@@ -117,7 +117,6 @@ void HitAssociation(int par = 0)
     event_container->SetEvent(myevent);
 
     event_container->Associate_Hits_to_Leptons(remove_hadron_hits);
-    event_container->CheckVeto();
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
@@ -142,6 +141,7 @@ void HitAssociation(int par = 0)
     }
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
+    if(check_veto) event_container->CheckVeto();
     if(fill_TTree) event_container->FillTree();
     for (int i = 0; i < myevent->GetNtrack(); i++)
     {
