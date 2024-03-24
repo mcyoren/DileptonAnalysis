@@ -13,10 +13,10 @@ void NewHitAssociation(int par = 0)
   const int fill_QA_lepton_hists = 1;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 1;
-  const int fill_DCA_hists = 1;
+  const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 1;
-  const int do_track_QA = 1;
-  const int do_reveal_hadron = 1;
+  const int do_track_QA = 0;
+  const int do_reveal_hadron = 0;
   const int fill_true_DCA = 1;
   const int check_veto = 1;
 
@@ -43,7 +43,7 @@ void NewHitAssociation(int par = 0)
     if (ievent % 1000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 1000000)
+    if (ievent > 100000)
       break;
 
 
