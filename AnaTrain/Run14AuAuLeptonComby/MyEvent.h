@@ -94,7 +94,7 @@ namespace MyDileptonAnalysis
             // MC variables
             int mcid; // associated MC track
             
-            std::vector<float> dangle1,dangle2,dangle3;
+            std::vector<float> dangle0,dangle1,dangle2,dangle3;
 
       public:
             MyTrack()
@@ -275,25 +275,48 @@ namespace MyDileptonAnalysis
                   return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime);
             };
 
-            void SetdPhidThe(int layer, float val1, float val2) 
+            void SetdPhidThe(int layer, float val1, float val2, float val3, float val4) 
             {
-                  if(layer==1) {dangle1.push_back(val1);dangle1.push_back(val2);}
-                  if(layer==2) {dangle2.push_back(val1);dangle2.push_back(val2);}
-                  if(layer==3) {dangle3.push_back(val1);dangle3.push_back(val2);}
+                  if(layer==0) {dangle0.push_back(val1);dangle0.push_back(val2);dangle0.push_back(val3);dangle0.push_back(val4);}
+                  if(layer==1) {dangle1.push_back(val1);dangle1.push_back(val2);dangle1.push_back(val3);dangle1.push_back(val4);}
+                  if(layer==2) {dangle2.push_back(val1);dangle2.push_back(val2);dangle2.push_back(val3);dangle2.push_back(val4);}
+                  if(layer==3) {dangle3.push_back(val1);dangle3.push_back(val2);dangle3.push_back(val3);dangle3.push_back(val4);}
             };
 
             float GetdPhi(int layer, unsigned int iter) 
             {
-                  if(layer==1&&iter<dangle1.size()) return dangle1[iter*2];
-                  else if(layer==2&&iter<dangle2.size()) return dangle2[iter*2];
-                  else if(layer==3&&iter<dangle3.size()) return dangle3[iter*2];
+                  if     (layer==0&& 4*iter<dangle0.size()) return dangle0[iter*4];
+                  else if(layer==1&& 4*iter<dangle1.size()) return dangle1[iter*4];
+                  else if(layer==2&& 4*iter<dangle2.size()) return dangle2[iter*4];
+                  else if(layer==3&& 4*iter<dangle3.size()) return dangle3[iter*4];
+                  std::cout<<"loh"<<std::endl;
                   return -999;
             };
             float GetdThe(int layer, unsigned int iter) 
             {
-                  if(layer==1&&iter<dangle1.size()) return dangle1[iter*2+1];
-                  else if(layer==2&&iter<dangle2.size()) return dangle2[iter*2+1];
-                  else if(layer==3&&iter<dangle3.size()) return dangle3[iter*2+1];
+                  if     (layer==0 && 4*iter+1<dangle0.size()) return dangle0[iter*4+1];
+                  else if(layer==1 && 4*iter+1<dangle1.size()) return dangle1[iter*4+1];
+                  else if(layer==2 && 4*iter+1<dangle2.size()) return dangle2[iter*4+1];
+                  else if(layer==3 && 4*iter+1<dangle3.size()) return dangle3[iter*4+1];
+                  std::cout<<"loh"<<std::endl;
+                  return -999;
+            };
+            float GetDist(int layer, unsigned int iter) 
+            {
+                  if     (layer==0 && 4*iter+2<dangle0.size()) return dangle0[iter*4+2];
+                  else if(layer==1 && 4*iter+2<dangle1.size()) return dangle1[iter*4+2];
+                  else if(layer==2 && 4*iter+2<dangle2.size()) return dangle2[iter*4+2];
+                  else if(layer==3 && 4*iter+2<dangle3.size()) return dangle3[iter*4+2];
+                  std::cout<<"loh "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  return -999;
+            };
+            int GetHits(int layer, unsigned int iter) 
+            {
+                  if     (layer==0 && 4*iter+3<dangle0.size()) return (int) dangle0[iter*4+3];
+                  else if(layer==1 && 4*iter+3<dangle1.size()) return (int) dangle1[iter*4+3];
+                  else if(layer==2 && 4*iter+3<dangle2.size()) return (int) dangle2[iter*4+3];
+                  else if(layer==3 && 4*iter+3<dangle3.size()) return (int) dangle3[iter*4+3];
+                  std::cout<<"loh "<<layer<<" "<<4*iter+3<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
 
@@ -674,7 +697,7 @@ namespace MyDileptonAnalysis
             std::vector<MyDileptonAnalysis::MyVTXHit> GetVTXHits() { return VTXHitList; };
 
             void Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr],
-                                           TH3D *sdphi_hist_el[N_centr], TH3D *dthe_hist_el[N_centr], TH3D *sdthe_hist_el[N_centr]);
+                                           TH3D *sdphi_hist_el[N_centr], TH3D *dthe_hist_el[N_centr], TH3D *sdthe_hist_el[N_centr], TH3D *chi2_ndf[N_centr]);
             void Associate_Hits_to_Hadrons(TH2D *hist_br, TH2D *hist_bz, int is_fill_hsits,TH3D *dphi_hist[N_centr], 
                                            TH3D *sdphi_hist[N_centr], TH3D *dthe_hist[N_centr], TH3D *sdthe_hist[N_centr]);
 
@@ -695,7 +718,7 @@ namespace MyDileptonAnalysis
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
-            TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
+            TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr], *chi2_ndf[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
@@ -728,6 +751,7 @@ namespace MyDileptonAnalysis
                         dthe_hist[i] = nullptr;
                         sdphi_hist[i] = nullptr;
                         sdthe_hist[i] = nullptr;
+                        chi2_ndf[i] = nullptr;
                         dphi_hist_el[i] = nullptr;
                         dthe_hist_el[i] = nullptr;
                         sdphi_hist_el[i] = nullptr;
@@ -777,7 +801,7 @@ namespace MyDileptonAnalysis
             void WriteOutFile();
             void Associate_Hits_to_Leptons(bool test = false)
             {
-                  event->Associate_Hits_to_Leptons(hist_br, hist_bz, test, is_fill_hsits, dphi_hist_el, sdphi_hist_el, dthe_hist_el, sdthe_hist_el);
+                  event->Associate_Hits_to_Leptons(hist_br, hist_bz, test, is_fill_hsits, dphi_hist_el, sdphi_hist_el, dthe_hist_el, sdthe_hist_el, chi2_ndf);
             };
             void Associate_Hits_to_Hadrons()
             {
