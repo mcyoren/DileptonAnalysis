@@ -696,8 +696,8 @@ namespace MyDileptonAnalysis
             std::vector<MyDileptonAnalysis::MyHadron> GetHadrons() { return HadronList; };
             std::vector<MyDileptonAnalysis::MyVTXHit> GetVTXHits() { return VTXHitList; };
 
-            void Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr],
-                                           TH3D *sdphi_hist_el[N_centr], TH3D *dthe_hist_el[N_centr], TH3D *sdthe_hist_el[N_centr], TH3D *chi2_ndf[N_centr]);
+            void Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr*2],
+                                           TH3D *sdphi_hist_el[N_centr*2], TH3D *dthe_hist_el[N_centr*2], TH3D *sdthe_hist_el[N_centr*2], TH3D *chi2_ndf[N_centr]);
             void Associate_Hits_to_Hadrons(TH2D *hist_br, TH2D *hist_bz, int is_fill_hsits,TH3D *dphi_hist[N_centr], 
                                            TH3D *sdphi_hist[N_centr], TH3D *dthe_hist[N_centr], TH3D *sdthe_hist[N_centr]);
 
@@ -718,8 +718,9 @@ namespace MyDileptonAnalysis
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
-            TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr], *chi2_ndf[N_centr];
-            TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
+            TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
+            TH3D *chi2_ndf[N_centr];
+            TH3D *dphi_hist_el[N_centr*2], *dthe_hist_el[N_centr*2], *sdphi_hist_el[N_centr*2], *sdthe_hist_el[N_centr*2];
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
@@ -745,6 +746,13 @@ namespace MyDileptonAnalysis
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
+                  for (int i = 0; i < N_centr*2; i++)
+                  {
+                        dphi_hist_el[i] = nullptr;
+                        dthe_hist_el[i] = nullptr;
+                        sdphi_hist_el[i] = nullptr;
+                        sdthe_hist_el[i] = nullptr;
+                  }
                   for (int i = 0; i < N_centr; i++)
                   {
                         dphi_hist[i] = nullptr;
@@ -752,10 +760,6 @@ namespace MyDileptonAnalysis
                         sdphi_hist[i] = nullptr;
                         sdthe_hist[i] = nullptr;
                         chi2_ndf[i] = nullptr;
-                        dphi_hist_el[i] = nullptr;
-                        dthe_hist_el[i] = nullptr;
-                        sdphi_hist_el[i] = nullptr;
-                        sdthe_hist_el[i] = nullptr;
                         d_dphi_hist[i] = nullptr;
                         d_dthe_hist[i] = nullptr;
                         DCA_hist[i] = nullptr;

@@ -262,15 +262,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
 
         int addit_reject = 0;
-        if( !(mytrk->GetMinDphi(1)>2 && mytrk->GetMinDphi(1)<8 && mytrk->GetPtPrime()<0.6) ) addit_reject = 1;
-        if ( fabs(mytrk->GetMinDphi(1))<2 && fabs(mytrk->GetMinDthe(1))<2 &&  
-            ((mytrk->GetHitCounter(2) > 0 && fabs(mytrk->GetMinDphi(2))<2 && fabs(mytrk->GetMinDthe(2))<2) ||
-             (mytrk->GetHitCounter(3) > 0 && fabs(mytrk->GetMinDphi(3))<2 && fabs(mytrk->GetMinDthe(3))<2)) )
+        if( (mytrk->GetHitCounter(2) > 0 && mytrk->GetHitCounter(3) > 0) || mytrk->GetPtPrime()>0.6 ) addit_reject = 1;
+        if ( mytrk->GetHitCounter(2) > 0 && mytrk->GetHitCounter(3) > 0)
              addit_reject += 10;
         
         int hadron_reject = 0;
         if ( mytrk->GetPtPrime() > 0.4 ) hadron_reject=10;
-        if ( (mytrk->GetGhost() == 0 && fabs(mytrk->GetPC3SDPHI())<2 && fabs(mytrk->GetPC3SDZ())<2) || mytrk->GetPtPrime() > 0.6 )  hadron_reject+=1;
+        if ( (fabs(mytrk->GetPC3SDPHI())<2 && fabs(mytrk->GetPC3SDZ())<2) || mytrk->GetPtPrime() > 0.6 )  hadron_reject+=1;
         
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 

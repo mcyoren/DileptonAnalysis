@@ -85,8 +85,8 @@ namespace MyDileptonAnalysis
             ilayer = -7777;
     }
 
-    void MyEvent::Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr],
-                                            TH3D *sdphi_hist_el[N_centr], TH3D *dthe_hist_el[N_centr], TH3D *sdthe_hist_el[N_centr], TH3D *chi2_ndf[N_centr])
+    void MyEvent::Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr*2],
+                                            TH3D *sdphi_hist_el[N_centr*2], TH3D *dthe_hist_el[N_centr*2], TH3D *sdthe_hist_el[N_centr*2], TH3D *chi2_ndf[N_centr])
     {
         const int nleptons = this->GetNtrack();
         const int nvtxhits = this->GetNVTXhit();
@@ -218,7 +218,7 @@ namespace MyDileptonAnalysis
                             sigma_phi_value /= 2;
                             sigma_theta_value /= 1+iter_layer/2;
                             mean_phi_value = dphi_previous_layer*1.15;
-                            mean_theta_value = dthe_previous_layer*(1.2+0.2*(2-iter_layer));
+                            mean_theta_value += dthe_previous_layer;
                         }
 
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
@@ -263,13 +263,13 @@ namespace MyDileptonAnalysis
                         if(iter_layer==2 && iassociatedhit==0) layer_bin = 4;
                         if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
                         {
-                            dphi_hist_el[layer_bin+charge_bin*0]->Fill(dphi, dphi_previous_layer, pt);
-                            sdphi_hist_el[layer_bin]->Fill(sdphi, dphi_previous_layer/sigma_phi_value, pt);
+                            dphi_hist_el[2*layer_bin+charge_bin]->Fill(dphi, dphi_previous_layer, pt);
+                            sdphi_hist_el[2*layer_bin+charge_bin]->Fill(sdphi, dphi_previous_layer/sigma_phi_value, pt);
                         }
                         if (fabs(sdphi) < sigma && SignTrack && is_fill_hsits)
                         {
-                            dthe_hist_el[layer_bin]->Fill(dthe, dthe_previous_layer, pt);
-                            sdthe_hist_el[layer_bin]->Fill(sdthe, dthe_previous_layer/sigma_theta_value, pt);
+                            dthe_hist_el[2*layer_bin+charge_bin]->Fill(dthe, dthe_previous_layer, pt);
+                            sdthe_hist_el[2*layer_bin+charge_bin]->Fill(sdthe, dthe_previous_layer/sigma_theta_value, pt);
                         }
                     } // enf of hit loop
                 }
@@ -279,32 +279,41 @@ namespace MyDileptonAnalysis
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 float chi2 = 0.;
-                for (int ii1 = 0; ii1 < numbers[0][inum] / 1000; ii1++)
-                {
+                for (int ii1 = 0; ii1 < ((numbers[0][inum] / 1000) >0); ii1++)
+                {   
+                    int nn = 1;
                     chi2 += mytrk->GetDist(0, ii1);
-                    for (int ii2 = 0; ii2 < numbers[0][inum] / 100 %10; ii2++)
+                    for (int ii2 = 0; ii2 < ((numbers[0][inum] / 100 %10) >0); ii2++)
                     {
                         chi2 += mytrk->GetDist(1, ii2);
-                        for (int ii3 = 0; ii3 < numbers[0][inum] / 10 %10; ii3++)
+                        nn++;
+                        for (int ii3 = 0; ii3 < ((numbers[0][inum] / 10 %10) > 0); ii3++)
                         {
                             chi2 += mytrk->GetDist(2, ii3);
+                            nn++;
                         }
-                        for (int ii4 = 0; ii4 < numbers[0][inum] % 10; ii4++)
+                        for (int ii4 = 0; ii4 < ((numbers[0][inum] % 10) >0); ii4++)
                         {
                             chi2 += mytrk->GetDist(3, ii4);
+                            nn++;
                         }
+                        chi2 /= nn;
                         if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
-                        chi2_ndf[central_bin]->Fill(chi2/numbers[0].size(), numbers[0].size(), pt);
+                        chi2_ndf[central_bin]->Fill(chi2, numbers[0][inum] / 1000+numbers[0][inum] / 100 %10+numbers[0][inum] / 10 %10 + numbers[0][inum] % 10 - 3, pt);
                     }
                 }
             }
+            chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
+                    
             if(min_chi2<3)
             {
                 mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000-0.5), 0);
                 mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/100 %10-0.5), 1);
-                if (mytrk->GetHitCounter(2)>0) mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/10 %10 -0.5 ), 2);
-                if (mytrk->GetHitCounter(3)>0) mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%10 -0.5), 3);
-                
+                if (mytrk->GetHitCounter(2)>0) {mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/10 %10 -0.5 ), 2);mytrk->SetHitCounter(2,1);}
+                if (mytrk->GetHitCounter(3)>0) {mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%10 -0.5), 3);mytrk->SetHitCounter(3,1);}
+                mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
+            }else{
+                mytrk->SetHitCounter(0,0);
             }
 
         }     // enf of e loop
@@ -843,11 +852,11 @@ namespace MyDileptonAnalysis
 
         if (fill_ell)
         {
-            INIT_HISTOS(3, dphi_hist_el, N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el, N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            INIT_HISTOS(3, sdphi_hist_el, N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
-            INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
-            INIT_HISTOS(3, chi2_ndf, N_centr,      100, 0, 10,  10, 0, 10, 25, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el,  2*N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el,  2*N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el, 2*N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el, 2*N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
+            INIT_HISTOS(3, chi2_ndf, N_centr,      50, 0, 10,  20, 0, 20, 25, 0, 5);
             is_fill_hsits = 1;
         }
 
