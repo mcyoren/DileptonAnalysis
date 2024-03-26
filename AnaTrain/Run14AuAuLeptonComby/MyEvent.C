@@ -85,13 +85,12 @@ namespace MyDileptonAnalysis
             ilayer = -7777;
     }
 
-    void MyEvent::Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr*2],
-                                            TH3D *sdphi_hist_el[N_centr*2], TH3D *dthe_hist_el[N_centr*2], TH3D *sdthe_hist_el[N_centr*2], TH3D *chi2_ndf[N_centr])
+    void MyEventContainer::Associate_Hits_to_Leptons(bool test)
     {
-        const int nleptons = this->GetNtrack();
-        const int nvtxhits = this->GetNVTXhit();
-        const int centrality = this->GetCentrality();
-        const int rungroup = this->GetRunNumber();
+        const int nleptons = event->GetNtrack();
+        const int nvtxhits = event->GetNVTXhit();
+        const int centrality = event->GetCentrality();
+        const int rungroup = event->GetRunNumber();
         if (test)
             is_fill_hsits = 0;
         const int central_bin = (int)centrality / 20;
@@ -99,7 +98,7 @@ namespace MyDileptonAnalysis
             return;
         for (int itrk = 0; itrk < nleptons; itrk++)
         {
-            MyDileptonAnalysis::MyElectron *mytrk = this->GetEntry(itrk);
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
             // mytrk = static_cast<MyDileptonAnalysis::MyHadron*>(myhad);
             const float pt = mytrk->GetPtPrime();
 
@@ -109,8 +108,8 @@ namespace MyDileptonAnalysis
             float the0_trk_proj = mytrk->GetThe0Prime();
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
-            float rp = sqrt(this->GetPreciseX() * this->GetPreciseX() + this->GetPreciseY() * this->GetPreciseY());
-            float zp = this->GetPreciseZ();
+            float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
+            float zp = event->GetPreciseZ();
 
             float dilep_phi_projection[total_vtx_layers];
             float dilep_the_projection[total_vtx_layers];
@@ -194,7 +193,7 @@ namespace MyDileptonAnalysis
                     int iter_num = 0;
                     for (int ihit = 0; ihit < nvtxhits; ihit++)
                     {
-                        MyDileptonAnalysis::MyVTXHit *vtxhit = this->GetVTXHitEntry(ihit);
+                        MyDileptonAnalysis::MyVTXHit *vtxhit = event->GetVTXHitEntry(ihit);
 
                         const int layer = vtxhit->GetLayer();
 
@@ -215,10 +214,10 @@ namespace MyDileptonAnalysis
 
                         if(iter_layer<2||iassociatedhit>0)
                         {
-                            sigma_phi_value /= 2;
-                            sigma_theta_value /= 1+iter_layer/2;
-                            mean_phi_value = dphi_previous_layer*1.15;
-                            mean_theta_value += dthe_previous_layer;
+                            sigma_phi_value = mytrk->get_dynamic_sigma_phi_data(0, layer,dphi_previous_layer);
+                            mean_phi_value = mytrk->get_dynamic_mean_phi_data(0, layer,dphi_previous_layer);
+                            sigma_theta_value = mytrk->get_dynamic_sigma_theta_data(0, layer,dthe_previous_layer);
+                            mean_theta_value = mytrk->get_dynamic_mean_theta_data(0, layer,dthe_previous_layer);
                         }
 
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
@@ -259,17 +258,15 @@ namespace MyDileptonAnalysis
                             if (vtxhit->N_AssociatedTracks() > 0)
                                 SignTrack = false;
                         }
-                        int layer_bin = iter_layer;
-                        if(iter_layer==2 && iassociatedhit==0) layer_bin = 4;
                         if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
                         {
-                            dphi_hist_el[2*layer_bin+charge_bin]->Fill(dphi, dphi_previous_layer, pt);
-                            sdphi_hist_el[2*layer_bin+charge_bin]->Fill(sdphi, dphi_previous_layer/sigma_phi_value, pt);
+                            dphi_hist_el_dynamic[2*layer+charge_bin]->Fill(dphi, dphi_previous_layer, pt);
+                            sdphi_hist_el_dynamic[2*layer+charge_bin]->Fill(sdphi, dphi_previous_layer/sigma_phi_value, pt);
                         }
                         if (fabs(sdphi) < sigma && SignTrack && is_fill_hsits)
                         {
-                            dthe_hist_el[2*layer_bin+charge_bin]->Fill(dthe, dthe_previous_layer, pt);
-                            sdthe_hist_el[2*layer_bin+charge_bin]->Fill(sdthe, dthe_previous_layer/sigma_theta_value, pt);
+                            dthe_hist_el_dynamic[2*layer+charge_bin]->Fill(dthe, dthe_previous_layer, pt);
+                            sdthe_hist_el_dynamic[2*layer+charge_bin]->Fill(sdthe, dthe_previous_layer/sigma_theta_value, pt);
                         }
                     } // enf of hit loop
                 }
@@ -319,19 +316,18 @@ namespace MyDileptonAnalysis
         }     // enf of e loop
     }         // end
 
-    void MyEvent::Associate_Hits_to_Hadrons(TH2D *hist_br, TH2D *hist_bz, int is_fill_hsits, TH3D *dphi_hist[N_centr],
-                                            TH3D *sdphi_hist[N_centr], TH3D *dthe_hist[N_centr], TH3D *sdthe_hist[N_centr])
+    void MyEventContainer::Associate_Hits_to_Hadrons()
     {
-        const int nhadron = this->GetNhadron();
-        const int nvtxhits = this->GetNVTXhit();
-        const int centrality = this->GetCentrality();
-        const int rungroup = this->GetRunNumber();
+        const int nhadron = event->GetNhadron();
+        const int nvtxhits = event->GetNVTXhit();
+        const int centrality = event->GetCentrality();
+        const int rungroup = event->GetRunNumber();
         const int central_bin = (int)centrality / 20;
         if (central_bin > 4 || central_bin < 0)
             return;
         for (int itrk = 0; itrk < nhadron; itrk++)
         {
-            MyDileptonAnalysis::MyHadron *mytrk = this->GetHadronEntry(itrk);
+            MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
             const float pt = mytrk->GetPtPrime();
 
             const float thetaprime = mytrk->GetThe0Prime();
@@ -340,8 +336,8 @@ namespace MyDileptonAnalysis
             float the0_trk_proj = mytrk->GetThe0Prime();
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
-            float rp = sqrt(this->GetPreciseX() * this->GetPreciseX() + this->GetPreciseY() * this->GetPreciseY());
-            float zp = this->GetPreciseZ();
+            float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
+            float zp = event->GetPreciseZ();
 
             float dilep_phi_projection[total_vtx_layers];
             float dilep_the_projection[total_vtx_layers];
@@ -391,7 +387,7 @@ namespace MyDileptonAnalysis
             float min[nvtx_layers] = {100, 100, 100, 100};
             for (int ihit = 0; ihit < nvtxhits; ihit++)
             {
-                MyDileptonAnalysis::MyVTXHit *vtxhit = this->GetVTXHitEntry(ihit);
+                MyDileptonAnalysis::MyVTXHit *vtxhit = event->GetVTXHitEntry(ihit);
 
                 const int layer = vtxhit->GetLayer();
 
@@ -431,7 +427,7 @@ namespace MyDileptonAnalysis
                     for (int iasstrack = 0; iasstrack < N_AssociatedTracks; iasstrack++)
                     {
                         const int CompetitorID = vtxhit->GetAssociatedTrack(iasstrack);
-                        MyDileptonAnalysis::MyHadron *CompetitorTrack = this->GetHadronEntry(CompetitorID);
+                        MyDileptonAnalysis::MyHadron *CompetitorTrack = event->GetHadronEntry(CompetitorID);
                         if (ihit == CompetitorTrack->GetHitIndex(layer))
                         {
                             if (vtxhit->GetAssociatedTrackDistance(CompetitorID) < diff)
@@ -851,21 +847,33 @@ namespace MyDileptonAnalysis
             outfile = new TFile(outfilename.c_str(), "RECREATE", outfilename.c_str(), compress);
 
         if (fill_ell)
-        {
-            INIT_HISTOS(3, dphi_hist_el,  2*N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el,  2*N_centr, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            INIT_HISTOS(3, sdphi_hist_el, 2*N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
-            INIT_HISTOS(3, sdthe_hist_el, 2*N_centr, 100, -10, 10, 100, -10, 10, 50, 0, 5);
+        {   
+            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 200, -0.1, 0.1, 200, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 200, -0.1, 0.1, 200, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
             INIT_HISTOS(3, chi2_ndf, N_centr,      50, 0, 10,  20, 0, 20, 25, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 25, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 25, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
+            if(fill_ell>1)
+            {
+                INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+                INIT_HISTOS(3, dthe_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+                INIT_HISTOS(3, sdphi_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+                INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+                is_fill_hsits = 2;
+            }
             is_fill_hsits = 1;
         }
 
         if (fill_had)
         {
-            INIT_HISTOS(3, dphi_hist, N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist, N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10, 8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10, 8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)

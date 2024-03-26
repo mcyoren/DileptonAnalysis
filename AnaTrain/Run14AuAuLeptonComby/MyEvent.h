@@ -275,6 +275,29 @@ namespace MyDileptonAnalysis
                   return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime);
             };
 
+            float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 
+            { 
+                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  return phi_mean_phi_params[rungroup][arg0][0]+phi_mean_phi_params[rungroup][arg0][1]*phi_prev; 
+            };
+            float get_dynamic_mean_theta_data(int rungroup, int ilay, float phi_prev)
+            { 
+                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  return the_mean_the_params[rungroup][arg0][0]+the_mean_the_params[rungroup][arg0][1]*phi_prev; 
+            };
+            float get_dynamic_sigma_phi_data(int rungroup, int ilay, float phi_prev)
+            {
+                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
+                  return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev);
+            };
+            float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
+            {
+                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
+            };
+
+
             void SetdPhidThe(int layer, float val1, float val2, float val3, float val4) 
             {
                   if(layer==0) {dangle0.push_back(val1);dangle0.push_back(val2);dangle0.push_back(val3);dangle0.push_back(val4);}
@@ -696,11 +719,6 @@ namespace MyDileptonAnalysis
             std::vector<MyDileptonAnalysis::MyHadron> GetHadrons() { return HadronList; };
             std::vector<MyDileptonAnalysis::MyVTXHit> GetVTXHits() { return VTXHitList; };
 
-            void Associate_Hits_to_Leptons(TH2D *hist_br, TH2D *hist_bz, bool test, int is_fill_hsits, TH3D *dphi_hist_el[N_centr*2],
-                                           TH3D *sdphi_hist_el[N_centr*2], TH3D *dthe_hist_el[N_centr*2], TH3D *sdthe_hist_el[N_centr*2], TH3D *chi2_ndf[N_centr]);
-            void Associate_Hits_to_Hadrons(TH2D *hist_br, TH2D *hist_bz, int is_fill_hsits,TH3D *dphi_hist[N_centr], 
-                                           TH3D *sdphi_hist[N_centr], TH3D *dthe_hist[N_centr], TH3D *sdthe_hist[N_centr]);
-
             void SetDCA(const unsigned int itrk = 0, const int layer2 = 1);
             void SetDCA2(const unsigned int itrk = 0, const int layer3 = 2);
             void ReshuffleElectrons();
@@ -720,7 +738,8 @@ namespace MyDileptonAnalysis
             TTree *tree;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
             TH3D *chi2_ndf[N_centr];
-            TH3D *dphi_hist_el[N_centr*2], *dthe_hist_el[N_centr*2], *sdphi_hist_el[N_centr*2], *sdthe_hist_el[N_centr*2];
+            TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
+            TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
@@ -746,12 +765,12 @@ namespace MyDileptonAnalysis
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
-                  for (int i = 0; i < N_centr*2; i++)
+                  for (int i = 0; i < N_dynamic; i++)
                   {
-                        dphi_hist_el[i] = nullptr;
-                        dthe_hist_el[i] = nullptr;
-                        sdphi_hist_el[i] = nullptr;
-                        sdthe_hist_el[i] = nullptr;
+                        dphi_hist_el_dynamic[i] = nullptr;
+                        dthe_hist_el_dynamic[i] = nullptr;
+                        sdphi_hist_el_dynamic[i] = nullptr;
+                        sdthe_hist_el_dynamic[i] = nullptr;
                   }
                   for (int i = 0; i < N_centr; i++)
                   {
@@ -759,6 +778,10 @@ namespace MyDileptonAnalysis
                         dthe_hist[i] = nullptr;
                         sdphi_hist[i] = nullptr;
                         sdthe_hist[i] = nullptr;
+                        dphi_hist_el[i] = nullptr;
+                        dthe_hist_el[i] = nullptr;
+                        sdphi_hist_el[i] = nullptr;
+                        sdthe_hist_el[i] = nullptr;
                         chi2_ndf[i] = nullptr;
                         d_dphi_hist[i] = nullptr;
                         d_dthe_hist[i] = nullptr;
@@ -803,14 +826,9 @@ namespace MyDileptonAnalysis
             void ResetTree() {tree->Reset();};
             void FillTree() {ev = *event;tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(bool test = false)
-            {
-                  event->Associate_Hits_to_Leptons(hist_br, hist_bz, test, is_fill_hsits, dphi_hist_el, sdphi_hist_el, dthe_hist_el, sdthe_hist_el, chi2_ndf);
-            };
-            void Associate_Hits_to_Hadrons()
-            {
-                  event->Associate_Hits_to_Hadrons(hist_br, hist_bz, is_fill_hadron_hsits, dphi_hist, sdphi_hist, dthe_hist, sdthe_hist);
-            };
+            void Associate_Hits_to_Leptons(bool test = false);
+            void Associate_Hits_to_Hadrons();
+
             void Reveal_Hadron();
 
             void FillDphiHists();
