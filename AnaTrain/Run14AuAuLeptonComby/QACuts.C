@@ -21,8 +21,8 @@ void Run14AuAuLeptonCombyReco::InitParams()
     TEMC = 5;
     EMCDPHI = 0.05; // ~5 sigma 0.05
     EMCDZ = 25;     // ~5 sigma 25
-    EMCSDPHI = 2;   // remove sigmalized cut for Run14AuAu because the recalibrator doesn't work for simulation
-    EMCSDZ = 2;
+    EMCSDPHI = 5;   // remove sigmalized cut for Run14AuAu because the recalibrator doesn't work for simulation
+    EMCSDZ = 5;
     RICH_GHOST = 10; // by default, RICH ghost cut is off
 
     std::cout << "Run14AuAuCut loaded... " << std::endl;

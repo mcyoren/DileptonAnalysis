@@ -289,7 +289,7 @@ namespace MyDileptonAnalysis
             {
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
-                  return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev);
+                  return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
             float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
             {
@@ -298,48 +298,66 @@ namespace MyDileptonAnalysis
             };
 
 
-            void SetdPhidThe(int layer, float val1, float val2, float val3, float val4) 
+            void SetdPhidThe(int layer, float val1, float val2, float val3, float val4, float val5, float val6) 
             {
-                  if(layer==0) {dangle0.push_back(val1);dangle0.push_back(val2);dangle0.push_back(val3);dangle0.push_back(val4);}
-                  if(layer==1) {dangle1.push_back(val1);dangle1.push_back(val2);dangle1.push_back(val3);dangle1.push_back(val4);}
-                  if(layer==2) {dangle2.push_back(val1);dangle2.push_back(val2);dangle2.push_back(val3);dangle2.push_back(val4);}
-                  if(layer==3) {dangle3.push_back(val1);dangle3.push_back(val2);dangle3.push_back(val3);dangle3.push_back(val4);}
+                  if(layer==0) {dangle0.push_back(val1);dangle0.push_back(val2);dangle0.push_back(val3);dangle0.push_back(val4);dangle0.push_back(val5);dangle0.push_back(val6);}
+                  if(layer==1) {dangle1.push_back(val1);dangle1.push_back(val2);dangle1.push_back(val3);dangle1.push_back(val4);dangle1.push_back(val5);dangle1.push_back(val6);}
+                  if(layer==2) {dangle2.push_back(val1);dangle2.push_back(val2);dangle2.push_back(val3);dangle2.push_back(val4);dangle2.push_back(val5);dangle2.push_back(val6);}
+                  if(layer==3) {dangle3.push_back(val1);dangle3.push_back(val2);dangle3.push_back(val3);dangle3.push_back(val4);dangle3.push_back(val5);dangle3.push_back(val6);}
             };
 
             float GetdPhi(int layer, unsigned int iter) 
             {
-                  if     (layer==0&& 4*iter<dangle0.size()) return dangle0[iter*4];
-                  else if(layer==1&& 4*iter<dangle1.size()) return dangle1[iter*4];
-                  else if(layer==2&& 4*iter<dangle2.size()) return dangle2[iter*4];
-                  else if(layer==3&& 4*iter<dangle3.size()) return dangle3[iter*4];
-                  std::cout<<"loh"<<std::endl;
+                  if     (layer==0&& 6*iter<dangle0.size()) return dangle0[iter*6];
+                  else if(layer==1&& 6*iter<dangle1.size()) return dangle1[iter*6];
+                  else if(layer==2&& 6*iter<dangle2.size()) return dangle2[iter*6];
+                  else if(layer==3&& 6*iter<dangle3.size()) return dangle3[iter*6];
+                  std::cout<<"GetdPhi "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetdThe(int layer, unsigned int iter) 
             {
-                  if     (layer==0 && 4*iter+1<dangle0.size()) return dangle0[iter*4+1];
-                  else if(layer==1 && 4*iter+1<dangle1.size()) return dangle1[iter*4+1];
-                  else if(layer==2 && 4*iter+1<dangle2.size()) return dangle2[iter*4+1];
-                  else if(layer==3 && 4*iter+1<dangle3.size()) return dangle3[iter*4+1];
-                  std::cout<<"loh"<<std::endl;
+                  if     (layer==0 && 6*iter+1<dangle0.size()) return dangle0[iter*6+1];
+                  else if(layer==1 && 6*iter+1<dangle1.size()) return dangle1[iter*6+1];
+                  else if(layer==2 && 6*iter+1<dangle2.size()) return dangle2[iter*6+1];
+                  else if(layer==3 && 6*iter+1<dangle3.size()) return dangle3[iter*6+1];
+                  std::cout<<"GetdThe "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  return -999;
+            };
+            float GetsdPhi(int layer, unsigned int iter) 
+            {
+                  if     (layer==0&& 6*iter+2<dangle0.size()) return dangle0[iter*6+2];
+                  else if(layer==1&& 6*iter+2<dangle1.size()) return dangle1[iter*6+2];
+                  else if(layer==2&& 6*iter+2<dangle2.size()) return dangle2[iter*6+2];
+                  else if(layer==3&& 6*iter+2<dangle3.size()) return dangle3[iter*6+2];
+                  std::cout<<"GetsdPhi "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  return -999;
+            };
+            float GetsdThe(int layer, unsigned int iter) 
+            {
+                  if     (layer==0 && 6*iter+3<dangle0.size()) return dangle0[iter*6+3];
+                  else if(layer==1 && 6*iter+3<dangle1.size()) return dangle1[iter*6+3];
+                  else if(layer==2 && 6*iter+3<dangle2.size()) return dangle2[iter*6+3];
+                  else if(layer==3 && 6*iter+3<dangle3.size()) return dangle3[iter*6+3];
+                  std::cout<<"GetsdThe "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetDist(int layer, unsigned int iter) 
             {
-                  if     (layer==0 && 4*iter+2<dangle0.size()) return dangle0[iter*4+2];
-                  else if(layer==1 && 4*iter+2<dangle1.size()) return dangle1[iter*4+2];
-                  else if(layer==2 && 4*iter+2<dangle2.size()) return dangle2[iter*4+2];
-                  else if(layer==3 && 4*iter+2<dangle3.size()) return dangle3[iter*4+2];
-                  std::cout<<"loh "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  if     (layer==0 && 6*iter+4<dangle0.size()) return dangle0[iter*6+4];
+                  else if(layer==1 && 6*iter+4<dangle1.size()) return dangle1[iter*6+4];
+                  else if(layer==2 && 6*iter+4<dangle2.size()) return dangle2[iter*6+4];
+                  else if(layer==3 && 6*iter+4<dangle3.size()) return dangle3[iter*6+4];
+                  std::cout<<"GetDist "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             int GetHits(int layer, unsigned int iter) 
             {
-                  if     (layer==0 && 4*iter+3<dangle0.size()) return (int) dangle0[iter*4+3];
-                  else if(layer==1 && 4*iter+3<dangle1.size()) return (int) dangle1[iter*4+3];
-                  else if(layer==2 && 4*iter+3<dangle2.size()) return (int) dangle2[iter*4+3];
-                  else if(layer==3 && 4*iter+3<dangle3.size()) return (int) dangle3[iter*4+3];
-                  std::cout<<"loh "<<layer<<" "<<4*iter+3<<" "<<dangle0.size()<<std::endl;
+                  if     (layer==0 && 6*iter+5<dangle0.size()) return (int) dangle0[iter*6+5];
+                  else if(layer==1 && 6*iter+5<dangle1.size()) return (int) dangle1[iter*6+5];
+                  else if(layer==2 && 6*iter+5<dangle2.size()) return (int) dangle2[iter*6+5];
+                  else if(layer==3 && 6*iter+5<dangle3.size()) return (int) dangle3[iter*6+5];
+                  std::cout<<"GetHits "<<layer<<" "<<4*iter+3<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
 

@@ -262,13 +262,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
 
         int addit_reject = 0;
-        if( (mytrk->GetHitCounter(2) > 0 && mytrk->GetHitCounter(3) > 0) || mytrk->GetPtPrime()>0.6 ) addit_reject = 1;
-        if ( mytrk->GetHitCounter(2) > 0 && mytrk->GetHitCounter(3) > 0)
+        if( (mytrk->GetMinsDphi(0) > 0) || mytrk->GetPtPrime()>0.6 ) addit_reject = 1;
+        if ( mytrk->GetMinsDphi(0) > 0)
              addit_reject += 10;
         
         int hadron_reject = 0;
         if ( mytrk->GetPtPrime() > 0.4 ) hadron_reject=10;
-        if ( (fabs(mytrk->GetPC3SDPHI())<2 && fabs(mytrk->GetPC3SDZ())<2) || mytrk->GetPtPrime() > 0.6 )  hadron_reject+=1;
+        if ( fabs(mytrk->GetEmcdphi_e())<2 && fabs(mytrk->GetEmcdz_e())<2 )  hadron_reject+=1;
         
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 

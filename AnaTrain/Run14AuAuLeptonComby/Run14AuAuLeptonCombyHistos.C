@@ -40,7 +40,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_mass_ee_recon);
   fcn_3Dx.push_back(get_phi_ee);
 
   fcn_3Dy.clear();
@@ -68,8 +68,8 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_pt);
   fcn_3Dz.push_back(get_pt);
   fcn_3Dz.push_back(get_pt);
-  fcn_3Dz.push_back(get_pt);
-  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_recon_pt);
+  fcn_3Dz.push_back(get_recon_pt);
 
   fcn_3D_weight.clear();
   fcn_3D_weight.push_back(set_weight_1);
@@ -198,10 +198,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   
   return DCA;
 }
@@ -225,10 +225,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   
   return DCA;
 }
@@ -252,10 +252,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   
   return DCA;
 }
@@ -284,11 +284,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
-  
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   return DCA;
 }
 
@@ -316,10 +315,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   
   return DCA;
 }
@@ -332,26 +331,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 < 10 || ghost2 < 10 ) return -999;
-
-  const double KEFF_pip = fabs (p1->get_double(Run14AuAuLeptonCombyEnum::KEFF) - 1);
-  const double KEFF_pim = fabs (p2->get_double(Run14AuAuLeptonCombyEnum::KEFF) - 1);
-
-  if ( KEFF_pip > 0.2 || KEFF_pim > 0.2 ) return -999;
-
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
-  const double DCA_pip = DCA_X_pip/fabs(DCA_X_pip) * sqrt(DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip);
-  const double DCA_pim = DCA_X_pim/fabs(DCA_X_pim) * sqrt(DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim);
+  const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
+  const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = fabs( DCA_pip + DCA_pim);
+  const double DCA = sqrt( DCA_pip - DCA_pim);
   
   return DCA;
 }
