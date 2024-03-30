@@ -113,8 +113,8 @@ float Run14AuAuLeptonCombyHistos::get_recon_pt(PHParticle *Type1, const unsigned
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const double KEFF_pip = p1->get_double(Run14AuAuLeptonCombyEnum::KEFF);
-  const double KEFF_pim = p2->get_double(Run14AuAuLeptonCombyEnum::KEFF);
+  const double KEFF_pip = 1./0.88;
+  const double KEFF_pim = 1./0.88;
 
   const double px = p1->get_px()*KEFF_pip + p2->get_px()*KEFF_pim;
   const double py = p1->get_py()*KEFF_pip + p2->get_py()*KEFF_pim;
@@ -135,8 +135,8 @@ float Run14AuAuLeptonCombyHistos::get_mass_ee_recon(PHParticle *Type1, const uns
 
   const double me = 0.000510998918;
 
-  const double KEFF_pip = p1->get_double(Run14AuAuLeptonCombyEnum::KEFF);
-  const double KEFF_pim = p2->get_double(Run14AuAuLeptonCombyEnum::KEFF);
+  const double KEFF_pip = 1.0/0.88;
+  const double KEFF_pim = 1.0/0.88;
 
   const double px1 = p1->get_px()*KEFF_pip;
   const double py1 = p1->get_py()*KEFF_pip;
@@ -201,7 +201,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   
   return DCA;
 }
@@ -228,7 +228,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   
   return DCA;
 }
@@ -255,7 +255,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   
   return DCA;
 }
@@ -287,7 +287,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   return DCA;
 }
 
@@ -318,7 +318,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   
   return DCA;
 }
@@ -340,7 +340,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = sqrt( DCA_pip - DCA_pim);
+  const double DCA = sqrt( DCA_pip + DCA_pim);
   
   return DCA;
 }

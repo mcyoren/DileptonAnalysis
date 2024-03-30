@@ -216,6 +216,8 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit();
                         const float theta_hit = vtxhit->GetTheHit();
 
+                        const float sigma = 2.0;
+
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
                         float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
@@ -223,10 +225,12 @@ namespace MyDileptonAnalysis
 
                         if(iter_layer<2||iassociatedhit>0)
                         {
-                            sigma_phi_value = mytrk->get_dynamic_sigma_phi_data(0, layer,dphi_previous_layer);
-                            mean_phi_value = mytrk->get_dynamic_mean_phi_data(0, layer,dphi_previous_layer);
-                            sigma_theta_value = mytrk->get_dynamic_sigma_theta_data(0, layer,dthe_previous_layer);
-                            mean_theta_value = mytrk->get_dynamic_mean_theta_data(0, layer,dthe_previous_layer);
+                            int cycle_layer = layer;
+                            if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
+                            sigma_phi_value   = mytrk->get_dynamic_sigma_phi_data  (0, cycle_layer, dphi_previous_layer);
+                            mean_phi_value    = mytrk->get_dynamic_mean_phi_data   (0, cycle_layer, dphi_previous_layer);
+                            sigma_theta_value = mytrk->get_dynamic_sigma_theta_data(0, cycle_layer, dthe_previous_layer);
+                            mean_theta_value  = mytrk->get_dynamic_mean_theta_data (0, cycle_layer, dthe_previous_layer);
                         }
 
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
@@ -236,10 +240,9 @@ namespace MyDileptonAnalysis
 
                         const float diff = sqrt(pow(sdphi, 2) + pow(sdthe, 2));
 
-                        const float sigma = 2.0;
 
                         bool SignTrack = true;
-                        if (fabs(sdphi) < sigma && fabs(sdthe) < sigma)
+                        if ( sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
                         {
                             if (diff < min[layer])
                             {
@@ -255,11 +258,11 @@ namespace MyDileptonAnalysis
                             mytrk->AddHitCounter(layer);
                             mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
                             iter_nums[layer]++;
-                            if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*10  +numbers[3][iassociatedhit-1]);
-                            if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*10  );
-                            if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*100 +numbers[2][iassociatedhit]);
-                            if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*100 +numbers[3][iassociatedhit-mytrk->GetHitCounter(2)]);
-                            if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*1000+numbers[1][iassociatedhit]);
+                            if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
+                            if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*100  );
+                            if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
+                            if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[3][iassociatedhit-mytrk->GetHitCounter(2)]);
+                            if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*1000000+numbers[1][iassociatedhit]);
 
                         } // end of association
                         else
@@ -267,52 +270,19 @@ namespace MyDileptonAnalysis
                             if (vtxhit->N_AssociatedTracks() > 0)
                                 SignTrack = false;
                         }
-                        if(iter_layer>1 && iassociatedhit==0) continue;
                         int in_arg = 2*layer+charge_bin;
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=2;
-                    
+                        if(iter_layer>1 && iassociatedhit==0) in_arg+=4;
+
                         if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
                         }
-                        if (fabs(sdphi) < sigma && SignTrack && is_fill_hsits)
+                        if (sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits)
                         {
                             dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
                             sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
-                        }
-                        if(layer==0)
-                        {
-                            if (fabs(sdthe) < sigma && fabs(sdphi) < 10 && SignTrack && is_fill_hsits)
-                            {
-                                for (int ihitlayer2 = 0; ihitlayer2 < mytrk->GetHitCounter(2); ihitlayer2++)
-                                {
-                                    in_arg = 8+charge_bin;
-                                    dphi_hist_el_dynamic[in_arg]->Fill (mytrk->GetdPhi(2, ihitlayer2) , dphi, pt);
-                                    sdphi_hist_el_dynamic[in_arg]->Fill(mytrk->GetsdPhi(2, ihitlayer2),sdphi, pt);
-                                }
-                                for (int ihitlayer3 = 0; ihitlayer3 < mytrk->GetHitCounter(3); ihitlayer3++)
-                                {
-                                    in_arg = 10+charge_bin;
-                                    dphi_hist_el_dynamic[in_arg]->Fill (mytrk->GetdPhi(3, ihitlayer3) , dphi, pt);
-                                    sdphi_hist_el_dynamic[in_arg]->Fill(mytrk->GetsdPhi(3, ihitlayer3),sdphi, pt);
-                                }                             
-                            }
-                            if (fabs(sdphi) < sigma && fabs(sdthe) < 10 && SignTrack && is_fill_hsits)
-                            {
-                                for (int ihitlayer2 = 0; ihitlayer2 < mytrk->GetHitCounter(2); ihitlayer2++)
-                                {
-                                    in_arg = 8+charge_bin;
-                                    dthe_hist_el_dynamic[in_arg]->Fill (mytrk->GetdThe(2, ihitlayer2) , dthe, pt);
-                                    sdthe_hist_el_dynamic[in_arg]->Fill(mytrk->GetsdThe(2, ihitlayer2),sdthe, pt);
-                                }
-                                for (int ihitlayer3 = 0; ihitlayer3 < mytrk->GetHitCounter(3); ihitlayer3++)
-                                {
-                                    in_arg = 10+charge_bin;
-                                    dthe_hist_el_dynamic[in_arg]->Fill (mytrk->GetdThe(3, ihitlayer3) , dthe, pt);
-                                    sdthe_hist_el_dynamic[in_arg]->Fill(mytrk->GetsdThe(3, ihitlayer3),sdthe, pt);
-                                } 
-                            }
                         }
                     } // enf of hit loop
                 }
@@ -321,39 +291,50 @@ namespace MyDileptonAnalysis
             int final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
-                float chi2 = 0.;
-                const int inum1 = numbers[0][inum] / 1000-1;
-                const int inum2 = numbers[0][inum] / 100 %10-1;
-                const int inum3 = numbers[0][inum] / 10 %10-1;
-                const int inum4 = numbers[0][inum] %10-1;
-                int ndf_count = 2;
+                float chi2 = 0;
+                float recon_pt = 0;
+                const int inum1 = numbers[0][inum] / 1000000-1;
+                const int inum2 = numbers[0][inum] / 10000 %100-1;
+                const int inum3 = numbers[0][inum] / 100 %100-1;
+                const int inum4 = numbers[0][inum] %100-1;
 
                 if(inum1>=0 && inum2>=0)
                 {   
-                    chi2 += sqrt ( SQR(mytrk->GetDist(0, inum1)) + SQR(mytrk->GetDist(1, inum2)));
-                    if( inum3>=0 && inum4>=0)
+                    mytrk->SetHitIndex(mytrk->GetHits(0,inum1), 0);
+                    mytrk->SetHitIndex(mytrk->GetHits(1,inum2), 1);
+                    if (mytrk->GetHitCounter(2)>0) mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5), 2);
+                    if (mytrk->GetHitCounter(3)>0) mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);
+                    if( inum4>=0) 
                     {
-                        chi2 += sqrt ( SQR(chi2) + SQR(mytrk->GetDist(2, inum3)) );
-                        ndf_count++;
+                        event->SetDCA2(itrk,3);
+                        recon_pt += mytrk->GetReconPT();
                     }
-                    chi2 /= ndf_count;
-                    
+                    if( inum3>=0) 
+                    {
+                        event->SetDCA2(itrk,2);
+                        recon_pt += mytrk->GetReconPT();
+                        if (inum4>=0) recon_pt/=2;
+                    }
+                    chi2 = fabs(recon_pt-pt)/pt*10;
                     if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
                     
                     chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
                 }
             }
             chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
-                    
-            if(min_chi2<3)
+            mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
+            if(min_chi2<8)
             {
-                mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000-0.5), 0);
-                mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/100 %10-0.5), 1);
-                if (mytrk->GetHitCounter(2)>0) {mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/10 %10 -0.5 ), 2);mytrk->SetHitCounter(2,1);}
-                if (mytrk->GetHitCounter(3)>0) {mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%10 -0.5), 3);mytrk->SetHitCounter(3,1);}
+                mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000000-0.5), 0);
+                mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %100-0.5), 1);
+                if (final_number/100 %100>0) {mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5 ), 2);mytrk->SetHitCounter(2,1);}
+                if (final_number%100>0) {mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);mytrk->SetHitCounter(3,1);}
                 mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
-                mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/1000-0.5) * mytrk->GetChargePrime(), 0);
-                mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/1000-0.5) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/1000000-0.5) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/1000000-0.5) * mytrk->GetChargePrime(), 0);
+                //if (mytrk->GetHitCounter(3)>0)  mytrk->SetDCA2(3);
+                //if (mytrk->GetHitCounter(2)>0)  mytrk->SetDCA2(2);
+
             }else{
                 mytrk->SetHitCounter(0,0);
             }
@@ -860,9 +841,9 @@ namespace MyDileptonAnalysis
                     const float mean = veto_window_mean_par0[layer][charge_bin][dphi_index] + veto_window_mean_par1[layer][charge_bin][dphi_index]*exp(veto_window_mean_par2[layer][charge_bin][dphi_index] * pt);
                     const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
                     
-                     if (abs(dthe) < 0.002 ) veto_hist[centr_bin]->    Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (abs(dthe) < 0.002 ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
                     if (abs(dphi) > 0.001 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if(fabs(dthe) < 0.002) sveto_hist[centr_bin]->    Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (fabs(dthe) < 0.002) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
                     if (fabs(dphi) < 0.05 && fabs(dthe) < 0.001*ilayer)
                     {
                         count++;

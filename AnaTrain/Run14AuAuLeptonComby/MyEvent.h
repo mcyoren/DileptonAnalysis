@@ -312,7 +312,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1&& 6*iter<dangle1.size()) return dangle1[iter*6];
                   else if(layer==2&& 6*iter<dangle2.size()) return dangle2[iter*6];
                   else if(layer==3&& 6*iter<dangle3.size()) return dangle3[iter*6];
-                  std::cout<<"GetdPhi "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetdPhi "<<layer<<" "<<6*iter+0<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetdThe(int layer, unsigned int iter) 
@@ -321,7 +321,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+1<dangle1.size()) return dangle1[iter*6+1];
                   else if(layer==2 && 6*iter+1<dangle2.size()) return dangle2[iter*6+1];
                   else if(layer==3 && 6*iter+1<dangle3.size()) return dangle3[iter*6+1];
-                  std::cout<<"GetdThe "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetdThe "<<layer<<" "<<6*iter+1<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetsdPhi(int layer, unsigned int iter) 
@@ -330,7 +330,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1&& 6*iter+2<dangle1.size()) return dangle1[iter*6+2];
                   else if(layer==2&& 6*iter+2<dangle2.size()) return dangle2[iter*6+2];
                   else if(layer==3&& 6*iter+2<dangle3.size()) return dangle3[iter*6+2];
-                  std::cout<<"GetsdPhi "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetsdPhi "<<layer<<" "<<6*iter+2<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetsdThe(int layer, unsigned int iter) 
@@ -339,7 +339,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+3<dangle1.size()) return dangle1[iter*6+3];
                   else if(layer==2 && 6*iter+3<dangle2.size()) return dangle2[iter*6+3];
                   else if(layer==3 && 6*iter+3<dangle3.size()) return dangle3[iter*6+3];
-                  std::cout<<"GetsdThe "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetsdThe "<<layer<<" "<<6*iter+3<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             float GetDist(int layer, unsigned int iter) 
@@ -348,7 +348,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+4<dangle1.size()) return dangle1[iter*6+4];
                   else if(layer==2 && 6*iter+4<dangle2.size()) return dangle2[iter*6+4];
                   else if(layer==3 && 6*iter+4<dangle3.size()) return dangle3[iter*6+4];
-                  std::cout<<"GetDist "<<layer<<" "<<3*iter+2<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetDist "<<layer<<" "<<6*iter+4<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
             int GetHits(int layer, unsigned int iter) 
@@ -357,7 +357,7 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+5<dangle1.size()) return (int) dangle1[iter*6+5];
                   else if(layer==2 && 6*iter+5<dangle2.size()) return (int) dangle2[iter*6+5];
                   else if(layer==3 && 6*iter+5<dangle3.size()) return (int) dangle3[iter*6+5];
-                  std::cout<<"GetHits "<<layer<<" "<<4*iter+3<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
 
