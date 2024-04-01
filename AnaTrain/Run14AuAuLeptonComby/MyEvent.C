@@ -223,10 +223,10 @@ namespace MyDileptonAnalysis
                         float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
                         float mean_theta_value = mytrk->get_mean_theta_data(rungroup, central_bin, layer);
 
+                        int cycle_layer = layer;
+                        if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
                         if(iter_layer<2||iassociatedhit>0)
                         {
-                            int cycle_layer = layer;
-                            if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
                             sigma_phi_value   = mytrk->get_dynamic_sigma_phi_data  (0, cycle_layer, dphi_previous_layer);
                             mean_phi_value    = mytrk->get_dynamic_mean_phi_data   (0, cycle_layer, dphi_previous_layer);
                             sigma_theta_value = mytrk->get_dynamic_sigma_theta_data(0, cycle_layer, dthe_previous_layer);
@@ -235,7 +235,7 @@ namespace MyDileptonAnalysis
 
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                         const float dthe = (dilep_the_projection[ilayer] - theta_hit);
-                        const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;
+                        const float sdphi = (dphi - mean_phi_value) / sigma_phi_value - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
                         const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
 
                         const float diff = sqrt(pow(sdphi, 2) + pow(sdthe, 2));
@@ -831,7 +831,7 @@ namespace MyDileptonAnalysis
                     const float dphi = (phi_hit - phi_orig);
                     const float dthe = (theta_hit - the_orig);
 
-                    if (abs(dphi) > 0.05 || abs(dthe) > 0.05 || abs(dphi) < 0.0001)
+                    if (abs(dphi) > 0.05 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
                         continue;
 
                     int dphi_index = 1;
@@ -841,11 +841,17 @@ namespace MyDileptonAnalysis
                     const float mean = veto_window_mean_par0[layer][charge_bin][dphi_index] + veto_window_mean_par1[layer][charge_bin][dphi_index]*exp(veto_window_mean_par2[layer][charge_bin][dphi_index] * pt);
                     const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
                     
-                    if (abs(dthe) < 0.002 ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (abs(dthe) < 0.001 ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
                     if (abs(dphi) > 0.001 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (fabs(dthe) < 0.002) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (fabs(dphi) < 0.05 && fabs(dthe) < 0.001*ilayer)
+                    if (fabs(dthe) < 0.001) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (ilayer==1 && dphi_index + charge_bin == 1 && fabs(dphi) < 0.006 && fabs(dthe) < 0.001)
                     {
+                        electron->SetGhost(ilayer);
+                        count++;
+                    }
+                    if (ilayer>1 && fabs(dphi) < 0.004 && fabs(dthe) < 0.001)
+                    {
+                        electron->SetGhost(ilayer);
                         count++;
                     }
                 }

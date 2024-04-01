@@ -296,6 +296,11 @@ namespace MyDileptonAnalysis
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
             };
+            float get_dynamic_smean_phi_data(int rungroup, int ilay, float phi_prev)
+            { 
+                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
+            };
 
 
             void SetdPhidThe(int layer, float val1, float val2, float val3, float val4, float val5, float val6) 

@@ -262,7 +262,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            
         int addit_reject = 0;
-        if( ((mytrk->GetMinsDphi(0) > 0) || mytrk->GetPtPrime()>0.6) && (mytrk->GetMinsDphi(0) > -1 || mytrk->GetPtPrime()>0.9) ) addit_reject = 1;
+        if (  mytrk ->GetGhost() == 0 ) addit_reject = 1;
         if ( mytrk->GetMinsDphi(0) > 0)
              addit_reject += 10;
         
