@@ -12,8 +12,17 @@
 #include "TrigLvl1.h"
 #include "RunHeader.h"
 #include "TriggerHelper.h"
+
 #include "emcClusterContainer.h"
 #include "emcClusterContent.h"
+#include "emcCalibrationDataHelper.h"
+#include "EmcIndexer.h"
+#include "emcTowerContainer.h"
+#include "emcTowerContent.h"
+#include "emcCalibrationData.h"
+#include "emcCalibrationDataHelper.h"
+#include "emcCalFEM.h"
+
 #include "ErtOutv1.h"
 #include "TH1.h"
 #include "TH1D.h"
@@ -41,10 +50,12 @@
 #include "PHPoint.h"
 
 #include <iostream>
-#include <cstdio>
 #include <fstream>
+#include <cstdio>
 #include <iomanip>
 #include <cmath>
+#include <cstdlib>
+
 
 
 class Run14AuAuLeptonCombyReco : public SubsysReco
@@ -75,8 +86,12 @@ private:
     bool IsCentralSupportCut(const float theta0, const float bbcVertex);
     int applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, const float vertex, const float centrality, const int run_number);
     template <typename track>
-    void set_track(track *newTrack, const PHCentralTrack *trk, const int itrk_reco, const float bbcz = 0, const float svxz = 0, const int rg_beamoffset = 0);
+    void set_track(track *newTrack, const PHCentralTrack *trk, const int itrk_reco, const float bbcz = 0, const float svxz = 0, const int rg_beamoffset = 0, const emcClusterContainer* emccont = nullptr);
     void fill_SVXHits_to_myevent(const SvxClusterList *svxhitlist, MyDileptonAnalysis::MyEvent *event);
+    void InitWalk(PHCompositeNode *topNode);
+    void MoonWalk();
+    void Walking(PHCompositeNode *topNode);
+    void StopWalking();
 
 
 protected:
@@ -84,7 +99,7 @@ protected:
     MyDileptonAnalysis::MyEventContainer *event_container;
 
     int remove_hadron_hits, fill_QA_hadron_hists, fill_QA_lepton_hists, fill_TTree, fill_d_dphi_hists, 
-        fill_DCA_hists, use_d_dphi_DCA, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto;
+        fill_DCA_hists, use_iden, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto;
     int dcmap_runs[N_RUN_GRP][MAX_RUN];
     float dcmap_xx1[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
     float dcmap_yy1[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
@@ -94,6 +109,16 @@ protected:
     float dcmap_yy3[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
     float dcmap_xx4[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
     float dcmap_yy4[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
+
+    float Walk[24768];
+    float Walk2[24768];
+    float T0Offset[24768];
+    float T0OffsetSigma[24768];
+    float SectorOffset[8];  
+    TF1 *fafter;
+    emcCalibrationDataHelper *fCDH;
+    Fun4AllServer *se;
+    TH2D *Sector_Time_hist;
 
     int TRIGGERBIT;
     float BBC_VERTEX_CUT;

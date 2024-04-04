@@ -615,3 +615,201 @@ bool Run14AuAuLeptonCombyReco::dead_region(float x, float y, float xx1, float yy
         return true;
     return false;
 }
+
+void Run14AuAuLeptonCombyReco::MoonWalk()
+{
+    fCDH = nullptr;
+    Sector_Time_hist = nullptr;
+    se = nullptr;
+    for (int itow = 0; itow < 24768; itow++)
+    {
+        Walk[itow] = 0;
+        Walk2[itow] = 0;
+        T0Offset[itow] = 0;
+        T0OffsetSigma[itow] = 0;
+    }
+    for (int isec = 0; isec < 8; isec++)
+    {
+        SectorOffset[isec] = 0;
+    }
+    fafter = new TF1("f", "[0]*exp([1]/x)*pow(x,[2])", 0.2, 20);
+    fafter->SetParameters(-8.25403, -5.4072, -0.33457);
+
+    return;
+}
+
+void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
+{
+    std::cout << __FILE__ << ":" << __LINE__ << " in InitRun" << std::endl;
+
+    int runnumber = 0;
+
+    const RunHeader *runheader =
+        findNode::getClass<RunHeader>(topNode, "RunHeader");
+    if (!runheader)
+    {
+        std::cout << PHWHERE << "Failed to find RunHeader Node" << std::endl;
+    }
+    runnumber = runheader->get_RunNumber();
+    std::cout << "RecalEMCalTOF::InitRun: Run Number = " << runnumber << std::endl;
+    fCDH = new emcCalibrationDataHelper(runnumber, false);
+
+    char dummy[100];
+    int run;
+    int sector;
+    int itowerid;
+    double max = 0, peak = 0, sigma = 0;
+    double walkconst = 0, walkconst2 = 0, woffset = 0;
+    TOAD toad("Run14AuAuLeptonComby");
+    
+    std::string file_location0 = toad.location("WalkCorrection.txt");
+    std::ifstream file_walk(file_location0.c_str());
+    std::string file_location1 = toad.location("TowerByTower.txt");
+    std::ifstream file_tower(file_location1.c_str());
+    std::string file_location2 = toad.location("SectorBySector.txt");
+    std::ifstream file_sector(file_location2.c_str());
+
+    if (file_walk.is_open())
+    {
+        std::cout << "Recal Open '" << file_location0.c_str() << std::endl;
+    }
+    else
+    {
+        std::cout << "File " << file_location0.c_str() << " doesn't exist" << std::endl;
+        exit(0);
+    }
+    if (file_tower.is_open())
+    {
+        std::cout << "Recal Open '" << file_location1.c_str() << std::endl;
+    }
+    else
+    {
+        std::cout << "File " << file_location1.c_str() << " doesn't exist" << std::endl;
+        exit(0);
+    }
+    if (file_sector.is_open())
+    {
+        std::cout << "Recal Open '" << file_location2.c_str() << std::endl;
+    }
+    else
+    {
+        std::cout << "File " << file_location2.c_str() << " doesn't exist" << std::endl;
+        exit(0);
+    }
+
+    while (file_walk >> dummy >> itowerid >> walkconst >> walkconst2 >> woffset)
+    {
+        Walk[itowerid] = walkconst;
+        Walk2[itowerid] = walkconst2;
+    }
+    file_walk.close();
+
+    while (file_tower >> dummy >> itowerid >> max >> peak >> sigma)
+    {
+        T0Offset[itowerid] = peak;
+        T0OffsetSigma[itowerid] = sigma;
+    }
+    file_tower.close();
+
+    while (file_sector >> run >> dummy >> sector >> max >> peak >> sigma)
+    {
+        if (run == runnumber)
+        {
+            SectorOffset[sector] = peak;
+        }
+    }
+    file_sector.close();
+
+    se = Fun4AllServer::instance();
+    Sector_Time_hist = new TH2D("Sector_Time_hist", "Sector_Time_hist", 500, -20, 30, 8,0,8);
+    se->registerHisto("Sector_Time_hist", Sector_Time_hist);
+
+    return ;
+}
+
+void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
+{
+    const PHGlobal *_phglobal_ptr =
+        findNode::getClass<PHGlobal>(topNode, "PHGlobal");
+    const emcClusterContainer* _emcClusterContainer_ptr =
+        findNode::getClass<emcClusterContainer>(topNode, "emcClusterContainer");
+    const emcTowerContainer* _emcTowerContainer_ptr =
+        findNode::getClass<emcTowerContainer>(topNode, "emcHitContainer");
+    if(!_phglobal_ptr||!_emcClusterContainer_ptr||!_emcTowerContainer_ptr)
+    {
+        std::cout<<"bad-vad nodes"<<std::endl;
+    }
+    float fVtx = _phglobal_ptr->getBbcZVertex();
+    float bbct0 = _phglobal_ptr->getBbcTimeZero();
+    
+    int nclusters = _emcClusterContainer_ptr->size();
+    int ntowers = _emcTowerContainer_ptr->size();
+    
+    for (int i = 0; i < nclusters; i++)
+    { 
+        emcClusterContent *cluster = _emcClusterContainer_ptr->getCluster(i);
+
+        int clustercent = cluster->towerid(0);
+        emcTowerContent *tower = nullptr;
+        for (int itow = 0; itow < ntowers; itow++)
+        {
+            emcTowerContent *towertemp = _emcTowerContainer_ptr->getTower(itow);
+            if (towertemp->towerid() == clustercent)
+            {
+                tower = towertemp;
+            }
+        }
+        if (tower == nullptr)
+            continue;
+            
+        int ifem, channel, isec;
+        EmcIndexer::PXPXSM144CH(clustercent, ifem, channel);
+        const emcCalFEM* LC = fCDH->getCalibration(ifem, "LCTofs");
+        float lc = LC->getValueFast(channel, 0);
+        lc = ((lc > 25. && lc < 65.) ? lc : 40.0) / 1000.;
+
+        int TDC = tower->TDC();
+        int ADC = tower->ADC();
+        double x = cluster->x();
+        double y = cluster->y();
+        double z = cluster->z() - fVtx;
+        while(clustercent>24767) clustercent -=24768;
+        if(clustercent<0) continue;
+        if (clustercent < 15552)
+        {
+            isec = clustercent / (72 * 36);
+        }
+        else
+        {
+            isec = 6 + (clustercent - 6 * 72 * 36) / (96 * 48);
+        }
+        
+        double d = sqrt(x * x + y * y + z * z);
+        double c = 29.979245829979; //[cm/ns]
+        double t_flash = d / c;
+        double t0_offset = T0Offset[clustercent];
+        double sec_offset = SectorOffset[isec];
+        double walk = Walk[clustercent] / ADC + Walk2[clustercent] / (ADC * ADC);
+        double fTime = -lc * (TDC - walk) - t0_offset - sec_offset - t_flash;
+        if (TDC < 0)
+            fTime = -9999;
+        // Afterburner
+        fTime = fTime - fafter->Eval(cluster->ecent());
+        // std::cout << fTime << std::endl;
+        
+        cluster->set_tofcorr(fTime - bbct0);
+        
+        if(((cluster->chi2()<3&&isec<6)||(cluster->prob_photon()>0.02&&isec>5))&&cluster->e()>0.400)
+        {
+            Sector_Time_hist->Fill(fTime+sec_offset,isec);
+        }
+        
+    }
+    
+    return;
+}
+
+void Run14AuAuLeptonCombyReco::StopWalking()
+{
+    delete fCDH;
+}

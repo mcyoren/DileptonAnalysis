@@ -4,6 +4,9 @@ INCLUDES = -I$(includedir) -I$(OFFLINE_MAIN)/include -I$(ROOTSYS)/include
 
 mydatadir = $(datadir)/$(PACKAGE_INCLUDE_DIR)
 dist_mydata_DATA = \
+  SectorBySector.txt \
+  TowerByTower.txt \
+  WalkCorrection.txt \
   field_map.root
 
 lib_LTLIBRARIES = \

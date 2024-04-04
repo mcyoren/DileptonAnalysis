@@ -564,6 +564,8 @@ namespace MyDileptonAnalysis
 
             short ilayer;
 
+            float adc[4];
+
             std::map<int, float> associated_tracks;
             //std::vector<double> dangle1;
 
@@ -584,6 +586,10 @@ namespace MyDileptonAnalysis
                   thetahit = -8888;
 
                   ilayer = -8888;
+                  adc[0]=-9999;
+                  adc[1]=-9999;
+                  adc[2]=-9999;
+                  adc[3]=-9999;
             };
             virtual ~MyVTXHit(){};
 
@@ -635,6 +641,10 @@ namespace MyDileptonAnalysis
             };
             float GetAssociatedTrackDistance(int itrackid) { return associated_tracks[itrackid]; };
             void DeleteAssociatedTrack(int itrackid) { associated_tracks.erase(itrackid); };
+
+            void SetAdc(int layer, float adc1, float adc2){if(layer>1) {adc[layer*2-4]=adc1;adc[layer*2-3]=adc2;}};
+            float GetAdc1(int layer){if (layer>1) return adc[layer*2-4]; else return -9999;}
+            float GetAdc2(int layer){if (layer>1) return adc[layer*2-3]; else return -9999;}
 
             ClassDef(MyVTXHit, 1)
       };
@@ -772,6 +782,7 @@ namespace MyDileptonAnalysis
             TH3D *DCPT_ReconPT, *sDCPT_ReconPT, *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr], *charge_hist;
             TH3D *veto_hist[N_centr], *veto_hist_the[N_centr], *sveto_hist[N_centr];
             TH2D *couter_veto_hist;
+            TH3D *adc_hist;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_reveal, is_fill_DCA2_hist, is_check_veto;
            
@@ -788,6 +799,7 @@ namespace MyDileptonAnalysis
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
+                  adc_hist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -855,6 +867,7 @@ namespace MyDileptonAnalysis
             void Reveal_Hadron();
 
             void FillDphiHists();
+            void FillTrueDCA();
 
             MyEvent *GetEvent() { return event; };
             void SetEvent(MyDileptonAnalysis::MyEvent *ev) { event = ev; };

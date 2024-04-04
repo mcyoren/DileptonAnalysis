@@ -534,60 +534,6 @@ namespace MyDileptonAnalysis
         return 0;
     }
 
-    void MyEvent::SetDCA(const unsigned int itrk, const int layer2)
-    {
-        MyDileptonAnalysis::MyElectron *mytrk = this->GetEntry(itrk);
-        if (!mytrk)
-            return;
-
-        const float R = mytrk->GetPtPrime() / (0.003 * 0.90);
-        const float R2 = R * R;
-
-        MyVTXHit *vtxhit = this->GetVTXHitEntry(mytrk->GetHitIndex(0));
-        if (!vtxhit)
-            return;
-
-        const float x1 = vtxhit->GetXHit();
-        const float y1 = vtxhit->GetYHit();
-
-        vtxhit = this->GetVTXHitEntry(mytrk->GetHitIndex(layer2));
-        if (!vtxhit)
-            return;
-
-        const float x2 = vtxhit->GetXHit();
-        const float y2 = vtxhit->GetYHit();
-
-        const float dx = x2 - x1;
-        const float dy = y2 - y1;
-
-        const float dx2 = dx * dx;
-        const float dy2 = dy * dy;
-
-        const int arm = (mytrk->GetArm() - 0.5) * 2;
-        const int charge = mytrk->GetChargePrime();
-
-        if (R2 < dx2 + dy2)
-            return;
-
-        const float delta = arm * charge * 0.5 * sqrt((4 * R2 - dx2 - dy2) / (1 + dy2 / dx2));
-
-        const float x3 = 0.5 * (x1 + x2) - delta * dy / dx;
-        const float y3 = 0.5 * (y1 + y2) + delta;
-
-        const float X_circle = x3 - this->GetPreciseX();
-        const float Y_circle = y3 - this->GetPreciseY();
-
-        const float L = sqrt(X_circle * X_circle + Y_circle * Y_circle);
-        const float dca = (L - R) * 10000; // In Micro Meters
-
-        mytrk->SetDCA(dca);
-        const float sdca = dca / (sigma_DCA[0][0][layer2 - 1][0] + sigma_DCA[0][0][layer2 - 1][1] * exp(sigma_DCA[0][0][layer2 - 1][2] * mytrk->GetPtPrime()));
-        mytrk->SetsDCA(sdca);
-
-        mytrk->SetDCAX(X_circle * dca / L);
-        mytrk->SetDCAY(Y_circle * dca / L);
-    }
-
     void MyEvent::SetDCA2(const unsigned int itrk, const int layer3)
     {
         MyDileptonAnalysis::MyElectron *mytrk = this->GetEntry(itrk);
@@ -684,110 +630,6 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::Reveal_Hadron()
-    {
-        const int central_bin = (int)event->GetCentrality() / 20;
-        
-        event->ReshuffleElectrons();
-        const int nleptons = event->GetNtrack();
-        for (int itrk = 0; itrk < nleptons; itrk++)
-        {
-            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-            const float pt = mytrk->GetPtPrime();
-            const float z1 = mytrk->GetCrkz();
-            const float phi1 = mytrk->GetCrkphi();
-
-            const float dcenter_phi_sigma = 0.013;
-            const float dcenter_z_sigma = 5.0;
-
-            const int neleccand[2] = {(int)event->GetNeleccand(), nleptons};
-            const int first_iter[2] = {0, itrk + 1};
-            for (int iway = 0; iway < 2; iway++)
-            {
-                for (int jtrk = first_iter[iway]; jtrk < neleccand[iway]; jtrk++)
-                {
-                    MyDileptonAnalysis::MyElectron *myeleccand;
-                    if (iway == 0)
-                        myeleccand = event->GetElecCand(jtrk);
-                    else
-                        myeleccand = event->GetEntry(jtrk);
-
-                    const float z2 = myeleccand->GetCrkz();
-                    if (z2 < -999)
-                        continue;
-                    const float phi2 = myeleccand->GetCrkphi();
-                    if (phi2 < -999)
-                        continue;
-                    const int charge_bin = fabs(mytrk->GetChargePrime() - myeleccand->GetChargePrime()) * 5 / 2;
-
-                    const float dcenter_z = (z1 - z2) / dcenter_z_sigma;
-                    const float dcenter_phi = (phi1 - phi2) / dcenter_phi_sigma;
-
-                    const float dzed = mytrk->GetZDC() - myeleccand->GetZDC();
-                    const float dphi = mytrk->GetPhiDC() - myeleccand->GetPhiDC();
-                    const float dalpha = mytrk->GetAlphaPrime() - myeleccand->GetAlphaPrime();
-
-                    float dep1 = mytrk->GetDep();
-                    if (dep1 < 0)
-                        dep1 = -dep1 * 2.5;
-                    float dep2 = myeleccand->GetDep();
-                    if (dep2 < 0)
-                        dep2 = -dep2 * 2.5;
-                    const int EP1 = mytrk->GetEcore() / mytrk->GetPtot() > 0.8;
-                    const int EP2 = myeleccand->GetEcore() / myeleccand->GetPtot() > 0.8 || mytrk->GetEcore() < -999;
-
-                    const float dcenter_r = sqrt(dcenter_phi * dcenter_phi + dcenter_z * dcenter_z);
-                    const float pt_in_hist = 0.5 * (pt + myeleccand->GetPtPrime());
-                    if (fabs(dphi - (0.13 * dalpha)) < 0.015)
-                        el_had_dz->Fill(dzed, pt_in_hist, central_bin + charge_bin);
-                    el_had_dphi->Fill((dphi - (0.04 * dalpha)) / 0.005, pt_in_hist, central_bin + charge_bin);
-                    el_had_dr->Fill(dcenter_r, pt_in_hist, central_bin + charge_bin);
-
-                    if ((fabs(dzed) < 6.0 && fabs(dphi - (0.13 * dalpha)) < 0.015) || fabs(dphi - (0.04 * dalpha)) < 0.015 ||
-                        (fabs(dphi - (-0.065 * dalpha)) < 0.015))
-                    {
-                        if (mytrk->GetGhost() == 0 && (dep1 > dep2 || EP1 < EP2))
-                            mytrk->SetGhost(3);
-                        if (myeleccand->GetGhost() == 0 && (dep1 < dep2 || EP1 > EP2))
-                            myeleccand->SetGhost(3);
-                    }
-                    if ((fabs(dcenter_z) < 0.01 && fabs(dcenter_phi) < 5) || (fabs(dcenter_phi) < 0.01 && fabs(dcenter_z) < 5))
-                    {
-                        if (dep1 > dep2 || EP1 < EP2)
-                            mytrk->SetGhost(4);
-                        if (dep1 < dep2 || EP1 > EP2)
-                            myeleccand->SetGhost(4);
-                    }
-
-                    if (dcenter_r < 4)
-                    {
-                        if (dep1 > dep2 || EP1 < EP2)
-                            mytrk->SetGhost(1);
-                        if (dep1 < dep2 || EP1 > EP2)
-                            myeleccand->SetGhost(1);
-                        if (dcenter_r < 3 && myeleccand->GetProb() > 0.05 && myeleccand->GetTOFDPHI() > 0 && myeleccand->GetTOFDZ() < 20)
-                        {
-                            if (dep1 > dep2 || EP1 < EP2)
-                                mytrk->SetGhost(2);
-                            if (dep1 < dep2 || EP1 > EP2)
-                                myeleccand->SetGhost(2);
-                        }
-                    }
-                }
-            }
-            if (fabs(mytrk->GetEmcdphi()) > 0.05 || fabs(mytrk->GetEmcdz()) > 25)
-                continue;
-            const int ghost = 5 * mytrk->GetGhost();
-            const float EP_new = mytrk->GetEcore() / (mytrk->GetPtot() * mytrk->GetReconPT() / mytrk->GetPtPrime());
-            ep_hist->Fill(mytrk->GetEcore() / mytrk->GetPtot(), pt, central_bin + ghost);
-            ep_hist_el->Fill(EP_new, pt, central_bin + ghost);
-            if (mytrk->GetEcore() / mytrk->GetPtot() > 0.8 && mytrk->GetDep() < 2)
-            {
-                emc_dphi_el->Fill(mytrk->GetEmcdphi(), pt, central_bin + ghost);
-                emc_dz_el->Fill(mytrk->GetEmcdz(), pt, central_bin + ghost);
-            }
-        }
-    }
 
     void MyEventContainer::CheckVeto()
     {   
@@ -804,6 +646,10 @@ namespace MyDileptonAnalysis
             if (electron->GetHitCounter(0) < 1 || electron->GetHitCounter(1) < 1 ||
                 (electron->GetHitCounter(2) < 1 && electron->GetHitCounter(3) < 1))
                 continue;
+
+            temc->Fill(electron->GetEmcTOF(),pt,centr_bin);
+            ttof->Fill(electron->GetTOFE(),pt,centr_bin);
+
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
                 if(electron->GetHitCounter(ilayer)<1) continue;
@@ -814,6 +660,13 @@ namespace MyDileptonAnalysis
                 const float phi_orig = hit_orig->GetPhiHit();
                 const float the_orig = hit_orig->GetTheHit();
                 
+                if(ilayer>1) 
+                {
+                    adc_hist->Fill(hit_orig->GetAdc1(ilayer),pt, (ilayer-2)*3+0);
+                    adc_hist->Fill(hit_orig->GetAdc2(ilayer),pt, (ilayer-2)*3+1);
+                    adc_hist->Fill(hit_orig->GetAdc1(ilayer)+hit_orig->GetAdc2(ilayer),pt, (ilayer-2)*3+2);
+                }
+
                 const int nvtxhits = event->GetNVTXhit();
 
                 for (int ihit = 0; ihit < nvtxhits; ihit++)
@@ -831,7 +684,7 @@ namespace MyDileptonAnalysis
                     const float dphi = (phi_hit - phi_orig);
                     const float dthe = (theta_hit - the_orig);
 
-                    if (abs(dphi) > 0.05 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
+                    if (abs(dphi) > 0.1 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
                         continue;
 
                     int dphi_index = 1;
@@ -841,17 +694,27 @@ namespace MyDileptonAnalysis
                     const float mean = veto_window_mean_par0[layer][charge_bin][dphi_index] + veto_window_mean_par1[layer][charge_bin][dphi_index]*exp(veto_window_mean_par2[layer][charge_bin][dphi_index] * pt);
                     const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
                     
-                    if (abs(dthe) < 0.001 ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (abs(dphi) > 0.001 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (fabs(dthe) < 0.001) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (ilayer==1 && dphi_index + charge_bin == 1 && fabs(dphi) < 0.006 && fabs(dthe) < 0.001)
+                    if (abs(dthe) < 0.002/ilayer  ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (abs(dphi) < 0.006 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (fabs(dthe) < 0.002/ilayer ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if (ilayer==1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.03+0.04*exp(-2*pt) && fabs(dthe) < 0.002)
                     {
-                        electron->SetGhost(ilayer);
+                        if(electron->GetGhost()<10) electron->SetGhost(ilayer);
                         count++;
                     }
-                    if (ilayer>1 && fabs(dphi) < 0.004 && fabs(dthe) < 0.001)
+                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.06+0.08*exp(-2*pt)  && fabs(dthe) < 0.002/ilayer )
                     {
-                        electron->SetGhost(ilayer);
+                        if(electron->GetGhost()<10) electron->SetGhost(ilayer);
+                        count++;
+                    }
+                    if (ilayer==1 && dphi_index + charge_bin == 1 && fabs(dphi) < 0.006 && fabs(dthe) < 0.001)
+                    {
+                        electron->SetGhost(ilayer+10);
+                        count++;
+                    }
+                    if (ilayer>1 && fabs(dphi) < 0.004  && fabs(dthe) < 0.001 )
+                    {
+                        electron->SetGhost(ilayer+10);
                         count++;
                     }
                 }
@@ -859,6 +722,46 @@ namespace MyDileptonAnalysis
             couter_veto_hist->Fill(count,centr_bin);
         }
     }
+
+    void MyEventContainer::FillTrueDCA()
+    {
+        const int central_bin = (int)event->GetCentrality() / 20;
+        const int nleptons = event->GetNtrack();
+        for (int itrk = 0; itrk < nleptons; itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            const float pt = mytrk->GetPtPrime();
+            if (pt < 0.2)
+                continue;
+            if (mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1)
+                continue;
+            const int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
+            event->SetDCA(itrk, 1);
+            for (int ilayer = 3; ilayer > 1; ilayer--)
+            {
+                if (mytrk->GetHitCounter(ilayer) < 1) continue;
+                const int ibin = charge_bin + ilayer * 2 - 2;
+                
+                event->SetDCA2(itrk, ilayer);
+                DCPT_ReconPT->Fill(mytrk->GetReconPT(), pt, central_bin + 5 * (ilayer - 2));
+                if (mytrk->GetGhost()==0)
+                sDCPT_ReconPT->Fill(mytrk->GetReconPT(), pt, central_bin + 5 * (ilayer - 2));
+                float third_bin_input = 0.1 + (1 - mytrk->GetChargePrime()) * 1.5 + 6 * mytrk->GetArm();
+                if (is_fill_DCA_hist)
+                    DCA2_2D_hist[central_bin]->Fill(mytrk->GetDCAX2(), mytrk->GetDCAY2(), third_bin_input);
+                if (is_fill_DCA_hist && mytrk->GetGhost()==0)
+                    sDCA2_2D_hist[central_bin]->Fill(mytrk->GetDCAX2(), mytrk->GetDCAY2(), third_bin_input);
+                const float DCA2 = mytrk->GetDCA2();
+                DCA2_hist[central_bin]->Fill(DCA2, ibin, pt);
+                if (mytrk->GetGhost()==0)
+                    sDCA2_hist[central_bin]->Fill(DCA2, ibin, pt);
+                DCA12_hist[central_bin]->Fill(mytrk->GetDCA2(), mytrk->GetDCA(), third_bin_input);
+                charge_hist->Fill(abs(charge_bin - (1 - mytrk->GetCharge()) / 2) * 4 + (1 - mytrk->GetCharge()) + mytrk->GetArm() + 0.1, pt, central_bin);
+            }
+        }
+    }
+
+
 
     void MyEventContainer::GetHistsFromFile(const std::string loc)
     {
@@ -966,7 +869,7 @@ namespace MyDileptonAnalysis
         if (fill_true_DCA)
         {
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50, 0, 5, 10, 0, 10);
-            INIT_HIST(3, sDCPT_ReconPT, 500, -0.05, 0.05, 500, -0.05, 0.05, 10, 0, 10);
+            INIT_HIST(3, sDCPT_ReconPT,50, 0, 5, 50, 0, 5, 10, 0, 10);
             INIT_HISTOS(3, DCA12_hist, N_centr, 100, -2000, 2000, 100, -2000, 2000, 12, 0, 12);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 4, 2, 6, 28, 0.2, 3);
             INIT_HISTOS(3, sDCA2_hist, N_centr, 200, -4000, 4000, 4, 2, 6, 28, 0.2, 3);
@@ -979,9 +882,84 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.02, 0.02, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, sveto_hist,    N_centr, 200, 0, 20,       16,0,16, 28, 0.2, 3);
             INIT_HIST(2, couter_veto_hist, 4, 0, 4, 5, 0, 5);
+            INIT_HIST(3, adc_hist, 1200,0,1200, 50, 0, 2.5, 6, 0, 6);
+            INIT_HIST(3, temc, 150, -50, 150, 18, 0.2, 2.0, 5, 0, 5);
+            INIT_HIST(3, ttof, 150, -50, 150, 18, 0.2, 2.0, 5, 0, 5);
             is_check_veto = 1;
         }
     }
+    
+    void MyEventContainer::WriteOutFile()
+    {
+        std::cout << "Start writing hists to My outfile" << std::endl;
+        infile->Close();
+        if (is_fill_tree || is_fill_hadron_hsits || is_fill_hsits || is_fill_dphi_hist || is_fill_DCA_hist || is_fill_track_QA
+        || is_fill_reveal || is_fill_DCA2_hist||is_check_veto)
+        {
+            outfile->cd();
+            outfile->Write();
+            outfile->Close();
+        }
+        std::cout << "Hists were written to My outfile" << std::endl;
+    }
+
+    /// @yoren no longer in use
+
+    void MyEvent::SetDCA(const unsigned int itrk, const int layer2)
+    {
+        MyDileptonAnalysis::MyElectron *mytrk = this->GetEntry(itrk);
+        if (!mytrk)
+            return;
+
+        const float R = mytrk->GetPtPrime() / (0.003 * 0.90);
+        const float R2 = R * R;
+
+        MyVTXHit *vtxhit = this->GetVTXHitEntry(mytrk->GetHitIndex(0));
+        if (!vtxhit)
+            return;
+
+        const float x1 = vtxhit->GetXHit();
+        const float y1 = vtxhit->GetYHit();
+
+        vtxhit = this->GetVTXHitEntry(mytrk->GetHitIndex(layer2));
+        if (!vtxhit)
+            return;
+
+        const float x2 = vtxhit->GetXHit();
+        const float y2 = vtxhit->GetYHit();
+
+        const float dx = x2 - x1;
+        const float dy = y2 - y1;
+
+        const float dx2 = dx * dx;
+        const float dy2 = dy * dy;
+
+        const int arm = (mytrk->GetArm() - 0.5) * 2;
+        const int charge = mytrk->GetChargePrime();
+
+        if (R2 < dx2 + dy2)
+            return;
+
+        const float delta = arm * charge * 0.5 * sqrt((4 * R2 - dx2 - dy2) / (1 + dy2 / dx2));
+
+        const float x3 = 0.5 * (x1 + x2) - delta * dy / dx;
+        const float y3 = 0.5 * (y1 + y2) + delta;
+
+        const float X_circle = x3 - this->GetPreciseX();
+        const float Y_circle = y3 - this->GetPreciseY();
+
+        const float L = sqrt(X_circle * X_circle + Y_circle * Y_circle);
+        const float dca = (L - R) * 10000; // In Micro Meters
+
+        mytrk->SetDCA(dca);
+        const float sdca = dca / (sigma_DCA[0][0][layer2 - 1][0] + sigma_DCA[0][0][layer2 - 1][1] * exp(sigma_DCA[0][0][layer2 - 1][2] * mytrk->GetPtPrime()));
+        mytrk->SetsDCA(sdca);
+
+        mytrk->SetDCAX(X_circle * dca / L);
+        mytrk->SetDCAY(Y_circle * dca / L);
+    }
+
+
     void MyEventContainer::FillDphiHists()
     {
         const int central_bin = (int)event->GetCentrality() / 20;
@@ -1102,17 +1080,111 @@ namespace MyDileptonAnalysis
             }
         }
     }
-    void MyEventContainer::WriteOutFile()
+
+
+    void MyEventContainer::Reveal_Hadron()
     {
-        std::cout << "Start writing hists to My outfile" << std::endl;
-        infile->Close();
-        if (is_fill_tree || is_fill_hadron_hsits || is_fill_hsits || is_fill_dphi_hist || is_fill_DCA_hist || is_fill_track_QA
-        || is_fill_reveal || is_fill_DCA2_hist||is_check_veto)
+        const int central_bin = (int)event->GetCentrality() / 20;
+        
+        event->ReshuffleElectrons();
+        const int nleptons = event->GetNtrack();
+        for (int itrk = 0; itrk < nleptons; itrk++)
         {
-            outfile->cd();
-            outfile->Write();
-            outfile->Close();
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            const float pt = mytrk->GetPtPrime();
+            const float z1 = mytrk->GetCrkz();
+            const float phi1 = mytrk->GetCrkphi();
+
+            const float dcenter_phi_sigma = 0.013;
+            const float dcenter_z_sigma = 5.0;
+
+            const int neleccand[2] = {(int)event->GetNeleccand(), nleptons};
+            const int first_iter[2] = {0, itrk + 1};
+            for (int iway = 0; iway < 2; iway++)
+            {
+                for (int jtrk = first_iter[iway]; jtrk < neleccand[iway]; jtrk++)
+                {
+                    MyDileptonAnalysis::MyElectron *myeleccand;
+                    if (iway == 0)
+                        myeleccand = event->GetElecCand(jtrk);
+                    else
+                        myeleccand = event->GetEntry(jtrk);
+
+                    const float z2 = myeleccand->GetCrkz();
+                    if (z2 < -999)
+                        continue;
+                    const float phi2 = myeleccand->GetCrkphi();
+                    if (phi2 < -999)
+                        continue;
+                    const int charge_bin = fabs(mytrk->GetChargePrime() - myeleccand->GetChargePrime()) * 5 / 2;
+
+                    const float dcenter_z = (z1 - z2) / dcenter_z_sigma;
+                    const float dcenter_phi = (phi1 - phi2) / dcenter_phi_sigma;
+
+                    const float dzed = mytrk->GetZDC() - myeleccand->GetZDC();
+                    const float dphi = mytrk->GetPhiDC() - myeleccand->GetPhiDC();
+                    const float dalpha = mytrk->GetAlphaPrime() - myeleccand->GetAlphaPrime();
+
+                    float dep1 = mytrk->GetDep();
+                    if (dep1 < 0)
+                        dep1 = -dep1 * 2.5;
+                    float dep2 = myeleccand->GetDep();
+                    if (dep2 < 0)
+                        dep2 = -dep2 * 2.5;
+                    const int EP1 = mytrk->GetEcore() / mytrk->GetPtot() > 0.8;
+                    const int EP2 = myeleccand->GetEcore() / myeleccand->GetPtot() > 0.8 || mytrk->GetEcore() < -999;
+
+                    const float dcenter_r = sqrt(dcenter_phi * dcenter_phi + dcenter_z * dcenter_z);
+                    const float pt_in_hist = 0.5 * (pt + myeleccand->GetPtPrime());
+                    if (fabs(dphi - (0.13 * dalpha)) < 0.015)
+                        el_had_dz->Fill(dzed, pt_in_hist, central_bin + charge_bin);
+                    el_had_dphi->Fill((dphi - (0.04 * dalpha)) / 0.005, pt_in_hist, central_bin + charge_bin);
+                    el_had_dr->Fill(dcenter_r, pt_in_hist, central_bin + charge_bin);
+
+                    if ((fabs(dzed) < 6.0 && fabs(dphi - (0.13 * dalpha)) < 0.015) || fabs(dphi - (0.04 * dalpha)) < 0.015 ||
+                        (fabs(dphi - (-0.065 * dalpha)) < 0.015))
+                    {
+                        if (mytrk->GetGhost() == 0 && (dep1 > dep2 || EP1 < EP2))
+                            mytrk->SetGhost(3);
+                        if (myeleccand->GetGhost() == 0 && (dep1 < dep2 || EP1 > EP2))
+                            myeleccand->SetGhost(3);
+                    }
+                    if ((fabs(dcenter_z) < 0.01 && fabs(dcenter_phi) < 5) || (fabs(dcenter_phi) < 0.01 && fabs(dcenter_z) < 5))
+                    {
+                        if (dep1 > dep2 || EP1 < EP2)
+                            mytrk->SetGhost(4);
+                        if (dep1 < dep2 || EP1 > EP2)
+                            myeleccand->SetGhost(4);
+                    }
+
+                    if (dcenter_r < 4)
+                    {
+                        if (dep1 > dep2 || EP1 < EP2)
+                            mytrk->SetGhost(1);
+                        if (dep1 < dep2 || EP1 > EP2)
+                            myeleccand->SetGhost(1);
+                        if (dcenter_r < 3 && myeleccand->GetProb() > 0.05 && myeleccand->GetTOFDPHI() > 0 && myeleccand->GetTOFDZ() < 20)
+                        {
+                            if (dep1 > dep2 || EP1 < EP2)
+                                mytrk->SetGhost(2);
+                            if (dep1 < dep2 || EP1 > EP2)
+                                myeleccand->SetGhost(2);
+                        }
+                    }
+                }
+            }
+            if (fabs(mytrk->GetEmcdphi()) > 0.05 || fabs(mytrk->GetEmcdz()) > 25)
+                continue;
+            const int ghost = 5 * mytrk->GetGhost();
+            const float EP_new = mytrk->GetEcore() / (mytrk->GetPtot() * mytrk->GetReconPT() / mytrk->GetPtPrime());
+            ep_hist->Fill(mytrk->GetEcore() / mytrk->GetPtot(), pt, central_bin + ghost);
+            ep_hist_el->Fill(EP_new, pt, central_bin + ghost);
+            if (mytrk->GetEcore() / mytrk->GetPtot() > 0.8 && mytrk->GetDep() < 2)
+            {
+                emc_dphi_el->Fill(mytrk->GetEmcdphi(), pt, central_bin + ghost);
+                emc_dz_el->Fill(mytrk->GetEmcdz(), pt, central_bin + ghost);
+            }
         }
-        std::cout << "Hists were written to My outfile" << std::endl;
     }
+
 }

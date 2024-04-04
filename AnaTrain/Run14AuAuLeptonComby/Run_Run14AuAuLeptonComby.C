@@ -1,0 +1,77 @@
+void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
+    gSystem->Load("libRun14AuAuLeptonEvent.so");
+    gSystem->Load("libRun14AuAuLeptonComby.so");  
+    gSystem->Load("libTOAD");  
+    gSystem->Load("libUltraLight");  
+    gSystem->Load("libCabanaBoy");
+    
+    recoConsts *reco_consts =  recoConsts::instance();
+    reco_consts->set_IntFlag("Remove_hadron_hits", 0);
+    reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
+    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
+    reco_consts->set_IntFlag("Fill_TTree", 0);
+    reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
+    reco_consts->set_IntFlag("Fill_DCA_hists", 0);
+    reco_consts->set_IntFlag("Use_ident", 1);
+    reco_consts->set_IntFlag("Do_track_QA", 0);
+    reco_consts->set_IntFlag("Do_reveal_hadron", 0);
+    reco_consts->set_IntFlag("Fill_true_DCA", 1);
+    reco_consts->set_IntFlag("Check_Veto", 1);
+       
+    SubsysReco *reco = new Run14AuAuLeptonCombyReco(outFile);
+
+    cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
+    cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
+
+    CabanaBoy *cb = new CabanaBoy(10,4,1, "Run14AuAuLeptonComby");
+    //CabanaBoy *cb = new CabanaBoy(10,1,1, "Run14AuAuLeptonComby");
+	
+	cb->SetHistoFileName(outFile);
+	cb->setZVertexMax(10);
+	cb->setReactionPlaneSelectionType(CabanaBoy::ReactionPlaneNotUsed);
+	cb->setCentralitySelectionType(CabanaBoy::CentralityTypeRun12CuAu);
+	cb->setCuts(mc);
+	cb->setHistos(mh);
+	cb->setPoolType(CabanaBoy::MultiAkibaPools);
+	cb->setFastMom(false);
+	cb->setPoolDepth(20);
+	cb->setMixingType11(true);  
+	cb->setMixingType12(true);
+	cb->setMixingType22(true);
+	cb->Verbosity(0);
+
+    Fun4AllServer *se = Fun4AllServer::instance();
+    se->Verbosity(0);
+
+    SubsysReco *mstr = se->getSubsysReco("MASTERRECALIBRATORMANAGER");
+    se->unregisterSubsystem(mstr);
+   
+    MasterRecalibrator *mr = new MasterRecalibrator();
+    mr->Unlock(0);
+    mr->RemoveRecalibrator("MomChangeRecalReco");
+    mr->RemoveRecalibrator("Run14AuAu200PC2MatchRecal");
+    mr->RemoveRecalibrator("Run14AuAu200EMCMatchRecal");
+    mr->RemoveRecalibrator("SvxCentralTrackRecalReco");
+    mr->RemoveRecalibrator("SvxCentralTrackReFit");
+    mr->RemoveRecalibrator("SvxCentralTrackFitRecal");
+
+    //mr->RemoveRecalibrator("EmcTofWalkRecalReco");//EmcGenericEScaleRecalReco
+    //mr->RemoveRecalibrator("EmctofrecalReco");//EmcPidrecalReco
+    //mr->RemoveRecalibrator("EmcGenericDeadRecalReco");
+
+    se->registerSubsystem(mr);
+
+    se->registerSubsystem(reco);
+    se->registerSubsystem(cb);
+}
+
+
+void InputData(vector<string> &indata) {
+  //indata.push_back("EWG");
+  //indata.push_back("PWG");
+  indata.push_back("CNT");
+  indata.push_back("DST_SVX");
+ // indata.push_back("DST_EVE");
+  return;
+}
+
