@@ -254,8 +254,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             {
                 emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
                 if(!emc) continue;
-	            mytrk->SetEmcTOF( emc->tofcorr() ); 
-            }
+	            mytrk->SetEmcTOF(emc->tofcorr());  
+            } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
         }
     }
 
@@ -278,9 +278,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         int hadron_reject = 0;
         if ( mytrk->GetPtPrime() > 0.4 ) hadron_reject=10;
-        if ( fabs(mytrk->GetEmcTOF())<10) hadron_reject+=1;
-        if ( hadron_reject==11 && fabs(mytrk->GetEmcdphi_e())<2 && fabs(mytrk->GetEmcdz_e())<2 && 
-        ((mytrk->GetEcore()/mytrk->GetPtot()>0.8 && mytrk->GetDep()<2 ) ||  mytrk->GetPtPrime()>0.9) )  hadron_reject=100;
+        if ( fabs(mytrk->GetEmcTOF())<5) hadron_reject+=1;
+        if ( hadron_reject==11 && mytrk->GetDep()>0-mytrk->GetPtPrime() && mytrk->GetDep()<2+mytrk->GetPtPrime()  )  hadron_reject=100;
         
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 
@@ -452,7 +451,7 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
     newTrack->SetCrkz(trk->get_center_z(itrk_reco));
 
     newTrack->SetPrimes(bbcz, svxz, rg_beamoffset);
-    newTrack->SetTOFE((trk->get_ttof(itrk_reco)-trk->get_pltof(itrk_reco)/30.)*10);
+    newTrack->SetTOFE((trk->get_m2tof(itrk_reco))*100);
     newTrack->SetEmcTOF(trk->get_temc(itrk_reco));
 	if(trk->get_emcid(itrk_reco) >= 0)
     {

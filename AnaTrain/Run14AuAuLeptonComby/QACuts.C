@@ -619,12 +619,15 @@ bool Run14AuAuLeptonCombyReco::dead_region(float x, float y, float xx1, float yy
 void Run14AuAuLeptonCombyReco::MoonWalk()
 {
     fCDH = nullptr;
-    Sector_Time_hist = nullptr;
+    tdc_adc_PbGl = nullptr;
     se = nullptr;
     for (int itow = 0; itow < 24768; itow++)
     {
         Walk[itow] = 0;
         Walk2[itow] = 0;
+        Walk3[itow] = 0;
+        Walk4[itow] = 0;
+        Walk5[itow] = 0;
         T0Offset[itow] = 0;
         T0OffsetSigma[itow] = 0;
     }
@@ -658,8 +661,8 @@ void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
     int run;
     int sector;
     int itowerid;
-    double max = 0, peak = 0, sigma = 0;
-    double walkconst = 0, walkconst2 = 0, woffset = 0;
+    float max = 0, peak = 0, sigma = 0;
+    float walkconst = 0, walkconst2 = 0, woffset = 0, secondExp=0, normSecondExp=0;
     TOAD toad("Run14AuAuLeptonComby");
     
     std::string file_location0 = toad.location("WalkCorrection.txt");
@@ -697,10 +700,13 @@ void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
         exit(0);
     }
 
-    while (file_walk >> dummy >> itowerid >> walkconst >> walkconst2 >> woffset)
-    {
-        Walk[itowerid] = walkconst;
-        Walk2[itowerid] = walkconst2;
+    while(file_walk>>dummy>>itowerid>>walkconst>>walkconst2>>woffset>>secondExp>>normSecondExp){
+
+      Walk[itowerid] =walkconst;
+      Walk2[itowerid]=walkconst2;
+      Walk3[itowerid]=woffset;
+      Walk4[itowerid]=secondExp;
+      Walk5[itowerid]=normSecondExp;
     }
     file_walk.close();
 
@@ -721,8 +727,9 @@ void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
     file_sector.close();
 
     se = Fun4AllServer::instance();
-    Sector_Time_hist = new TH2D("Sector_Time_hist", "Sector_Time_hist", 500, -20, 30, 8,0,8);
-    se->registerHisto("Sector_Time_hist", Sector_Time_hist);
+    std::cout << "RecalEMCalTOF::Init: " << "Book tdc_adc_PbGl histogram" << std::endl;
+    tdc_adc_PbGl = new TH3D("tdc_adc_PbGl","TDC/ADC of EMCal sectors histogram",500,-1000,4000,600,-1000,4000,8,0,8);
+    se->registerHisto("tdc_adc_PbGl", tdc_adc_PbGl );
 
     return ;
 }
@@ -759,49 +766,63 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
                 tower = towertemp;
             }
         }
+
         if (tower == nullptr)
             continue;
-            
+        
         int ifem, channel, isec;
         EmcIndexer::PXPXSM144CH(clustercent, ifem, channel);
         const emcCalFEM* LC = fCDH->getCalibration(ifem, "LCTofs");
         float lc = LC->getValueFast(channel, 0);
         lc = ((lc > 25. && lc < 65.) ? lc : 40.0) / 1000.;
 
-        int TDC = tower->TDC();
-        int ADC = tower->ADC();
-        double x = cluster->x();
-        double y = cluster->y();
-        double z = cluster->z() - fVtx;
+        const int TDC = tower->TDC();
+        const int ADC = tower->ADC();
+        const float x = cluster->x();
+        const float y = cluster->y();
+        const float z = cluster->z() - fVtx;
         while(clustercent>24767) clustercent -=24768;
         if(clustercent<0) continue;
         if (clustercent < 15552)
         {
-            isec = clustercent / (72 * 36);
+            isec = clustercent / (72 * 36); 
+            //iy = (clustercent - isec * 2592) / 72;
+            //iz = (clustercent - isec * 2592) % 72;
         }
         else
         {
             isec = 6 + (clustercent - 6 * 72 * 36) / (96 * 48);
+            //iy = (clustercent - 15552 - 4608 * (isec - 6)) / 96;
+            //iz = (clustercent - 15552 - 4608 * (isec - 6)) % 96;
         }
+        int sector_clockwise = isec;
+        if(isec<4) sector_clockwise = isec;
+        else if(isec==4) sector_clockwise = 5; // sector E2
+        else if(isec==5) sector_clockwise = 4;  // sector E3
+        else if(isec==6) sector_clockwise = 7; // sector E0
+        else if(isec==7) sector_clockwise = 6;  // sector E1
+        else continue;
         
-        double d = sqrt(x * x + y * y + z * z);
-        double c = 29.979245829979; //[cm/ns]
-        double t_flash = d / c;
-        double t0_offset = T0Offset[clustercent];
-        double sec_offset = SectorOffset[isec];
-        double walk = Walk[clustercent] / ADC + Walk2[clustercent] / (ADC * ADC);
-        double fTime = -lc * (TDC - walk) - t0_offset - sec_offset - t_flash;
+        const float d = sqrt(x * x + y * y + z * z);
+        const float c = 29.979245829979; //[cm/ns]
+        const float t_flash = d / c;
+        //const float t0_offset = T0Offset[clustercent]; ///// i have no idea why??
+        const float t0_offset = bbct0;
+        const float sec_offset = SectorOffset[sector_clockwise];
+        const float walk = Walk[clustercent]*(pow(ADC,Walk2[clustercent]))+Walk3[clustercent]*(pow(ADC,Walk4[clustercent]))+Walk5[clustercent]; //  new fitting function by balazs 5 parameters,  walk3 is tower offset in TDC
+        //float fTime = -lc * (TDC - walk) - t0_offset - sec_offset - t_flash;
+        float fTime =  lc * (4095 -TDC)- walk - t0_offset -sec_offset - t_flash; // Edited by Attia
         if (TDC < 0)
             fTime = -9999;
         // Afterburner
-        fTime = fTime - fafter->Eval(cluster->ecent());
+        //fTime = fTime - fafter->Eval(cluster->ecent());
         // std::cout << fTime << std::endl;
         
-        cluster->set_tofcorr(fTime - bbct0);
+        cluster->set_tofcorr(fTime - 0*bbct0);
         
         if(((cluster->chi2()<3&&isec<6)||(cluster->prob_photon()>0.02&&isec>5))&&cluster->e()>0.400)
         {
-            Sector_Time_hist->Fill(fTime+sec_offset,isec);
+            tdc_adc_PbGl->Fill(TDC,ADC,sector_clockwise);
         }
         
     }

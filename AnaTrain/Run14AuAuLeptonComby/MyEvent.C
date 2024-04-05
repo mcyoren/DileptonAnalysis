@@ -592,19 +592,21 @@ namespace MyDileptonAnalysis
 
         const int final_charge = (y2 - 0.5 * y1 - 0.5 * y3) / fabs(y2 - 0.5 * y1 - 0.5 * y3) * arm;
         mytrk->SetQ(final_charge);
-
-        /*float xx[3]={x1,x2,x3}, yy[3]={y1,y2,y3};
-        TGraph* graph = new TGraph(3,xx,yy);
-        TF1 *func;
-        if(x1 > 0) func = new TF1("func","pol2", 0, 20);
-        else func = new TF1("func","pol2", -20, 0);
-        graph->Fit(func,"QR");
-        const float par1 = func->GetParameter(1);
-        const float par2 = func->GetParameter(2);
-        const float slope = par1 + 2*par2*this->GetPreciseX();
+        if(fabs(x1)==fabs(x2)||fabs(x2)==fabs(x3)||fabs(x1)==fabs(x3))
+        {
+            std::cout<<"no parabola"<<std::endl;
+            return;
+        }
+        const float a = 1./(x1-x3)*((y1-y2)/(x1-x2)-(y2-y3)/(x2-x3));
+        const float b = (y1-y2)*(x3+x2)/(x1-x2)/(x3-x1)-(y2-y3)*(x1+x2)/(x2-x3)/(x3-x1);
+        const float c = y1-b*x1-a*x1*x1;
+        const float slope = b + 2*a*this->GetPreciseX();
         float phi0_new_method = TMath::ATan(slope);
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method += pi;
-        mytrk->SetPhi0(phi0_new_method);*/
+        mytrk->SetPhi0(phi0_new_method);
+        mytrk->SetMinDist(a,0);
+        mytrk->SetMinDist(b,1);
+        mytrk->SetMinDist(c,2);
     }
 
     void MyEvent::ReshuffleElectrons()
@@ -882,9 +884,9 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.02, 0.02, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, sveto_hist,    N_centr, 200, 0, 20,       16,0,16, 28, 0.2, 3);
             INIT_HIST(2, couter_veto_hist, 4, 0, 4, 5, 0, 5);
-            INIT_HIST(3, adc_hist, 1200,0,1200, 50, 0, 2.5, 6, 0, 6);
-            INIT_HIST(3, temc, 150, -50, 150, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ttof, 150, -50, 150, 18, 0.2, 2.0, 5, 0, 5);
+            INIT_HIST(3, adc_hist, 500,0,500, 50, 0, 2.5, 6, 0, 6);
+            INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
+            INIT_HIST(3, ttof, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             is_check_veto = 1;
         }
     }

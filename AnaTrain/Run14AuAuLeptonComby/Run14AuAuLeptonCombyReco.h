@@ -30,6 +30,7 @@
 #include "TH3.h"
 #include "TF1.h"
 #include "TFile.h"
+#include "THmulf.h"
 #include "getClass.h"
 #include "TOAD.h"
 #include "UltraLight/UltraLight.h"
@@ -112,13 +113,16 @@ protected:
 
     float Walk[24768];
     float Walk2[24768];
+    float Walk3[24768];
+    float Walk4[24768];
+    float Walk5[24768];
     float T0Offset[24768];
     float T0OffsetSigma[24768];
     float SectorOffset[8];  
     TF1 *fafter;
     emcCalibrationDataHelper *fCDH;
     Fun4AllServer *se;
-    TH2D *Sector_Time_hist;
+    TH3D *tdc_adc_PbGl;
 
     int TRIGGERBIT;
     float BBC_VERTEX_CUT;
