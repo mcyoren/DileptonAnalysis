@@ -203,14 +203,14 @@ void NewHitAssociation(int par = 0)
             if(abs(dca00)<abs(dca0))dca0 = dca00;
         }
         */
-                    dca0 = newTrack1->GetDCAX2()+newTrack2->GetDCAX2();
-        const float dca1 = newTrack1->GetDCAY2()+newTrack2->GetDCAY2();
-        const float dca2 = newTrack1->GetDCAX2()-newTrack2->GetDCAX2();
-        const float dca3 = newTrack1->GetDCAY2()-newTrack2->GetDCAY2();
-        const float dca4 = newTrack1->GetDCAX2()/abs(newTrack1->GetDCAX2())*abs(newTrack1->GetDCA2())+newTrack2->GetDCAX2()/abs(newTrack2->GetDCAX2())*abs(newTrack2->GetDCA2());
-        const float dca5 = newTrack1->GetDCAY2()/abs(newTrack1->GetDCAY2())*abs(newTrack1->GetDCA2())+newTrack2->GetDCAY2()/abs(newTrack2->GetDCAY2())*abs(newTrack2->GetDCA2());
-        const float dca6 = newTrack1->GetDCAX2()/abs(newTrack1->GetDCAX2())*abs(newTrack1->GetDCA2())-newTrack2->GetDCAX2()/abs(newTrack2->GetDCAX2())*abs(newTrack2->GetDCA2());
-        const float dca7 = newTrack1->GetDCAY2()/abs(newTrack1->GetDCAY2())*abs(newTrack1->GetDCA2())-newTrack2->GetDCAY2()/abs(newTrack2->GetDCAY2())*abs(newTrack2->GetDCA2());
+                    dca0 = abs(newTrack1->GetDCAX2()+newTrack2->GetDCAX2());
+        const float dca1 = abs(newTrack1->GetDCAY2()+newTrack2->GetDCAY2());
+        const float dca2 = abs(newTrack1->GetDCAX2()-newTrack2->GetDCAX2());
+        const float dca3 = abs(newTrack1->GetDCAY2()-newTrack2->GetDCAY2());
+        const float dca4 = abs(newTrack1->GetDCAX2()/abs(newTrack1->GetDCAX2())*abs(newTrack1->GetDCA2())+newTrack2->GetDCAX2()/abs(newTrack2->GetDCAX2())*abs(newTrack2->GetDCA2()));
+        const float dca5 = abs(newTrack1->GetDCAY2()/abs(newTrack1->GetDCAY2())*abs(newTrack1->GetDCA2())+newTrack2->GetDCAY2()/abs(newTrack2->GetDCAY2())*abs(newTrack2->GetDCA2()));
+        const float dca6 = abs(newTrack1->GetDCAX2()/abs(newTrack1->GetDCAX2())*abs(newTrack1->GetDCA2())-newTrack2->GetDCAX2()/abs(newTrack2->GetDCAX2())*abs(newTrack2->GetDCA2()));
+        const float dca7 = abs(newTrack1->GetDCAY2()/abs(newTrack1->GetDCAY2())*abs(newTrack1->GetDCA2())-newTrack2->GetDCAY2()/abs(newTrack2->GetDCAY2())*abs(newTrack2->GetDCA2()));
         
         const float pair_pt = sqrt( (newTrack1->GetPx()+newTrack2->GetPx())*(newTrack1->GetPx()+newTrack2->GetPx())+(newTrack1->GetPy()+newTrack2->GetPy())*(newTrack1->GetPy()+newTrack2->GetPy()) );
 

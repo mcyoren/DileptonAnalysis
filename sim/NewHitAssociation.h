@@ -16,7 +16,7 @@
 #include "../AnaTrain/Run14AuAuLeptonComby/MyEvent.h"
 #include "MyEvent_OLD.h"
 
-const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/event_display/input/analysis_output_ccbar_pthat0.root", 
+const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/event_display/input/phi_ee_sim.root", 
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/analysis_output_ccbar_pthat0.root", 
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/merged_output_photon.root",
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/jpsi_sim.root",
