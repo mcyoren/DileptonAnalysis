@@ -270,16 +270,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
         if (mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
+        if ( fabs(mytrk->GetEmcTOF())>5) continue;
+        if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
-        if (  (mytrk->GetMinsDphi(0) > 0 && mytrk ->GetGhost() < 10) ||  mytrk ->GetGhost()==0 ) addit_reject = 1;
-        if ( mytrk ->GetGhost()==0 )
+        if (  mytrk ->GetGhost()==0 ||  mytrk->GetMinsDphi(0) > 0 ) addit_reject = 1;
+        if ( addit_reject == 1 &&  mytrk->GetMinsDphi(0) < 2 )
              addit_reject += 10;
         
         int hadron_reject = 0;
-        if ( mytrk->GetPtPrime() > 0.4 ) hadron_reject=10;
-        if ( fabs(mytrk->GetEmcTOF())<5) hadron_reject+=1;
-        if ( hadron_reject==11 && mytrk->GetDep()>0-mytrk->GetPtPrime() && mytrk->GetDep()<2+mytrk->GetPtPrime()  )  hadron_reject=100;
+        if ( (mytrk->GetN0()>5 && mytrk->GetPtPrime()<=0.3) || (mytrk->GetN0()>4 && mytrk->GetPtPrime()>0.3 && mytrk->GetPtPrime()<=0.5) ||
+             (mytrk->GetN0()>3 && mytrk->GetPtPrime()>0.5 && mytrk->GetPtPrime()<=0.9) || mytrk->GetPtPrime()>0.9 ) hadron_reject=1;
+        if ( mytrk->GetPtPrime() > 0.4) hadron_reject+=10;
+        if ( (mytrk->GetN0()>4 && mytrk->GetPtPrime() > 0.4 && mytrk->GetPtPrime()<=0.6 ) || (mytrk->GetN0()>3 && mytrk->GetPtPrime() > 0.6 )  )  hadron_reject=100;
         
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 

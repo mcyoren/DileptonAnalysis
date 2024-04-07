@@ -216,7 +216,7 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit();
                         const float theta_hit = vtxhit->GetTheHit();
 
-                        const float sigma = 2.0;
+                        float sigma = 2.0;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -242,7 +242,8 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if ( sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
+                        if (layer == 0) sigma = 5;
+                        if ( sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < 2)
                         {
                             if (diff < min[layer])
                             {
@@ -274,7 +275,7 @@ namespace MyDileptonAnalysis
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=2;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=4;
 
-                        if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
+                        if (fabs(sdthe) < 2 && SignTrack && is_fill_hsits)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
@@ -287,7 +288,7 @@ namespace MyDileptonAnalysis
                     } // enf of hit loop
                 }
             }
-            float min_chi2=100.;
+            float min_chi2=1000.;
             int final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
@@ -323,7 +324,7 @@ namespace MyDileptonAnalysis
             }
             chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
-            if(min_chi2<8)
+            if(min_chi2<800)
             {
                 mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000000-0.5), 0);
                 mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %100-0.5), 1);
