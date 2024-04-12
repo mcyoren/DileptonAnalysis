@@ -232,6 +232,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     fill_SVXHits_to_myevent(svxhitlist, event);
 
     event_container->Associate_Hits_to_Leptons();
+    if(fill_TTree) event_container->FillTree();
     event->ReshuffleElectrons();
     
     if(event->GetNtrack()<1 || (centrality < 20 && event->GetNtrack() < 1 ) ) return 0;
@@ -263,7 +264,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    if(fill_TTree) event_container->FillTree();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {

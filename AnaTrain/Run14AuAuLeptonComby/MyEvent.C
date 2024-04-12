@@ -887,7 +887,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(2, couter_veto_hist, 4, 0, 4, 5, 0, 5);
             INIT_HIST(3, adc_hist, 500,0,500, 50, 0, 2.5, 6, 0, 6);
             INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
-            INIT_HIST(3, ttof, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
+            INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);
             is_check_veto = 1;
         }
     }
@@ -900,7 +900,9 @@ namespace MyDileptonAnalysis
         || is_fill_reveal || is_fill_DCA2_hist||is_check_veto)
         {
             outfile->cd();
+            tree->Write();
             outfile->Write();
+            outfile->Map();
             outfile->Close();
         }
         std::cout << "Hists were written to My outfile" << std::endl;
