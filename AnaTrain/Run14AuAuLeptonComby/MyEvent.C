@@ -900,9 +900,7 @@ namespace MyDileptonAnalysis
         || is_fill_reveal || is_fill_DCA2_hist||is_check_veto)
         {
             outfile->cd();
-            tree->Write();
             outfile->Write();
-            outfile->Map();
             outfile->Close();
         }
         std::cout << "Hists were written to My outfile" << std::endl;

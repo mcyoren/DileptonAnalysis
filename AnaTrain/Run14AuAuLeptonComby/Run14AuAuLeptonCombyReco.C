@@ -220,7 +220,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             newElectron.SetEmcdz_e(particleCNT->get_emcsdz_e(itrk_reco));
             newElectron.SetEmcdphi_e(particleCNT->get_emcsdphi_e(itrk_reco));
             if(newElectron.GetPtPrime()>E_PT && newElectron.GetPtPrime()<MAX_PT) event->AddTrack(&newElectron);
-            else event->AddElecCand(&newElectron);
+            else if(do_reveal_hadron) event->AddElecCand(&newElectron);
             break;
         default:
             continue;
