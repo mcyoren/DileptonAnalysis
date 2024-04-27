@@ -182,6 +182,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     const int run_group_beamoffset = event->GetRunGroup(run_number);
     const int n_tracks = particleCNT->get_npart();
+    
     for (int itrk_reco = 0; itrk_reco < n_tracks; ++itrk_reco)
     {
         const int itype = applySingleTrackCut(particleCNT, itrk_reco, precise_z, centrality, run_number);
@@ -232,17 +233,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     fill_SVXHits_to_myevent(svxhitlist, event);
 
     event_container->Associate_Hits_to_Leptons();
-    if(fill_TTree) event_container->FillTree();
     event->ReshuffleElectrons();
     
-    if(event->GetNtrack()<1 || (centrality < 20 && event->GetNtrack() < 1 ) ) return 0;
-    
+    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 2 ) ) return 0;
+
     if(remove_hadron_hits) 
     {
         event_container->Associate_Hits_to_Hadrons();
     }
 
-    if(event->GetNtrack()<1 || (centrality < 20 && event->GetNtrack() < 1 ) ) return 0;
+    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 1 ) ) return 0;
     
     if(use_iden)
     {
@@ -264,6 +264,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
+    if(fill_TTree) event_container->FillTree();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {

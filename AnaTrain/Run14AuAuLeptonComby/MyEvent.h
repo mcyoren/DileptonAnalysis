@@ -764,7 +764,6 @@ namespace MyDileptonAnalysis
 
       private:
             MyEvent *event;
-            MyEvent ev;
             std::vector<MyDileptonAnalysis::MyEvent> EventList;
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
@@ -859,7 +858,7 @@ namespace MyDileptonAnalysis
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
             const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0);
             void ResetTree() {tree->Reset();};
-            void FillTree() {ev = *event;tree->Fill();};
+            void FillTree() {tree->Fill();};
             void WriteOutFile();
             void Associate_Hits_to_Leptons(bool test = false);
             void Associate_Hits_to_Hadrons();

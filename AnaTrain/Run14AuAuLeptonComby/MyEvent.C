@@ -216,7 +216,7 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit();
                         const float theta_hit = vtxhit->GetTheHit();
 
-                        float sigma = 2.0;
+                        float sigma = 5.0;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -243,7 +243,7 @@ namespace MyDileptonAnalysis
 
                         bool SignTrack = true;
                         if (layer == 0) sigma = 5;
-                        if ( sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < 2)
+                        if ( sdphi*mytrk->GetChargePrime()>-5 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < 5)
                         {
                             if (diff < min[layer])
                             {
@@ -324,7 +324,7 @@ namespace MyDileptonAnalysis
             }
             chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
-            if(min_chi2<800)
+            if(min_chi2<800000)
             {
                 mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000000-0.5), 0);
                 mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %100-0.5), 1);
@@ -625,7 +625,7 @@ namespace MyDileptonAnalysis
             if (do_reshuf)
             {
                 this->RemoveTrackEntry(itrk);
-                this->AddElecCand(&mytrk);
+                //this->AddElecCand(&mytrk);
                 n_electrons--;
                 itrk--;
                 continue;
@@ -817,7 +817,7 @@ namespace MyDileptonAnalysis
         if (fill_tree)
         {
             tree = new TTree("tree", "tree");
-            tree->Branch("MyEvent", &ev);
+            tree->Branch("MyEvent", event);
             is_fill_tree = 1;
         }
         if (fill_dphi)
