@@ -845,7 +845,7 @@ namespace MyDileptonAnalysis
 
             virtual ~MyEventContainer()
             {
-                  std::cout << "Straritng to Delete Event in my Container" << std::endl;
+                  std::cout << "Starting to Delete Event in my Container" << std::endl;
                   if(is_fill_tree||is_fill_hadron_hsits||is_fill_hsits||is_fill_dphi_hist||is_fill_DCA_hist||is_fill_track_QA
                   ||is_fill_reveal||is_fill_DCA2_hist||is_check_veto) {delete outfile;}
                   delete event;

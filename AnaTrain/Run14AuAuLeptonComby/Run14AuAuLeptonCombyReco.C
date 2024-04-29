@@ -242,7 +242,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Hadrons();
     }
 
-    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 1 ) ) return 0;
+    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 2 ) ) return 0;
     
     if(use_iden)
     {
