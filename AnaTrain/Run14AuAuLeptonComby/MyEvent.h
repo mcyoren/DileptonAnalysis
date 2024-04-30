@@ -38,35 +38,35 @@ namespace MyDileptonAnalysis
       {
 
       private:
-            int trkid;       // DC track index
-            int trkinfo;     // arm: 0 east, 1 west
-            int trk_quality; // side 0 south, 1 north
+            short trkid;       // DC track index
+            short trkinfo;     // arm: 0 east, 1 west
+            short trk_quality; // side 0 south, 1 north
                              // sector 0-7 with 0 being lowest west sector
 
             // basic parameters from tracking
-            int q;        // charge of the track
+            short q;        // charge of the track
             float pt;     // transverse momentum
             float phi_DC; // phi of track at 220 cm
             float z_DC;   // z poition of track at 220 cm (measured by PC1)
             float phi0;   // phi at interaction point - assuming track is primary
             float the0;   // dito but theta
             float alpha;  // alpha inclination at DC (total field bent = alpha + (phi_DC-phi0))
-            int arm;
-            int dcside;
-            int sect;
-            float qpt;
-            int n_hits;
+            short arm;
+            short dcside;
+            short sect;
+            //float qpt;
+            short n_hits;
 
             // Updated track parameters
 
-            int q_prime;
+            short q_prime;
             float phi0_prime;
             float the0_prime;
             float pt_prime;
             float alpha_prime;
 
             // EMCal variables
-            int emcid;     // EMC cluster
+            short emcid;     // EMC cluster
             int emctower;  // emctower = 1000*iy + 10*iz + sector
                            // EMC sector 0-4 from bottom of arm
                            // iy tower coordinates in rphi
@@ -85,57 +85,52 @@ namespace MyDileptonAnalysis
             // pc3 info
             float pc3sdphi;
             float pc3sdz;
-            // ERT information
-            int isERT; // indicates which ERT trigger fired
 
             float crkphi; // phi position of ring
             float crkz;   // z position of ring
 
             // MC variables
-            int mcid; // associated MC track
+            short mcid; // associated MC track
             
-            std::vector<float> dangle0,dangle1,dangle2,dangle3;
 
       public:
             MyTrack()
             {
-                  trkid = -99999; // max value of unsigned short
-                  trkinfo = -99999;
-                  trk_quality = -99999;
-                  arm = -99999;
-                  dcside = -99999;
-                  sect = -99999;
-                  emcid = -99999;
-                  emctower = -99999;
-                  isERT = -99999;
-                  mcid = -99999;
-                  q = -99999;
-                  qpt = -99999;
-                  q_prime = -99999;
-                  n_hits = -99999;
-                  pt = -99999;
-                  pt_prime = -99999;
-                  phi_DC = -99999;
-                  z_DC = -99999;
-                  phi0 = -99999;
-                  phi0_prime = -99999;
-                  the0 = -99999;
-                  the0_prime = -99999;
-                  alpha = -99999;
-                  alpha_prime = -99999;
-                  ecore = -99999;
-                  dep = -99999;
-                  prob = -99999;
-                  emcdz = -99999;
-                  emcdphi = -99999;
-                  emctof = -99999;
-                  tofe = -99999;
+                  trkid = -8888; // max value of unsigned short
+                  trkinfo = -8888;
+                  trk_quality = -8888;
+                  arm = -8888;
+                  dcside = -8888;
+                  sect = -8888;
+                  emcid = -8888;
+                  emctower = -8888;
+                  mcid = -8888;
+                  q = -8888;
+                  q_prime = -8888;
+                  n_hits = -8888;
+                  pt = -8888;
+                  pt_prime = -8888;
+                  phi_DC = -8888;
+                  z_DC = -8888;
+                  phi0 = -8888;
+                  phi0_prime = -8888;
+                  the0 = -8888;
+                  the0_prime = -8888;
+                  alpha = -8888;
+                  alpha_prime = -8888;
+                  ecore = -8888;
+                  dep = -8888;
+                  prob = -8888;
+                  emcdz = -8888;
+                  emcdphi = -8888;
+                  emctof = -8888;
+                  tofe = -8888;
                   tofdphi = -99990;
-                  tofdz = -99999;
-                  pc3sdphi = -99999;
-                  pc3sdz = -99999;
-                  crkphi = -99999;
-                  crkz = -99999;
+                  tofdz = -8888;
+                  pc3sdphi = -8888;
+                  pc3sdz = -8888;
+                  crkphi = -8888;
+                  crkz = -8888;
             };
 
             virtual ~MyTrack(){};
@@ -148,7 +143,7 @@ namespace MyDileptonAnalysis
             int GetSect() const { return sect; };
             float GetPx() const
             {
-                  if (pt == -99999)
+                  if (pt == -8888)
                   {
                         return pt;
                   }
@@ -159,7 +154,7 @@ namespace MyDileptonAnalysis
             };
             float GetPy() const
             {
-                  if (pt == -99999)
+                  if (pt == -8888)
                   {
                         return pt;
                   }
@@ -170,7 +165,7 @@ namespace MyDileptonAnalysis
             };
             float GetPz() const
             {
-                  if (pt == -99999)
+                  if (pt == -8888)
                   {
                         return pt;
                   }
@@ -181,7 +176,7 @@ namespace MyDileptonAnalysis
             };
             float GetPtot() const
             {
-                  if (pt == -99999)
+                  if (pt == -8888)
                   {
                         return pt;
                   }
@@ -218,7 +213,6 @@ namespace MyDileptonAnalysis
             float GetTOFDZ() const { return tofdz; };
             float GetPC3SDPHI() const { return pc3sdphi; };
             float GetPC3SDZ() const { return pc3sdz; };
-            int GetisERT() const { return isERT; };
             int GetMcId() const { return mcid; };
             float GetCrkphi() const { return crkphi; };
             float GetCrkz() const { return crkz; };
@@ -227,7 +221,6 @@ namespace MyDileptonAnalysis
             void SetTrkQuality(int strk_quality) { trk_quality = strk_quality; };
             void SetArm(int sarm) { arm = sarm; };
             void SetTrkInfo(int sarm, int sdcside, int ssect) { trkinfo = short(ssect + 10 * sdcside + 100 * sarm); };
-            void SetQpt(float spx, float spy, float scharge) { qpt = scharge * sqrt(spx * spx + spy * spy); };
             void SetDCSide(int sdcside) { dcside = sdcside; };
             void SetSect(int ssect) { sect = ssect; };
             void SetPt(float spt) { pt = spt; pt_prime = spt; };
@@ -255,7 +248,6 @@ namespace MyDileptonAnalysis
             void SetTOFDZ(float stofdz) { tofdz = stofdz; };
             void SetPC3SDPHI(float spc3sdphi) { pc3sdphi = spc3sdphi; };
             void SetPC3SDZ(float spc3sdz) { pc3sdz = spc3sdz; };
-            void SetisERT(int sisERT) { isERT = sisERT; };
             void SetMcId(int smcid) { mcid = smcid; };
             void SetCrkphi(float scrkphi) { crkphi = scrkphi; };
             void SetCrkz(float scrkz) { crkz = scrkz; };
@@ -302,6 +294,151 @@ namespace MyDileptonAnalysis
                   return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
             };
 
+            /// below defined virtual functions for ide to suggest based on inherentence in electron and hadron classes
+
+            virtual float GetChi2() const { return 0; };
+            virtual int GetN0() const { return 0; };
+            virtual int GetNpe0() const { return 0; };
+            virtual int GetDisp() const { return 0; };
+            virtual float GetEmcdz_e() const { return 0; };
+            virtual float GetEmcdphi_e() const { return 0; };
+
+            virtual void SetChi2(float schi2) { };
+            virtual void SetN0(int sn0) { };
+            virtual void SetNPE0(int snpe0) { };
+            virtual void SetDISP(int sdisp) { };
+            virtual void SetEmcdz_e(float semcdz) { };
+            virtual void SetEmcdphi_e(float semcdphi) { }
+
+            virtual void SetHitIndex(int iindex, int iilayer) { };
+            virtual void AddHitCounter(int iilayer) {  };
+            virtual void RemoveHitCounter(int iilayer) {  };
+            virtual void SetMinDist(float imindist, int iilayer) { };
+            virtual void SetGhost(int value) { };
+
+            virtual int GetHitIndex(int iilayer) { return 0; };
+            virtual int GetHitCounter(int iilayer) { return 0; };
+            virtual float GetMinDist(int iilayer) { return 0; };
+            virtual int GetGhost() { return 0; } 
+
+            ClassDef(MyTrack, 1)
+      };
+
+      class MyElectron : public MyTrack
+      {
+
+      private:
+            int n0;       // number of photo tubes in mask
+            float disp;
+            float npe0;
+            float chi2;
+
+            float emcdz_e;   // delta z of cluster and track projection
+            float emcdphi_e; // delta phi of cluster and track projection
+
+            int hit_index[4];
+            int hit_counter[4];
+            int isGhost;
+            float min_dist[4];
+            float min_dphi[4];
+            float min_dthe[4];
+            float min_sdphi[4];
+            float min_sdthe[4];
+            float DCA, DCA2;
+            float sDCA;
+            float DCA_X,DCA_X2;
+            float DCA_Y,DCA_Y2;
+            float true_pt;
+            // Wenching information
+            int isConv; // indicates is there Solution fro Wenqing algoritm
+            std::vector<float> dangle0,dangle1,dangle2,dangle3;
+
+      public:
+            MyElectron() : MyTrack()
+            {
+                  n0 = -8888; // max value for byte
+                  disp = -8888;
+                  chi2 = -8888;
+                  npe0 = -8888;
+                  emcdz_e = -8888;
+                  emcdphi_e = -8888;
+                  DCA = -8888;
+                  sDCA = -8888;
+                  DCA_X = -8888;
+                  DCA_Y = -8888;
+                  DCA2 = -8888;
+                  DCA_X2 = -8888;
+                  DCA_Y2 = -8888;
+                  true_pt = -8888;
+                  isConv=-8888;
+
+                  for (int iteri = 0; iteri < 4; iteri++)
+                  {
+                        hit_index[iteri] = -8888;
+                        hit_counter[iteri] = 0;
+                        min_dist[iteri] = 100.;
+                        min_dphi[iteri] = 100;
+                        min_dthe[iteri] = 100;
+                        min_sdphi[iteri] = 100;
+                        min_sdthe[iteri] = 100;
+                  }
+                  isGhost = 0;
+            };
+
+            virtual ~MyElectron(){};
+
+            float GetChi2() const { return chi2; };
+            int GetN0() const { return n0; };
+            int GetNpe0() const { return npe0; };
+            int GetDisp() const { return disp; };
+            float GetEmcdz_e() const { return emcdz_e; };
+            float GetEmcdphi_e() const { return emcdphi_e; };
+
+            void SetChi2(float schi2) { chi2 = schi2; };
+            void SetN0(int sn0) { n0 = sn0; };
+            void SetNPE0(int snpe0) { npe0 = snpe0; };
+            void SetDISP(int sdisp) { disp = sdisp; };
+            void SetEmcdz_e(float semcdz) { emcdz_e = semcdz; };
+            void SetEmcdphi_e(float semcdphi) { emcdphi_e = semcdphi; }
+
+            void SetHitIndex(int iindex, int iilayer) { hit_index[iilayer] = iindex; };
+            void AddHitCounter(int iilayer) { hit_counter[iilayer]++; };
+            void SetHitCounter(int iilayer, int value) { hit_counter[iilayer] = value; };
+            void RemoveHitCounter(int iilayer) { hit_counter[iilayer]--; };
+            void ZeroHitCounters() { for (int i = 0; i < 4; i++) hit_counter[i]=0; };
+            void SetMinDist(float imindist, int iilayer) { min_dist[iilayer] = imindist; };
+            void SetMinDphi(float imindist, int iilayer) { min_dphi[iilayer] = imindist; };
+            void SetMinDthe(float imindist, int iilayer) { min_dthe[iilayer] = imindist; };
+            void SetGhost(int value) { isGhost=value; };
+            void SetDCA(float value) {DCA = value;};
+            void SetsDCA(float value) {sDCA = value;};
+            void SetDCAX(float value) {DCA_X = value;};
+            void SetDCAY(float value) {DCA_Y = value;};
+            void SetDCA2(float value) {DCA2 = value;};
+            void SetDCAX2(float value) {DCA_X2 = value;};
+            void SetDCAY2(float value) {DCA_Y2 = value;};
+            void SetReconPT(float value) {true_pt = value;};
+            void SetMinsDphi(float imindist, int iilayer) { min_sdphi[iilayer] = imindist; };
+            void SetMinsDthe(float imindist, int iilayer) { min_sdthe[iilayer] = imindist; };
+            void SetIsConv(float value) {isConv = value;};
+
+            int GetHitIndex(int iilayer) { return hit_index[iilayer]; };
+            int GetHitCounter(int iilayer) { return hit_counter[iilayer]; };
+            float GetMinDist(int iilayer) { return min_dist[iilayer]; };
+            float GetMinDphi(int iilayer) { return min_dphi[iilayer]; };
+            float GetMinDthe(int iilayer) { return min_dthe[iilayer]; };
+            int GetGhost() { return isGhost; }
+            float GetDCA() {return DCA;};
+            float GetsDCA() {return sDCA;};
+            float GetDCAX() {return DCA_X;};
+            float GetDCAY() {return DCA_Y;};
+            float GetDCA2() {return DCA2;};
+            float GetDCAX2() {return DCA_X2;};
+            float GetDCAY2() {return DCA_Y2;};
+            float GetReconPT() {return true_pt;};
+            float GetMinsDphi(int iilayer) { return min_sdphi[iilayer]; };
+            float GetMinsDthe(int iilayer) { return min_sdthe[iilayer]; };
+            int GetIsConv() { return isConv; }
 
             void SetdPhidThe(int layer, float val1, float val2, float val3, float val4, float val5, float val6) 
             {
@@ -366,145 +503,6 @@ namespace MyDileptonAnalysis
                   return -999;
             };
 
-            /// below defined virtual functions for ide to suggest based on inherentence in electron and hadron classes
-
-            virtual float GetChi2() const { return 0; };
-            virtual int GetN0() const { return 0; };
-            virtual int GetNpe0() const { return 0; };
-            virtual int GetDisp() const { return 0; };
-            virtual float GetEmcdz_e() const { return 0; };
-            virtual float GetEmcdphi_e() const { return 0; };
-
-            virtual void SetChi2(float schi2) { };
-            virtual void SetN0(int sn0) { };
-            virtual void SetNPE0(int snpe0) { };
-            virtual void SetDISP(int sdisp) { };
-            virtual void SetEmcdz_e(float semcdz) { };
-            virtual void SetEmcdphi_e(float semcdphi) { }
-
-            virtual void SetHitIndex(int iindex, int iilayer) { };
-            virtual void AddHitCounter(int iilayer) {  };
-            virtual void RemoveHitCounter(int iilayer) {  };
-            virtual void SetMinDist(float imindist, int iilayer) { };
-            virtual void SetGhost(int value) { };
-
-            virtual int GetHitIndex(int iilayer) { return 0; };
-            virtual int GetHitCounter(int iilayer) { return 0; };
-            virtual float GetMinDist(int iilayer) { return 0; };
-            virtual int GetGhost() { return 0; } 
-
-            ClassDef(MyTrack, 1)
-      };
-
-      class MyElectron : public MyTrack
-      {
-
-      private:
-            int n0;       // number of photo tubes in mask
-            float disp;
-            float npe0;
-            float chi2;
-
-            float emcdz_e;   // delta z of cluster and track projection
-            float emcdphi_e; // delta phi of cluster and track projection
-
-            int hit_index[4];
-            int hit_counter[4];
-            int isGhost;
-            float min_dist[4];
-            float min_dphi[4];
-            float min_dthe[4];
-            float min_sdphi[4];
-            float min_sdthe[4];
-            float DCA, DCA2;
-            float sDCA;
-            float DCA_X,DCA_X2;
-            float DCA_Y,DCA_Y2;
-            float true_pt;
-
-      public:
-            MyElectron() : MyTrack()
-            {
-                  n0 = -99999; // max value for byte
-                  disp = -99999;
-                  chi2 = -99999;
-                  npe0 = -99999;
-                  emcdz_e = -99999;
-                  emcdphi_e = -99999;
-                  DCA = -99999;
-                  sDCA = -99999;
-                  DCA_X = -99999;
-                  DCA_Y = -99999;
-                  DCA2 = -99999;
-                  DCA_X2 = -99999;
-                  DCA_Y2 = -99999;
-                  true_pt = -99999;
-
-                  for (int iteri = 0; iteri < 4; iteri++)
-                  {
-                        hit_index[iteri] = -99999;
-                        hit_counter[iteri] = 0;
-                        min_dist[iteri] = 100.;
-                        min_dphi[iteri] = 100;
-                        min_dthe[iteri] = 100;
-                        min_sdphi[iteri] = 100;
-                        min_sdthe[iteri] = 100;
-                  }
-                  isGhost = 0;
-            };
-
-            virtual ~MyElectron(){};
-
-            float GetChi2() const { return chi2; };
-            int GetN0() const { return n0; };
-            int GetNpe0() const { return npe0; };
-            int GetDisp() const { return disp; };
-            float GetEmcdz_e() const { return emcdz_e; };
-            float GetEmcdphi_e() const { return emcdphi_e; };
-
-            void SetChi2(float schi2) { chi2 = schi2; };
-            void SetN0(int sn0) { n0 = sn0; };
-            void SetNPE0(int snpe0) { npe0 = snpe0; };
-            void SetDISP(int sdisp) { disp = sdisp; };
-            void SetEmcdz_e(float semcdz) { emcdz_e = semcdz; };
-            void SetEmcdphi_e(float semcdphi) { emcdphi_e = semcdphi; }
-
-            void SetHitIndex(int iindex, int iilayer) { hit_index[iilayer] = iindex; };
-            void AddHitCounter(int iilayer) { hit_counter[iilayer]++; };
-            void SetHitCounter(int iilayer, int value) { hit_counter[iilayer] = value; };
-            void RemoveHitCounter(int iilayer) { hit_counter[iilayer]--; };
-            void ZeroHitCounters() { for (int i = 0; i < 4; i++) hit_counter[i]=0; };
-            void SetMinDist(float imindist, int iilayer) { min_dist[iilayer] = imindist; };
-            void SetMinDphi(float imindist, int iilayer) { min_dphi[iilayer] = imindist; };
-            void SetMinDthe(float imindist, int iilayer) { min_dthe[iilayer] = imindist; };
-            void SetGhost(int value) { isGhost=value; };
-            void SetDCA(float value) {DCA = value;};
-            void SetsDCA(float value) {sDCA = value;};
-            void SetDCAX(float value) {DCA_X = value;};
-            void SetDCAY(float value) {DCA_Y = value;};
-            void SetDCA2(float value) {DCA2 = value;};
-            void SetDCAX2(float value) {DCA_X2 = value;};
-            void SetDCAY2(float value) {DCA_Y2 = value;};
-            void SetReconPT(float value) {true_pt = value;};
-            void SetMinsDphi(float imindist, int iilayer) { min_sdphi[iilayer] = imindist; };
-            void SetMinsDthe(float imindist, int iilayer) { min_sdthe[iilayer] = imindist; };
-
-            int GetHitIndex(int iilayer) { return hit_index[iilayer]; };
-            int GetHitCounter(int iilayer) { return hit_counter[iilayer]; };
-            float GetMinDist(int iilayer) { return min_dist[iilayer]; };
-            float GetMinDphi(int iilayer) { return min_dphi[iilayer]; };
-            float GetMinDthe(int iilayer) { return min_dthe[iilayer]; };
-            int GetGhost() { return isGhost; }
-            float GetDCA() {return DCA;};
-            float GetsDCA() {return sDCA;};
-            float GetDCAX() {return DCA_X;};
-            float GetDCAY() {return DCA_Y;};
-            float GetDCA2() {return DCA2;};
-            float GetDCAX2() {return DCA_X2;};
-            float GetDCAY2() {return DCA_Y2;};
-            float GetReconPT() {return true_pt;};
-            float GetMinsDphi(int iilayer) { return min_sdphi[iilayer]; };
-            float GetMinsDthe(int iilayer) { return min_sdthe[iilayer]; };
 
             ClassDef(MyElectron, 1)
       };
@@ -512,9 +510,9 @@ namespace MyDileptonAnalysis
       class MyHadron : public MyTrack
       {
       private:
-            int hit_index[4];
-            int hit_counter[4];
-            int isGhost;
+            short hit_index[4];
+            short hit_counter[4];
+            short isGhost;
             float min_dist[4];
 
       public:
@@ -522,7 +520,7 @@ namespace MyDileptonAnalysis
             {
                   for (int iteri = 0; iteri < 4; iteri++)
                   {
-                        hit_index[iteri] = -99999;
+                        hit_index[iteri] = -8888;
                         hit_counter[iteri] = 0;
                         min_dist[iteri] = 100.;
                   }
@@ -549,22 +547,20 @@ namespace MyDileptonAnalysis
       {
 
       private:
-            int clustid;
-            int layer;
+            unsigned int clustid; // = layer + ilayr*10 + sensor*100 + ladder * 1000 + clustid*100000 /// max  = 4,294,967,295 => clustid_max = 42949
+            /*int layer;
             int ladder;
-            int sensor;
+            int sensor;*/
 
             float xhit; // xyz position of cluster [cm]
             float yhit;
             float zhit;
 
-            float rhit;
+            /*float rhit;
             float phihit;
-            float thetahit;
+            float thetahit;*/
 
-            short ilayer;
-
-            float adc[4];
+            //short ilayer;
 
             std::map<int, float> associated_tracks;
             //std::vector<double> dangle1;
@@ -572,41 +568,28 @@ namespace MyDileptonAnalysis
       public:
             MyVTXHit()
             {
-                  clustid = -99999;
-                  layer = -99999;
-                  ladder = -8888;
-                  sensor = -99999;
+                  clustid = 0;
 
-                  xhit = -99999;
-                  yhit = -99999;
-                  zhit = -99999;
+                  xhit = -8888;
+                  yhit = -8888;
+                  zhit = -8888;
 
-                  rhit = -8888;
-                  phihit = -8888;
-                  thetahit = -8888;
-
-                  ilayer = -8888;
-                  adc[0]=-9999;
-                  adc[1]=-9999;
-                  adc[2]=-9999;
-                  adc[3]=-9999;
             };
             virtual ~MyVTXHit(){};
 
-            int GetClustId() const { return clustid; };
-            int GetLayer() const { return layer; };
-            int GetLadder() const { return ladder; };
-            int GetSensor() const { return sensor; };
+            int GetClustId() const { return clustid/100000; };
+            int GetLayer() const { return clustid%10; };
+            int GetiLayer() const { return clustid/10%10; };
+            int GetSensor() const { return clustid/100%10; };
+            int GetLadder() const { return clustid/1000%100; };
 
             float GetXHit() const { return xhit; };
             float GetYHit() const { return yhit; };
             float GetZHit() const { return zhit; };
 
-            float GetRHit() const { return rhit; };
-            float GetPhiHit() const { return phihit; };
-            float GetTheHit() const { return thetahit; };
+            float GetPhiHit(const float xvtx=0, const float yvtx=0, const float zvtx=0) const;
+            float GetTheHit(const float xvtx=0, const float yvtx=0, const float zvtx=0) const;
 
-            short GetiLayer() const { return ilayer; };
 
             float GetPhi() const
             {
@@ -616,16 +599,19 @@ namespace MyDileptonAnalysis
                   return phi;
             };
 
-            void SetClustId(int sclustid) { clustid = sclustid; };
-            void SetLayer(int slayer) { layer = slayer; };
-            void SetLadder(int sladder) { ladder = sladder; };
-            void SetSensor(int ssensor) { sensor = ssensor; };
+            void SetClustId(int sclustid) { clustid = clustid - (clustid/100000)*100000 + sclustid*100000; };
+            void SetLayer (int slayer) { clustid = clustid - clustid%10 + slayer; };
+            void SetiLayer (int silayer) { clustid = clustid - (clustid/10%10)*10 + silayer*10;};
+            void SetSensor(int ssensor) { clustid = clustid - (clustid/100%10)*100 + ssensor*100; };
+            void SetLadder(int sladder) { clustid = clustid - (clustid/1000%100)*1000 + sladder*1000; };
 
-            void SetXHit(float sx) { xhit = sx; };
-            void SetYHit(float sy) { yhit = sy; };
-            void SetZHit(float sz) { zhit = sz; };
+            void SetXHit(float value) { xhit=value; };
+            void SetYHit(float value) { yhit=value; };
+            void SetZHit(float value) { zhit=value; };
 
-            void SetPolars(const float xvtx = 0, const float yvtx = 0, const float zvtx = 0);
+
+            /*void SetPolars(const float xhit = 0, const float yhit = 0, const float zhit = 0, 
+                           const float xvtx = 0, const float yvtx = 0, const float zvtx = 0);*/
             void SetiLayerFromR();
 
             void AddAssociatedTrack(int trackID, float dist) { associated_tracks[trackID] = dist; };
@@ -641,10 +627,6 @@ namespace MyDileptonAnalysis
             };
             float GetAssociatedTrackDistance(int itrackid) { return associated_tracks[itrackid]; };
             void DeleteAssociatedTrack(int itrackid) { associated_tracks.erase(itrackid); };
-
-            void SetAdc(int layer, float adc1, float adc2){if(layer>1) {adc[layer*2-4]=adc1;adc[layer*2-3]=adc2;}};
-            float GetAdc1(int layer){if (layer>1) return adc[layer*2-4]; else return -9999;}
-            float GetAdc2(int layer){if (layer>1) return adc[layer*2-3]; else return -9999;}
 
             ClassDef(MyVTXHit, 1)
       };
@@ -729,7 +711,7 @@ namespace MyDileptonAnalysis
             void SetPreciseZ(float sPreciseZ) { preciseZ = sPreciseZ; };
             float GetPreciseZ() { return preciseZ; };
 
-            int GetRunGroup(int in_run_number);
+            int GetRunGroup(int in_run_number) const;
 
             void AddTrack(const MyElectron *newTrack) { TrackList.push_back(*newTrack); };
             void AddHadron(const MyHadron *newTrack) { HadronList.push_back(*newTrack); };

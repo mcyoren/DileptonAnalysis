@@ -191,7 +191,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         switch (itype)
         {
         case 0:
-            if(remove_hadron_hits||do_track_QA){
+            if(do_track_QA){
                 set_track(&newHadron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
                 event->AddHadron(&newHadron);
             }
@@ -207,7 +207,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 set_track(&newElectron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
                 event->AddElecCand(&newElectron);
             }
-            if(remove_hadron_hits||do_track_QA){
+            if(do_track_QA){
                 set_track(&newHadron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
                 event->AddHadron(&newHadron);
             }
@@ -237,7 +237,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     
     if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 2 ) ) return 0;
 
-    if(remove_hadron_hits) 
+    if(remove_hadron_hits && 1==0 ) 
     {
         event_container->Associate_Hits_to_Hadrons();
     }
@@ -257,6 +257,17 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(!emc) continue;
 	            mytrk->SetEmcTOF(emc->tofcorr());  
             } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
+        }
+        int n_hadrons = event->GetNhadron();
+        for (int itrk = 0; itrk < n_hadrons; itrk++)
+        {
+            MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
+            if(mytrk->GetEmcId()>=0) 
+            {
+                emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
+                if(!emc) continue;
+	            mytrk->SetEmcTOF(emc->tofcorr());  
+            } 
         }
     }
 
@@ -378,7 +389,7 @@ int Run14AuAuLeptonCombyReco::applySingleTrackCut(const PHCentralTrack *d_trk, c
     if (MAX_PT > -99 && pT >= MAX_PT*1.05 &&  rich_phi<-99)
         return 0;
         
-    if (dep < -2 && ecore < 0.3 && d_trk->get_n0(itrk)<0 && rich_phi<-99)
+    if (dep < -2 && ecore < 0.3 && d_trk->get_n0(itrk)<0 /*&& rich_phi<-99*/)
         return 1;
 
     if(rich_phi>-99 && ((E_PT > -99 && pT <= E_PT*0.8) || (!pass_quality0 && !pass_quality1 && !pass_quality2) ||
@@ -493,9 +504,13 @@ void Run14AuAuLeptonCombyReco::fill_SVXHits_to_myevent(const SvxClusterList *svx
         newHit.SetXHit(svxhit->get_xyz_global(0));
         newHit.SetYHit(svxhit->get_xyz_global(1));
         newHit.SetZHit(svxhit->get_xyz_global(2));
-        newHit.SetPolars(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
         newHit.SetiLayerFromR();
-        newHit.SetAdc(svxhit->get_layer(),svxhit->get_adc(0),svxhit->get_adc(1));
+        if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()||
+        svxhit->get_sensor()!=newHit.GetSensor()) 
+        {
+            std::cout<<" smth is wrong "<<std::endl;
+            continue;
+        }
         event->AddVTXHit(&newHit);
     }
 }

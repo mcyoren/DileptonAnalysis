@@ -54,19 +54,29 @@ namespace MyDileptonAnalysis
         this->SetThe0Prime(new_the0 - theta_offset);
     }
 
-    void MyVTXHit::SetPolars(const float xvtx, const float yvtx, const float zvtx)
+    float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) const
     {
-        rhit = sqrt(xhit * xhit + yhit * yhit);
-        TVector3 hitpoint;
-        hitpoint.SetXYZ(xhit - xvtx, yhit - yvtx, zhit - zvtx);
-        phihit = hitpoint.Phi();
+        TVector2 hitpoint;
+        hitpoint.Set(xhit - xvtx, yhit - yvtx);
+        float phihit = hitpoint.Phi();
         if (phihit < -TMath::Pi() / 2)
             phihit += 2 * TMath::Pi();
-        thetahit = hitpoint.Theta();
+        return phihit;
+    }
+
+    float MyVTXHit::GetTheHit(const float xvtx, const float yvtx, const float zvtx) const
+    {
+        TVector3 hitpoint;
+        hitpoint.SetXYZ(xhit - xvtx, yhit - yvtx, zhit - zvtx);
+        const float thetahit = hitpoint.Theta();
+        return thetahit;
     }
 
     void MyVTXHit::SetiLayerFromR()
     {
+        const int layer = this->GetLayer();
+        const float rhit = sqrt(xhit * xhit + yhit * yhit);
+        int ilayer = 0;
         if (layer == 0 || layer == 1)
             ilayer = layer;
         else if (rhit > 10.20 && rhit < 10.70)
@@ -83,6 +93,7 @@ namespace MyDileptonAnalysis
             ilayer = 7;
         else
             ilayer = -7777;
+        this->SetiLayer(ilayer);
     }
 
     void MyEventContainer::Associate_Hits_to_Leptons(bool test)
@@ -151,15 +162,10 @@ namespace MyDileptonAnalysis
                 rp += step_size;
             }
             const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
-            const float quality = mytrk->GetTrkQuality();
-            if (quality == 63 || quality == 31 || quality == 51)
-                mytrk->SetisERT(1);
-            else
-                mytrk->SetisERT(0);
 
             float min[nvtx_layers] = {100, 100, 100, 100};
             
-            std::vector<int> numbers[4];
+            std::vector<long> numbers[4];
             int iter_nums[4] = {0,0,0,0};
 
             for (int iter_layer = 3; iter_layer >= 0; iter_layer--)
@@ -213,8 +219,8 @@ namespace MyDileptonAnalysis
                         if (ilayer < 0)
                             continue;
 
-                        const float phi_hit = vtxhit->GetPhiHit();
-                        const float theta_hit = vtxhit->GetTheHit();
+                        const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
                         float sigma = 5.0;
 
@@ -259,11 +265,12 @@ namespace MyDileptonAnalysis
                             mytrk->AddHitCounter(layer);
                             mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
                             iter_nums[layer]++;
+                            if((iter_nums[layer]>99&&layer>2)||iter_nums[layer]>999) std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
                             if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
                             if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*100  );
                             if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
                             if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[3][iassociatedhit-mytrk->GetHitCounter(2)]);
-                            if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*1000000+numbers[1][iassociatedhit]);
+                            if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*10000000+numbers[1][iassociatedhit]);
 
                         } // end of association
                         else
@@ -288,14 +295,14 @@ namespace MyDileptonAnalysis
                     } // enf of hit loop
                 }
             }
-            float min_chi2=1000.;
+            float min_chi2=1000000.;
             int final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 float chi2 = 0;
                 float recon_pt = 0;
-                const int inum1 = numbers[0][inum] / 1000000-1;
-                const int inum2 = numbers[0][inum] / 10000 %100-1;
+                const int inum1 = numbers[0][inum] / 10000000-1;
+                const int inum2 = numbers[0][inum] / 10000 %1000-1;
                 const int inum3 = numbers[0][inum] / 100 %100-1;
                 const int inum4 = numbers[0][inum] %100-1;
 
@@ -326,13 +333,13 @@ namespace MyDileptonAnalysis
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
-                mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/1000000-0.5), 0);
-                mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %100-0.5), 1);
+                mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/10000000-0.5), 0);
+                mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %1000-0.5), 1);
                 if (final_number/100 %100>0) {mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5 ), 2);mytrk->SetHitCounter(2,1);}
                 if (final_number%100>0) {mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);mytrk->SetHitCounter(3,1);}
                 mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
-                mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/1000000-0.5) * mytrk->GetChargePrime(), 0);
-                mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/1000000-0.5) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
                 //if (mytrk->GetHitCounter(3)>0)  mytrk->SetDCA2(3);
                 //if (mytrk->GetHitCounter(2)>0)  mytrk->SetDCA2(2);
 
@@ -405,11 +412,6 @@ namespace MyDileptonAnalysis
                 rp += step_size;
             }
             const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
-            const float quality = mytrk->GetTrkQuality();
-            if (quality == 63 || quality == 31 || quality == 51)
-                mytrk->SetisERT(1);
-            else
-                mytrk->SetisERT(0);
 
             float min[nvtx_layers] = {100, 100, 100, 100};
             for (int ihit = 0; ihit < nvtxhits; ihit++)
@@ -425,8 +427,8 @@ namespace MyDileptonAnalysis
                 if (ilayer < 0)
                     continue;
 
-                const float phi_hit = vtxhit->GetPhiHit();
-                const float theta_hit = vtxhit->GetTheHit();
+                const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
                 const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                 const float dthe = (dilep_the_projection[ilayer] - theta_hit);
@@ -463,7 +465,7 @@ namespace MyDileptonAnalysis
                             }
                             else
                             {
-                                if (CompetitorTrack->GetHitCounter(layer) == 1 && mytrk->GetisERT() <= CompetitorTrack->GetisERT())
+                                if (CompetitorTrack->GetHitCounter(layer) == 1 )
                                 {
                                     SignTrack = false; // maybe delete
                                 }
@@ -525,7 +527,7 @@ namespace MyDileptonAnalysis
         ElecCandList.clear();
     }
 
-    int MyEvent::GetRunGroup(int in_run_number)
+    int MyEvent::GetRunGroup(int in_run_number) const
     {
         for (int irun = 0; irun < N_rg_beam_offset; irun++)
         {
@@ -660,15 +662,9 @@ namespace MyDileptonAnalysis
 
                 MyDileptonAnalysis::MyVTXHit *hit_orig = event->GetVTXHitEntry(id_hit);
 
-                const float phi_orig = hit_orig->GetPhiHit();
-                const float the_orig = hit_orig->GetTheHit();
+                const float phi_orig = hit_orig->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                 
-                if(ilayer>1) 
-                {
-                    adc_hist->Fill(hit_orig->GetAdc1(ilayer),pt, (ilayer-2)*3+0);
-                    adc_hist->Fill(hit_orig->GetAdc2(ilayer),pt, (ilayer-2)*3+1);
-                    adc_hist->Fill(hit_orig->GetAdc1(ilayer)+hit_orig->GetAdc2(ilayer),pt, (ilayer-2)*3+2);
-                }
 
                 const int nvtxhits = event->GetNVTXhit();
 
@@ -681,8 +677,8 @@ namespace MyDileptonAnalysis
                     int layer = vtxhit->GetLayer()-1;
                     if(layer<0) layer=0;
 
-                    const float phi_hit = vtxhit->GetPhiHit();
-                    const float theta_hit = vtxhit->GetTheHit();
+                    const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                    const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
                     const float dphi = (phi_hit - phi_orig);
                     const float dthe = (theta_hit - the_orig);
