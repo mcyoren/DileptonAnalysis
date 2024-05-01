@@ -42,13 +42,21 @@
 
 #include "recoConsts.h"
 
+#include "RpSumXYObject.h"
+#include "RpSnglSumXY.h"
+#include "RpConst.h"
+#include "ReactionPlaneObject.h"
+#include "ReactionPlaneSngl.h"
+
 #include "MyEvent.h"
+#include "Reconstruction.h"
 #include "SvxClusterList.h"
 #include "SvxCluster.h"
 #include <TMath.h>
 #include "VtxOut.h"
 #include "TVector3.h"
 #include "PHPoint.h"
+#include "TLorentzVector.h"
 
 #include <iostream>
 #include <fstream>
@@ -62,7 +70,7 @@
 class Run14AuAuLeptonCombyReco : public SubsysReco
 {
 public:
-    Run14AuAuLeptonCombyReco(const char *outfile = "test.root");
+    Run14AuAuLeptonCombyReco(const char *outfile = "test.root", const char *lookup_file = "/afs/rhic.bnl.gov/phenix/PHENIX_LIB/sys/x8664_sl7/taxi_large/share/PhotonConversionAnalysis/lookup_3D_one_phi.root");
     virtual ~Run14AuAuLeptonCombyReco();
 
     int Init(PHCompositeNode *topNode);
@@ -93,11 +101,14 @@ private:
     void MoonWalk();
     void Walking(PHCompositeNode *topNode);
     void StopWalking();
+    int Solution(MyDileptonAnalysis::MyTrack* mytrk1, MyDileptonAnalysis::MyTrack* mytrk2, 
+                  MyDileptonAnalysis::Reconstruction* reco, float zVtx);
 
 
 protected:
     UltraLight *ul;
     MyDileptonAnalysis::MyEventContainer *event_container;
+    MyDileptonAnalysis::Reconstruction reco;
 
     int remove_hadron_hits, fill_QA_hadron_hists, fill_QA_lepton_hists, fill_TTree, fill_d_dphi_hists, 
         fill_DCA_hists, use_iden, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto;

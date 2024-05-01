@@ -370,7 +370,7 @@ namespace MyDileptonAnalysis
                   DCA_X2 = -8888;
                   DCA_Y2 = -8888;
                   true_pt = -8888;
-                  isConv=-8888;
+                  isConv=0;
 
                   for (int iteri = 0; iteri < 4; iteri++)
                   {
@@ -420,7 +420,7 @@ namespace MyDileptonAnalysis
             void SetReconPT(float value) {true_pt = value;};
             void SetMinsDphi(float imindist, int iilayer) { min_sdphi[iilayer] = imindist; };
             void SetMinsDthe(float imindist, int iilayer) { min_sdthe[iilayer] = imindist; };
-            void SetIsConv(float value) {isConv = value;};
+            void SetIsConv(int value) {isConv = value;};
 
             int GetHitIndex(int iilayer) { return hit_index[iilayer]; };
             int GetHitCounter(int iilayer) { return hit_counter[iilayer]; };
@@ -631,6 +631,50 @@ namespace MyDileptonAnalysis
             ClassDef(MyVTXHit, 1)
       };
 
+      class MyPair
+      {
+      private:
+            float phi_e;
+            float phi_p;
+            float theta_e;
+            float theta_p;
+            float r_pair;
+
+            UShort_t id_e;
+            UShort_t id_p;
+
+      public:
+            MyPair()
+            {
+                  phi_e = -8888;
+                  phi_p = -8888;
+                  theta_e = -8888;
+                  theta_p = -8888;
+                  r_pair = -8888;
+                  id_e = -8888;
+                  id_p = -8888;
+            };
+            virtual ~MyPair(){};
+
+            float GetPhiElectron() const { return phi_e; }
+            float GetPhiPositron() const { return phi_p; }
+            float GetThetaElectron() const { return theta_e; }
+            float GetThetaPositron() const { return theta_p; }
+            float GetRPair() const { return r_pair; }
+            float GetIDElectron() const { return id_e; }
+            float GetIDPositron() const { return id_p; }
+
+            void SetPhiElectron(float sphi_e) { phi_e = sphi_e; }
+            void SetPhiPositron(float sphi_p) { phi_p = sphi_p; }
+            void SetThetaElectron(float stheta_e) { theta_e = stheta_e; }
+            void SetThetaPositron(float stheta_p) { theta_p = stheta_p; }
+            void SetRPair(float sr_pair) { r_pair = sr_pair; }
+            void SetIDElectron(int sid_e) { id_e = sid_e; }
+            void SetIDPositron(int sid_p) { id_p = sid_p; }
+
+            ClassDef(MyPair, 1)
+      };
+
       class MyEvent : public TObject
       {
 
@@ -647,6 +691,10 @@ namespace MyDileptonAnalysis
             float preciseY;
             float preciseZ;
             float run_number;
+            float psi2_BBC; // BBC (2nd and 3rd)
+            float psi3_BBC;
+            float psi2_FVTXA0; // FVTXA0
+            float psi3_FVTXA0;
 
             std::vector<MyDileptonAnalysis::MyElectron> TrackList;
             std::vector<MyDileptonAnalysis::MyHadron> HadronList;
@@ -669,6 +717,11 @@ namespace MyDileptonAnalysis
                   preciseY = -999;
                   preciseZ = -999;
                   run_number = -999;
+
+                  psi2_BBC    = -999;
+                  psi3_BBC    = -999;
+                  psi2_FVTXA0    = -999;
+                  psi3_FVTXA0    = -999;
             };
 
             virtual ~MyEvent(){};
@@ -710,6 +763,18 @@ namespace MyDileptonAnalysis
 
             void SetPreciseZ(float sPreciseZ) { preciseZ = sPreciseZ; };
             float GetPreciseZ() { return preciseZ; };
+
+            void SetPsi2BBC(float spsi2_BBC) { psi2_BBC = spsi2_BBC; };
+            float GetPsi2BBC() { return psi2_BBC; };
+
+            void SetPsi3BBC(float spsi3_BBC) { psi3_BBC = spsi3_BBC; };
+            float GetPsi3BBC() { return psi3_BBC; };
+
+            void SetPsi2FVTXA0(float spsi2_FVTXA0) { psi2_FVTXA0 = spsi2_FVTXA0; };
+            float GetPsi2FVTXA0() { return psi2_FVTXA0; };
+
+            void SetPsi3FVTXA0(float spsi3_FVTXA0) { psi3_FVTXA0 = spsi3_FVTXA0; };
+            float GetPsi3FVTXA0() { return psi3_FVTXA0; };
 
             int GetRunGroup(int in_run_number) const;
 

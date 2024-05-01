@@ -11,12 +11,14 @@ dist_mydata_DATA = \
 
 lib_LTLIBRARIES = \
   libRun14AuAuLeptonEvent.la \
+  libRun14AuAuLeptonConvReco.la \
   libRun14AuAuLeptonComby.la 
 
 noinst_HEADERS = \
   MyEventLinkDef.h \
   MyEvent.h \
   MyEventConstants.h \
+  ReconstructionLinkDef.h \
   Run14AuAuLeptonCombyLinkDef.h
 
 include_HEADERS = \
@@ -25,11 +27,16 @@ include_HEADERS = \
   Run14AuAuLeptonCombyReco.h \
   Declarations.h \
   Run14AuAuLeptonCombyHistos.h \
+  Reconstruction.h \
   Run14AuAuLeptonCombyCutter.h 
 
 libRun14AuAuLeptonEvent_la_SOURCES = \
   MyEvent.C \
   MyEvent_Dict.C
+
+libRun14AuAuLeptonConvReco_la_SOURCES = \
+  Reconstruction.cpp \
+  Reconstruction_Dict.C
 
 libRun14AuAuLeptonComby_la_SOURCES = \
   Run14AuAuLeptonCombyReco.C \
@@ -41,6 +48,9 @@ libRun14AuAuLeptonComby_la_SOURCES = \
 
 libRun14AuAuLeptonEvent_la_LIBADD = \
 $(ROOT_LIBS)  
+
+libRun14AuAuLeptonConvReco_la_LIBADD = \
+$(ROOT_LIBS)
 
 libRun14AuAuLeptonComby_la_LIBADD = \
   -L$(libdir) \
@@ -58,6 +68,12 @@ MyEvent_Dict.C: \
   MyEventConstants.h \
   MyEventLinkDef.h 
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
+
+# Rule for generating CINT dictionaries from class headers.                                                                                                                                     
+Reconstruction_Dict.C: \
+  Reconstruction.h \
+  ReconstructionLinkDef.h
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(AM_CPPFLAGS) $^
 
 # Rule for generating CINT dictionaries from class headers.
 Run14AuAuLeptonComby_Dict.C: \

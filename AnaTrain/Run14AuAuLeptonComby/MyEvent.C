@@ -10,6 +10,7 @@ ClassImp(MyDileptonAnalysis::MyTrack)
 ClassImp(MyDileptonAnalysis::MyElectron)
 ClassImp(MyDileptonAnalysis::MyHadron)
 ClassImp(MyDileptonAnalysis::MyVTXHit)
+ClassImp(MyDileptonAnalysis::MyPair)
 
 using namespace MyDileptonAnalysis;
 using namespace std;

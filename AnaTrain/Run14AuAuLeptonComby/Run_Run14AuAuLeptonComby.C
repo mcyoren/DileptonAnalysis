@@ -1,15 +1,22 @@
 void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     gSystem->Load("libRun14AuAuLeptonEvent.so");
+    gSystem->Load("libRun14AuAuLeptonConvReco.so");
     gSystem->Load("libRun14AuAuLeptonComby.so");  
     gSystem->Load("libTOAD");  
+    gSystem->Load("libRPCalibRun.so");
     gSystem->Load("libUltraLight");  
     gSystem->Load("libCabanaBoy");
     
+    TOAD toad_loader("PhotonConversionAnalysis");
+    toad_loader.SetVerbosity(4);
+    string lookupfile_location = toad_loader.location("lookup_3D_one_phi.root");
+    std::cout<<"lookup_3D_one_phi.root is located at "<<lookupfile_location.c_str()<<std::endl;
+
     recoConsts *reco_consts =  recoConsts::instance();
-    reco_consts->set_IntFlag("Remove_hadron_hits", 0);
+    reco_consts->set_IntFlag("Remove_hadron_hits", 1);
     reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
     reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
-    reco_consts->set_IntFlag("Fill_TTree", 0);
+    reco_consts->set_IntFlag("Fill_TTree", 1);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
     reco_consts->set_IntFlag("Use_ident", 1);
@@ -18,7 +25,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     reco_consts->set_IntFlag("Fill_true_DCA", 1);
     reco_consts->set_IntFlag("Check_Veto", 1);
        
-    SubsysReco *reco = new Run14AuAuLeptonCombyReco(outFile);
+    SubsysReco *reco = new Run14AuAuLeptonCombyReco(outFile, lookupfile_location.c_str());
 
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
@@ -61,6 +68,12 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
 
     se->registerSubsystem(mr);
 
+    RPReadCalibTree *readT = new RPReadCalibTree();
+    readT->setTreeFileRecent("RP_recent_run14pro106_newcent_merge.root");
+    readT->setTreeFileFlat("RP_flat_run14pro106_newcent_merge.root");
+    readT->setTOADname("hachiya/15.08");	
+    se->registerSubsystem(readT);
+
     se->registerSubsystem(reco);
     se->registerSubsystem(cb);
 }
@@ -71,7 +84,7 @@ void InputData(vector<string> &indata) {
   //indata.push_back("PWG");
   indata.push_back("CNT");
   indata.push_back("DST_SVX");
- // indata.push_back("DST_EVE");
+  indata.push_back("DST_EVE");
   return;
 }
 

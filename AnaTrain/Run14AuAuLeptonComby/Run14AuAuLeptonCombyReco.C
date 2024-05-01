@@ -2,7 +2,8 @@
 #include "Run14AuAuLeptonCombyReco.h"
 
 
-Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile)
+Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const char *lookup_file) : 
+    SubsysReco("Run14AuAuLeptonCombyReco"), reco(lookup_file)
 {
     InitParams();
     MoonWalk();
@@ -115,6 +116,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         findNode::getClass<VtxOut>(TopNode, "VtxOut");
     const emcClusterContainer* emccont =
         findNode::getClass<emcClusterContainer>(TopNode, "emcClusterContainer");
+    const ReactionPlaneObject* rpobject = 
+        findNode::getClass<ReactionPlaneObject>(TopNode, "ReactionPlaneObject");
 
     if (!globalCNT)
         std::cout << "NO GLOBAL!!!!!!!!!!!!!!!\n";
@@ -130,6 +133,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         std::cout << "NO vtxout!!!!!!!!!!!!!!!\n";
     if (!emccont)
         std::cout << "NO emcClusterContainer!!!!!!!!!!!!!!!\n";
+    if (!rpobject)
+        std::cout << "NO ReactionPlaneObject!!!!!!!!!!!!!!!\n";
 
     const int run_number = runHDR->get_RunNumber();
     int run_group = get_rungroup(run_number) - 1;
@@ -179,6 +184,26 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     event->SetBBCcharge(bbcq);
     event->SetVtxZ(bbc_vertex);
     event->SetBBCtimeN(bbcT0);
+
+     // BBC sum
+    ReactionPlaneSngl *rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1));
+    float psi2_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
+
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 2));
+    float psi3_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
+
+    event->SetPsi2BBC(psi2_BBC);
+    event->SetPsi3BBC(psi3_BBC);
+
+    // FVTX, all sectors w/ eta>1.0
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 1));
+    float psi2_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : -9999;
+
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 2));
+    float psi3_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : -9999;
+
+    event->SetPsi2FVTXA0(psi2_FVTXA0);
+    event->SetPsi3FVTXA0(psi3_FVTXA0);
 
     const int run_group_beamoffset = event->GetRunGroup(run_number);
     const int n_tracks = particleCNT->get_npart();
@@ -257,6 +282,21 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(!emc) continue;
 	            mytrk->SetEmcTOF(emc->tofcorr());  
             } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
+            for (int jtrk = itrk+1; jtrk < n_electrons; jtrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
+                if(mytrk2->GetChargePrime()!=mytrk->GetChargePrime())
+                {
+                    std::cout<<"kek"<<std::endl;
+                    const int solut =  Solution(mytrk,mytrk2,&reco,precise_z);
+                    std::cout<<solut<<std::endl;
+                    if(solut>0)
+                    {
+                        mytrk ->SetIsConv(solut);
+                        mytrk2->SetIsConv(solut);
+                    }
+                }
+            }
         }
         int n_hadrons = event->GetNhadron();
         for (int itrk = 0; itrk < n_hadrons; itrk++)
@@ -296,6 +336,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() > 0.4) hadron_reject+=10;
         if ( (mytrk->GetN0()>4 && mytrk->GetPtPrime() > 0.4 && mytrk->GetPtPrime()<=0.6 ) || (mytrk->GetN0()>3 && mytrk->GetPtPrime() > 0.6 )  )  hadron_reject=100;
         
+        if(mytrk->GetIsConv()>0) std::cout<<"opa nihua "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
+        <<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
+
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 
         UltraLightTrack ult("Run14AuAuLeptonComby Track",
@@ -544,4 +587,98 @@ const std::string Run14AuAuLeptonCombyReco::GetFilePath()
     const std::string loc = toad.location("field_map.root");
 
     return loc;
+}
+
+static double getPhiv(double px_e, double py_e, double pz_e, double px_p, double py_p, double pz_p)
+{
+    TLorentzVector p1;
+    TLorentzVector p2;
+    TLorentzVector pair;
+
+    p1.SetX(px_e);
+    p1.SetY(py_e);
+    p1.SetZ(pz_e);
+    p1.SetE(sqrt(pow(p1.P(), 2) + SQR(0.0005)));
+    p2.SetX(px_p);
+    p2.SetY(py_p);
+    p2.SetZ(pz_p);
+    p2.SetE(sqrt(pow(p2.P(), 2) + SQR(0.0005)));
+    pair = p1 + p2; // pair corresponds to photon if the pair matches
+
+    TVector3 P1, P2, Photon, z, v, u, w, wc;
+
+    z.SetX(0);
+    z.SetY(0);
+    z.SetZ(1); // unit vector along z
+
+    P1.SetX(px_e);
+    P1.SetY(py_e);
+    P1.SetZ(pz_e);
+
+    P2.SetX(px_p);
+    P2.SetY(py_p);
+    P2.SetZ(pz_p);
+
+    Photon.SetX(pair.Px());
+    Photon.SetY(pair.Py());
+    Photon.SetZ(pair.Pz());
+
+    v = (P1.Cross(P2)).Unit(); // unit vector v corresponds to the unit vector of the cross product of ep pair
+    u = Photon.Unit();
+    w = (u.Cross(v)).Unit();
+    wc = (u.Cross(z)).Unit();
+
+    double phiv = acos(-w.Dot(wc));
+    return phiv;
+}
+
+
+int Run14AuAuLeptonCombyReco::Solution(MyDileptonAnalysis::MyTrack *mytrk1, MyDileptonAnalysis::MyTrack *mytrk2, MyDileptonAnalysis::Reconstruction *reco, float zVtx)
+{ // only solution cut
+
+    const float DPHI = 0.05, R_LO = 1, R_HI = 29, R_HI2 = 23, R_HI3 = 20, DTHETA=0.01, ZEDCUT=4, PHIVCUT=0.1, ZEDCUT2=2, DTHETA2=0.006, DPHI2 = 0.005;
+
+    MyDileptonAnalysis::MyPair mypair;
+
+    reco->findIntersection(mytrk1, mytrk2, &mypair, zVtx);
+    const float radius_r = mypair.GetRPair();
+    if ((radius_r <= R_LO) || (radius_r >= R_HI))
+        return 0;
+
+    float dphi_r = mypair.GetPhiElectron() - mypair.GetPhiPositron();
+    if (dphi_r > TMath::Pi())
+        dphi_r = 2 * TMath::Pi() - dphi_r; // 1.3pi->0.7pi
+    if (dphi_r < -TMath::Pi())
+        dphi_r = -2 * TMath::Pi() - dphi_r; // -1.3pi->-0.7pi
+    if (TMath::Abs(dphi_r) >= DPHI)
+        return 1;
+
+    float phiv = -9999., dzed = -9999.;
+    if (mytrk1->GetCharge() == 1)
+    {
+        phiv = getPhiv(mytrk1->GetPx(), mytrk1->GetPy(), mytrk1->GetPz(), mytrk2->GetPx(), mytrk2->GetPy(), mytrk2->GetPz());
+        dzed = mytrk1->GetZDC() - mytrk2->GetZDC();
+    }
+    if (mytrk1->GetCharge() == -1)
+    {
+        phiv = getPhiv(mytrk2->GetPx(), mytrk2->GetPy(), mytrk2->GetPz(), mytrk1->GetPx(), mytrk1->GetPy(), mytrk1->GetPz());
+        dzed = mytrk2->GetZDC() - mytrk1->GetZDC();
+    }
+
+    if(fabs(dzed)>ZEDCUT) return 2;
+
+    float dtheta_r = mypair.GetThetaElectron() - mypair.GetThetaPositron();
+
+    if (dtheta_r >= DTHETA) return 3;
+    if (radius_r >= R_HI2) return 3;
+
+    if ( TMath::Abs(phiv-TMath::Pi())>=PHIVCUT ) return 4;
+
+    if (radius_r >= R_HI3) return 5;
+    if (dtheta_r >= DTHETA2) return 5;
+
+    if(fabs(dzed)>ZEDCUT2) return 6;
+    if (TMath::Abs(dphi_r) >= DPHI2) return 6;
+
+    return 7;
 }
