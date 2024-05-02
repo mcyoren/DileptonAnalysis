@@ -619,7 +619,6 @@ bool Run14AuAuLeptonCombyReco::dead_region(float x, float y, float xx1, float yy
 void Run14AuAuLeptonCombyReco::MoonWalk()
 {
     fCDH = nullptr;
-    tdc_adc_PbGl = nullptr;
     se = nullptr;
     for (int itow = 0; itow < 24768; itow++)
     {
@@ -637,6 +636,8 @@ void Run14AuAuLeptonCombyReco::MoonWalk()
     }
     fafter = new TF1("f", "[0]*exp([1]/x)*pow(x,[2])", 0.2, 20);
     fafter->SetParameters(-8.25403, -5.4072, -0.33457);
+
+    phi_conv_hist=nullptr; the_conv_hist=nullptr; r_conv_hist=nullptr; dzed_conv_hist=nullptr,phiv_conv_hist=nullptr;
 
     return;
 }
@@ -728,8 +729,16 @@ void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
 
     se = Fun4AllServer::instance();
     std::cout << "RecalEMCalTOF::Init: " << "Book tdc_adc_PbGl histogram" << std::endl;
-    tdc_adc_PbGl = new TH3D("tdc_adc_PbGl","TDC/ADC of EMCal sectors histogram",500,-1000,4000,600,-1000,4000,8,0,8);
-    se->registerHisto("tdc_adc_PbGl", tdc_adc_PbGl );
+    phi_conv_hist = new TH2D("phi_conv_hist","phi_conv_hist",500,-0.5,0.5,50,0,5);
+    se->registerHisto("phi_conv_hist", phi_conv_hist );
+    the_conv_hist = new TH2D("the_conv_hist","the_conv_hist",500,-0.5,0.5,50,0,5);
+    se->registerHisto("the_conv_hist", the_conv_hist );
+    r_conv_hist = new TH2D("r_conv_hist","r_conv_hist",500,-1,49,50,0,5);
+    se->registerHisto("r_conv_hist", r_conv_hist );
+    dzed_conv_hist = new TH2D("dzed_conv_hist","dzed_conv_hist",500,-20,20,50,0,5);
+    se->registerHisto("dzed_conv_hist", dzed_conv_hist );
+    phiv_conv_hist = new TH2D("phiv_conv_hist","phiv_conv_hist",500,0,3.14159,50,0,5);
+    se->registerHisto("phiv_conv_hist", phiv_conv_hist );
 
     return ;
 }
@@ -819,11 +828,6 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
         // std::cout << fTime << std::endl;
         
         cluster->set_tofcorr(fTime - 0*bbct0);
-        
-        if(((cluster->chi2()<3&&isec<6)||(cluster->prob_photon()>0.02&&isec>5))&&cluster->e()>0.400)
-        {
-            tdc_adc_PbGl->Fill(TDC,ADC,sector_clockwise);
-        }
         
     }
     

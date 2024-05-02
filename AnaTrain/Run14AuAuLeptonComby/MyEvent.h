@@ -125,7 +125,7 @@ namespace MyDileptonAnalysis
                   emcdphi = -8888;
                   emctof = -8888;
                   tofe = -8888;
-                  tofdphi = -99990;
+                  tofdphi = -8888;
                   tofdz = -8888;
                   pc3sdphi = -8888;
                   pc3sdz = -8888;
@@ -143,7 +143,7 @@ namespace MyDileptonAnalysis
             int GetSect() const { return sect; };
             float GetPx() const
             {
-                  if (pt == -8888)
+                  if (pt < -100)
                   {
                         return pt;
                   }
@@ -154,7 +154,7 @@ namespace MyDileptonAnalysis
             };
             float GetPy() const
             {
-                  if (pt == -8888)
+                  if (pt < -100)
                   {
                         return pt;
                   }
@@ -165,7 +165,7 @@ namespace MyDileptonAnalysis
             };
             float GetPz() const
             {
-                  if (pt == -8888)
+                  if (pt < -100)
                   {
                         return pt;
                   }
@@ -176,7 +176,7 @@ namespace MyDileptonAnalysis
             };
             float GetPtot() const
             {
-                  if (pt == -8888)
+                  if (pt < -100)
                   {
                         return pt;
                   }
@@ -321,6 +321,12 @@ namespace MyDileptonAnalysis
             virtual float GetMinDist(int iilayer) { return 0; };
             virtual int GetGhost() { return 0; } 
 
+            virtual void SetRConv(float val) {  };
+            virtual void SetdPhiConv(float val) {  };
+            virtual void SetdTheConv(float val) {  };
+            virtual void SetdZedConv(float val) {  };
+            virtual void SetPhiVConv(float val) {  };
+
             ClassDef(MyTrack, 1)
       };
 
@@ -350,7 +356,9 @@ namespace MyDileptonAnalysis
             float DCA_Y,DCA_Y2;
             float true_pt;
             // Wenching information
-            int isConv; // indicates is there Solution fro Wenqing algoritm
+            int isConv; // indicates is there Solution fro Wenqing algoritm and how tigt is it
+            float r_conv, dphi_conv, dthe_conv, phiv_conv, dzed_conv;
+
             std::vector<float> dangle0,dangle1,dangle2,dangle3;
 
       public:
@@ -371,6 +379,11 @@ namespace MyDileptonAnalysis
                   DCA_Y2 = -8888;
                   true_pt = -8888;
                   isConv=0;
+                  r_conv = -8888;
+                  dphi_conv = -8888;
+                  dthe_conv = -8888;
+                  phiv_conv = -8888;
+                  dzed_conv = -8888;
 
                   for (int iteri = 0; iteri < 4; iteri++)
                   {
@@ -421,6 +434,11 @@ namespace MyDileptonAnalysis
             void SetMinsDphi(float imindist, int iilayer) { min_sdphi[iilayer] = imindist; };
             void SetMinsDthe(float imindist, int iilayer) { min_sdthe[iilayer] = imindist; };
             void SetIsConv(int value) {isConv = value;};
+            void SetRConv(float val) { r_conv = val; };
+            void SetdPhiConv(float val) { dphi_conv = val; };
+            void SetdTheConv(float val) { dthe_conv = val; };
+            void SetdZedConv(float val) { dzed_conv = val; };
+            void SetPhiVConv(float val) { phiv_conv = val; };
 
             int GetHitIndex(int iilayer) { return hit_index[iilayer]; };
             int GetHitCounter(int iilayer) { return hit_counter[iilayer]; };
@@ -438,7 +456,12 @@ namespace MyDileptonAnalysis
             float GetReconPT() {return true_pt;};
             float GetMinsDphi(int iilayer) { return min_sdphi[iilayer]; };
             float GetMinsDthe(int iilayer) { return min_sdthe[iilayer]; };
-            int GetIsConv() { return isConv; }
+            int GetIsConv() { return isConv; };
+            float GetRConv() { return r_conv; };
+            float GetdPhiConv() { return dphi_conv; };
+            float GetdTheConv() { return dthe_conv; };
+            float GetdZedConv() { return dzed_conv; };
+            float GetPhiVConv() { return phiv_conv; };
 
             void SetdPhidThe(int layer, float val1, float val2, float val3, float val4, float val5, float val6) 
             {
@@ -502,6 +525,7 @@ namespace MyDileptonAnalysis
                   std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()<<std::endl;
                   return -999;
             };
+            void ClearNumberVectors(){dangle0.clear();dangle1.clear();dangle2.clear();dangle3.clear();};
 
 
             ClassDef(MyElectron, 1)
@@ -587,8 +611,8 @@ namespace MyDileptonAnalysis
             float GetYHit() const { return yhit; };
             float GetZHit() const { return zhit; };
 
-            float GetPhiHit(const float xvtx=0, const float yvtx=0, const float zvtx=0) const;
-            float GetTheHit(const float xvtx=0, const float yvtx=0, const float zvtx=0) const;
+            float GetPhiHit(const float xvtx=0, const float yvtx=0, const float zvtx=0);
+            float GetTheHit(const float xvtx=0, const float yvtx=0, const float zvtx=0);
 
 
             float GetPhi() const

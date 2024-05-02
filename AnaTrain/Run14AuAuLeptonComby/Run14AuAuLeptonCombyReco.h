@@ -133,7 +133,7 @@ protected:
     TF1 *fafter;
     emcCalibrationDataHelper *fCDH;
     Fun4AllServer *se;
-    TH3D *tdc_adc_PbGl;
+    TH2D *phi_conv_hist, *the_conv_hist, *r_conv_hist, *dzed_conv_hist, *phiv_conv_hist;
 
     int TRIGGERBIT;
     float BBC_VERTEX_CUT;

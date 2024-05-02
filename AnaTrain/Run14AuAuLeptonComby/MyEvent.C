@@ -55,17 +55,17 @@ namespace MyDileptonAnalysis
         this->SetThe0Prime(new_the0 - theta_offset);
     }
 
-    float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) const
+    float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) 
     {
         TVector2 hitpoint;
         hitpoint.Set(xhit - xvtx, yhit - yvtx);
         float phihit = hitpoint.Phi();
-        if (phihit < -TMath::Pi() / 2)
-            phihit += 2 * TMath::Pi();
+        if (phihit > 3 * TMath::Pi() / 2)
+            phihit -= 2 * TMath::Pi();
         return phihit;
     }
 
-    float MyVTXHit::GetTheHit(const float xvtx, const float yvtx, const float zvtx) const
+    float MyVTXHit::GetTheHit(const float xvtx, const float yvtx, const float zvtx) 
     {
         TVector3 hitpoint;
         hitpoint.SetXYZ(xhit - xvtx, yhit - yvtx, zhit - zvtx);
@@ -223,7 +223,7 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                        float sigma = 5.0;
+                        float sigma = 4.0;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -249,8 +249,8 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if (layer == 0) sigma = 5;
-                        if ( sdphi*mytrk->GetChargePrime()>-5 && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < 5)
+                        if(layer==0) sigma=5;
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
                         {
                             if (diff < min[layer])
                             {
@@ -283,12 +283,12 @@ namespace MyDileptonAnalysis
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=2;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=4;
 
-                        if (fabs(sdthe) < 2 && SignTrack && is_fill_hsits)
+                        if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
                         }
-                        if (sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits)
+                        if (sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits)
                         {
                             dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
                             sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
@@ -347,7 +347,7 @@ namespace MyDileptonAnalysis
             }else{
                 mytrk->SetHitCounter(0,0);
             }
-
+            mytrk->ClearNumberVectors();
         }     // enf of e loop
     }         // end
 

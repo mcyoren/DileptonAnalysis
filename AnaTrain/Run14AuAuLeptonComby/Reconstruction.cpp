@@ -462,24 +462,24 @@ static bool find_rconv( float alpha_e, float alpha_p, float phi_e, float phi_p, 
 
 void Reconstruction::findIntersection(MyTrack const* trk1, MyTrack const* trk2, MyPair* pair, float zvertex)
 {
-	if ( ( trk1->GetAlpha() )*( trk2->GetAlpha() )>0 ) { cout<<"likesign pair!!!"<<endl; return; }
+	if ( ( trk1->GetAlphaPrime() )*( trk2->GetAlphaPrime() )>0 ) { cout<<"likesign pair!!!"<<endl; return; }
 
 	float r_conv, phi_conv_e, phi_conv_p, theta_conv_e, theta_conv_p;
-	if ( trk1->GetAlpha()>0 && trk2->GetAlpha()<0)
+	if ( trk1->GetAlphaPrime()>0 && trk2->GetAlphaPrime()<0)
 	{ 
-		find_rconv( trk1->GetAlpha(), trk2->GetAlpha(), trk1->GetPhiDC(), trk2->GetPhiDC(), trk1->GetZDC() - zvertex, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, r_conv );
-		project_phi( trk1->GetAlpha(), trk1->GetPhiDC(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_e);
-		project_phi( trk2->GetAlpha(), trk2->GetPhiDC(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_p );
-		project_theta( trk1->GetAlpha(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_e );
-		project_theta( trk2->GetAlpha(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_p );
+		find_rconv( trk1->GetAlphaPrime(), trk2->GetAlphaPrime(), trk1->GetPhiDC(), trk2->GetPhiDC(), trk1->GetZDC() - zvertex, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, r_conv );
+		project_phi( trk1->GetAlphaPrime(), trk1->GetPhiDC(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_e);
+		project_phi( trk2->GetAlphaPrime(), trk2->GetPhiDC(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_p );
+		project_theta( trk1->GetAlphaPrime(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_e );
+		project_theta( trk2->GetAlphaPrime(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_p );
 	}
 	else 
 	{
-		find_rconv( trk2->GetAlpha(), trk1->GetAlpha(), trk2->GetPhiDC(), trk1->GetPhiDC(), trk2->GetZDC() - zvertex, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, r_conv );
-		project_phi( trk2->GetAlpha(), trk2->GetPhiDC(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_e);
-		project_phi( trk1->GetAlpha(), trk1->GetPhiDC(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_p );
-		project_theta( trk2->GetAlpha(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_e );
-		project_theta( trk1->GetAlpha(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_p );
+		find_rconv( trk2->GetAlphaPrime(), trk1->GetAlphaPrime(), trk2->GetPhiDC(), trk1->GetPhiDC(), trk2->GetZDC() - zvertex, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, r_conv );
+		project_phi( trk2->GetAlphaPrime(), trk2->GetPhiDC(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_e);
+		project_phi( trk1->GetAlphaPrime(), trk1->GetPhiDC(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, phi_conv_p );
+		project_theta( trk2->GetAlphaPrime(), r_conv, trk2->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_e );
+		project_theta( trk1->GetAlphaPrime(), r_conv, trk1->GetZDC() - zvertex, pimpl->alpha_r_z, theta_conv_p );
 	}
 	
 	pair->SetRPair( r_conv );
@@ -501,9 +501,9 @@ TVector3 Reconstruction::findMomentum(MyTrack* trk, float r, float phi_conv, flo
 {
 	TVector3 vec;
 	float mom, phi, theta;
-	lookup_fit( TMath::Abs(trk->GetAlpha()), r, TMath::Abs(trk->GetZDC() - zvertex), 1, pimpl->alpha_r_z, mom );
-	project_phi( trk->GetAlpha(), trk->GetPhiDC(), r, TMath::Abs(trk->GetZDC() - zvertex), pimpl->alpha_r_z, phi );
-	project_theta( trk->GetAlpha(), r, trk->GetZDC() - zvertex, pimpl->alpha_r_z, theta );
+	lookup_fit( TMath::Abs(trk->GetAlphaPrime()), r, TMath::Abs(trk->GetZDC() - zvertex), 1, pimpl->alpha_r_z, mom );
+	project_phi( trk->GetAlphaPrime(), trk->GetPhiDC(), r, TMath::Abs(trk->GetZDC() - zvertex), pimpl->alpha_r_z, phi );
+	project_theta( trk->GetAlphaPrime(), r, trk->GetZDC() - zvertex, pimpl->alpha_r_z, theta );
 
 	float pt = mom*sin(theta);
 	vec.SetPtThetaPhi( pt, theta, phi );
