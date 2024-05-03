@@ -322,8 +322,8 @@ namespace MyDileptonAnalysis
             virtual int GetGhost() { return 0; } 
 
             virtual void SetRConv(float val) {  };
-            virtual void SetdPhiConv(float val) {  };
-            virtual void SetdTheConv(float val) {  };
+            virtual void SetPhiConv(float val) {  };
+            virtual void SetTheConv(float val) {  };
             virtual void SetdZedConv(float val) {  };
             virtual void SetPhiVConv(float val) {  };
 
@@ -357,7 +357,7 @@ namespace MyDileptonAnalysis
             float true_pt;
             // Wenching information
             int isConv; // indicates is there Solution fro Wenqing algoritm and how tigt is it
-            float r_conv, dphi_conv, dthe_conv, phiv_conv, dzed_conv;
+            float r_conv, phi_conv, the_conv, phiv_conv, dzed_conv;
 
             std::vector<float> dangle0,dangle1,dangle2,dangle3;
 
@@ -380,8 +380,8 @@ namespace MyDileptonAnalysis
                   true_pt = -8888;
                   isConv=0;
                   r_conv = -8888;
-                  dphi_conv = -8888;
-                  dthe_conv = -8888;
+                  phi_conv = -8888;
+                  the_conv = -8888;
                   phiv_conv = -8888;
                   dzed_conv = -8888;
 
@@ -435,8 +435,8 @@ namespace MyDileptonAnalysis
             void SetMinsDthe(float imindist, int iilayer) { min_sdthe[iilayer] = imindist; };
             void SetIsConv(int value) {isConv = value;};
             void SetRConv(float val) { r_conv = val; };
-            void SetdPhiConv(float val) { dphi_conv = val; };
-            void SetdTheConv(float val) { dthe_conv = val; };
+            void SetPhiConv(float val) { phi_conv = val; };
+            void SetTheConv(float val) { the_conv = val; };
             void SetdZedConv(float val) { dzed_conv = val; };
             void SetPhiVConv(float val) { phiv_conv = val; };
 
@@ -458,8 +458,8 @@ namespace MyDileptonAnalysis
             float GetMinsDthe(int iilayer) { return min_sdthe[iilayer]; };
             int GetIsConv() { return isConv; };
             float GetRConv() { return r_conv; };
-            float GetdPhiConv() { return dphi_conv; };
-            float GetdTheConv() { return dthe_conv; };
+            float GetPhiConv() { return   phi_conv; };
+            float GetTheConv() { return   the_conv; };
             float GetdZedConv() { return dzed_conv; };
             float GetPhiVConv() { return phiv_conv; };
 

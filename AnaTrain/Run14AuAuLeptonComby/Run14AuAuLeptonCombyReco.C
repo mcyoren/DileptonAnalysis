@@ -282,17 +282,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(!emc) continue;
 	            mytrk->SetEmcTOF(emc->tofcorr());  
             } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
-            for (int jtrk = itrk+1; jtrk < n_electrons; jtrk++)
+            if(mytrk->GetChargePrime()<0) continue;
+            for (int jtrk = 0; jtrk < n_electrons; jtrk++)
             {
                 MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
-                if(mytrk2->GetChargePrime()!=mytrk->GetChargePrime())
+                if(mytrk2->GetChargePrime()>0) continue;
+                const int solut =  Solution(mytrk,mytrk2,&reco,precise_z);
+                if(solut>0)
                 {
-                    const int solut =  Solution(mytrk,mytrk2,&reco,precise_z);
-                    if(solut>0)
-                    {
-                        mytrk ->SetIsConv(solut);
-                        mytrk2->SetIsConv(solut);
-                    }
+                    mytrk ->SetIsConv(solut);
+                    mytrk2->SetIsConv(solut);
                 }
             }
         }
@@ -652,45 +651,36 @@ int Run14AuAuLeptonCombyReco::Solution(MyDileptonAnalysis::MyTrack *mytrk1, MyDi
     if (dphi_r < -TMath::Pi())
         dphi_r = -2 * TMath::Pi() - dphi_r; // -1.3pi->-0.7pi
 
-    float phiv = -9999., dzed = -9999.;
-    if (mytrk1->GetCharge() == 1)
-    {
-        phiv = getPhiv(mytrk1->GetPx(), mytrk1->GetPy(), mytrk1->GetPz(), mytrk2->GetPx(), mytrk2->GetPy(), mytrk2->GetPz());
-        dzed = mytrk1->GetZDC() - mytrk2->GetZDC();
-    }
-    if (mytrk1->GetCharge() == -1)
-    {
-        phiv = getPhiv(mytrk2->GetPx(), mytrk2->GetPy(), mytrk2->GetPz(), mytrk1->GetPx(), mytrk1->GetPy(), mytrk1->GetPz());
-        dzed = mytrk2->GetZDC() - mytrk1->GetZDC();
-    }
-    
+    const float phiv = getPhiv(mytrk2->GetPx(), mytrk2->GetPy(), mytrk2->GetPz(), mytrk1->GetPx(), mytrk1->GetPy(), mytrk1->GetPz());
+    const float dzed =  mytrk2->GetZDC() - mytrk1->GetZDC();
     const float dtheta_r = mypair.GetThetaElectron() - mypair.GetThetaPositron();
 
     mytrk1->SetRConv(radius_r); mytrk2->SetRConv(radius_r);
-    mytrk1->SetdPhiConv(dphi_r); mytrk2->SetdPhiConv(dphi_r);
-    mytrk1->SetdTheConv(dtheta_r); mytrk2->SetdTheConv(dtheta_r);
+    mytrk1->SetPhiConv(mypair.GetPhiPositron()); mytrk2->SetPhiConv(mypair.GetPhiElectron());
+    mytrk1->SetTheConv(mypair.GetThetaPositron()); mytrk2->SetTheConv(mypair.GetThetaElectron());
     mytrk1->SetdZedConv(dzed); mytrk2->SetdZedConv(dzed);
     mytrk1->SetPhiVConv(phiv); mytrk2->SetPhiVConv(phiv);
     
     if (TMath::Abs(dzed) < ZEDCUT) phi_conv_hist->Fill(dphi_r,0.5*(mytrk1->GetPt()+mytrk2->GetPt()));
     if (TMath::Abs(dphi_r) < DPHI) dzed_conv_hist->Fill(dzed,0.5*(mytrk1->GetPt()+mytrk2->GetPt()));    
 
-    if (TMath::Abs(dphi_r) >= DPHI) return 1;
-    if(TMath::Abs(dzed) >= ZEDCUT)  return 2;
+    if ( mytrk1->GetArm() != mytrk2->GetArm() ) return 1;
+    if (TMath::Abs(dphi_r) >= DPHI) return 2;
+    if(TMath::Abs(dzed) >= ZEDCUT)  return 3;
 
     the_conv_hist->Fill(dtheta_r,0.5*(mytrk1->GetPt()+mytrk2->GetPt()));
     phiv_conv_hist->Fill(phiv,0.5*(mytrk1->GetPt()+mytrk2->GetPt()));
 
-    if (dtheta_r >= DTHETA) return 3;
-    if (radius_r >= R_HI2)  return 3;
+    if (dtheta_r >= DTHETA) return 4;
+    if (radius_r >= R_HI2)  return 4;
 
-    if ( TMath::Abs(phiv-TMath::Pi())>=PHIVCUT ) return 4;
+    if ( TMath::Abs(phiv)>=PHIVCUT ) return 5;
 
-    if (radius_r >= R_HI3)   return 5;
-    if (dtheta_r >= DTHETA2) return 5;
+    if (radius_r >= R_HI3)   return 6;
+    if (dtheta_r >= DTHETA2) return 6;
 
-    if (TMath::Abs(dzed) >= ZEDCUT2) return 6;
-    if (TMath::Abs(dphi_r) >= DPHI2) return 6;
+    if (TMath::Abs(dzed) >= ZEDCUT2) return 7;
+    if (TMath::Abs(dphi_r) >= DPHI2) return 7;
 
-    return 7;
+    return 8;
 }
