@@ -339,8 +339,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() > 0.4) hadron_reject+=10;
         if ( (mytrk->GetN0()>4 && mytrk->GetPtPrime() > 0.4 && mytrk->GetPtPrime()<=0.6 ) || (mytrk->GetN0()>3 && mytrk->GetPtPrime() > 0.6 )  )  hadron_reject=100;
         
-        if(mytrk->GetIsConv()>0) std::cout<<"opa nihua "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
-        <<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
+        //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
+        //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
 
