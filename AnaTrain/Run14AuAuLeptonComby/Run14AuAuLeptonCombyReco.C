@@ -258,17 +258,21 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     fill_SVXHits_to_myevent(svxhitlist, event);
 
     event_container->Associate_Hits_to_Leptons();
-    event->ReshuffleElectrons();
+    int n_good_el = 0;
+    for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+    {
+        MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+        if (mytrk->GetHitCounter(0) > 0 && mytrk->GetHitCounter(1) > 0 &&
+           (mytrk->GetHitCounter(2) > 0 || mytrk->GetHitCounter(3) > 0)) n_good_el++;
+    }
     
-    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 2 ) ) return 0;
+    if(n_good_el<2 || (centrality < 20 && n_good_el < 2 ) ) return 0;
 
     if(remove_hadron_hits && 1==0 ) 
     {
         event_container->Associate_Hits_to_Hadrons();
     }
 
-    if(event->GetNtrack()<2 || (centrality < 20 && event->GetNtrack() < 2 ) ) return 0;
-    
     if(use_iden)
     {
         Walking(TopNode);
@@ -307,6 +311,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             } 
         }
     }
+    
+    //event->ReshuffleElectrons();
 
     if(check_veto) event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();

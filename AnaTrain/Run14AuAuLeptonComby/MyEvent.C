@@ -628,7 +628,7 @@ namespace MyDileptonAnalysis
             if (do_reshuf)
             {
                 this->RemoveTrackEntry(itrk);
-                //this->AddElecCand(&mytrk);
+                this->AddElecCand(&mytrk);
                 n_electrons--;
                 itrk--;
                 continue;
