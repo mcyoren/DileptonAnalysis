@@ -70,7 +70,7 @@
 class Run14AuAuLeptonCombyReco : public SubsysReco
 {
 public:
-    Run14AuAuLeptonCombyReco(const char *outfile = "test.root", const char *lookup_file = "/afs/rhic.bnl.gov/phenix/PHENIX_LIB/sys/x8664_sl7/taxi_large/share/PhotonConversionAnalysis/lookup_3D_one_phi.root");
+    Run14AuAuLeptonCombyReco(const char *outfile = "test.root", const char *lookup_file = "lookup_3D_one_phi.root");
     virtual ~Run14AuAuLeptonCombyReco();
 
     int Init(PHCompositeNode *topNode);
