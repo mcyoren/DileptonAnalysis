@@ -761,8 +761,6 @@ namespace MyDileptonAnalysis
         }
     }
 
-
-
     void MyEventContainer::GetHistsFromFile(const std::string loc)
     {
         infile = TFile::Open(loc.c_str(), "read");
