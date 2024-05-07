@@ -327,10 +327,10 @@ namespace MyDileptonAnalysis
                     chi2 = fabs(recon_pt-pt)/pt*10;
                     if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
                     
-                    chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
+                    if (is_fill_hsits) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
                 }
             }
-            chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
+            if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
@@ -341,8 +341,9 @@ namespace MyDileptonAnalysis
                 mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
                 mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
                 mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
-                //if (mytrk->GetHitCounter(3)>0)  mytrk->SetDCA2(3);
-                //if (mytrk->GetHitCounter(2)>0)  mytrk->SetDCA2(2);
+                event->SetDCA(itrk, 1);
+                if (mytrk->GetHitCounter(3)>0)  event->SetDCA2(itrk, 3);
+                if (mytrk->GetHitCounter(2)>0)  event->SetDCA2(itrk, 2);
 
             }else{
                 mytrk->SetHitCounter(0,0);
@@ -636,7 +637,6 @@ namespace MyDileptonAnalysis
         }
     }
 
-
     void MyEventContainer::CheckVeto()
     {   
         const int centr_bin = event->GetCentrality()/20;
@@ -653,9 +653,11 @@ namespace MyDileptonAnalysis
                 (electron->GetHitCounter(2) < 1 && electron->GetHitCounter(3) < 1))
                 continue;
 
-            temc->Fill(electron->GetEmcTOF(),pt,centr_bin);
-            ttof->Fill(electron->GetTOFE(),pt,centr_bin);
-
+            if(is_check_veto) 
+            {
+                temc->Fill(electron->GetEmcTOF(),pt,centr_bin);
+                ttof->Fill(electron->GetTOFE(),pt,centr_bin);
+            }
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
                 if(electron->GetHitCounter(ilayer)<1) continue;
@@ -693,10 +695,12 @@ namespace MyDileptonAnalysis
 
                     const float mean = veto_window_mean_par0[layer][charge_bin][dphi_index] + veto_window_mean_par1[layer][charge_bin][dphi_index]*exp(veto_window_mean_par2[layer][charge_bin][dphi_index] * pt);
                     const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
-                    
-                    if (abs(dthe) < 0.002/ilayer  ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (abs(dphi) < 0.006 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
-                    if (fabs(dthe) < 0.002/ilayer ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                    if(is_check_veto) 
+                    {
+                        if (abs(dthe) < 0.002/ilayer  ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
+                        if (abs(dphi) < 0.006 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
+                        if (fabs(dthe) < 0.002/ilayer ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                    }
                     if (ilayer==1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.03+0.04*exp(-2*pt) && fabs(dthe) < 0.002)
                     {
                         if(electron->GetGhost()<10) electron->SetGhost(ilayer);
@@ -719,7 +723,7 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            couter_veto_hist->Fill(count,centr_bin);
+            if(is_check_veto) couter_veto_hist->Fill(count,centr_bin);
         }
     }
 
@@ -759,6 +763,24 @@ namespace MyDileptonAnalysis
                 charge_hist->Fill(abs(charge_bin - (1 - mytrk->GetCharge()) / 2) * 4 + (1 - mytrk->GetCharge()) + mytrk->GetArm() + 0.1, pt, central_bin);
             }
         }
+    }
+
+    int MyEventContainer::GetNGoodElectrons()
+    {
+        int n_good_el = 0;
+        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            if (mytrk->GetHitCounter(0) > 0 && mytrk->GetHitCounter(1) > 0 &&
+               (mytrk->GetHitCounter(2) > 0 || mytrk->GetHitCounter(3) > 0)) 
+               {
+                    el_pt_hist->Fill(mytrk->GetPtPrime(),0.5,event->GetCentrality());
+                    n_good_el++;
+               }else{
+                    el_pt_hist->Fill(mytrk->GetPtPrime(),1.5,event->GetCentrality());
+               }
+        }
+        return n_good_el;
     }
 
     void MyEventContainer::GetHistsFromFile(const std::string loc)
@@ -813,6 +835,9 @@ namespace MyDileptonAnalysis
         {
             tree = new TTree("tree", "tree");
             tree->Branch("MyEvent", event);
+            INIT_HIST(1, event_hist, 10, 0, 10);
+            INIT_HIST(1, centr_hist, 100, 0, 100);
+            INIT_HIST(3, el_pt_hist, 50, 0, 5, 2, 0, 2, 100, 0, 100);
             is_fill_tree = 1;
         }
         if (fill_dphi)

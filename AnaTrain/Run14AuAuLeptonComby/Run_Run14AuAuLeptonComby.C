@@ -15,15 +15,15 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     recoConsts *reco_consts =  recoConsts::instance();
     reco_consts->set_IntFlag("Remove_hadron_hits", 1);
     reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
-    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
+    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 0);
     reco_consts->set_IntFlag("Fill_TTree", 1);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
     reco_consts->set_IntFlag("Use_ident", 1);
     reco_consts->set_IntFlag("Do_track_QA", 0);
     reco_consts->set_IntFlag("Do_reveal_hadron", 0);
-    reco_consts->set_IntFlag("Fill_true_DCA", 1);
-    reco_consts->set_IntFlag("Check_Veto", 1);
+    reco_consts->set_IntFlag("Fill_true_DCA", 0);
+    reco_consts->set_IntFlag("Check_Veto", 0);
        
     SubsysReco *reco = new Run14AuAuLeptonCombyReco(outFile, lookupfile_location.c_str());
 

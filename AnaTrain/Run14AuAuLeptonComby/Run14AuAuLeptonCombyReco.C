@@ -102,6 +102,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         printf("Ncalls = %dk\n", ncalls / 1000);
     }
 
+    event_container->FillEventHist(0);
+    
     const PHGlobal *globalCNT =
         findNode::getClass<PHGlobal>(TopNode, "PHGlobal");
     const PHCentralTrack *particleCNT =
@@ -136,6 +138,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!rpobject)
         std::cout << "NO ReactionPlaneObject!!!!!!!!!!!!!!!\n";
 
+    event_container->FillEventHist(1);
+
     const int run_number = runHDR->get_RunNumber();
     int run_group = get_rungroup(run_number) - 1;
     if(run_group<0||run_group>6) run_group = 0;
@@ -146,6 +150,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!trigscaled_on)
         return false;
 
+    event_container->FillEventHist(2);
+
     // ZDC coincidence
     const float zdc1 = globalCNT->getZdcEnergyN();
     const float zdc2 = globalCNT->getZdcEnergyS();
@@ -154,13 +160,20 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!isZDCOK)
         return false;
 
+    event_container->FillEventHist(3);
+
     if (run_number < 0)
         return 0;
     if (fabs(bbc_vertex) > BBC_VERTEX_CUT)
         return 0;
 
+    event_container->FillEventHist(4);
+
     if (centrality < 0 || centrality > 93)
         return 0;
+
+    event_container->FillEventHist(5);
+    event_container->FillCentrHist(centrality);
 
     npassed++;
     
@@ -204,6 +217,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     event->SetPsi2FVTXA0(psi2_FVTXA0);
     event->SetPsi3FVTXA0(psi3_FVTXA0);
+
+    if(psi2_BBC>-9000 || psi2_FVTXA0 >-9000) event_container->FillEventHist(6);
 
     const int run_group_beamoffset = event->GetRunGroup(run_number);
     const int n_tracks = particleCNT->get_npart();
@@ -253,20 +268,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
 
-    if(event->GetNtrack()<1) return 0;
+    if(event->GetNtrack()<2) return 0;
 
     fill_SVXHits_to_myevent(svxhitlist, event);
 
     event_container->Associate_Hits_to_Leptons();
-    int n_good_el = 0;
-    for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
-    {
-        MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-        if (mytrk->GetHitCounter(0) > 0 && mytrk->GetHitCounter(1) > 0 &&
-           (mytrk->GetHitCounter(2) > 0 || mytrk->GetHitCounter(3) > 0)) n_good_el++;
-    }
-    
-    if(n_good_el<2 || (centrality < 20 && n_good_el < 2 ) ) return 0;
+    const int n_good_el = event_container->GetNGoodElectrons();
+    if( n_good_el<2 ) return 0;
+
+    event_container->FillEventHist(7);
 
     if(remove_hadron_hits && 1==0 ) 
     {
@@ -314,7 +324,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     
     //event->ReshuffleElectrons();
 
-    if(check_veto) event_container->CheckVeto();
+    event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
