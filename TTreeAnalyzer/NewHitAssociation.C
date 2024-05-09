@@ -26,7 +26,7 @@ void NewHitAssociation(int par = 0)
   MyDileptonAnalysis::MyEventContainer *event_container = new MyDileptonAnalysis::MyEventContainer();
   event_container->InitEvent();
   event_container->GetHistsFromFile("../AnaTrain/Run14AuAuLeptonComby/field_map.root");
-  event_container->CreateOutFileAndInitHists("kek0.root", fill_QA_lepton_hists, fill_QA_hadron_hists, fill_TTree, fill_d_dphi_hists,
+  event_container->CreateOutFileAndInitHists("kek.root", fill_QA_lepton_hists, fill_QA_hadron_hists, fill_TTree, fill_d_dphi_hists,
                                              fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
   MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
   // event = 0;
@@ -56,25 +56,25 @@ void NewHitAssociation(int par = 0)
     if (ievent > 8000000)
       break;
 
-    //int n_electrons = event->GetNtrack();
-    //for (int itrk = 0; itrk < n_electrons; itrk++)
-    //{
-    //  MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-    //  if (mytrk->GetIsConv() < 8 || mytrk->GetRConv()>5) 
-    //  {
-    //    event->RemoveTrackEntry(itrk);
-    //    n_electrons--;
-    //    itrk--;
-    //  }
-    //}
-    //if (n_electrons < 1)
-    //  continue;
+    int n_electrons = event->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+      if (mytrk->GetIsConv() < 4) 
+      {
+        event->RemoveTrackEntry(itrk);
+        n_electrons--;
+        itrk--;
+      }
+    }
+    if (n_electrons < 1)
+      continue;
 
     //event_container->SetEvent(event);
 
     event_container->Associate_Hits_to_Leptons();
 
-    //event->ReshuffleElectrons();
+    event->ReshuffleElectrons();
 
     if (event->GetNtrack() < 2)
       continue;
