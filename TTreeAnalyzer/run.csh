@@ -10,7 +10,18 @@ setenv TSEARCHPATH .:/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuA
 echo $LD_LIBRARY_PATH
 echo $TSEARCHPATH
 
+set mystart=`date +%s`
+
 root -l -b << EOF
     .L ../AnaTrain/Run14AuAuLeptonComby/MyEvent.C+
     .x NewHitAssociation.C+
 EOF
+
+set myend=`date +%s`
+echo "kek"
+@ mytot=$myend - $mystart
+set mymin=60
+
+@ mymin=$mytot / $mymin
+
+echo $mymin
