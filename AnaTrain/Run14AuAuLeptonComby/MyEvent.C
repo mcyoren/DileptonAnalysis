@@ -111,6 +111,7 @@ namespace MyDileptonAnalysis
         for (int itrk = 0; itrk < nleptons; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            mytrk->ZeroHitCounters();
             // mytrk = static_cast<MyDileptonAnalysis::MyHadron*>(myhad);
             const float pt = mytrk->GetPtPrime();
 
@@ -313,17 +314,17 @@ namespace MyDileptonAnalysis
                     mytrk->SetHitIndex(mytrk->GetHits(1,inum2), 1);
                     if (mytrk->GetHitCounter(2)>0) mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5), 2);
                     if (mytrk->GetHitCounter(3)>0) mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);
-                    if( inum4>=0) 
-                    {
-                        event->SetDCA2(itrk,3);
-                        recon_pt += mytrk->GetReconPT();
-                    }
-                    if( inum3>=0) 
-                    {
-                        event->SetDCA2(itrk,2);
-                        recon_pt += mytrk->GetReconPT();
-                        if (inum4>=0) recon_pt/=2;
-                    }
+                    //if( inum4>=0) 
+                    //{
+                    //    event->SetDCA2(itrk,3);
+                    //    recon_pt += mytrk->GetReconPT();
+                    //}
+                    //if( inum3>=0) 
+                    //{
+                    //    event->SetDCA2(itrk,2);
+                    //    recon_pt += mytrk->GetReconPT();
+                    //    if (inum4>=0) recon_pt/=2;
+                    //}
                     chi2 = fabs(recon_pt-pt)/pt*10;
                     if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
                     
@@ -348,7 +349,7 @@ namespace MyDileptonAnalysis
             }else{
                 mytrk->SetHitCounter(0,0);
             }
-            mytrk->ClearNumberVectors();
+            //mytrk->ClearNumberVectors();
         }     // enf of e loop
     }         // end
 
