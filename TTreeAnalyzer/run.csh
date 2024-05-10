@@ -18,10 +18,12 @@ root -l -b << EOF
 EOF
 
 set myend=`date +%s`
-echo "kek"
+
 @ mytot=$myend - $mystart
 set mymin=60
 
-@ mymin=$mytot / $mymin
+@ mysec=$mytot % $mymin
+@ mymins=$mytot / $mymin
+@ myhour=$mymins / $mymin
 
-echo $mymin
+echo "Accumulated time:" $myhour "hours" $mymins "minutes" $mysec "seconds"
