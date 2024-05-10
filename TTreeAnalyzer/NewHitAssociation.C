@@ -84,7 +84,7 @@ void NewHitAssociation(int par = 0)
     for (int itrk = 0; itrk < n_hadrons*remove_hadron_hits; itrk++)
     {
       MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
-      if (mytrk->GetPtPrime() < 1.5) 
+      if (mytrk->GetPtPrime() < 1.0 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2) 
       {
         event->RemoveHadronEntry(itrk);
         n_hadrons--;
