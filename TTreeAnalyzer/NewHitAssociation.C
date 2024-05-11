@@ -1,8 +1,8 @@
 #include "NewHitAssociation.h"
-void NewHitAssociation(int par = 0)
+void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
 {
 
-  TFile *input = new TFile(inFile[par], "READ");
+  TFile *input = new TFile(inFile0, "READ");
   if (!(input))
   {
     cout << "no input file" << endl;
@@ -26,8 +26,8 @@ void NewHitAssociation(int par = 0)
   TBranch *br = T->GetBranch("MyEvent");
   MyDileptonAnalysis::MyEventContainer *event_container = new MyDileptonAnalysis::MyEventContainer();
   event_container->InitEvent();
-  event_container->GetHistsFromFile("../AnaTrain/Run14AuAuLeptonComby/field_map.root");
-  event_container->CreateOutFileAndInitHists("kek.root", fill_QA_lepton_hists, fill_QA_hadron_hists, fill_TTree, fill_d_dphi_hists,
+  event_container->GetHistsFromFile(field_file_path);
+  event_container->CreateOutFileAndInitHists(outFile, fill_QA_lepton_hists, fill_QA_hadron_hists, fill_TTree, fill_d_dphi_hists,
                                              fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
   MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
   // event = 0;
@@ -113,6 +113,8 @@ void NewHitAssociation(int par = 0)
     for (int i = 0; i < event->GetNtrack(); i++)
     {
       MyDileptonAnalysis::MyElectron *newTrack1 = event->GetEntry(i);
+      if (newTrack1->GetHitCounter(0) < 1 || newTrack1->GetHitCounter(1) < 1 || 
+         (newTrack1->GetHitCounter(2) < 1 && newTrack1->GetHitCounter(3) < 1 )) continue;
       if (newTrack1->GetGhost() > 0)
         continue;
       if (newTrack1->GetChargePrime() < 0)
@@ -123,6 +125,8 @@ void NewHitAssociation(int par = 0)
       for (int j = 0; j < event->GetNtrack(); j++)
       {
         MyDileptonAnalysis::MyElectron *newTrack2 = event->GetEntry(j);
+      if (newTrack2->GetHitCounter(0) < 1 || newTrack2->GetHitCounter(1) < 1 || 
+         (newTrack2->GetHitCounter(2) < 1 && newTrack2->GetHitCounter(3) < 1 )) continue;
         if (newTrack2->GetChargePrime() > 0)
           continue;
         if (newTrack2->GetGhost() > 0)

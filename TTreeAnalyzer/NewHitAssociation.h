@@ -19,7 +19,7 @@ const char inFile[][200] = {"/phenix/plhf/mitran/taxi/2024/AuAu14/my-TTree0_1928
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/merged_output_photon.root",
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/jpsi_sim.root",
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/phi_ee_sim.root"};
-const char field_file_path[200]="../AnaTrain/November/field_map.root";
+const char field_file_path[200]="/phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/offline/AnalysisTrain/Run14AuAuLeptonComby/field_map.root";
 
 // #include "AnaTrain/MyEvent.C"
 bool ifcout = false;
