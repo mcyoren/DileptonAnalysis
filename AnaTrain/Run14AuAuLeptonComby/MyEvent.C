@@ -687,7 +687,7 @@ namespace MyDileptonAnalysis
                     const float dphi = (phi_hit - phi_orig);
                     const float dthe = (theta_hit - the_orig);
 
-                    if (abs(dphi) > 0.1 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
+                    if (abs(dphi) > 0.12 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
                         continue;
 
                     int dphi_index = 1;
@@ -702,12 +702,12 @@ namespace MyDileptonAnalysis
                         if (abs(dphi) < 0.006 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
                         if (fabs(dthe) < 0.002/ilayer ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
                     }
-                    if (ilayer==1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.03+0.04*exp(-2*pt) && fabs(dthe) < 0.002)
+                    if (ilayer==1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.04+0.04*exp(-2*pt) && fabs(dthe) < 0.002)
                     {
                         if(electron->GetGhost()<10) electron->SetGhost(ilayer);
                         count++;
                     }
-                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.06+0.08*exp(-2*pt)  && fabs(dthe) < 0.002/ilayer )
+                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.06+0.08*exp(-2*pt)  && fabs(dthe) < 0.01 )
                     {
                         if(electron->GetGhost()<10) electron->SetGhost(ilayer);
                         count++;
@@ -905,7 +905,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, veto_hist,     N_centr, 200, -0.05, 0.05, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.02, 0.02, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, sveto_hist,    N_centr, 200, 0, 20,       16,0,16, 28, 0.2, 3);
-            INIT_HIST(2, couter_veto_hist, 4, 0, 4, 5, 0, 5);
+            INIT_HIST(2, couter_veto_hist, 8, 0, 8, 5, 0, 5);
             INIT_HIST(3, adc_hist, 500,0,500, 50, 0, 2.5, 6, 0, 6);
             INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);
