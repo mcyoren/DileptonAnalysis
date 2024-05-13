@@ -1,16 +1,14 @@
 #!/bin/sh
 
-tcsh -c "source source.csh"
-
-LIST=`ls -lhtr /phenix/plhf/mitran/taxi/Run14AuAu200CAMBPro109/19294/data/my-4*.root | awk '{printf("%s\n",$9)}'`
+LIST=`ls -lhtr /phenix/plhf/mitran/taxi/Run14AuAu200CAMBPro109/19???/data/my-4*.root | awk '{printf("%s\n",$9)}'`
 
 NUM=0
 Additional_Rejection=0
 Gen_Cut=0
 isERT=1
-#export MYINSTALL=/direct/phenix+u/vdoomra/install
-#export LD_LIBRARY_PATH=$MYINSTALL/lib:$LD_LIBRARY_PATH
+
 echo $LD_LIBRARY_PATH
+echo $TSEARCHPATH
 
 chmod g+rx ${_CONDOR_SCRATCH_DIR}
 cd ${_CONDOR_SCRATCH_DIR}
@@ -23,6 +21,8 @@ mkdir -p $DIR
 pushd $DIR
 
 echo $DIR
+
+mystart=`date +%s`
 
 for file in $LIST
 do
@@ -38,15 +38,28 @@ do
     echo $file $output $DIRECTORY
 
     root -l -b <<EOF
-    .L /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/offline/AnalysisTrain/Run14AuAuLeptonComby/MyEvent.C+
-    .L /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/NewHitAssociation.C+
+    gSystem->Load("libRun14AuAuLeptonEvent");    
+    gSystem->Load("/phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/NewHitAssociation_C.so");
     NewHitAssociation("$file","$output")
 EOF
 
-mv my-$output /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/First
+mv my-$output /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/All
   fi
   NUM=$(( $NUM + 1 ))
 done
 
 popd
 rm -r $DIR
+
+myend=`date +%s`
+
+mytot=$((myend-mystart))
+mymin=60
+
+mysec=$((mytot%mymin))
+mymins=$((mytot/mymin))
+myhour=$((mymins/mymin))
+
+echo "Accumulated time:" $myhour "hours" $mymins "minutes" $mysec "seconds"
+
+#gSystem->Load("/phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/offline/AnalysisTrain/Run14AuAuLeptonComby/MyEvent_C.so");
