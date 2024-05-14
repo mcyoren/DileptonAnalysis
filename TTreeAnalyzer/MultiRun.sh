@@ -34,7 +34,7 @@ do
     DUMMY=`echo $file | awk -F \/ '{printf("%s\n",$7)}' | awk -F\- '{printf("%s\n",$2)}' | awk -F\. '{printf("%s\n",$1)}'`
 
     DIRECTORY=$(( 10#$DUMMY ))
-    output=first_$NAME0
+    output=first_"$NAME"_"$NAME0"
     echo $file $output $DIRECTORY
 
     root -l -b <<EOF
