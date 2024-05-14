@@ -225,7 +225,7 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                        float sigma = 4.0;
+                        float sigma = 2.0;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -251,7 +251,7 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if(layer==0) sigma=5;
+                        if(layer==0) sigma=2;
                         if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
                         {
                             if (diff < min[layer])
@@ -649,7 +649,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(ielectron);
             const int charge_bin = (1 - electron->GetChargePrime()) / 2;
             const float pt = electron->GetPtPrime();
-            if (pt < 0.2)
+            if (pt < 0.4)
                 continue;
             if (electron->GetHitCounter(0) < 1 || electron->GetHitCounter(1) < 1 ||
                 (electron->GetHitCounter(2) < 1 && electron->GetHitCounter(3) < 1))
@@ -688,7 +688,7 @@ namespace MyDileptonAnalysis
                     const float dphi = (phi_hit - phi_orig);
                     const float dthe = (theta_hit - the_orig);
 
-                    if (abs(dphi) > 0.12 || abs(dthe) > 0.05 || abs(dphi) < 0.0005)
+                    if (abs(dphi) > 0.5 || abs(dthe) > 0.5 || abs(dphi) < 0.0005)
                         continue;
 
                     int dphi_index = 1;
@@ -699,16 +699,16 @@ namespace MyDileptonAnalysis
                     const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
                     if(is_check_veto) 
                     {
-                        if (abs(dthe) < 0.002/ilayer  ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
-                        if (abs(dphi) < 0.006 )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
-                        if (fabs(dthe) < 0.002/ilayer ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
+                        if (fabs(dthe) < 0.01  ) veto_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
+                        if (fabs(dphi) < 0.01 + 0.03*ilayer )veto_hist_the[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
+                        if (fabs(dthe) < 0.01 ) sveto_hist[centr_bin]->  Fill(fabs(dphi - mean) / sigma,ilayer+4*dphi_index+8*charge_bin,pt);
                     }
-                    if (ilayer==1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.04+0.04*exp(-2*pt) && fabs(dthe) < 0.002)
+                    if (ilayer<2 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.04+0.04*exp(-2*pt) && fabs(dthe) < 0.01)
                     {
                         if(electron->GetGhost()<10) electron->SetGhost(ilayer);
                         count++;
                     }
-                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.06+0.08*exp(-2*pt)  && fabs(dthe) < 0.01 )
+                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.1  && fabs(dthe) < 0.01 )
                     {
                         if(electron->GetGhost()<10) electron->SetGhost(ilayer);
                         count++;
@@ -903,8 +903,8 @@ namespace MyDileptonAnalysis
         }
         if(check_veto)
         {
-            INIT_HISTOS(3, veto_hist,     N_centr, 200, -0.05, 0.05, 16,0,16, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.02, 0.02, 16,0,16, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_hist,     N_centr, 200, -0.15, 0.15, 16,0,16, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.15, 0.15, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, sveto_hist,    N_centr, 200, 0, 20,       16,0,16, 28, 0.2, 3);
             INIT_HIST(2, couter_veto_hist, 8, 0, 8, 5, 0, 5);
             INIT_HIST(3, adc_hist, 500,0,500, 50, 0, 2.5, 6, 0, 6);
