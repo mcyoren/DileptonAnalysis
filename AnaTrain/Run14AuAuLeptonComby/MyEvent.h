@@ -18,6 +18,7 @@
 #include <climits>
 #include <map>
 #include <vector>
+#include <deque>
 #include <iostream>
 #include "MyEventConstants.h"
 #include "TVector3.h"
@@ -837,6 +838,7 @@ namespace MyDileptonAnalysis
       private:
             MyEvent *event;
             std::vector<MyDileptonAnalysis::MyEvent> EventList;
+            //std::deque<MyDileptonAnalysis::MyEvent> evtbuff_list[MIX_CENTBIN][MIX_ZVTXBIN][MIX_RP2BIN];
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
@@ -846,6 +848,7 @@ namespace MyDileptonAnalysis
             TH3D *chi2_ndf[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
+            TH3D *dphi_phi0_pt_hist[nvtx_layers], *dthe_the0_pt_hist[nvtx_layers]; 
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
@@ -880,6 +883,11 @@ namespace MyDileptonAnalysis
                         dthe_hist_el_dynamic[i] = nullptr;
                         sdphi_hist_el_dynamic[i] = nullptr;
                         sdthe_hist_el_dynamic[i] = nullptr;
+                  }
+                  for (int i = 0; i < nvtx_layers; i++)
+                  {
+                        dphi_phi0_pt_hist[i] = nullptr;
+                        dthe_the0_pt_hist[i] = nullptr;
                   }
                   for (int i = 0; i < N_centr; i++)
                   {
@@ -935,7 +943,7 @@ namespace MyDileptonAnalysis
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(bool test = false);
+            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, bool not_fill = false);
             void Associate_Hits_to_Hadrons();
 
             void Reveal_Hadron();

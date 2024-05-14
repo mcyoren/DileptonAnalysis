@@ -97,14 +97,14 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(bool test)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, bool not_fill)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
         const int centrality = event->GetCentrality();
         const int rungroup = event->GetRunNumber();
-        if (test)
-            is_fill_hsits = 0;
+        const int is_fill_hsits_local = is_fill_hsits && !not_fill;
+
         const int central_bin = (int)centrality / 20;
         if (central_bin > 4 || central_bin < 0)
             return;
@@ -225,8 +225,6 @@ namespace MyDileptonAnalysis
                         const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                        float sigma = 2.0;
-
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
                         float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
@@ -251,8 +249,8 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if(layer==0) sigma=2;
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
+                        //if(layer==0) sigma=2;
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma_veto && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
                         {
                             if (diff < min[layer])
                             {
@@ -285,12 +283,12 @@ namespace MyDileptonAnalysis
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=2;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=4;
 
-                        if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits)
+                        if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits_local)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
                         }
-                        if (sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits)
+                        if (sdphi*mytrk->GetChargePrime()>-sigma_veto && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits_local)
                         {
                             dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
                             sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
@@ -329,10 +327,10 @@ namespace MyDileptonAnalysis
                     chi2 = fabs(recon_pt-pt)/pt*10;
                     if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
                     
-                    if (is_fill_hsits) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
+                    if (is_fill_hsits_local) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
                 }
             }
-            if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
+            if(is_fill_hsits_local) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
@@ -495,15 +493,17 @@ namespace MyDileptonAnalysis
                     if (vtxhit->N_AssociatedTracks() > 0)
                         SignTrack = false;
                 }
-                if (abs(sdthe) < 2.0 && is_fill_hsits)
+                if (abs(sdthe) < 2.0 && is_fill_hadron_hsits)
                 {
                     dphi_hist[central_bin]->Fill(dphi, charge_bin + 2 * layer, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, charge_bin + 2 * layer, pt);
+                    dphi_phi0_pt_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), pt);
                 }
-                if (abs(sdphi) < 2.0 && is_fill_hsits)
+                if (abs(sdphi) < 2.0 && is_fill_hadron_hsits)
                 {
                     dthe_hist[central_bin]->Fill(dthe, charge_bin + 2 * layer, pt);
                     sdthe_hist[central_bin]->Fill(sdthe, charge_bin + 2 * layer, pt);
+                    dthe_the0_pt_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), pt);
                 }
             } // enf of hit loop
         }     // end of hadron loop
@@ -831,6 +831,8 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dthe_hist,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
             INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
             INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dphi_phi0_pt_hist,  nvtx_layers, 200, -0.05, 0.05, 120, -1.57, 4.71, 50, 0, 5);
+            INIT_HISTOS(3, dthe_the0_pt_hist,  nvtx_layers, 200, -0.05, 0.05, 120, 0.785, 2.36, 50, 0, 5);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)
@@ -1211,5 +1213,19 @@ namespace MyDileptonAnalysis
             }
         }
     }
+    //void MyEventContainer::fill_evtbuff_list(int icent_mix, int izvtx_mix, int ipsi2_mix)
+    //{
+    //    if (icent_mix < 0 || izvtx_mix < 0 || ipsi2_mix < 0)
+    //        return;
+    //    evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].push_back(event);
+    //    if (debug_mode)
+    //        std::cout << "evt buff info: " << icent_mix << " " << izvtx_mix << " " << ipsi2_mix << " depth now " << evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].size() << std::endl;
+    //    if (evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].size() > max_evbuf_depth)
+    //    {
+    //        evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].pop_front();
+    //    }
+    //}
 
-}
+}//end of namespace
+
+

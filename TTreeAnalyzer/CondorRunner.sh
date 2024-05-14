@@ -1,7 +1,9 @@
 #!/bin/sh
 
-rm /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/All/*
-rm /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/logs/*
+if [[ $1 == 0 ]];then
+    rm /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/All/*
+    rm /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/output/logs/*
+fi
 
 tcsh -c "source source.csh"
 
@@ -22,7 +24,12 @@ gSystem->Load("libRun14AuAuLeptonEvent");
 .L /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/TTreeAnalyzer/FirstIter/NewHitAssociation.C+
 EOF
 
-#./MultiRun.sh 100
+if [[ $1 -gt 0 ]];then
+    ./MultiRun.sh $1
+fi
+
 #.L /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/offline/AnalysisTrain/Run14AuAuLeptonComby/MyEvent.C+
 
-condor_submit multirun.job
+if [[ $1 == 0 ]];then
+    condor_submit multirun.job
+fi
