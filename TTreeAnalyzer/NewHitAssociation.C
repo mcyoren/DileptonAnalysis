@@ -58,10 +58,11 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
       break;
 
     int n_electrons = event->GetNtrack();
-    for (int itrk = 0; itrk < n_electrons*is_only_conv; itrk++)
+    for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-      if (mytrk->GetIsConv() < 8 || mytrk->GetRConv()>3) 
+      mytrk->ResetPhi0();
+      if ((mytrk->GetIsConv() < 8 || mytrk->GetRConv()>3) && is_only_conv) 
       {
         event->RemoveTrackEntry(itrk);
         n_electrons--;
@@ -85,12 +86,13 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     for (int itrk = 0; itrk < n_hadrons*remove_hadron_hits; itrk++)
     {
       MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
-      if (mytrk->GetPtPrime() < 1.0 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2) 
+      if (mytrk->GetPtPrime() < 1.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2) 
       {
         event->RemoveHadronEntry(itrk);
         n_hadrons--;
         itrk--;
       }
+      //mytrk->ResetPhi0();
     }
 
     if (remove_hadron_hits)

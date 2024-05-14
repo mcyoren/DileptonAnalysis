@@ -294,6 +294,7 @@ namespace MyDileptonAnalysis
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
             };
+            void ResetPhi0();
 
             /// below defined virtual functions for ide to suggest based on inherentence in electron and hadron classes
 
