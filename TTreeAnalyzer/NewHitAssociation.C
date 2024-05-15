@@ -61,7 +61,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-      mytrk->ResetPhi0();
+      mytrk->ResetPrimes(event->GetVtxZ(),event->GetPreciseZ(),event->GetRunNumber());
       if ((mytrk->GetIsConv() < 8 || mytrk->GetRConv()>3) && is_only_conv) 
       {
         event->RemoveTrackEntry(itrk);
@@ -92,7 +92,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
         n_hadrons--;
         itrk--;
       }
-      //mytrk->ResetPhi0();
+      mytrk->ResetPrimes(event->GetVtxZ(),event->GetPreciseZ(),event->GetRunNumber());
     }
 
     if (remove_hadron_hits)

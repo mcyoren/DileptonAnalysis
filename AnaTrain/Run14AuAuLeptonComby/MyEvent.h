@@ -294,7 +294,7 @@ namespace MyDileptonAnalysis
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
             };
-            void ResetPhi0();
+            void ResetPrimes(const float bbcz = 0, const float svxz = 0, const int rg_beamoffset = 0);
 
             /// below defined virtual functions for ide to suggest based on inherentence in electron and hadron classes
 
@@ -849,7 +849,8 @@ namespace MyDileptonAnalysis
             TH3D *chi2_ndf[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
-            TH3D *dphi_phi0_pt_hist[nvtx_layers], *dthe_the0_pt_hist[nvtx_layers]; 
+            TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
+            TH3D *dphi_phi0_corr_hist[nvtx_layers], *dthe_the0_corr_hist[nvtx_layers]; 
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
@@ -887,8 +888,10 @@ namespace MyDileptonAnalysis
                   }
                   for (int i = 0; i < nvtx_layers; i++)
                   {
-                        dphi_phi0_pt_hist[i] = nullptr;
-                        dthe_the0_pt_hist[i] = nullptr;
+                        dphi_phi0_init_hist[i] = nullptr;
+                        dthe_the0_init_hist[i] = nullptr;
+                        dphi_phi0_corr_hist[i] = nullptr;
+                        dthe_the0_corr_hist[i] = nullptr;
                   }
                   for (int i = 0; i < N_centr; i++)
                   {
