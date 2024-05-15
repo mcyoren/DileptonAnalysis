@@ -193,7 +193,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     event->SetPreciseY(precise_y);
     event->SetPreciseZ(precise_z);
     event->SetEvtNo(ncalls);
-    event->SetRunNumber(run_group);
+    event->SetRunNumber(run_group);/////neeed a doctor
     event->SetBBCcharge(bbcq);
     event->SetVtxZ(bbc_vertex);
     event->SetBBCtimeN(bbcT0);
