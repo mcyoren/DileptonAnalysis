@@ -59,6 +59,8 @@ namespace MyDileptonAnalysis
     {
         ///reversing prev corrections
         float phi_offset = -999;
+    
+        this->SetPhi0(this->GetPhi0() + 2.0195 * (this->GetAlpha() - this->GetAlphaPrime()));
 
         if (this->GetArm() == 0)
         {
@@ -74,6 +76,10 @@ namespace MyDileptonAnalysis
         else
             this->SetPhi0(this->GetPhi0Prime() + phi_offset - res_rot_west);
 
+        // set Phi0 to right value
+        const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset);
+
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
 
@@ -88,10 +94,6 @@ namespace MyDileptonAnalysis
         the_offset_params[rungroup][DCArm][1] * TMath::Cos(new_the0) + the_offset_params[rungroup][DCArm][2];
 
         this->SetThe0Prime(new_the0 - theta_offset);
-
-        // set Phi0 to right value
-        const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset);
     }
 
     float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) 
@@ -536,9 +538,11 @@ namespace MyDileptonAnalysis
                 {
                     dphi_hist[central_bin]->Fill(dphi, charge_bin + 2 * layer, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, charge_bin + 2 * layer, pt);
-                    const float dphi0 = dphi + mytrk->GetPhi0() + 2.0195*(mytrk->GetAlpha()-mytrk->GetAlphaPrime()) - mytrk->GetPhi0Prime();
-                    dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0() + 2.0195*(mytrk->GetAlpha()-mytrk->GetAlphaPrime()), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    const float dphi0 = dphi + mytrk->GetPhi0() + 0*2.0195*(mytrk->GetAlpha()-mytrk->GetAlphaPrime()) - mytrk->GetPhi0Prime();
+                    dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0() + 0*2.0195*(mytrk->GetAlpha()-mytrk->GetAlphaPrime()), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                 }
                 if (abs(sdphi) < 2.0 && is_fill_hadron_hsits)
                 {
@@ -548,6 +552,8 @@ namespace MyDileptonAnalysis
                     const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
                     dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dthe_phi0_init_hist[layer]->Fill(dthe0, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dthe_phi0_corr_hist[layer]->Fill(dthe, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                 }
             } // enf of hit loop
         }     // end of hadron loop
@@ -879,6 +885,10 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dthe_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
             INIT_HISTOS(3, dphi_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
             INIT_HISTOS(3, dthe_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
+            INIT_HISTOS(3, dthe_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
+            INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
+            INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
+            INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)

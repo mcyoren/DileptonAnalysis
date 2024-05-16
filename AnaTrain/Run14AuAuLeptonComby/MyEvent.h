@@ -851,6 +851,8 @@ namespace MyDileptonAnalysis
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
             TH3D *dphi_phi0_corr_hist[nvtx_layers], *dthe_the0_corr_hist[nvtx_layers]; 
+            TH3D *dphi_the0_init_hist[nvtx_layers], *dthe_phi0_init_hist[nvtx_layers];
+            TH3D *dphi_the0_corr_hist[nvtx_layers], *dthe_phi0_corr_hist[nvtx_layers]; 
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
@@ -892,6 +894,10 @@ namespace MyDileptonAnalysis
                         dthe_the0_init_hist[i] = nullptr;
                         dphi_phi0_corr_hist[i] = nullptr;
                         dthe_the0_corr_hist[i] = nullptr;
+                        dphi_the0_init_hist[i] = nullptr;
+                        dthe_phi0_init_hist[i] = nullptr;
+                        dphi_the0_corr_hist[i] = nullptr;
+                        dthe_phi0_corr_hist[i] = nullptr;
                   }
                   for (int i = 0; i < N_centr; i++)
                   {

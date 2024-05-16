@@ -92,6 +92,14 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
         n_hadrons--;
         itrk--;
       }
+    }
+    for (int itrk = 0; itrk <  event->GetNhadron(); itrk++)
+    {
+      MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
+      if (remove_hadron_hits && (mytrk->GetPtPrime() < 1.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2)) 
+      {
+        std::cout<<"WTF"<<std::endl;
+      }
       mytrk->ResetPrimes(event->GetVtxZ(),event->GetPreciseZ(),event->GetRunNumber());
     }
 
