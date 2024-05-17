@@ -543,6 +543,8 @@ namespace MyDileptonAnalysis
                     dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                 }
                 if (abs(sdphi) < 2.0 && is_fill_hadron_hsits)
                 {
@@ -552,8 +554,6 @@ namespace MyDileptonAnalysis
                     const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
                     dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dthe_phi0_init_hist[layer]->Fill(dthe0, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dthe_phi0_corr_hist[layer]->Fill(dthe, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                 }
             } // enf of hit loop
         }     // end of hadron loop

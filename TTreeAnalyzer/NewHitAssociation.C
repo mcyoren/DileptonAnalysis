@@ -10,7 +10,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
   }
   const int remove_hadron_hits = 1;
   const int fill_QA_hadron_hists = 1;
-  const int fill_QA_lepton_hists = 1;
+  const int fill_QA_lepton_hists = 0;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -37,14 +37,14 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
 
   int nevt = T->GetEntries();
 
-  TH3D *myhist0 = new TH3D("myhist0", "myhist0", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist1 = new TH3D("myhist1", "myhist1", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist2 = new TH3D("myhist2", "myhist2", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist3 = new TH3D("myhist3", "myhist3", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist4 = new TH3D("myhist4", "myhist4", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist5 = new TH3D("myhist5", "myhist5", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist6 = new TH3D("myhist6", "myhist6", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
-  TH3D *myhist7 = new TH3D("myhist7", "myhist7", 500, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist0 = new TH3D("myhist0", "myhist0", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist1 = new TH3D("myhist1", "myhist1", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist2 = new TH3D("myhist2", "myhist2", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist3 = new TH3D("myhist3", "myhist3", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist4 = new TH3D("myhist4", "myhist4", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist5 = new TH3D("myhist5", "myhist5", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist6 = new TH3D("myhist6", "myhist6", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *myhist7 = new TH3D("myhist7", "myhist7", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
 
   for (int ievent = 0; ievent < nevt; ievent++)
   {
