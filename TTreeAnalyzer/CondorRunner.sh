@@ -47,6 +47,7 @@ fi
 #.L /phenix/plhf/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/offline/AnalysisTrain/Run14AuAuLeptonComby/MyEvent.C+
 
 if [[ $1 == 0 ]];then
+    condor_rm -all
     echo "subbmiting 1000 jobs to condor"
     condor_submit multirun.job
 fi
