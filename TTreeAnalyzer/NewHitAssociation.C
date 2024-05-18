@@ -45,6 +45,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
   TH3D *myhist5 = new TH3D("myhist5", "myhist5", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
   TH3D *myhist6 = new TH3D("myhist6", "myhist6", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
   TH3D *myhist7 = new TH3D("myhist7", "myhist7", 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+  TH3D *vtxhist = new TH3D("vtxhist", "vtxhist", 250, -1, 1, 250, -1, 1, 10, 0, 10);
 
   for (int ievent = 0; ievent < nevt; ievent++)
   {
@@ -82,6 +83,8 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     if (event->GetNtrack() < 2)
       continue;
 
+    vtxhist->Fill(event->GetPreciseX(),event->GetPreciseY(),event->GetRunNumber());
+
     int n_hadrons = event->GetNhadron();
     for (int itrk = 0; itrk < n_hadrons*remove_hadron_hits; itrk++)
     {
@@ -100,7 +103,9 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
       {
         std::cout<<"WTF"<<std::endl;
       }
+      //std::cout<<"before: "<<mytrk->GetPhi0()<<" "<<mytrk->GetPhi0Prime()<<" "<<mytrk->GetThe0()<<" "<<mytrk->GetThe0Prime()<<" "<<std::endl;
       mytrk->ResetPrimes(event->GetVtxZ(),event->GetPreciseZ(),event->GetRunNumber());
+      //std::cout<<"after: "<<mytrk->GetPhi0()<<" "<<mytrk->GetPhi0Prime()<<" "<<mytrk->GetThe0()<<" "<<mytrk->GetThe0Prime()<<" "<<std::endl;
     }
 
     if (remove_hadron_hits)
