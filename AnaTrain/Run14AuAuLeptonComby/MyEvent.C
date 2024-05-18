@@ -86,8 +86,8 @@ namespace MyDileptonAnalysis
         //const float new_phi_offset = phi_offset_params[rungroup][DCArm][0] * TMath::Sin(this->GetPhi0()) + 
         //phi_offset_params[rungroup][DCArm][1] * TMath::Cos(this->GetPhi0()) + phi_offset_params[rungroup][DCArm][2];
 
-        const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - fVTXXoffset[rungroup]*(1-2*DCArm)) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
-        ((fYoffset[DCArm][rungroup] - fVTXYoffset[rungroup] )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
+        const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup]+1.)*(1-2*DCArm)) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
+        ((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]-0.5) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
 
         this->SetPhi0Prime(this->GetPhi0() - new_phi_offset);
 

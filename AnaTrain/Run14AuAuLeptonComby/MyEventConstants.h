@@ -51,7 +51,7 @@ const float fYoffset[2][12] = {
 const float fVTXXoffset[8] = {0.322, 0.343, 0.337, 0.346, 0.354, 0.350, 0.350, 0.350};
 const float fVTXYoffset[8] = {0.0352, 0.0712, 0.0420, 0.0461, 0.0454, 0.0450, 0.0450, 0.0450};
 
-const float ToT_offset[2] = {-0.006,0.006};
+const float ToT_offset[2] = {-0.003,0.003};
 
 const float dilep_par0_phi[N_ARM] = {-0.002988, 0.001341};
 const float dilep_par1_phi[N_ARM] = {-0.012395, -0.005118};
