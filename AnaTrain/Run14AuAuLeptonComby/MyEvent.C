@@ -78,7 +78,7 @@ namespace MyDileptonAnalysis
 
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * 2 * (0.5 -this->GetArm()) );
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * (-this->GetChargePrime()) );
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
@@ -89,10 +89,10 @@ namespace MyDileptonAnalysis
         //const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup]+1.*(1-2*DCArm))) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
         //((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
         
-        const float new_phi_offset = ToT_offset[DCArm] + ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
-        ( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
+        const float new_phi_offset = ToT_offset[DCArm] - 2.0195 * 1.005 * (-this->GetChargePrime()) * ( ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) -
+        ( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]) );
 
-        if (DCArm == 0 ) this->SetPhi0Prime(this->GetPhi0() - 2.0195* new_phi_offset);
+        this->SetPhi0Prime(this->GetPhi0() -  new_phi_offset);
 
         //const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
 
