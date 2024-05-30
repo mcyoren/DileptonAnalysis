@@ -49,7 +49,7 @@ const float fYoffset[2][12] = {
 };
 
 const float fVTXXoffset[8] = {0.322, 0.343, 0.337, 0.346, 0.354, 0.350, 0.350, 0.350};
-const float fVTXYoffset[8] = {0.0352, 0.0712, 0.0420, 0.0461, 0.0454, 0.0450, 0.0450, 0.0450};
+const float fVTXYoffset[8] = {0.0352, 0.03712, 0.0420, 0.0461, 0.0454, 0.0450, 0.0450, 0.0450};
 
 const float ToT_offset[2] = {-0.003,0.006};
 

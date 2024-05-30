@@ -78,7 +78,7 @@ namespace MyDileptonAnalysis
 
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 0*2.0195 * alpha_offset );
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * 2 * (0.5 -this->GetArm()) );
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
@@ -86,10 +86,13 @@ namespace MyDileptonAnalysis
         //const float new_phi_offset = phi_offset_params[rungroup][DCArm][0] * TMath::Sin(this->GetPhi0()) + 
         //phi_offset_params[rungroup][DCArm][1] * TMath::Cos(this->GetPhi0()) + phi_offset_params[rungroup][DCArm][2];
 
-        const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup]+1.*(1-2*DCArm))) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
-        ((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
+        //const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup]+1.*(1-2*DCArm))) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
+        //((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
+        
+        const float new_phi_offset = ToT_offset[DCArm] + ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
+        ( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
 
-        this->SetPhi0Prime(this->GetPhi0() - new_phi_offset);
+        if (DCArm == 0 ) this->SetPhi0Prime(this->GetPhi0() - 2.0195* new_phi_offset);
 
         //const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
 
@@ -442,12 +445,12 @@ namespace MyDileptonAnalysis
 
                 const float bz = hist_bz->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100 / 0.97);
+                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100);
                 phi0_trk_proj += delta_phi0;
 
                 const float bradial = hist_br->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the0_trk_proj)) / (2 * pz * 100 / 0.97);
+                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the0_trk_proj)) / (2 * pz * 100 );
 
                 if (thetaprime > pi / 2)
                     the0_trk_proj -= delta_the0;
