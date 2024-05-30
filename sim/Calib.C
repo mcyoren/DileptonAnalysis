@@ -51,7 +51,7 @@ void Calib(int par = 0)
     if (ievent % 5000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 200000)
+    if (ievent > 2000000)
       break;
 
 
@@ -108,7 +108,7 @@ void Calib(int par = 0)
     for (int i = 0; i < event->GetNtrack()*fill_QA_hadron_hists; i++)
     {
       DileptonAnalysis::MyTrack trk = event->GetEntry(i);
-      if (trk.GetPtPrime()<5) continue;
+      if (trk.GetPtPrime()>1.5) continue;
       MyDileptonAnalysis::MyHadron *newTrack = new MyDileptonAnalysis::MyHadron;
       newTrack->SetTrkId(i);
       newTrack->SetArm(trk.GetArm());
@@ -164,6 +164,7 @@ void Calib(int par = 0)
 
     
     event_container->SetEvent(myevent);
+    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons();
 
     event_container->Associate_Hits_to_Leptons(remove_hadron_hits);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
@@ -189,7 +190,6 @@ void Calib(int par = 0)
         event_container->Associate_Hits_to_Leptons();
     }
 
-    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons();
 
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
