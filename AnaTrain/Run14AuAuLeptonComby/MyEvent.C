@@ -412,7 +412,7 @@ namespace MyDileptonAnalysis
 
             const float thetaprime = mytrk->GetThe0Prime();
 
-            float phi0_trk_proj = mytrk->GetPhi0Prime();
+            float phi0_trk_proj = mytrk->GetPhi0Prime()+0.00*mytrk->GetChargePrime()/mytrk->GetPtPrime();
             float the0_trk_proj = mytrk->GetThe0Prime();
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
@@ -442,12 +442,12 @@ namespace MyDileptonAnalysis
 
                 const float bz = hist_bz->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100);
+                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100 / 0.97);
                 phi0_trk_proj += delta_phi0;
 
                 const float bradial = hist_br->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the0_trk_proj)) / (2 * pz * 100);
+                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the0_trk_proj)) / (2 * pz * 100 / 0.97);
 
                 if (thetaprime > pi / 2)
                     the0_trk_proj -= delta_the0;
