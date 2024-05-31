@@ -133,7 +133,7 @@ const float the_offset_params[8][2][3] = {
 
 const float res_rot_east = 0.001;
 const float res_rot_west = -0.001;
-const int N_steps = 1800;
+const int N_steps = 1900;
 const float step_size = 0.01;
 
 const float radii[total_vtx_layers] = {2.64, 5.22, 10.41, 11.80, 12.90, 15.55, 16.74, 17.91};

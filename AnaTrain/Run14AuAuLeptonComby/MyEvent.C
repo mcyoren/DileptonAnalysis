@@ -78,7 +78,7 @@ namespace MyDileptonAnalysis
 
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * (1-2*this->GetArm()) );
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * (1-0*this->GetArm()) );
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
@@ -89,9 +89,12 @@ namespace MyDileptonAnalysis
         //const float new_phi_offset = ToT_offset[DCArm] + ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup]+1.*(1-2*DCArm))) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
         //((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
         
-        const float new_phi_offset = ToT_offset[DCArm] - 2.0195 * 1.005 * (1-2*this->GetArm()) * ( ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) -
-        ( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]) );
+        //const float new_phi_offset = ToT_offset[DCArm] - 2.0195 * 1.005 * (1-2*this->GetArm()) * ( ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) -
+        //( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]) );
 
+        const float new_phi_offset = ToT_offset[DCArm] + 2.0195 * (1-0*this->GetArm()) * ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup])) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
+        ((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]);
+        
         this->SetPhi0Prime(this->GetPhi0() -  new_phi_offset);
 
         //const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
@@ -420,6 +423,8 @@ namespace MyDileptonAnalysis
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
             float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
+            float xp = event->GetPreciseX()*( 2*mytrk->GetArm() - 1 );
+            float yp = event->GetPreciseY();
             float zp = event->GetPreciseZ();
 
             float dilep_phi_projection[total_vtx_layers];
@@ -431,6 +436,8 @@ namespace MyDileptonAnalysis
             }
             for (int p = 1; p < N_steps; p++)
             {
+                rp = sqrt(SQR(xp) + SQR(yp) );
+
                 for (int l = 0; l < total_vtx_layers; l++)
                 {
                     if (fabs(rp - radii[l]) < step_size && dilep_phi_projection[l] < -900)
@@ -458,7 +465,9 @@ namespace MyDileptonAnalysis
                     the0_trk_proj += delta_the0;
 
                 zp += step_size * TMath::Tan(pi / 2 - the0_trk_proj);
-                rp += step_size;
+                xp += step_size * TMath::Cos(phi0_trk_proj-0.5*delta_phi0);
+                yp += step_size * TMath::Sin(phi0_trk_proj-0.5*delta_phi0);
+                //rp += step_size;
             }
             const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
 

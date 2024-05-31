@@ -358,7 +358,7 @@ namespace MyDileptonAnalysis
             float DCA_Y,DCA_Y2;
             float true_pt;
             // Wenching information
-            int isConv; // indicates is there Solution fro Wenqing algoritm and how tigt is it
+            int isConv; // indicates is there Solution for Wenqing algoritm and how tigt is it
             float r_conv, phi_conv, the_conv, phiv_conv, dzed_conv;
 
             std::vector<float> dangle0,dangle1,dangle2,dangle3;
