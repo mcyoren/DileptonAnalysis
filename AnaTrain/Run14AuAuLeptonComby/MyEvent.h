@@ -863,7 +863,8 @@ namespace MyDileptonAnalysis
             TH3D *veto_hist[N_centr], *veto_hist_the[N_centr], *sveto_hist[N_centr];
             TH2D *couter_veto_hist;
             TH3D *adc_hist;
-            TH3D *inv_mass_dca0,*inv_mass_dca1,*inv_mass_dca2,*inv_mass_dca3,*inv_mass_dca4,*inv_mass_dca5,*inv_mass_dca6,*inv_mass_dca7;
+            TH3D *inv_mass_dca_fg0,*inv_mass_dca_fg1,*inv_mass_dca_fg2,*inv_mass_dca_fg3,*inv_mass_dca_fg4,*inv_mass_dca_fg5,*inv_mass_dca_fg6,*inv_mass_dca_fg7;
+            TH3D *inv_mass_dca_bg0,*inv_mass_dca_bg1,*inv_mass_dca_bg2,*inv_mass_dca_bg3,*inv_mass_dca_bg4,*inv_mass_dca_bg5,*inv_mass_dca_bg6,*inv_mass_dca_bg7;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_reveal, is_fill_DCA2_hist, is_check_veto;
            
@@ -882,8 +883,10 @@ namespace MyDileptonAnalysis
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
                   adc_hist = nullptr;
-                  inv_mass_dca0=nullptr;inv_mass_dca1=nullptr;inv_mass_dca2=nullptr;inv_mass_dca3=nullptr;inv_mass_dca4=nullptr;inv_mass_dca5=nullptr;
-                  inv_mass_dca6=nullptr;inv_mass_dca7=nullptr;
+                  inv_mass_dca_fg0=nullptr;inv_mass_dca_fg1=nullptr;inv_mass_dca_fg2=nullptr;inv_mass_dca_fg3=nullptr;
+                  inv_mass_dca_fg4=nullptr;inv_mass_dca_fg5=nullptr;inv_mass_dca_fg6=nullptr;inv_mass_dca_fg7=nullptr;
+                  inv_mass_dca_bg0=nullptr;inv_mass_dca_bg1=nullptr;inv_mass_dca_bg2=nullptr;inv_mass_dca_bg3=nullptr;
+                  inv_mass_dca_bg4=nullptr;inv_mass_dca_bg5=nullptr;inv_mass_dca_bg6=nullptr;inv_mass_dca_bg7=nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;

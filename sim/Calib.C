@@ -20,6 +20,7 @@ void Calib(int par = 0)
   const int Use_ident = 1;
   const int fill_true_DCA = 1;
   const int check_veto = 1;
+  const int fill_inv_mass = 1;
 
 
   TTree *T = (TTree *)input->Get("T");
@@ -28,7 +29,7 @@ void Calib(int par = 0)
   event_container->InitEvent();
   event_container->GetHistsFromFile("../../ee_QA/AnaTrain/Run14AuAuLeptonComby/field_map.root");
   event_container->CreateOutFileAndInitHists("kek.root",fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
+                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass);
   DileptonAnalysis::MyEvent *event = 0;                                             
   //event = 0;
   br->SetAddress(&event);
@@ -51,7 +52,7 @@ void Calib(int par = 0)
     if (ievent % 5000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 200000)
+    if (ievent > 2000000)
       break;
 
 
@@ -197,6 +198,7 @@ void Calib(int par = 0)
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
     myevent->ReshuffleElectrons();
+    if(fill_inv_mass) event_container->fill_inv_mass();
     float x0 = event->GetPreciseX();
     const float y0 = event->GetPreciseY();
     for (int i = 0; i < myevent->GetNtrack(); i++)
