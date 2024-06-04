@@ -839,7 +839,7 @@ namespace MyDileptonAnalysis
       private:
             MyEvent *event;
             std::vector<MyDileptonAnalysis::MyEvent> EventList;
-            //std::deque<MyDileptonAnalysis::MyEvent> evtbuff_list[MIX_CENTBIN][MIX_ZVTXBIN][MIX_RP2BIN];
+            std::deque<MyDileptonAnalysis::MyEvent> evtbuff_list[MIX_CENTBIN][MIX_ZVTXBIN][MIX_RP2BIN];
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
@@ -863,6 +863,7 @@ namespace MyDileptonAnalysis
             TH3D *veto_hist[N_centr], *veto_hist_the[N_centr], *sveto_hist[N_centr];
             TH2D *couter_veto_hist;
             TH3D *adc_hist;
+            TH3D *inv_mass_dca0,*inv_mass_dca1,*inv_mass_dca2,*inv_mass_dca3,*inv_mass_dca4,*inv_mass_dca5,*inv_mass_dca6,*inv_mass_dca7;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_reveal, is_fill_DCA2_hist, is_check_veto;
            
@@ -881,6 +882,8 @@ namespace MyDileptonAnalysis
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
                   adc_hist = nullptr;
+                  inv_mass_dca0=nullptr;inv_mass_dca1=nullptr;inv_mass_dca2=nullptr;inv_mass_dca3=nullptr;inv_mass_dca4=nullptr;inv_mass_dca5=nullptr;
+                  inv_mass_dca6=nullptr;inv_mass_dca7=nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -949,7 +952,7 @@ namespace MyDileptonAnalysis
             void ClearEvent() { event->ClearEvent(); };
             void GetHistsFromFile(const std::string loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
-            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0);
+            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
@@ -968,6 +971,9 @@ namespace MyDileptonAnalysis
             void FillEventHist(const float varX){ event_hist->Fill(varX); };
             void FillCentrHist(const float centr){ centr_hist->Fill(centr); };
             int GetNGoodElectrons();
+
+            void fill_evtbuff_list();
+            void fill_inv_mass();
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };

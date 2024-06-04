@@ -428,6 +428,9 @@ namespace MyDileptonAnalysis
             float yp = event->GetPreciseY();
             float zp = event->GetPreciseZ();
 
+            float phi_now = phi0_trk_proj;
+            float the_now = the0_trk_proj;
+
             float dilep_phi_projection[total_vtx_layers];
             float dilep_the_projection[total_vtx_layers];
             for (int ii = 0; ii < total_vtx_layers; ii++)
@@ -455,19 +458,20 @@ namespace MyDileptonAnalysis
 
                 const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100);
                 phi0_trk_proj += delta_phi0;
+                phi_now += 2*delta_phi0;
 
                 const float bradial = hist_br->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the0_trk_proj)) / (2 * pz * 100 );
+                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the_now)) / (2 * pz * 100 );
 
                 if (thetaprime > pi / 2)
-                    the0_trk_proj -= delta_the0;
+                    {the0_trk_proj -= delta_the0; the_now -= 2*delta_the0;}
                 else
-                    the0_trk_proj += delta_the0;
+                    {the0_trk_proj += delta_the0; the_now += 2*delta_the0;}
 
-                zp += step_size * TMath::Tan(pi / 2 - the0_trk_proj);
-                xp += step_size * TMath::Cos(phi0_trk_proj-0.5*delta_phi0);
-                yp += step_size * TMath::Sin(phi0_trk_proj-0.5*delta_phi0);
+                zp += step_size * TMath::Tan(pi / 2 - the_now);
+                xp += step_size * TMath::Cos(phi_now);
+                yp += step_size * TMath::Sin(phi_now);
                 //rp += step_size;
             }
             const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
@@ -833,6 +837,90 @@ namespace MyDileptonAnalysis
         }
     }
 
+    void MyEventContainer::fill_evtbuff_list()
+    {
+        int icent_mix = event->GetCentrality() / 5;
+        if (icent_mix > 3)
+            icent_mix = 2 + event->GetCentrality() / 10;
+        if (icent_mix > 7)
+            icent_mix = 8;
+        const int izvtx_mix = (event->GetVtxZ() + 10) / 10;
+        const int ipsi2_mix = (event->GetPsi2FVTXA0() + pi / 2) / pi * 4;
+        evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].push_back(*event);
+        if (evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].size() > pool_depth)
+        {
+            evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix].pop_front();
+        }
+    }
+
+    void MyEventContainer::fill_inv_mass()
+    {
+        for (int ielectron = 0; ielectron < event->GetNtrack(); ielectron++)
+        {
+            MyDileptonAnalysis::MyElectron *newTrack1 = event->GetEntry(ielectron);
+            if (newTrack1->GetHitCounter(0) < 1 || newTrack1->GetHitCounter(1) < 1 ||
+                (newTrack1->GetHitCounter(2) < 1 && newTrack1->GetHitCounter(3) < 1))
+                continue;
+            if (newTrack1->GetGhost() > 0)
+                continue;
+            if (newTrack1->GetChargePrime() < 0)
+                continue;
+            //const float a1 = newTrack1->GetMinDist(0);
+            //const float b1 = newTrack1->GetMinDist(1);
+            //const float c1 = newTrack1->GetMinDist(2);
+            for (int jelectron = 0; jelectron < event->GetNtrack(); jelectron++)
+            {
+                MyDileptonAnalysis::MyElectron *newTrack2 = event->GetEntry(jelectron);
+                if (newTrack2->GetHitCounter(0) < 1 || newTrack2->GetHitCounter(1) < 1 ||
+                    (newTrack2->GetHitCounter(2) < 1 && newTrack2->GetHitCounter(3) < 1))
+                    continue;
+                if (newTrack2->GetChargePrime() > 0)
+                    continue;
+                if (newTrack2->GetGhost() > 0)
+                    continue;
+                //const float a2 = newTrack2->GetMinDist(0);
+                //const float b2 = newTrack2->GetMinDist(1);
+                //const float c2 = newTrack2->GetMinDist(2);
+
+                const float dca0 = abs(newTrack1->GetDCAX2() + newTrack2->GetDCAX2());
+                const float dca1 = abs(newTrack1->GetDCAY2() + newTrack2->GetDCAY2());
+                const float dca2 = abs(newTrack1->GetDCAX2() - newTrack2->GetDCAX2());
+                const float dca3 = abs(newTrack1->GetDCAY2() - newTrack2->GetDCAY2());
+                const float dca4 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
+                const float dca5 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
+                const float dca6 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
+                const float dca7 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
+
+                const float pair_pt = sqrt( SQR(newTrack1->GetPx() + newTrack2->GetPx()) + SQR(newTrack1->GetPy() + newTrack2->GetPy()));
+
+                const float px1 = newTrack1->GetPx();
+                const float py1 = newTrack1->GetPy();
+                const float pz1 = newTrack1->GetPz();
+                const float px2 = newTrack2->GetPx();
+                const float py2 = newTrack2->GetPy();
+                const float pz2 = newTrack2->GetPz();
+                const float pm1 = px1 * px1 + py1 * py1 + pz1 * pz1;
+                const float pm2 = px2 * px2 + py2 * py2 + pz2 * pz2;
+                const float es = sqrt(pm1 + me2) + sqrt(pm2 + me2);
+                const float px = px1 + px2;
+                const float py = py1 + py2;
+                const float pz = pz1 + pz2;
+
+                const float invm = sqrt(es * es - px * px - py * py - pz * pz);
+
+                inv_mass_dca0->Fill(dca0, invm, pair_pt);
+                inv_mass_dca1->Fill(dca1, invm, pair_pt);
+                inv_mass_dca2->Fill(dca2, invm, pair_pt);
+                inv_mass_dca3->Fill(dca3, invm, pair_pt);
+                inv_mass_dca4->Fill(dca4, invm, pair_pt);
+                inv_mass_dca5->Fill(dca5, invm, pair_pt);
+                inv_mass_dca6->Fill(dca6, invm, pair_pt);
+                inv_mass_dca7->Fill(dca7, invm, pair_pt);
+
+            }
+        }
+    }
+
     int MyEventContainer::GetNGoodElectrons()
     {
         int n_good_el = 0;
@@ -862,7 +950,8 @@ namespace MyDileptonAnalysis
         hist_bz = (TH2D *)infile->Get("hist_bz");
     }
     void MyEventContainer::CreateOutFileAndInitHists(std::string outfilename, const int fill_ell, const int fill_had, const int fill_tree, const int fill_dphi,
-                                                     const int fill_DCA, const int fill_track_QA, const int fill_reveal, const int fill_true_DCA, const int check_veto)
+                                                     const int fill_DCA, const int fill_track_QA, const int fill_reveal, const int fill_true_DCA, 
+                                                     const int check_veto, const int fill_inv_mas)
     {
         outfilename = "my-" + outfilename;
         const int compress = 9;
@@ -985,6 +1074,17 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);
             is_check_veto = 1;
+        }
+        if(fill_inv_mas)
+        {
+            INIT_HIST( 3, inv_mass_dca0, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca1, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca2, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca3, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca4, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca5, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca6, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
+            INIT_HIST( 3, inv_mass_dca7, 200, -2000, 2000, 500, 0, 5, 10, 0, 10);
         }
     }
     

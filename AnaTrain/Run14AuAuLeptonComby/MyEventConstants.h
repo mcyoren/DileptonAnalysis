@@ -31,7 +31,13 @@
 #define N_rg 7
 #define N_dynamic 12
 
+#define MIX_CENTBIN 10
+#define MIX_ZVTXBIN 10 
+#define MIX_RP2BIN 4
+#define pool_depth 50
+
 const float pi = 3.14159265358979323846;
+const float me2 = 2.61121e-7;
 
 const float mscale = 0.97;
 
