@@ -424,7 +424,7 @@ namespace MyDileptonAnalysis
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
             float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
-            float xp = event->GetPreciseX() + 2*mytrk->GetArm();
+            float xp = event->GetPreciseX() + 0*mytrk->GetArm();
             float yp = event->GetPreciseY();
             float zp = event->GetPreciseZ();
 
