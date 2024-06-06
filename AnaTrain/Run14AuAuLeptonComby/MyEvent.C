@@ -78,7 +78,7 @@ namespace MyDileptonAnalysis
 
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset * (1-0*this->GetArm()) );
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset  );
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
