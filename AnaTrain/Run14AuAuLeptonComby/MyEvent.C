@@ -456,7 +456,7 @@ namespace MyDileptonAnalysis
 
                 const float bz = hist_bz->GetBinContent(rbin, zbin) / 10000;
 
-                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100);
+                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100 );
                 phi0_trk_proj += delta_phi0;
                 phi_now += 2*delta_phi0;
 
