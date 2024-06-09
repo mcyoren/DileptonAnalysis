@@ -78,7 +78,7 @@ namespace MyDileptonAnalysis
 
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset  );
+        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset );
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
@@ -419,7 +419,7 @@ namespace MyDileptonAnalysis
 
             const float thetaprime = mytrk->GetThe0Prime();
 
-            float phi0_trk_proj = mytrk->GetPhi0Prime()+0.00*mytrk->GetChargePrime()/mytrk->GetPtPrime();
+            float phi0_trk_proj = mytrk->GetPhi0Prime()-0.002*mytrk->GetChargePrime()*mytrk->GetArm();
             float the0_trk_proj = mytrk->GetThe0Prime();
             const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
 
