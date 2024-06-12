@@ -82,6 +82,7 @@ namespace MyDileptonAnalysis
 
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
+        const int charge = (1-this->GetChargePrime())/2;
 
         //const float new_phi_offset = phi_offset_params[rungroup][DCArm][0] * TMath::Sin(this->GetPhi0()) + 
         //phi_offset_params[rungroup][DCArm][1] * TMath::Cos(this->GetPhi0()) + phi_offset_params[rungroup][DCArm][2];
@@ -92,18 +93,26 @@ namespace MyDileptonAnalysis
         //const float new_phi_offset = ToT_offset[DCArm] - 2.0195 * 1.005 * (1-2*this->GetArm()) * ( ( fVTXXoffset[rungroup] / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) -
         //( fVTXYoffset[rungroup] / 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm]) );
 
-        const float new_phi_offset = ToT_offset[DCArm] + 2.0195 * ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup])) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
-        ((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm])
-        - 0*2.0195 * ( 1. *  DCArm / 220) * TMath::Sin(this->GetPhi0()-ToT_offset[DCArm]);
+        //const float new_phi_offset = ToT_offset[DCArm] + 2.0195 * ((fXoffset[DCArm][rungroup] - (fVTXXoffset[rungroup])) / 220) * TMath::Sin(this->GetPhiDC()-ToT_offset[DCArm]) +
+        //((fYoffset[DCArm][rungroup] - (fVTXYoffset[rungroup]) )/ 220) * TMath::Cos(this->GetPhiDC()-ToT_offset[DCArm])
+        //- 0*2.0195 * ( 1. *  DCArm / 220) * TMath::Sin(this->GetPhi0()-ToT_offset[DCArm]);
+
+        const float new_phi_offset = phi_offset_param0[rungroup][DCArm][charge][3] * TMath::Sin(this->GetPhi0()) + 
+        phi_offset_param1[rungroup][DCArm][charge][3] * TMath::Cos(this->GetPhi0()) + phi_offset_param2[rungroup][DCArm][charge][3];
         
-        this->SetPhi0Prime(this->GetPhi0() -  new_phi_offset*0);
+        this->SetPhi0Prime(this->GetPhi0() -  new_phi_offset);
 
         //const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
 
         //const float theta_offset = the_offset_params[rungroup][DCArm][0] * TMath::Sin(new_the0) + 
         //the_offset_params[rungroup][DCArm][1] * TMath::Cos(new_the0) + the_offset_params[rungroup][DCArm][2];
 
-        //this->SetThe0Prime(new_the0 - theta_offset);
+        const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
+
+        const float theta_offset = the_offset_param0[rungroup][DCArm][charge][3] * TMath::Sin(new_the0) + 
+        the_offset_param1[rungroup][DCArm][charge][3] * TMath::Cos(new_the0) + the_offset_param2[rungroup][DCArm][charge][3];
+
+        this->SetThe0Prime( this->GetThe0Prime() - theta_offset);
     }
 
     float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) 
