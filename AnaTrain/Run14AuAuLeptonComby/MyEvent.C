@@ -112,7 +112,7 @@ namespace MyDileptonAnalysis
         const float theta_offset = the_offset_param0[rungroup][DCArm][charge][3] * TMath::Sin(new_the0) + 
         the_offset_param1[rungroup][DCArm][charge][3] * TMath::Cos(new_the0) + the_offset_param2[rungroup][DCArm][charge][3];
 
-        this->SetThe0Prime( this->GetThe0Prime() - theta_offset);
+        this->SetThe0Prime( new_the0 - theta_offset);
     }
 
     float MyVTXHit::GetPhiHit(const float xvtx, const float yvtx, const float zvtx) 
