@@ -865,6 +865,7 @@ namespace MyDileptonAnalysis
             TH3D *adc_hist;
             TH3D *inv_mass_dca_fg0,*inv_mass_dca_fg1,*inv_mass_dca_fg2,*inv_mass_dca_fg3,*inv_mass_dca_fg4,*inv_mass_dca_fg5,*inv_mass_dca_fg6,*inv_mass_dca_fg7;
             TH3D *inv_mass_dca_bg0,*inv_mass_dca_bg1,*inv_mass_dca_bg2,*inv_mass_dca_bg3,*inv_mass_dca_bg4,*inv_mass_dca_bg5,*inv_mass_dca_bg6,*inv_mass_dca_bg7;
+            TH3D* myvtx_hist;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_reveal, is_fill_DCA2_hist, is_check_veto;
            
@@ -887,6 +888,7 @@ namespace MyDileptonAnalysis
                   inv_mass_dca_fg4=nullptr;inv_mass_dca_fg5=nullptr;inv_mass_dca_fg6=nullptr;inv_mass_dca_fg7=nullptr;
                   inv_mass_dca_bg0=nullptr;inv_mass_dca_bg1=nullptr;inv_mass_dca_bg2=nullptr;inv_mass_dca_bg3=nullptr;
                   inv_mass_dca_bg4=nullptr;inv_mass_dca_bg5=nullptr;inv_mass_dca_bg6=nullptr;inv_mass_dca_bg7=nullptr;
+                  myvtx_hist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
