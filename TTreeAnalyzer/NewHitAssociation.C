@@ -83,7 +83,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     for (int itrk = 0; itrk < n_hadrons*remove_hadron_hits; itrk++)
     {
       MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
-      if (mytrk->GetPtPrime() < 1.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2) 
+      if (mytrk->GetPtPrime() < 0.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2) 
       {
         event->RemoveHadronEntry(itrk);
         n_hadrons--;
@@ -93,7 +93,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     for (int itrk = 0; itrk <  event->GetNhadron(); itrk++)
     {
       MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
-      if (remove_hadron_hits && (mytrk->GetPtPrime() < 1.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2)) 
+      if (remove_hadron_hits && (mytrk->GetPtPrime() < 0.5 || TMath::Abs(mytrk->GetPC3SDPHI())>2 || TMath::Abs(mytrk->GetPC3SDZ())>2)) 
       {
         std::cout<<"WTF"<<std::endl;
       }
