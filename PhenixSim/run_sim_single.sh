@@ -49,7 +49,7 @@ pushd $DIR
 echo start the single simulation in directory $DIR
 
 pwd
-NEVT=100
+NEVT=10000
 
 if [[ $itype == 0 || $itype == 3 ]];then
 cp /phenix/plhf/mitran/Simul/Dileptons/make_sim/make_single.C .
@@ -106,8 +106,8 @@ echo "==============================================="
 # set up Run14 PISA
 mv ../oscar.particles.dat .
 cp /phenix/plhf/mitran/Simul/Dileptons/make_sim/pisa/* .
-cp /phenix/plhf/mitran/Simul/Dileptons/pisa_svx/* .
-run_number=428737
+#cp /phenix/plhf/mitran/Simul/Dileptons/pisa_svx/* .
+#run_number=428737
 
 sed -i 's/ptrig [0-9]*/ptrig '$NEVT'/' glogon.kumac
 

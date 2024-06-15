@@ -1,6 +1,6 @@
 *  PISA kumac file for Central + Muon arms
 *
-SETRHIC 15 1                    ! Run n subrun m
+SETRHIC 14 1                    ! Run n subrun m
 PISAFILE 'PISAEvent.root'
 *
 * Random number seeds (using internal GEANT seeds from 001 to 215)

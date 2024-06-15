@@ -11,6 +11,6 @@ Error          = /dev/null
 Requirements   = (CPU_Speed >= 1) 
 Rank		       = CPU_Speed
 
-Arguments      = run_sim_single_eta.sh $(Process) 2 
+Arguments      = run_sim_single.sh $(Process) 3
 
-Queue 200
+Queue 20
