@@ -1,0 +1,14 @@
+Universe       = vanilla
+Notification   = Error
+Initialdir     = /phenix/u/workarea/adare/offline/analysis/runembed/
+Executable     = /usr/bin/python
+Arguments      = runembed.py $(Process) 211
+##Requirements   = CPU_Experiment == "phenix" 
+Log            = jobs/logs/piplus/$(Process).log
+Output         = jobs/logs/piplus/$(Process).out
+Error          = jobs/logs/piplus/$(Process).err
+Notify_user    = $ENV(USER)@rcf.rhic.bnl.gov
+GetEnv         = True
++Experiment    = "phenix"
++Job_Type      = "cas"
+Queue 25
