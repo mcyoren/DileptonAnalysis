@@ -171,6 +171,10 @@ void CNT_merge(const int runnumber,const int segment,const char *file,const char
   //CNTmerge_Manager->AddNode("TFvtxCompactTrk");
 
   CNTmerge_Manager->AddNode("SvxRawhitList");
+  CNTmerge_Manager->AddNode("SvxClusterList");
+  CNTmerge_Manager->AddNode("SvxGhitClusterList");
+  CNTmerge_Manager->AddNode("McSingle");
+  CNTmerge_Manager->AddNode("McEvalSingleList");
   //CNTmerge_Manager->AddNode("PHCentralTrack");
 
   se->registerOutputManager(CNTmerge_Manager);
