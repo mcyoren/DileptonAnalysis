@@ -2,6 +2,8 @@
 #define __SKIPEVENTS_H__
 
 #include "SubsysReco.h"
+#include <iostream>
+#include <fstream>
 
 class PHCompositeNode;
 
@@ -13,9 +15,9 @@ class SkipEvents: public SubsysReco {
   virtual ~SkipEvents() {}
   
   int Init(PHCompositeNode *topNode) {return 0;}
-  int InitRun(PHCompositeNode *topNode) {return 0;}
+  int InitRun(PHCompositeNode *topNode);
   int process_event(PHCompositeNode *topNode);
-  int End(PHCompositeNode *topNode) {return 0;}
+  int End(PHCompositeNode *topNode);
   
   int Reset(PHCompositeNode *topNode) 		{return 0;}
   int ResetEvent(PHCompositeNode *topNode) 	{return 0;}
@@ -27,6 +29,9 @@ class SkipEvents: public SubsysReco {
   int EventNumber;
   float minZVertex;
   float maxZVertex;
+
+  std::ofstream myfile;
+
 };
 
 #endif

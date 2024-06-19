@@ -63,7 +63,7 @@ int EmbedVertexSelect::process_event(PHCompositeNode *topNode) {
       float z1 = evt1 -> getBbcZVertex(); // MC from PHGlobal
       float z2 = evt2 -> getBbcZVertex(); // RD from PHGlobal
       //      cout << "VERTEXZ = " << ztrue
-      cout << "VtxMC= " << z1<<", VtxRD= "<<z2<<endl;
+      if (verbosity > 0) cout << "VtxMC= " << z1<<", VtxRD= "<<z2<<endl;
 
       // MatchRange is currently set at 1cm in the macro. Agreement
       // should be well within this because pisaToDST.C was set to

@@ -20,7 +20,7 @@ void Fun4All_embedeval_svx(
   cout << "Output evaluation ntuple : " << ntname << endl;
   cout << "Output evaluation anantuple : " << ntananame << endl;
    
-  float vtxmatch = 10000.0;
+  float vtxmatch = 1.0;
   float vtxmax = 30.0;
 
   int   dataFlag = 1; // 2 is for pp
@@ -107,7 +107,7 @@ void Fun4All_embedeval_svx(
   //se->Verbosity(40);
   
   SubsysReco *mixrec       = new MixEmbedreco("MIX");
-  mixrec->Verbosity(40);
+  mixrec->Verbosity(0);
   SubsysReco *bbcrec       = new BbcEmbedreco("BBC");
   SubsysReco *vtxrec       = new VtxReco("VTX");
   SubsysReco *padrec       = new PadEmbedreco("PAD");
@@ -119,8 +119,8 @@ void Fun4All_embedeval_svx(
   SubsysReco *crkrec       = new CrkEmbedreco("CRK");
   SubsysReco *emcrec       = new EmcEmbedreco("EMC");
   SubsysReco *accrec       = new AccEmbedreco("ACC");
-    SubsysReco *cglrec       = new CglEmbedreco("CGL");
-  SubsysReco *cglrec       = new CglReco("CGL");
+  SubsysReco *cglrec       = new CglEmbedreco("CGL");
+  //SubsysReco *cglrec       = new CglReco("CGL");
   
   //SubsysReco *ringrec      = new RingEmbedreco("RING");
   SubsysReco *ringrec      = new RingReco("RING");
@@ -179,7 +179,7 @@ void Fun4All_embedeval_svx(
   
   //EmbedVertexSelect enforce the matching of the bbc vertex between real DST and single DST. 
   //The range of matching can be specified by the SetVertexRange function.
-  EmbedVertexSelect *vtxmatch1 = new EmbedVertexSelect("VTX1","REAL");
+  EmbedVertexSelect *vtxmatch1 = new EmbedVertexSelect("VTXSEL","REAL");
   vtxmatch1->SetVertexRange(vtxmatch); //match vertex with in vtxmatch cm
   vtxmatch1->Verbosity(0);
  
@@ -190,7 +190,7 @@ void Fun4All_embedeval_svx(
   rc->set_CharFlag("EMBED_REAL_TOPNODE","REAL");
   
   //if one arm has no MC hits, then kick out the hits from real DST, the reconstruction will be much faster.
-  rc->set_IntFlag ("EMBED_KickOutHitsToSpeedupReco",0);
+  rc->set_IntFlag ("EMBED_KickOutHitsToSpeedupReco",1);
   //T0 information for DC East and DC West
   rc->set_FloatFlag("EMBED_DCEASTT0",40);
   rc->set_FloatFlag("EMBED_DCWESTT0",39);
@@ -233,9 +233,9 @@ void Fun4All_embedeval_svx(
   se->registerSubsystem(svxembed);
   se->registerSubsystem(svxapplyhotdead);
   se->registerSubsystem(svxreco);
-  se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
-  se->registerSubsystem(svxstandalone );
-  se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
+  //se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
+  //se->registerSubsystem(svxstandalone );
+  //se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
 
   //=========================================
   // These fill the compactCNT storage nodes

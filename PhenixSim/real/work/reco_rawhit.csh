@@ -25,6 +25,11 @@ if( $#argv != 3) then
   exit -1
 endif
 
+set sourcedir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/dstmerge/build/"
+cd $sourcedir
+make -j4
+make install
+
 set jobno     = $1
 set evtnum    = $2
 set inputfile = $3
@@ -79,6 +84,7 @@ root -b < cmd.input
 #move
 echo "mv -f CNTmerge_*.root $outputdir"
 mv -f CNTmerge_*.root $outputdir
+mv vertexes.txt $outputdir
 
 #remove tmp dir
 cd $HOME

@@ -34,7 +34,10 @@ setenv DATADIR /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/w
 
 source /opt/phenix/bin/phenix_setup.csh new
 setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf3/nnovitzk/mazsi_Test/ccnt/source/emc-evaluation/build/.libs:$LD_LIBRARY_PATH
+setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embedreco/install/lib:$LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/install/lib:$LD_LIBRARY_PATH
+
+echo $LD_LIBRARY_PATH
 
 ##################################
 

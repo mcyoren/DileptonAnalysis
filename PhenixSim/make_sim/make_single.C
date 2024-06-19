@@ -135,8 +135,8 @@ for(int ievt=0; ievt<nevt; ievt++) {
   for(int np=0; np<NPARTICLES; np++) {
 
 	// Try to generate flat in zvtx (-30; 30) and reweight after
-    //double vertex = scale*fGaus->GetRandom();
-    double vertex = scale*zvtx_dat->GetRandom();
+    double vertex = scale*fGaus->GetRandom();
+    //double vertex = scale*zvtx_dat->GetRandom();
     //double vertex = scale*(60*myrand->Rndm()-30);
     h1d_zvtx.Fill(vertex/scale);
 

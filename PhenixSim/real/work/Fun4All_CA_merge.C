@@ -93,7 +93,7 @@ void Fun4All_CA_merge(int nEvents=100,
   // Central arms
   //////////////////////////////////////////
   BbcReco *bbc     = new BbcReco();
-  bbc->setBbcVtxError( 2.0 );
+  bbc->setBbcVtxError( 1.0 );
 
   SubsysReco *ert     = new ErtReco();
   SubsysReco *zdc     = new ZdcReco();
@@ -129,7 +129,7 @@ void Fun4All_CA_merge(int nEvents=100,
   SvxPriVertexSeedFinder *svxvtxseedfinder = new SvxPriVertexSeedFinder();
   SvxStandAloneReco *svxstandalone         = new SvxStandAloneReco();
   svxstandalone->setVertexRecoFlag(2);
-  svxstandalone->setPPFlag(true);
+  svxstandalone->setPPFlag(false); /// takashi set is a true, but it takes much longer....
   SvxPrimVertexFinder *svxprimvtxfinder    = new SvxPrimVertexFinder();
 
   ////////////////////////////////// 
@@ -178,12 +178,12 @@ void Fun4All_CA_merge(int nEvents=100,
   se->registerSubsystem(svxhotdead);
   se->registerSubsystem(svxrec);
   se->registerSubsystem(svxvtxseedfinder);
-  se->registerSubsystem(svxstandalone);
+  se->registerSubsystem(svxstandalone); /// vtx determination is a little better with it on,  but works a decade longer 
   se->registerSubsystem(svxprimvtxfinder);
 
   SkipEvents* skipevents = new SkipEvents(0); // select events in a vertex range
   //skipevents->Verbosity(1);
-  skipevents->setZVertexRange(-1.0,1.0);
+  skipevents->setZVertexRange(-10.0,10.0);
   //skipevents->setZVertexRange(4.0,6.0);
   se->registerSubsystem(skipevents);
 
@@ -260,12 +260,12 @@ void Fun4All_CA_merge(int nEvents=100,
 
   /// SvxCentralTrackReco should be called after PHCentralTrack is reconstructed.
   SubsysReco* svxcentraltrack = new SvxCentralTrackReco();
-  se->registerSubsystem(svxcentraltrack);
+  //se->registerSubsystem(svxcentraltrack);
 
   SubsysReco* svxcentraltrackbg = new SvxCentralTrackReco("SVXCENTRALTRACKRECOBACK");
   (dynamic_cast<SvxCentralTrackReco*>svxcentraltrackbg)->RndmAssocDchFlag(1);
   svxcentraltrackbg->Verbosity(0);
-  se->registerSubsystem(svxcentraltrackbg);
+  //se->registerSubsystem(svxcentraltrackbg);
 
   // SvxSelectClusters* svxselect = new SvxSelectClusters();
   //  se->registerSubsystem(svxselect);

@@ -151,8 +151,17 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   dst_manager->AddNode("SvxRawhitList");
   dst_manager->AddNode("SvxClusterList");
   dst_manager->AddNode("SvxGhitClusterList");
+
+  dst_manager->AddNode("PHGlobal");
   dst_manager->AddNode("McSingle");
+  dst_manager->AddNode("PHEmbedMcRecoTrackList");
+  dst_manager->AddNode("PHEmbedMcRecoTrack");
+  dst_manager->AddNode("PHEmbededEvent");
   dst_manager->AddNode("McEvalSingleList");
+  dst_manager->AddNode("dEmcGeaClusterTrack");
+  dst_manager->AddNode("dEmcGeaTrack");
+  dst_manager->AddNode("dEmcGeaTrackCluster");
+  
   dst_manager->AddNode("CrkHit");
   dst_manager->AddNode("CrkRing");
   dst_manager->AddNode("CrkRingBack");

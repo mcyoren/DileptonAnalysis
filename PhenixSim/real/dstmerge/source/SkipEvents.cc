@@ -17,7 +17,12 @@ SkipEvents::SkipEvents(int nevents)
   minZVertex=-99999.;
   maxZVertex= 99999.;
 }
-
+//==============================================================
+int SkipEvents::InitRun(PHCompositeNode *topNode)
+{
+  myfile.open("vertexes.txt");
+  return 0;
+}
 //==============================================================
 int SkipEvents::process_event(PHCompositeNode *topNode) 
 {
@@ -43,6 +48,7 @@ int SkipEvents::process_event(PHCompositeNode *topNode)
   }
 
   if(zvtx0>minZVertex && zvtx0<maxZVertex) {
+    myfile << xvtx0 << " " << yvtx0 << " " << zvtx0 << "\n"; 
     // this is done to properly handle NAN
   }
   else {
@@ -52,4 +58,9 @@ int SkipEvents::process_event(PHCompositeNode *topNode)
 
   return EVENT_OK;
 }
-
+//==============================================================
+int SkipEvents::End(PHCompositeNode *topNode)
+{
+  myfile.close();
+  return 0;
+}
