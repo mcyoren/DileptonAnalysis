@@ -75,9 +75,9 @@ void pisaToDST_VTX(
   rc->set_IntFlag("RUNNUMBER",run_number);
 
   // Requested by EMCal
-  rc->set_IntFlag("EVALUATIONFLAG", 0);
-  //rc->set_IntFlag("EMCSIMULATIONV2", 1); // enable if you want the new code
-  //rc->set_IntFlag("EMCSIMULATIONV2NOQA", 1); // do not apply QA, disabled
+  rc->set_IntFlag("EVALUATIONFLAG", 1);
+  rc->set_IntFlag("EMCSIMULATIONV2", 1); // enable if you want the new code
+  rc->set_IntFlag("EMCSIMULATIONV2NOQA", 1); // do not apply QA, disabled
 
   // this should be moved to the Init method of TofSimreco
   rc->set_FloatFlag("TOFTIMINGRESOLUTION", 0.100);

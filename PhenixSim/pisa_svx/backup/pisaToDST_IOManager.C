@@ -1,3 +1,12 @@
+// $Id: pisaToDST_IOManager.C,v 1.14 2007/11/28 14:04:10 hpereira Exp $
+/*!
+   \file pisaToDST_IOManager.C
+   \brief simulation output managers
+   \author <a href="mailto:pereira@hep.saclay.cea.fr">Hugo Pereira</a>
+   \version $Revision: 1.14 $
+   \date $Date: 2007/11/28 14:04:10 $
+*/
+
 #include <stdio.h>
 #include <time.h>
 
@@ -16,7 +25,6 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   manager->AddNode("TrigLvl1");
 
   // pisa nodes
-
   manager->AddNode("fkin");
   manager->AddNode("pythia");
   manager->AddNode("primary");
@@ -34,7 +42,8 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   // ZDC
   manager->AddNode("ZdcOut");
   manager->AddNode("ZdcRaw");
-  
+
+
   // DCH
   manager->AddNode("dcghit");
   manager->AddNode("DchHitLineTablev1");
@@ -68,7 +77,7 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   // they can be added back starting from pro.80
   // manager->AddNode("CrkRing");
   // manager->AddNode("CrkRingBack");
-  
+
   // HBD
   // for now these are commented out
   // on decision from the HBD experts
@@ -78,11 +87,11 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   // manager->AddNode("HbdCellList");
   // manager->AddNode("HbdHitList");
 
-//--  // TEC
-//--  manager->AddNode("tecghit");
-//--  manager->AddNode("dTecGhitRaw");
-//--  manager->AddNode("TecOut");
-//--  manager->AddNode("TecHitOut");
+  // TEC
+  manager->AddNode("tecghit");
+  manager->AddNode("dTecGhitRaw");
+  manager->AddNode("TecOut");
+  manager->AddNode("TecHitOut");
 
   // TOF
   manager->AddNode("tofghit");
@@ -95,33 +104,27 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   manager->AddNode("TofwRaw");
   manager->AddNode("TofwHit");
 
-//--  // Aerogel
-//--  manager->AddNode("AerGeaHits");
-//--  manager->AddNode("AccCluster");
-//--  manager->AddNode("AccRaw");
-//--  manager->AddNode("AccHit");
-  
-
-
-
+  // Aerogel
+  manager->AddNode("AerGeaHits");
+  manager->AddNode("AccCluster");
+  manager->AddNode("AccRaw");
+  manager->AddNode("AccHit");
 
   // EMCal
   manager->AddNode("emcghit");
   manager->AddNode("emcClusterContainer");
   manager->AddNode("emcTowerContainer");
 
-  /*
   // additional EMCal evaluation nodes
   if( rc->FlagExist("EVALUATIONFLAG") && rc->get_IntFlag("EVALUATIONFLAG")==1 )
-  {
+  { 
 
     // Evaluation output from EMCal
     manager->AddNode("dEmcGeaClusterTrack");
     manager->AddNode("dEmcGeaTrack");
     manager->AddNode("dEmcGeaTrackCluster");
-
-  }
-  */
+    manager->AddNode("emcGeaTrackContainer");
+  } 
 
   // CGL
   manager->AddNode("CglTrack");
@@ -130,31 +133,35 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   manager->AddNode("PHTrackOut");
   manager->AddNode("PHTrackOutBack");
 
+  // copied from CNT node
+  manager->AddNode("PHCentralTrack");
+  manager->AddNode("PHGlobal");
+  manager->AddNode("PHGlobal_CENTRAL");
+  manager->AddNode("PHGlobal_MUON");
+
+  manager->AddNode("McSingle");
+
   // SVX
   manager->AddNode("SvxPisaHit");
   manager->AddNode("SvxGhitList");
   manager->AddNode("SvxRawhitList");
   manager->AddNode("SvxGhitRawhitList");
+  manager->AddNode("SvxClusterList");
   manager->AddNode("SvxRawhitClusterList");
   manager->AddNode("SvxGhitClusterList");
-  manager->AddNode("SvxClusterList");
   manager->AddNode("SvxSegmentList");
   manager->AddNode("SvxCentralTrackList");
   manager->AddNode("SvxCentralTrackBackList");
 
 
-  // copied from CNT node
-  manager->AddNode("PHGlobal");
-  manager->AddNode("PHGlobal_CENTRAL");
-  manager->AddNode("PHCentralTrack");
-//  manager->AddNode("PHGlobal_MUON");
+  // muon nodes
+  manager->AddNode("TMCPrimary");
+  manager->AddNode("TMuiMCHitO");
+  manager->AddNode("TMutMCHit");
+  manager->AddNode("TMutMCTrk");
 
-
-  manager->AddNode("McSingle");
-
-
-/*
-  // compact nodes
+  /*
+  // for compactCNT's
   manager->AddNode("DchHit_VarArray");
   manager->AddNode("EmcHit_VarArray");
   manager->AddNode("Pc1Hit_VarArray");
@@ -170,13 +177,11 @@ void DST_IOManager(const char* dstout, Fun4AllServer* se)
   manager->AddNode("TrackLineProjection_VarArray");
   manager->AddNode("TrackPathLength_VarArray");
   manager->AddNode("emcHitContainer");
-
   manager->AddNode("SvxHit_VarArray");
   manager->AddNode("SvxTrack_VarArray");
   manager->AddNode("SvxCentralTrack_VarArray");
   manager->AddNode("SvxCentralTrackBG_VarArray");
-*/
-
+  */
 
   se->registerOutputManager(manager);
 
