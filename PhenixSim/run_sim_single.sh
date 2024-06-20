@@ -49,7 +49,7 @@ pushd $DIR
 echo start the single simulation in directory $DIR
 
 pwd
-NEVT=1000
+NEVT=10000
 
 if [[ $itype == 0 || $itype == 3 ]];then
 cp /phenix/plhf/mitran/Simul/Dileptons/make_sim/make_single.C .

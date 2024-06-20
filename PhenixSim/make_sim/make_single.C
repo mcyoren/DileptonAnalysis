@@ -72,7 +72,7 @@ unsigned int get_seed()
 }
 
 void make_single(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt", 
-                TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.0, const float pt_max = 20, const double n = 0) {
+                TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.0, const float pt_max = 5, const double n = 0) {
 
 // n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 
@@ -147,7 +147,7 @@ TF1* fGaus = new TF1("fGaus","gaus",-10,10);
  fGaus->SetParameters(1.27043e+04, 1.77852e+00, 1.27954e+01); // for CuAu
 
 TH1D h1d_zvtx("h1d_zvtx","",400,-20,20);
-TH1D h1d_pi0pt("h1d_pi0pt","",600,0,15);
+TH1D h1d_pi0pt("h1d_pi0pt","",50,0,5);
 
 // Get Zvertex dist from data
 TH1D* zvtx_dat;
