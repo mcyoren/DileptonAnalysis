@@ -234,7 +234,7 @@ void Fun4All_embedeval_svx(
   se->registerSubsystem(svxapplyhotdead);
   se->registerSubsystem(svxreco);
   //se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
-  //se->registerSubsystem(svxstandalone );
+  //se->registerSubsystem(svxstandalone ); // take a lot of time for no good reason
   //se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
 
   //=========================================
@@ -314,7 +314,7 @@ void Fun4All_embedeval_svx(
  
 
   // SvxCentralTrackReconstruction
-  se->registerSubsystem( svxcnttrackreco );
+  //se->registerSubsystem( svxcnttrackreco ); ///if you dont use standard svxtrack algoritm you should not turn it on
  
   //evaluation module should always be the last one, there could be multiple evaluation modules
   se->registerSubsystem(evarec);

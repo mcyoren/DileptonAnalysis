@@ -39,6 +39,11 @@ setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons
 
 echo $LD_LIBRARY_PATH
 
+setenv sourcedir /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/build
+cd $sourcedir
+make -j4
+make install
+
 ##################################
 
 if( $#argv != 7) then

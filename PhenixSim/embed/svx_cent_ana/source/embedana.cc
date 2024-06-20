@@ -188,7 +188,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
   PHCentralTrack      *trk     = getClass<PHCentralTrack>( topNode,"PHCentralTrack");
   //PHTrackOut          *phtrk   = getClass<PHTrackOut>(     topNode,"PHTrackOut");
   PHDchTrackOut       *phdchtrk= getClass<PHDchTrackOut>(  topNode,"PHDchTrackOut");
-  SvxCentralTrackList *svxcnt  = getClass<SvxCentralTrackList>(topNode,"SvxCentralTrackList");
+  //SvxCentralTrackList *svxcnt  = getClass<SvxCentralTrackList>(topNode,"SvxCentralTrackList");
   //SvxClusterList      *svx     = getClass<SvxClusterList>( topNode,"SvxClusterList");
 
   //cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
@@ -260,9 +260,9 @@ int embedana::process_event(PHCompositeNode *topNode) {
   PHPointerList<PHEmbedMcRecoTrack>  *embedtrk = getClass< PHPointerList<PHEmbedMcRecoTrack> >(topNode, "PHEmbedMcRecoTrack");
 
   // mapping between PHCentralTrack and SvxCentralTrack
-  remapCntSvx(trk, svxcnt);
+  //remapCntSvx(trk, svxcnt);
 
-  if(embedtrk==NULL) { cout<<" no PHEmbedMcRecoTrack"<<endl;}
+  if(embedtrk==nullptr) { cout<<" no PHEmbedMcRecoTrack"<<endl;}
   else {
     //--cout<<"PHEmbedMcRecoTrack: length = "<<embedtrk->length()<<endl;
     for(unsigned int i=0; i<embedtrk->length(); i++){
@@ -300,7 +300,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       }
 
       PHSnglCentralTrack* sngl       = trk->get_track(idR);
-      SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
+      ///SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
 
       float ntp[100];
       for(int i=0; i<100; i++) ntp[i] = -9999.;
@@ -325,14 +325,14 @@ int embedana::process_event(PHCompositeNode *topNode) {
       ntp[15] = sngl->get_chi2()/sngl->get_npe0();
       ntp[16] = sngl->get_disp();
       
-      if(svxcntsngl!=NULL){
-        float ndf        = svxcntsngl->getNDF();
-        float chisqr     = svxcntsngl->getChiSquare();
-        ntp[17] = svxcntsngl->getDCA2D(); // dca2d
-        ntp[18] = svxcntsngl->getDCAZ();  // dcaz
-        ntp[19] = (ndf>0) ? chisqr/ndf : -9999.; // chi2ndf
-        ntp[20] = svxcntsngl->getHitPattern(); // hitptn
-      }
+      //if(svxcntsngl!=NULL){
+      //  float ndf        = svxcntsngl->getNDF();
+      //  float chisqr     = svxcntsngl->getChiSquare();
+      //  ntp[17] = svxcntsngl->getDCA2D(); // dca2d
+      //  ntp[18] = svxcntsngl->getDCAZ();  // dcaz
+      //  ntp[19] = (ndf>0) ? chisqr/ndf : -9999.; // chi2ndf
+      //  ntp[20] = svxcntsngl->getHitPattern(); // hitptn
+      //}
 
       ntp[21] = embed->get_ptS();
       ntp[22] = embed->get_momS();
