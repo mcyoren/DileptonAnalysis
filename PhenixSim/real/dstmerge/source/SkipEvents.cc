@@ -6,6 +6,8 @@
 #include "VtxOut.h"
 #include "PHPoint.h"
 #include "SkipEvents.h"
+#include "TrigLvl1.h"
+#include "PHGlobal.h"
 
 //==============================================================
 SkipEvents::SkipEvents(int nevents) 
@@ -46,7 +48,24 @@ int SkipEvents::process_event(PHCompositeNode *topNode)
     std::cout << "BBC Event vertex = " << xvtx1 << " " << yvtx1 << " " << zvtx1 << std::endl;
     std::cout << "Default Event vertex = " << xvtx0 << " " << yvtx0 << " " << zvtx0 << " " << s_vtx << std::endl;
   }
+  
+  const TrigLvl1 *Trig =
+    findNode::getClass<TrigLvl1>(topNode, "TrigLvl1");
+  const int trigscaled_on = Trig->get_lvl1_trigscaled_bit(4);
+  
+  const PHGlobal *globalCNT =
+    findNode::getClass<PHGlobal>(topNode, "PHGlobal");
+  
+  const float centrality = globalCNT->getCentrality();
+  const float zdc1 = globalCNT->getZdcEnergyN();
+  const float zdc2 = globalCNT->getZdcEnergyS();
+  const float zdcz = globalCNT->getZdcZVertex();
+  const bool isZDCOK = (zdc1 > 0 && zdc2 > 0 && zdcz > -9000);
+  if(verbosity>0) std::cout<<centrality<<" "<<isZDCOK<<std::endl;
 
+
+    if (!Trig || !trigscaled_on || !globalCNT || !isZDCOK)
+        return ABORTEVENT;
   if(zvtx0>minZVertex && zvtx0<maxZVertex) {
     myfile << xvtx0 << " " << yvtx0 << " " << zvtx0 << "\n"; 
     // this is done to properly handle NAN

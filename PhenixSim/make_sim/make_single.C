@@ -71,7 +71,8 @@ unsigned int get_seed()
     return fSeed;
 }
 
-void make_single(TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.0, const float pt_max = 20, const double n = 0) {
+void make_single(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt", 
+                TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.0, const float pt_max = 20, const double n = 0) {
 
 // n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 
@@ -85,10 +86,38 @@ void make_single(TString fout = "oscar.particles.dat", const int nevt = 10000, c
 // mass, x,y,z,t
 // and then "0 0"
 
+
+
 // ------- INPUT CARD --------
 double Tpi = 3.14159; 
 const int NPARTICLES = 1;
 double scale = 1e13; //cm to fm conversion
+
+
+//vertex staff
+  std::ifstream myfile (filepath);
+  vector<double> vertexes;
+  string line;
+  if (myfile.is_open())
+  {
+    while ( getline (myfile,line) )
+    {
+      string s;
+      std::stringstream ss(line);
+      while(getline(ss, s, ' '))
+      {
+        vertexes.push_back(atof(s.c_str())*scale);
+      }
+    }
+    myfile.close();
+  }
+
+  for (int i = 0; i < (int) vertexes.size()/3; i++)
+  {
+    if(false )std::cout<<vertexes[3*i] << "     " <<vertexes[3*i+1] << "     " <<vertexes[3*i+2] << " " <<std::endl;
+  }
+  
+
 // ---------------------------
 
 double rapwidth=10.,rapwin=.5;
@@ -135,7 +164,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
   for(int np=0; np<NPARTICLES; np++) {
 
 	// Try to generate flat in zvtx (-30; 30) and reweight after
-    double vertex = scale*fGaus->GetRandom();
+    double vertex = vertexes[3*ievt+2];
     //double vertex = scale*zvtx_dat->GetRandom();
     //double vertex = scale*(60*myrand->Rndm()-30);
     h1d_zvtx.Fill(vertex/scale);
@@ -148,7 +177,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
     // Particle index
     Int_t index = np;
     // note that these positions are in femtometers !
-    Double_t xpos=0.0; Double_t ypos=0.0; Double_t zpos=vertex; Double_t time=0.0;
+    Double_t xpos=vertexes[3*ievt]; Double_t ypos=vertexes[3*ievt+1]; Double_t zpos=vertexes[3*ievt+2]; Double_t time=0.0;
     // idpart id ist px,py,pz,E, mass, x,y,z,t
 
     //-------------------  PI0 --------------------

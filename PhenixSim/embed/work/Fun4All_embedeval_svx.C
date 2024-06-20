@@ -181,7 +181,7 @@ void Fun4All_embedeval_svx(
   //The range of matching can be specified by the SetVertexRange function.
   EmbedVertexSelect *vtxmatch1 = new EmbedVertexSelect("VTXSEL","REAL");
   vtxmatch1->SetVertexRange(vtxmatch); //match vertex with in vtxmatch cm
-  vtxmatch1->Verbosity(0);
+  vtxmatch1->Verbosity(1);
  
 
   //MC TopNode name

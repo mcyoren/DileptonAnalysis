@@ -10,6 +10,8 @@
 #include <recoConsts.h>
 #include <PHGlobal.h>
 #include <getClass.h>
+#include "VtxOut.h"
+#include "PHPoint.h"
 
 #include <cmath>
 #include <string>
@@ -52,7 +54,8 @@ int EmbedVertexSelect::process_event(PHCompositeNode *topNode) {
   else {
     PHGlobal* evt1 = getClass<PHGlobal>(mcnode,"PHGlobal");
     PHGlobal* evt2 = getClass<PHGlobal>(realnode,"PHGlobal");
-    if ( !(evt1 ) || !(evt2 ) ) {
+    VtxOut *d_vtx = findNode::getClass<VtxOut>(realnode,"VtxOut");
+    if ( !(evt1 ) || !(evt2 ) || !(d_vtx) ) {
       topNode->print();
       cout<<"missing global nodes "<<evt1<<" "<< evt2<<endl;
       RetCode = ABORTEVENT;
@@ -61,9 +64,9 @@ int EmbedVertexSelect::process_event(PHCompositeNode *topNode) {
     else {
       //      float ztrue = mcsingle->get_vertexz(0);
       float z1 = evt1 -> getBbcZVertex(); // MC from PHGlobal
-      float z2 = evt2 -> getBbcZVertex(); // RD from PHGlobal
+      float z2 = (d_vtx->get_Vertex()).getZ(); // RD from VTXOUT
       //      cout << "VERTEXZ = " << ztrue
-      if (verbosity > 0) cout << "VtxMC= " << z1<<", VtxRD= "<<z2<<endl;
+      if (verbosity > 0) cout << "VtxMC= " << z1<<", VtxRD= "<<z2<< ", bbcz_real= "<<evt2 -> getBbcZVertex()<<endl;
 
       // MatchRange is currently set at 1cm in the macro. Agreement
       // should be well within this because pisaToDST.C was set to
