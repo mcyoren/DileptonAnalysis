@@ -6,6 +6,9 @@
 #include <vector>
 #include <map>
 
+#include "MyEvent.h"
+#include "TOAD.h"
+
 class PHCompositeNode;
 class TFile;
 class TNtuple;
@@ -21,8 +24,8 @@ class TNtuple;
 //class SvxCluster;
 
 class PHCentralTrack;
-class SvxCentralTrackList;
-class SvxCentralTrack;
+//class SvxCentralTrackList;
+//class SvxCentralTrack;
 
 //class BbcOut;
 //class VtxOut;
@@ -68,7 +71,7 @@ private:
               float* d2dca_bc                  // return
             );
 
-  void remapCntSvx(PHCentralTrack* cnt, SvxCentralTrackList* svxcnt);
+  //void remapCntSvx(PHCentralTrack* cnt, SvxCentralTrackList* svxcnt);
 
 private:
   int EventNumber;
@@ -78,7 +81,10 @@ private:
 
   TNtuple*    m_ntp_embed;
 
-  std::vector<SvxCentralTrack*> m_vsvxcnt;
+
+  MyDileptonAnalysis::MyEventContainer *event_container;
+
+  //std::vector<SvxCentralTrack*> m_vsvxcnt;
 };
 
 #endif

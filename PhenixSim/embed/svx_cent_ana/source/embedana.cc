@@ -93,6 +93,7 @@
 
 #include "getClass.h"
 
+
 using namespace std;
 using namespace findNode;
 
@@ -102,21 +103,59 @@ embedana::embedana(string filename) : m_outFileName(filename)
 {
   ThisName   = "embedana";
   EventNumber=0;
+  event_container = nullptr;
 }
 
 //==============================================================
 
 embedana::~embedana() {
+  delete event_container;
+    std::cout<<"Event Container was deleted"<<std::endl;
 }
 
 //==============================================================
 
 int embedana::Init(PHCompositeNode *topNode) {
 
-  cout << "embedana::Init started..." << endl;
-  //OutputNtupleFile = new TFile(OutputFileName.c_str(),"RECREATE");
-  //cout << "embedana::Init: output file " << OutputFileName << " opened." << endl;
+    cout << "embedana::Init started..." << endl;
+    //OutputNtupleFile = new TFile(OutputFileName.c_str(),"RECREATE");
+    //cout << "embedana::Init: output file " << OutputFileName << " opened." << endl;
+    /*recoConsts* rc  = recoConsts::instance(); 
+    const int remove_hadron_hits = rc->get_IntFlag("Remove_hadron_hits", 0);
+    const int fill_QA_hadron_hists = rc->get_IntFlag("Fill_QA_hadron_hists", 0);
+    const int fill_QA_lepton_hists = rc->get_IntFlag("Fill_QA_lepton_hists", 0);
+    const int fill_TTree = rc->get_IntFlag("Fill_TTree", 0);
+    const int fill_d_dphi_hists = rc->get_IntFlag("Fill_d_dphi_hists", 0);
+    const int fill_DCA_hists = rc->get_IntFlag("Fill_DCA_hists", 0);
+    const int use_iden = rc->get_IntFlag("Use_ident", 0);
+    const int do_track_QA = rc->get_IntFlag("Do_track_QA", 0);
+    const int do_reveal_hadron = rc->get_IntFlag("Do_reveal_hadron", 0);
+    const int fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
+    const int check_veto = rc->get_IntFlag("Check_Veto", 0);
 
+
+    std::cout<<"Remove_hadron_hits: "<<remove_hadron_hits<<std::endl;
+    std::cout<<"fill_QA_hadron_hists: "<<fill_QA_hadron_hists<<std::endl;
+    std::cout<<"fill_QA_lepton_hists: "<<fill_QA_lepton_hists<<std::endl;
+    std::cout<<"fill_TTree: "<<fill_TTree<<std::endl;
+    std::cout<<"fill_d_dphi_hists: "<<fill_d_dphi_hists<<std::endl;
+    std::cout<<"fill_DCA_hists: "<<fill_DCA_hists<<std::endl;
+    std::cout<<"use_iden: "<<use_iden<<std::endl;
+    std::cout<<"Do_track_QA: "<<do_track_QA<<std::endl;
+    std::cout<<"do_reveal_hadron: "<<do_reveal_hadron<<std::endl;
+    std::cout<<"fill_true_DCA: "<<fill_true_DCA<<std::endl;
+    std::cout<<"check_veto: "<<check_veto<<std::endl;
+
+    TOAD toad("Run14AuAuLeptonComby");
+
+    const std::string loc = toad.location("field_map.root");
+    
+    event_container = new MyDileptonAnalysis::MyEventContainer();
+    event_container->InitEvent();
+    event_container->GetHistsFromFile(loc);
+    event_container->CreateOutFileAndInitHists(m_outFileName.c_str(),fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
+                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
+    */
   cout << "embedana::Init ended." << endl;
   return 0;
 }
@@ -271,6 +310,8 @@ int embedana::process_event(PHCompositeNode *topNode) {
 
   //////////////////////////////////////////////////////////////////////
   PHPointerList<PHEmbedMcRecoTrack>  *embedtrk = getClass< PHPointerList<PHEmbedMcRecoTrack> >(topNode, "PHEmbedMcRecoTrack");
+  
+  //event->ClearEvent();
 
   // mapping between PHCentralTrack and SvxCentralTrack
   //remapCntSvx(trk, svxcnt);
@@ -575,10 +616,5 @@ void embedana::calcDCA_BCbyCircleProjection
 
   // DCA value
   *d2dca_bc = b_sign*(charge*(R - L));
-}
-
-void embedana::remapCntSvx(PHCentralTrack* cnt, SvxCentralTrackList* svxcnt)
-{
- 
 }
   

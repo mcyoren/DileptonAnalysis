@@ -1,44 +1,62 @@
-
 AUTOMAKE_OPTIONS = foreign
 
-BUILT_SOURCES = \
-  testexternals.C
+INCLUDES = -I$(includedir) -I$(OFFLINE_MAIN)/include -I$(ROOTSYS)/include
 
+mydatadir = $(datadir)/$(PACKAGE_INCLUDE_DIR)
+dist_mydata_DATA = \
+  field_map.root
 
-INCLUDES = -I. -I$(srcdir) -I$(includedir) -I$(OFFLINE_MAIN)/include -I$(ROOTSYS)/include
-
-lib_LTLIBRARIES = libsvxcentana.la
-
-noinst_HEADERS = svxcentanaLinkDef.h 
-
-include_HEADERS = svxana.h embedana.h embeddisp.h SvxCentralTrackRecoDebug.h svxcentclsana.h svxstripdisp.h svxcntclusdisp.h svxcnttrkdisp.h SvxCheckCompactCNT.h ReadNtpCntTrk.h AnaNtpTrkPair.h AnaCompactCNT.h SvxanaPair.h svxanamini.h DebugTest.h SvxRpQA.h SvxanaPairDisp.h SvxCheckCluster.h
-
-libsvxcentana_la_SOURCES = svxana.cc embedana.cc embeddisp.cc SvxCentralTrackRecoDebug.C svxcentclsana.cc svxstripdisp.cc CentAnaDict.C svxcntclusdisp.cc svxcnttrkdisp.cc SvxCheckCompactCNT.C ReadNtpCntTrk.C AnaNtpTrkPair.C AnaCompactCNT.C SvxanaPair.C svxanamini.cc DebugTest.C SvxRpQA.C SvxanaPairDisp.C SvxCheckCluster.C
-
-libsvxcentana_la_LIBADD = -L$(OFFLINE_MAIN)/lib -lphool -lfun4all -luti -lCNT -lsvx -lreactionplane -lsimreco -lcompactCNT -lrecal
-
-
-noinst_PROGRAMS = \
-  testexternals
-
-testexternals_SOURCES = \
-  testexternals.C
-
-testexternals_LDADD = \
+lib_LTLIBRARIES = \
+  libRun14AuAuLeptonEvent.la \
   libsvxcentana.la
 
-testexternals.C:
-	echo "//*** this is a generated file. Do not commit, do not edit" > $@
-	echo "int main()" >> $@
-	echo "{" >> $@
-	echo "  return 0;" >> $@
-	echo "}" >> $@
+noinst_HEADERS = \
+  MyEventLinkDef.h \
+  MyEvent.h \
+  MyEventConstants.h 
 
+include_HEADERS = \
+  embedana.h 
 
-CentAnaDict.C: svxana.h embedana.h embeddisp.h SvxCentralTrackRecoDebug.h svxcentclsana.h svxstripdisp.h svxcntclusdisp.h svxcnttrkdisp.h SvxCheckCompactCNT.h ReadNtpCntTrk.h AnaNtpTrkPair.h AnaCompactCNT.h  SvxanaPair.h svxanamini.h DebugTest.h SvxRpQA.h SvxanaPairDisp.h SvxCheckCluster.h svxcentanaLinkDef.h
-	rootcint -f $@ -c $(INCLUDES) $^
+libRun14AuAuLeptonEvent_la_SOURCES = \
+  MyEvent.C \
+  MyEvent_Dict.C
+
+libsvxcentana_la_SOURCES = \
+  embedana.cc \
+  embedana_Dict.C
+
+libRun14AuAuLeptonEvent_la_LIBADD = \
+$(ROOT_LIBS)  
+
+libsvxcentana_la_LIBADD = \
+  -L$(libdir) \
+  -L$(OFFLINE_MAIN)/lib \
+  -lTOAD \
+  -lphool \
+  -lfun4all \
+  -luti \
+  -lCNT \
+  -lsvx \
+  -lreactionplane \
+  -lsimreco \
+  -lcompactCNT \
+  -lrecal
 
 # Rule for generating CINT dictionaries from class headers.
-%Dict.C %Dict.h: %.hh
-	rootcint -f *Dict* -c $(INCLUDES) $*.hh
+MyEvent_Dict.C: \
+  MyEvent.h \
+  MyEventConstants.h \
+  MyEventLinkDef.h 
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
+
+# Rule for generating CINT dictionaries from class headers.                                                                                                                                     
+embedana_Dict.C: \
+  embedana.h \
+  embedanaLinkDef.h 
+	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
+
+
+clean-local:
+	rm -f *Dict*
 
