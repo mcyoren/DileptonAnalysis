@@ -136,6 +136,7 @@ root -b < cmd.input #>& $HOME/root.log
 mv -f $outdst    $outdstdir
 mv -f $outntuple $outntdir
 mv -f $outntana  $outntanadir
+mv -f my-* $outntanadir
 
 #remove tmp dir
 cd $HOME

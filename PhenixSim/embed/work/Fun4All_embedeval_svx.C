@@ -71,6 +71,8 @@ void Fun4All_embedeval_svx(
 
 	gSystem->Load("libemcEmbed4all.so");
 
+  gSystem->Load("libRun14AuAuLeptonEvent.so");
+
   gROOT->ProcessLine(".L embed_IOManager.C");
 
   gSystem->ListLibraries();
@@ -101,7 +103,18 @@ void Fun4All_embedeval_svx(
   // this should be moved to the Init method of TofSimreco
   rc->set_FloatFlag("TOFTIMINGRESOLUTION", 0.100);
 
-
+  ///setting my module
+  rc->set_IntFlag("Remove_hadron_hits", 0);
+  rc->set_IntFlag("Fill_QA_hadron_hists", 1);
+  rc->set_IntFlag("Fill_QA_lepton_hists", 0);
+  rc->set_IntFlag("Fill_TTree", 0);
+  rc->set_IntFlag("Fill_d_dphi_hists", 0);
+  rc->set_IntFlag("Fill_DCA_hists", 0);
+  rc->set_IntFlag("Use_ident", 0);
+  rc->set_IntFlag("Do_track_QA", 0);
+  rc->set_IntFlag("Do_reveal_hadron", 0);
+  rc->set_IntFlag("Fill_true_DCA", 0);
+  rc->set_IntFlag("Check_Veto", 0);
 
   Fun4AllServer *se = Fun4AllServer::instance(); 
   //se->Verbosity(40);
