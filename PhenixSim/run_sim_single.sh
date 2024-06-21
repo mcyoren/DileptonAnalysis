@@ -1,7 +1,7 @@
 #!/bin/sh
 
 itype=$2  #0 -- only single, 1 -- only pisa, 2 --only pisaToDST, 3 -- all
-shift=0
+shift=1
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/gpfs/mnt/gpfs02/phenix/plhf/plhf3/nnovitzk/mazsi_Test/ccnt/source/emc-evaluation/build/.libs/
 #:/gpfs/mnt/gpfs02/phenix/plhf/plhf1/vborisov/Pasha/install
@@ -141,10 +141,10 @@ if test -f dst_out.root; then
 cp dst_out.root /phenix/plhf/mitran/Simul/Dileptons/output_single/dst/dst_out_single_$DIR.root
 
 popd
-#rm -rf pisa
+rm -rf pisa
 
 popd
-#rm -r $DIR
+rm -r $DIR
 
 echo "Done! Go Work!"
 

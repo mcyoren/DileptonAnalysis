@@ -7,6 +7,7 @@
 //#include "gsl/gsl_rng.h"
 //#include <math.h>
 
+#include "TMath.h"
 #include "phool.h"
 #include "PHTypedNodeIterator.h"
 #include "PHCompositeNode.h"
@@ -49,9 +50,10 @@
 //#include "SvxRawhitClusterList.h"
 //#include "SvxRawhitCluster.h"
 #include "SvxClusterList.h"
+#include "SvxGhitClusterList.h"
 #include "SvxCluster.h"
-#include "SvxCentralTrackList.h"
-#include "SvxCentralTrack.h"
+//#include "SvxCentralTrackList.h"
+//#include "SvxCentralTrack.h"
 //#include "SvxClusterInfo.h"
 //#include "SvxResidualInfo.h"
 //#include "SvxBeamCenterPar.h"
@@ -189,7 +191,18 @@ int embedana::process_event(PHCompositeNode *topNode) {
   //PHTrackOut          *phtrk   = getClass<PHTrackOut>(     topNode,"PHTrackOut");
   PHDchTrackOut       *phdchtrk= getClass<PHDchTrackOut>(  topNode,"PHDchTrackOut");
   //SvxCentralTrackList *svxcnt  = getClass<SvxCentralTrackList>(topNode,"SvxCentralTrackList");
-  //SvxClusterList      *svx     = getClass<SvxClusterList>( topNode,"SvxClusterList");
+  
+  
+  SvxClusterList      *svx     = getClass<SvxClusterList>( topNode,"SvxClusterList");
+  SvxGhitClusterList  *svxsim  = getClass<SvxGhitClusterList>( topNode,"SvxGhitClusterList");
+
+
+  recoConsts*    rc = recoConsts::instance();
+  Fun4AllServer* se = Fun4AllServer::instance();
+  PHCompositeNode* mcnode   = se->topNode(rc->get_CharFlag("EMBED_MC_TOPNODE"));
+  PHCentralTrack  *trk_mc    = getClass<PHCentralTrack>(mcnode,"PHCentralTrack");
+  
+  std::cout << "real and sim Nhits and Ntraks: " << svx->get_nClusters() << " " << svxsim->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
 
   //cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
   
@@ -301,6 +314,11 @@ int embedana::process_event(PHCompositeNode *topNode) {
 
       PHSnglCentralTrack* sngl       = trk->get_track(idR);
       ///SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
+      if(false)
+      {
+        PHSnglCentralTrack* mcsngl       = trk_mc->get_track(0);
+        std::cout << "mom of embed, mc, embed sim, geant " << sngl->get_mom() << " " << mcsngl->get_mom() << " " << embed->get_momS() << " " << embed->get_momG() << std::endl;
+      }
 
       float ntp[100];
       for(int i=0; i<100; i++) ntp[i] = -9999.;
@@ -350,7 +368,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       float genphi = embed->get_phi0G();
       float genthe = embed->get_the0G();
       float genvx  = embed->get_xvtxG();
-      float genvy  = embed->get_yvtxG();
+      float genvy  = embed->get_xvtxG()*TMath::Tan(embed->get_phi0G());
       float genvz  = embed->get_zvtxG();
 
       float beamxy[2] = {0., 0.};
@@ -373,7 +391,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       ntp[33] = embed->get_phi0G();
       ntp[34] = embed->get_the0G();
       ntp[35] = embed->get_xvtxG();
-      ntp[36] = embed->get_yvtxG();
+      ntp[36] = embed->get_xvtxG()*TMath::Tan(embed->get_phi0G());
       ntp[37] = embed->get_zvtxG();
       ntp[38] = embed->get_partidG();
       ntp[39] = gendca2d;
@@ -561,27 +579,6 @@ void embedana::calcDCA_BCbyCircleProjection
 
 void embedana::remapCntSvx(PHCentralTrack* cnt, SvxCentralTrackList* svxcnt)
 {
-  m_vsvxcnt.clear();
-  if(cnt==NULL || svxcnt==NULL){
-    if(cnt==NULL)    cout<<"No PHCentralTrack available"<<endl;
-    if(svxcnt==NULL) cout<<"No SvxCentralTrackList available"<<endl;
-    return;
-  }
-
-  int npart = cnt->get_npart();
-  m_vsvxcnt.assign(npart, (SvxCentralTrack*)NULL);
-  
-  if( svxcnt!=NULL ) {
-    for(int i=0; i<svxcnt->get_nCentralTracks(); i++){
-      SvxCentralTrack *svxcnttrk = svxcnt->getCentralTrack(i);
-      if(svxcnttrk==NULL) {
-        cout<<"no svxcnt"<<endl;
-        continue;
-      }
-      
-      int itrk = svxcnttrk->getDchIndex();
-      m_vsvxcnt[itrk] = svxcnttrk;
-    }
-  }
+ 
 }
   
