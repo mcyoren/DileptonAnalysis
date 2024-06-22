@@ -112,9 +112,9 @@ double scale = 1e13; //cm to fm conversion
     myfile.close();
   }
 
-  for (int i = 0; i < (int) vertexes.size()/3; i++)
+  for (int i = 0; i < (int) vertexes.size()/4; i++)
   {
-    if(false )std::cout<<vertexes[4*i] << "     " <<vertexes[4*i+1] << "     " <<vertexes[4*i+2] << " " <<std::endl;
+    if(false )std::cout<<vertexes[4*i] << "     " <<vertexes[4*i+1] << "     " <<vertexes[4*i+2] << " "<<vertexes[4*i+3] << " " <<std::endl;
   }
   
 
