@@ -104,6 +104,7 @@ embedana::embedana(string filename) : m_outFileName(filename)
   ThisName   = "embedana";
   EventNumber=0;
   event_container = nullptr;
+  fill_TTree = 0;
 }
 
 //==============================================================
@@ -120,11 +121,11 @@ int embedana::Init(PHCompositeNode *topNode) {
     cout << "embedana::Init started..." << endl;
     //OutputNtupleFile = new TFile(OutputFileName.c_str(),"RECREATE");
     //cout << "embedana::Init: output file " << OutputFileName << " opened." << endl;
-    /*recoConsts* rc  = recoConsts::instance(); 
+    recoConsts* rc  = recoConsts::instance(); 
     const int remove_hadron_hits = rc->get_IntFlag("Remove_hadron_hits", 0);
     const int fill_QA_hadron_hists = rc->get_IntFlag("Fill_QA_hadron_hists", 0);
     const int fill_QA_lepton_hists = rc->get_IntFlag("Fill_QA_lepton_hists", 0);
-    const int fill_TTree = rc->get_IntFlag("Fill_TTree", 0);
+    fill_TTree = rc->get_IntFlag("Fill_TTree", 0);
     const int fill_d_dphi_hists = rc->get_IntFlag("Fill_d_dphi_hists", 0);
     const int fill_DCA_hists = rc->get_IntFlag("Fill_DCA_hists", 0);
     const int use_iden = rc->get_IntFlag("Use_ident", 0);
@@ -155,7 +156,9 @@ int embedana::Init(PHCompositeNode *topNode) {
     event_container->GetHistsFromFile(loc);
     event_container->CreateOutFileAndInitHists(m_outFileName.c_str(),fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
                                                fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
-    */
+    
+    if(fill_TTree) event_container->ResetTree();
+    
   cout << "embedana::Init ended." << endl;
   return 0;
 }
@@ -200,11 +203,15 @@ int embedana::InitRun(PHCompositeNode *topNode) {
       ":genpt:genmom:genphi0:genthe0:genvx:genvy:genvz:genpid:gendca2d"
     );
 
-
   cout << "embedana::InitRun ended." << endl;
   return 0;
 }
 
+//==============================================================
+int embedana::ResetEvent(PHCompositeNode *topNode) {
+    event_container->ClearEvent();
+    return 0;
+}
 //==============================================================
 
 int embedana::process_event(PHCompositeNode *topNode) {
@@ -310,7 +317,10 @@ int embedana::process_event(PHCompositeNode *topNode) {
 
   //////////////////////////////////////////////////////////////////////
   PHPointerList<PHEmbedMcRecoTrack>  *embedtrk = getClass< PHPointerList<PHEmbedMcRecoTrack> >(topNode, "PHEmbedMcRecoTrack");
-  
+  MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
+  event->SetPreciseX((vtxout->get_Vertex()).getX());
+  event->SetPreciseY((vtxout->get_Vertex()).getY());
+  event->SetPreciseZ((vtxout->get_Vertex()).getZ());
   //event->ClearEvent();
 
   // mapping between PHCentralTrack and SvxCentralTrack
@@ -438,7 +448,17 @@ int embedana::process_event(PHCompositeNode *topNode) {
       ntp[39] = gendca2d;
 
       m_ntp_embed->Fill(ntp);
+
+      MyDileptonAnalysis::MyElectron newElectron;
+
+      newElectron.SetPtPrime(sngl->get_mom()*sin(sngl->get_the0()));
+      newElectron.SetPt(embed->get_momS()*sin(embed->get_the0S()));
+      newElectron.SetReconPT(embed->get_momG()*sin(embed->get_the0G()));
+
+      event->AddTrack(&newElectron);
     }
+    
+    if(fill_TTree) event_container->FillTree();
   }
 
   // dchit
@@ -573,6 +593,7 @@ int embedana::End(PHCompositeNode *topNode)
   cout << "Closing output file..." << endl;
   m_outfile->Close();
   delete m_outfile;
+  event_container->WriteOutFile();
   
   return 0;
 }

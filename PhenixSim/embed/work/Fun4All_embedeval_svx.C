@@ -67,11 +67,11 @@ void Fun4All_embedeval_svx(
   gSystem->Load("libembed.so");
   gSystem->Load("libembedreco.so");
 
+  gSystem->Load("libRun14AuAuLeptonEvent.so");
   gSystem->Load("libsvxcentana.so");
 
 	gSystem->Load("libemcEmbed4all.so");
 
-  gSystem->Load("libRun14AuAuLeptonEvent.so");
 
   gROOT->ProcessLine(".L embed_IOManager.C");
 
@@ -105,9 +105,9 @@ void Fun4All_embedeval_svx(
 
   ///setting my module
   rc->set_IntFlag("Remove_hadron_hits", 0);
-  rc->set_IntFlag("Fill_QA_hadron_hists", 1);
+  rc->set_IntFlag("Fill_QA_hadron_hists", 0);
   rc->set_IntFlag("Fill_QA_lepton_hists", 0);
-  rc->set_IntFlag("Fill_TTree", 0);
+  rc->set_IntFlag("Fill_TTree", 1);
   rc->set_IntFlag("Fill_d_dphi_hists", 0);
   rc->set_IntFlag("Fill_DCA_hists", 0);
   rc->set_IntFlag("Use_ident", 0);
