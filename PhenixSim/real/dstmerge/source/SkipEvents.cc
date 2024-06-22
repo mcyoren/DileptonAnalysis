@@ -64,10 +64,10 @@ int SkipEvents::process_event(PHCompositeNode *topNode)
   if(verbosity>0) std::cout<<centrality<<" "<<isZDCOK<<std::endl;
 
 
-    if (!Trig || !trigscaled_on || !globalCNT || !isZDCOK)
+    if (!Trig || !trigscaled_on || !globalCNT || !isZDCOK || centrality < 0 )
         return ABORTEVENT;
   if(zvtx0>minZVertex && zvtx0<maxZVertex) {
-    myfile << xvtx0 << " " << yvtx0 << " " << zvtx0 << "\n"; 
+    myfile << xvtx0 << " " << yvtx0 << " " << zvtx0 << " " << centrality << "\n"; 
     // this is done to properly handle NAN
   }
   else {

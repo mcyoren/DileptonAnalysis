@@ -114,7 +114,7 @@ double scale = 1e13; //cm to fm conversion
 
   for (int i = 0; i < (int) vertexes.size()/3; i++)
   {
-    if(false )std::cout<<vertexes[3*i] << "     " <<vertexes[3*i+1] << "     " <<vertexes[3*i+2] << " " <<std::endl;
+    if(false )std::cout<<vertexes[4*i] << "     " <<vertexes[4*i+1] << "     " <<vertexes[4*i+2] << " " <<std::endl;
   }
   
 
@@ -164,7 +164,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
   for(int np=0; np<NPARTICLES; np++) {
 
 	// Try to generate flat in zvtx (-30; 30) and reweight after
-    double vertex = vertexes[3*ievt+2];
+    double vertex = vertexes[4*ievt+2];
     //double vertex = scale*zvtx_dat->GetRandom();
     //double vertex = scale*(60*myrand->Rndm()-30);
     h1d_zvtx.Fill(vertex/scale);
@@ -177,7 +177,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
     // Particle index
     Int_t index = np;
     // note that these positions are in femtometers !
-    Double_t xpos=vertexes[3*ievt]; Double_t ypos=vertexes[3*ievt+1]; Double_t zpos=vertexes[3*ievt+2]; Double_t time=0.0;
+    Double_t xpos=vertexes[4*ievt]; Double_t ypos=vertexes[4*ievt+1]; Double_t zpos=vertexes[4*ievt+2]; Double_t time=0.0;
     // idpart id ist px,py,pz,E, mass, x,y,z,t
 
     //-------------------  PI0 --------------------

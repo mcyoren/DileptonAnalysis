@@ -32,6 +32,7 @@ void Fun4All_CA_merge(int nEvents=100,
   gSystem->Load("libspin.so");
   gSystem->Load("libSvxDstQA.so");
   gSystem->Load("libDstMerger.so");
+  gSystem->Load("librecal.so");
 
   gROOT->ProcessLine(".L OutputManager.C");
   gROOT->ProcessLine(".L rawdatacheck.C");
@@ -131,6 +132,7 @@ void Fun4All_CA_merge(int nEvents=100,
   svxstandalone->setVertexRecoFlag(2);
   svxstandalone->setPPFlag(false); /// takashi set is a true, but it takes much longer....
   SvxPrimVertexFinder *svxprimvtxfinder    = new SvxPrimVertexFinder();
+  
 
   ////////////////////////////////// 
   // Register SubSystems 
@@ -173,6 +175,31 @@ void Fun4All_CA_merge(int nEvents=100,
  
   se->registerSubsystem(global);
   se->registerSubsystem(global_central);
+
+//MasterRecalibratorManager *mrm = new MasterRecalibratorManager("MASTERRECALIBRATORMANAGER");
+  //mrm->FillHistos(0);
+  //MasterRecalibrator *mr = new MasterRecalibrator();
+  //mr->Unlock(0);
+  //Recalibrator *escale = mr->getRecalibrator("EmcGenericEScaleRecalReco");
+
+  Recalibrator *ReadbackCompactPWG = new ReadbackCompactPWG();
+  ReadbackCompactPWG->SetInputNode("emcClusterContainer");
+  ReadbackCompactPWG->SetBaseClass("emcClusterContainer");
+  se->registerSubsystem(ReadbackCompactPWG);
+  Recalibrator *ReadbackCompactCNT = new ReadbackCompactCNT();
+  ReadbackCompactCNT->SetInputNode("PHCentralTrack");
+  ReadbackCompactCNT->SetBaseClass("PHCentralTrack");
+  //se->registerSubsystem(ReadbackCompactCNT);
+  Recalibrator *escale = new EmcGenericEScaleRecalReco();
+  escale->SetInputNode("emcClusterContainer");
+  escale->SetBaseClass("emcClusterContainer");
+  se->registerSubsystem(escale);
+  Recalibrator *centr = new Run14AuAu200GeVCentralityReco();
+  centr->SetInputNode("PHGlobal");
+  centr->SetBaseClass("PHGlobal");
+  se->registerSubsystem(centr);
+
+
   se->registerSubsystem(svxpar);
   se->registerSubsystem(svxdecode);
   se->registerSubsystem(svxhotdead);

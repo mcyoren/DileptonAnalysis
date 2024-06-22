@@ -22,7 +22,7 @@
 #include "PHSnglCentralTrack.h"
 #include "EventHeader.h"
 #include "VtxOut.h"
-//#include "PHGlobal.h"
+#include "PHGlobal.h"
 //#include "TriggerHelper.h"
 //#include "RunHeader.h"
 //#include <PreviousEvent.h>
@@ -249,7 +249,6 @@ int embedana::process_event(PHCompositeNode *topNode) {
   PHCentralTrack  *trk_mc    = getClass<PHCentralTrack>(mcnode,"PHCentralTrack");
   
   std::cout << "real and sim Nhits and Ntraks: " << svx->get_nClusters() << " " << svxsim->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
-
   //cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
   
   // topnode
@@ -357,6 +356,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       //int idG = embed->get_dctrkidG();
       int idR = embed->get_dctrkidR();
       //int idS = embed->get_dctrkidS();
+      std::cout<<embed->get_bbccent()<<std::endl;
 
       if(idR<0||Ncnt<=idR) {
         cout<<" RealtrackID is out of range = "<<idR<<" : "<<Ncnt<<endl;
