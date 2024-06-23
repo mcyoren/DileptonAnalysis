@@ -150,7 +150,7 @@ void Fun4All_embedeval_svx(
   svxpar->set_GeometryFileName("svxPISA.par");
   svxpar->set_OffsetVtxToCnt(0.0, 0.0, 0.0);
   svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
-  svxpar->set_BeamCenter(0.0, 0.0);
+  //svxpar->set_BeamCenter(0.0, 0.0);
   svxpar->Load_ThresholdFile("svx_threshold.dat");
   //  svxpar->set_UseStripThresholdDatbase(false);
   //svxpar->Verbosity(1);
@@ -176,6 +176,7 @@ void Fun4All_embedeval_svx(
   SvxStandAloneReco *svxstandalone = new SvxStandAloneReco();
   svxstandalone->Verbosity(0);
   if(dataFlag==2) svxstandalone->setPPFlag(true);
+  else svxstandalone->setPPFlag(false);
   svxstandalone->setVertexRecoFlag(2);
   //svxstandalone->setVertexRecoFlag(0); /// ???? force to use beam center
 

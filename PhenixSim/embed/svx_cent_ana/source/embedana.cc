@@ -320,6 +320,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
   event->SetPreciseX((vtxout->get_Vertex()).getX());
   event->SetPreciseY((vtxout->get_Vertex()).getY());
   event->SetPreciseZ((vtxout->get_Vertex()).getZ());
+  //std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
   //event->ClearEvent();
 
   // mapping between PHCentralTrack and SvxCentralTrack
