@@ -13,4 +13,4 @@ Rank		       = CPU_Speed
 
 Arguments      = run_sim_single.sh $(Process) 3
 
-Queue 20
+Queue 200

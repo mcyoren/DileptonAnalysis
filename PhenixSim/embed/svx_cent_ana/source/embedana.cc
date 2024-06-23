@@ -52,6 +52,7 @@
 #include "SvxClusterList.h"
 #include "SvxGhitClusterList.h"
 #include "SvxCluster.h"
+#include "SvxGhitCluster.h"
 //#include "SvxCentralTrackList.h"
 //#include "SvxCentralTrack.h"
 //#include "SvxClusterInfo.h"
@@ -239,16 +240,17 @@ int embedana::process_event(PHCompositeNode *topNode) {
   //SvxCentralTrackList *svxcnt  = getClass<SvxCentralTrackList>(topNode,"SvxCentralTrackList");
   
   
-  SvxClusterList      *svx     = getClass<SvxClusterList>( topNode,"SvxClusterList");
-  SvxGhitClusterList  *svxsim  = getClass<SvxGhitClusterList>( topNode,"SvxGhitClusterList");
-
-
   recoConsts*    rc = recoConsts::instance();
   Fun4AllServer* se = Fun4AllServer::instance();
   PHCompositeNode* mcnode   = se->topNode(rc->get_CharFlag("EMBED_MC_TOPNODE"));
   PHCentralTrack  *trk_mc    = getClass<PHCentralTrack>(mcnode,"PHCentralTrack");
+
+  SvxClusterList      *svx     = getClass<SvxClusterList>( topNode,"SvxClusterList");
+  SvxClusterList      *svxsim     = getClass<SvxClusterList>( mcnode,"SvxClusterList");
+  SvxGhitClusterList  *svxembed  = getClass<SvxGhitClusterList>( topNode,"SvxGhitClusterList");
   
-  std::cout << "real and sim Nhits and Ntraks: " << svx->get_nClusters() << " " << svxsim->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
+  std::cout << "real embed and sim Nhits and Ntraks: " << svx->get_nClusters() << " " << svxsim->get_nClusters() << " " <<
+  svxembed->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
   //cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
   
   // topnode
@@ -452,16 +454,113 @@ int embedana::process_event(PHCompositeNode *topNode) {
 
       MyDileptonAnalysis::MyElectron newElectron;
 
-      newElectron.SetPtPrime(sngl->get_mom()*sin(sngl->get_the0()));
       newElectron.SetPt(embed->get_momS()*sin(embed->get_the0S()));
+      newElectron.SetPtPrime(sngl->get_mom()*sin(sngl->get_the0()));
       newElectron.SetReconPT(embed->get_momG()*sin(embed->get_the0G()));
+      newElectron.SetTrkId(itrk);
+      newElectron.SetTrkQuality(trk->get_quality(itrk));
+      newElectron.SetArm(trk->get_dcarm(itrk));
+      newElectron.SetDCSide(trk->get_dcside(itrk));
+      newElectron.SetSect(trk->get_sect(itrk));
+      newElectron.SetQ(trk->get_charge(itrk));
+      newElectron.SetPhiDC(trk->get_phi(itrk));
+      newElectron.SetPhi0(trk->get_phi0(itrk));
+      newElectron.SetThe0(trk->get_the0(itrk));
+      newElectron.SetPhi0Prime(trk->get_phi0(itrk));
+      newElectron.SetThe0Prime(trk->get_the0(itrk));
+      newElectron.SetZDC(trk->get_zed(itrk));
+      newElectron.SetAlpha(trk->get_alpha(itrk));
+      newElectron.SetAlphaPrime(trk->get_alpha(itrk));
+      newElectron.SetEmcId(trk->get_emcid(itrk));
+      newElectron.SetEcore(trk->get_ecore(itrk));
+      newElectron.SetDep(trk->get_dep(itrk));
+      newElectron.SetProb(trk->get_prob(itrk));
+      newElectron.SetEmcdz(trk->get_emcdz(itrk));
+      newElectron.SetEmcdphi(trk->get_emcdphi(itrk));
+      newElectron.SetEmcTower(trk->get_sect(itrk), trk->get_ysect(itrk), trk->get_zsect(itrk));
+      newElectron.SetTOFDPHI(trk->get_n0(itrk));
+      newElectron.SetTOFDZ(trk->get_plemc(itrk));
+      newElectron.SetPC3SDPHI(trk->get_pc3sdphi(itrk));
+      newElectron.SetPC3SDZ(trk->get_pc3sdz(itrk));
+      newElectron.SetCrkphi(trk->get_center_phi(itrk));
+      newElectron.SetCrkz(trk->get_center_z(itrk));
+      newElectron.SetTOFE((trk->get_m2tof(itrk)));
+      newElectron.SetEmcTOF(trk->get_temc(itrk));
+      newElectron.SetChi2(trk->get_chi2(itrk));
+      newElectron.SetN0(trk->get_n0(itrk));
+      newElectron.SetNPE0(trk->get_npe0(itrk));
+      newElectron.SetDISP(trk->get_disp(itrk));
+      newElectron.SetEmcdz_e(trk->get_emcsdz_e(itrk));
+      newElectron.SetEmcdphi_e(trk->get_emcsdphi_e(itrk));
+      newElectron.SetMcId(embed->get_partidG());
 
       event->AddTrack(&newElectron);
     }
     
-    if(fill_TTree) event_container->FillTree();
   }
+  for (int ihit = 0; ihit < svxsim->get_nClusters(); ihit++)
+    {
 
+        SvxCluster *svxhit = svxsim->get_Cluster(ihit);
+
+        if (svxhit == nullptr)
+        {
+            std::cout << "cluster NULL : " << ihit << std::endl;
+            continue;
+        }
+        
+        MyDileptonAnalysis::MyVTXHit newHit;
+        
+        newHit.SetClustId(ihit);
+        newHit.SetLayer(svxhit->get_layer());
+        newHit.SetLadder(svxhit->get_ladder());
+        newHit.SetSensor(1);
+        newHit.SetXHit(svxhit->get_xyz_global(0));
+        newHit.SetYHit(svxhit->get_xyz_global(1));
+        newHit.SetZHit(svxhit->get_xyz_global(2));
+        if(false)std::cout<<newHit.GetXHit()<<" "<<newHit.GetYHit()<<" "<<newHit.GetZHit()<<std::endl;
+        newHit.SetiLayerFromR();
+        if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()||
+        newHit.GetSensor()!=1) 
+        {
+            std::cout<<" smth is wrong "<<std::endl;
+            continue;
+        }
+        event->AddVTXHit(&newHit);
+    }
+    for (int ihit = 0; ihit < svxembed->get_nGhitClusters(); ihit++)
+    {
+
+        SvxGhitCluster *svxembeshit = svxembed->get_GhitCluster(ihit);
+        SvxCluster *svxhit = svx->get_Cluster(svxembeshit->get_clusterID());
+
+        if (svxhit == nullptr)
+        {
+            std::cout << "cluster NULL : " << ihit << std::endl;
+            continue;
+        }
+        
+        MyDileptonAnalysis::MyVTXHit newHit;
+        
+        newHit.SetClustId(ihit);
+        newHit.SetLayer(svxhit->get_layer());
+        newHit.SetLadder(svxhit->get_ladder());
+        newHit.SetSensor(0);
+        newHit.SetXHit(svxhit->get_xyz_global(0));
+        newHit.SetYHit(svxhit->get_xyz_global(1));
+        newHit.SetZHit(svxhit->get_xyz_global(2));
+        if(false)std::cout<<newHit.GetXHit()<<" "<<newHit.GetYHit()<<" "<<newHit.GetZHit()<<std::endl;
+        newHit.SetiLayerFromR();
+        if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()||
+        newHit.GetSensor()!=0) 
+        {
+            std::cout<<" smth is wrong "<<std::endl;
+            continue;
+        }
+        event->AddVTXHit(&newHit);
+    }
+
+    if(fill_TTree) event_container->FillTree();
   // dchit
 /*
   for(int ihit=0; ihit<dchit->Entries(); ihit++){

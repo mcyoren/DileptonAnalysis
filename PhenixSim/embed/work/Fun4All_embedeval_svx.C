@@ -145,13 +145,13 @@ void Fun4All_embedeval_svx(
 
   // vtx part
   SvxParManager *svxpar = new SvxParManager();
-  svxpar->Verbosity(0);
-  svxpar->set_ReadGeoParFromFile(1);
-  svxpar->set_GeometryFileName("svxPISA.par");
-  svxpar->set_OffsetVtxToCnt(0.0, 0.0, 0.0);
-  svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
+  svxpar->Verbosity(0);//hz no ppz
+  //svxpar->set_ReadGeoParFromFile(1);
+  //svxpar->set_GeometryFileName("svxPISA.par");
+  //svxpar->set_OffsetVtxToCnt(0.0, 0.0, 0.0);
+  //svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
   //svxpar->set_BeamCenter(0.0, 0.0);
-  svxpar->Load_ThresholdFile("svx_threshold.dat");
+  //svxpar->Load_ThresholdFile("svx_threshold.dat");
   //  svxpar->set_UseStripThresholdDatbase(false);
   //svxpar->Verbosity(1);
 
