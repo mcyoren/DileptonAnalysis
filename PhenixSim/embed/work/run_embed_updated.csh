@@ -63,11 +63,19 @@ echo "Setting internal variables..."
 set runnum    = "409471"
 set jobno     = $1
 set evtnum    = $2
-set inputsim  = $3
+#set inputsim  = $3
 set inputreal = $4
 set outdst    = $5
 set outntuple = $6
-set outntana  = $7
+
+set shift = 2
+set INPUT = `expr $shift + $jobno`
+echo $INPUT
+
+set outntana  = "$INPUT"_$7
+
+set DIR = `printf "%05d" $INPUT`
+set inputsim = /phenix/plhf/mitran/Simul/Dileptons/output_single/dst/dst_out_single_$DIR.root
 
 set scriptdir = "$DATADIR"
 
