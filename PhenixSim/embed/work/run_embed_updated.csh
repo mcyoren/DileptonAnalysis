@@ -40,10 +40,11 @@ setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons
 echo $LD_LIBRARY_PATH
 
 setenv sourcedir /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/build
+if( $1 == 0) then
 cd $sourcedir
 make -j4
 make install
-
+endif
 ##################################
 
 if( $#argv != 7) then
@@ -144,7 +145,7 @@ root -b < cmd.input #>& $HOME/root.log
 mv -f $outdst    $outdstdir
 mv -f $outntuple $outntdir
 mv -f $outntana  $outntanadir
-mv -f my-* $outntanadir
+mv -f my-$outntana $outntanadir
 
 #remove tmp dir
 cd $HOME

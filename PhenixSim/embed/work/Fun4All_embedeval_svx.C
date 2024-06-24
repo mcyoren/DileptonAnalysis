@@ -247,9 +247,9 @@ void Fun4All_embedeval_svx(
   se->registerSubsystem(svxembed);
   se->registerSubsystem(svxapplyhotdead);
   se->registerSubsystem(svxreco);
-  //se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
-  //se->registerSubsystem(svxstandalone ); // take a lot of time for no good reason
-  //se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
+  se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
+  se->registerSubsystem(svxstandalone ); // take a lot of time for no good reason
+  se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
 
   //=========================================
   // These fill the compactCNT storage nodes

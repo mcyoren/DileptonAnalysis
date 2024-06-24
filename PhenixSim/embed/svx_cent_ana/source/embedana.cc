@@ -203,6 +203,7 @@ int embedana::InitRun(PHCompositeNode *topNode) {
       ":simecore:simprob:simn0:simnpe0:simch2npe0:simdisp"
       ":genpt:genmom:genphi0:genthe0:genvx:genvy:genvz:genpid:gendca2d"
     );
+    
 
   cout << "embedana::InitRun ended." << endl;
   return 0;
@@ -359,14 +360,15 @@ int embedana::process_event(PHCompositeNode *topNode) {
       //int idG = embed->get_dctrkidG();
       int idR = embed->get_dctrkidR();
       //int idS = embed->get_dctrkidS();
-      std::cout<<embed->get_bbccent()<<std::endl;
+      std::cout<<embed->get_bbccent()<<" "<<idR<<" "<<Nembed<<std::endl;
 
       if(idR<0||Ncnt<=idR) {
         cout<<" RealtrackID is out of range = "<<idR<<" : "<<Ncnt<<endl;
         continue;
       }
-
+      
       PHSnglCentralTrack* sngl       = trk->get_track(idR);
+      if(!sngl) continue;
       ///SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
       if(false)
       {
@@ -463,6 +465,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       newElectron.SetDCSide(trk->get_dcside(itrk));
       newElectron.SetSect(trk->get_sect(itrk));
       newElectron.SetQ(trk->get_charge(itrk));
+      newElectron.SetQPrime(trk->get_charge(itrk));
       newElectron.SetPhiDC(trk->get_phi(itrk));
       newElectron.SetPhi0(trk->get_phi0(itrk));
       newElectron.SetThe0(trk->get_the0(itrk));
@@ -473,7 +476,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       newElectron.SetAlphaPrime(trk->get_alpha(itrk));
       newElectron.SetEmcId(trk->get_emcid(itrk));
       newElectron.SetEcore(trk->get_ecore(itrk));
-      newElectron.SetDep(trk->get_dep(itrk));
+      //newElectron.SetDep(trk->get_dep(itrk));
       newElectron.SetProb(trk->get_prob(itrk));
       newElectron.SetEmcdz(trk->get_emcdz(itrk));
       newElectron.SetEmcdphi(trk->get_emcdphi(itrk));
@@ -559,7 +562,6 @@ int embedana::process_event(PHCompositeNode *topNode) {
         }
         event->AddVTXHit(&newHit);
     }
-
     if(fill_TTree) event_container->FillTree();
   // dchit
 /*
