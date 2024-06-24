@@ -353,7 +353,7 @@ void Fun4All_embedeval_svx(
   ///////////////////////////////////////////
   // OutputManagers Set up functions  
   ///////////////////////////////////////////
-  if( dstout ) DST_IOManager(dstout, se);
+  if( false && dstout ) DST_IOManager(dstout, se);
   
   cout << "running ..." << endl;
 	//gBenchmark->Start("eventLoop");
