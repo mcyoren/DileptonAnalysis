@@ -10,8 +10,16 @@ isERT=1
 echo $LD_LIBRARY_PATH
 echo $TSEARCHPATH
 
-chmod g+rx ${_CONDOR_SCRATCH_DIR}
-cd ${_CONDOR_SCRATCH_DIR}
+tmpdir="/home/tmp/"${USER}"_jobreal_"$1
+
+if test -d $tmpdir; then
+echo $tmpdir exists
+else 
+mkdir -p $tmpdir
+fi
+echo "cd $tmpdir"
+cd       $tmpdir
+
 
 INPUT=$(( $1 ))
 echo $INPUT
@@ -50,6 +58,7 @@ done
 
 popd
 rm -r $DIR
+rm -r $tmpdir
 
 myend=`date +%s`
 
