@@ -1,7 +1,7 @@
 #include "Calib.h"
 void Calib(int par = 0)
 {
-
+  std::cout<<"start"<<std::endl;
   TFile *input = new TFile(inFile[par], "READ");
   if (!(input))
   {
@@ -23,14 +23,14 @@ void Calib(int par = 0)
   const int fill_inv_mass = 1;
 
 
-  TTree *T = (TTree *)input->Get("T");
+  TTree *T = (TTree *)input->Get("tree");
   TBranch *br = T->GetBranch("MyEvent");
   MyDileptonAnalysis::MyEventContainer *event_container = new MyDileptonAnalysis::MyEventContainer();
   event_container->InitEvent();
   event_container->GetHistsFromFile("../../ee_QA/AnaTrain/Run14AuAuLeptonComby/field_map.root");
   event_container->CreateOutFileAndInitHists("kek.root",fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
                                                fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass);
-  DileptonAnalysis::MyEvent *event = 0;                                             
+  MyDileptonAnalysis::MyEvent *event = 0;                                             
   //event = 0;
   br->SetAddress(&event);
 
@@ -52,7 +52,7 @@ void Calib(int par = 0)
     if (ievent % 5000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 200000)
+    if (ievent > 2000000)
       break;
 
 
@@ -71,7 +71,7 @@ void Calib(int par = 0)
 
     for (int i = 0; i < event->GetNtrack(); i++)
     {
-      DileptonAnalysis::MyTrack trk = event->GetEntry(i);
+      MyDileptonAnalysis::MyElectron trk = *event->GetEntry(i);
       MyDileptonAnalysis::MyElectron *newTrack = new MyDileptonAnalysis::MyElectron;
       newTrack->SetTrkId(i);
       newTrack->SetArm(trk.GetArm());
@@ -108,8 +108,8 @@ void Calib(int par = 0)
 
     for (int i = 0; i < event->GetNtrack()*fill_QA_hadron_hists; i++)
     {
-      DileptonAnalysis::MyTrack trk = event->GetEntry(i);
-      if (trk.GetPtPrime()<1.5) continue;
+      MyDileptonAnalysis::MyElectron trk = *event->GetEntry(i);
+      if (trk.GetPtPrime()<-1.||trk.GetPtPrime()>10.75) continue;
       MyDileptonAnalysis::MyHadron *newTrack = new MyDileptonAnalysis::MyHadron;
       newTrack->SetTrkId(i);
       newTrack->SetArm(trk.GetArm());
@@ -118,7 +118,7 @@ void Calib(int par = 0)
       newTrack->SetPt(trk.GetPt());
       newTrack->SetPtPrime(trk.GetPtPrime());
       newTrack->SetQ(trk.GetCharge());
-      newTrack->SetQPrime(trk.GetChargePrime());
+      newTrack->SetQPrime(trk.GetCharge());
       newTrack->SetPhiDC(trk.GetPhiDC());
       newTrack->SetPhi0(trk.GetPhi0());
       newTrack->SetThe0(trk.GetThe0());
@@ -148,9 +148,10 @@ void Calib(int par = 0)
 
     for (int i = 0; i < event->GetNVTXhit(); i++)
     {
-      DileptonAnalysis::MyVTXHit oldhit = event->GetVTXHitEntry(i);
+      MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
       MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
       newHit->SetClustId(i);
+      if(oldhit.GetSensor() != 1) continue;
       newHit->SetLayer(oldhit.GetLayer());
       newHit->SetLadder(oldhit.GetLadder());
       newHit->SetSensor(oldhit.GetSensor());
@@ -162,11 +163,11 @@ void Calib(int par = 0)
       myevent->AddVTXHit(newHit);
     }
     
-
+  
     
     event_container->SetEvent(myevent);
-    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons();
-
+    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(1000);
+    continue;
     event_container->Associate_Hits_to_Leptons();
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)

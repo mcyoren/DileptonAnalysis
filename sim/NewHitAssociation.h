@@ -25,7 +25,7 @@ const char field_file_path[200]="../AnaTrain/November/field_map.root";
 
 // #include "AnaTrain/MyEvent.C"
 bool ifcout = false;
-const float me2 = 0.000510998918*0.000510998918;
+//const float me2 = 0.000510998918*0.000510998918;
 
 using namespace std;
 

@@ -16,7 +16,7 @@
 #include "../AnaTrain/Run14AuAuLeptonComby/MyEvent.h"
 #include "MyEvent_OLD.h"
 
-const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/event_display/input/phi_ee_sim.root", 
+const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/event_display/input/my-all_first.root", 
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/analysis_output_ccbar_pthat0.root", 
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/merged_output_photon.root",
                             "/home/yoren/bnl/PHENIX/ee/event_display/input/jpsi_sim.root",
@@ -25,7 +25,7 @@ const char field_file_path[200]="../AnaTrain/November/field_map.root";
 
 // #include "AnaTrain/MyEvent.C"
 bool ifcout = false;
-const float me2 = 0.000510998918*0.000510998918;
+//const float me2 = 0.000510998918*0.000510998918;
 
 using namespace std;
 
