@@ -418,7 +418,7 @@ namespace MyDileptonAnalysis
         }     // enf of e loop
     }         // end
 
-    void MyEventContainer::Associate_Hits_to_Hadrons()
+    void MyEventContainer::Associate_Hits_to_Hadrons(float sigma)
     {
         const int nhadron = event->GetNhadron();
         const int nvtxhits = event->GetNVTXhit();
@@ -522,13 +522,13 @@ namespace MyDileptonAnalysis
                 const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;
                 const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
 
-                if (abs(sdphi) > 2 && abs(sdthe) > 2)
+                if (abs(sdphi) > sigma && abs(sdthe) > sigma)
                     continue;
 
                 const float diff = sqrt(pow(sdphi, 2) + pow(sdthe, 2));
 
                 bool SignTrack = true;
-                if (abs(sdphi) < 2.0 && abs(sdthe) < 2.0)
+                if (abs(sdphi) < sigma && abs(sdthe) < sigma)
                 {
                     int N_AssociatedTracks = vtxhit->N_AssociatedTracks();
                     for (int iasstrack = 0; iasstrack < N_AssociatedTracks; iasstrack++)
@@ -575,7 +575,7 @@ namespace MyDileptonAnalysis
                     if (vtxhit->N_AssociatedTracks() > 0)
                         SignTrack = false;
                 }
-                if (abs(sdthe) < 2.0 && is_fill_hadron_hsits)
+                if (abs(sdthe) < sigma && is_fill_hadron_hsits)
                 {
                     dphi_hist[central_bin]->Fill(dphi, charge_bin + 2 * layer, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, charge_bin + 2 * layer, pt);
@@ -587,7 +587,7 @@ namespace MyDileptonAnalysis
                     dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                 }
-                if (abs(sdphi) < 2.0 && is_fill_hadron_hsits)
+                if (abs(sdphi) < sigma && is_fill_hadron_hsits)
                 {
                     dthe_hist[central_bin]->Fill(dthe, charge_bin + 2 * layer, pt);
                     sdthe_hist[central_bin]->Fill(sdthe, charge_bin + 2 * layer, pt);

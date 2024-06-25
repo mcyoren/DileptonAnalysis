@@ -962,7 +962,7 @@ namespace MyDileptonAnalysis
             void FillTree() {tree->Fill();};
             void WriteOutFile();
             void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, bool not_fill = false);
-            void Associate_Hits_to_Hadrons();
+            void Associate_Hits_to_Hadrons(float sigma = 2);
 
             void Reveal_Hadron();
 
