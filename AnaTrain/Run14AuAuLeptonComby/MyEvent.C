@@ -1028,6 +1028,28 @@ namespace MyDileptonAnalysis
         return n_good_el;
     }
 
+    void MyEventContainer::correct_beam_offset()
+    {
+        const int rg_beamoffset = event->GetRunNumber();
+        const int n_rtk = event->GetNhadron();
+        for (int i = 0; i < n_rtk; i++)
+        {
+            MyDileptonAnalysis::MyHadron *hadron = event->GetHadronEntry(i);
+            const float alpha_offset = (fVTXXoffset[rg_beamoffset] / 220) * TMath::Sin(hadron->GetPhiDC()) + (fVTXYoffset[rg_beamoffset] / 220) * TMath::Cos(hadron->GetPhiDC());
+     
+            hadron->SetAlphaPrime(hadron->GetAlpha() - alpha_offset);
+            // set Phi0 to right value
+            hadron->SetPhi0Prime(hadron->GetPhi0() + 2.0195 * alpha_offset);
+
+            hadron->SetPtPrime(hadron->GetPt() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) * mscale);
+
+            if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
+                hadron->SetQPrime(-hadron->GetCharge());
+            else
+                hadron->SetQPrime(hadron->GetCharge());
+        }
+    }
+
     void MyEventContainer::GetHistsFromFile(const std::string loc)
     {
         infile = TFile::Open(loc.c_str(), "read");

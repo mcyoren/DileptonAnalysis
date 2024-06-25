@@ -979,6 +979,7 @@ namespace MyDileptonAnalysis
 
             void fill_evtbuff_list();
             void fill_inv_mass();
+            void correct_beam_offset();
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };
