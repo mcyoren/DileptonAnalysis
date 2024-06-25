@@ -109,7 +109,7 @@ void Calib(int par = 0)
     for (int i = 0; i < event->GetNtrack()*fill_QA_hadron_hists; i++)
     {
       MyDileptonAnalysis::MyElectron trk = *event->GetEntry(i);
-      if (trk.GetPtPrime()<-1.||trk.GetPtPrime()>10.75) continue;
+      if (trk.GetPtPrime()<-1.5||trk.GetPtPrime()>10.75) continue;
       MyDileptonAnalysis::MyHadron *newTrack = new MyDileptonAnalysis::MyHadron;
       newTrack->SetTrkId(i);
       newTrack->SetArm(trk.GetArm());
