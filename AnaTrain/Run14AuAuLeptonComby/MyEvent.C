@@ -1035,13 +1035,13 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < n_rtk; i++)
         {
             MyDileptonAnalysis::MyHadron *hadron = event->GetHadronEntry(i);
-            const float alpha_offset = (fVTXXoffset[rg_beamoffset] / 220) * TMath::Sin(hadron->GetPhiDC()) + (fVTXYoffset[rg_beamoffset] / 220) * TMath::Cos(hadron->GetPhiDC());
+            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(hadron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(hadron->GetPhiDC());
      
             hadron->SetAlphaPrime(hadron->GetAlpha() - alpha_offset);
             // set Phi0 to right value
-            hadron->SetPhi0Prime(hadron->GetPhi0() + 2.0195 * alpha_offset);
+            hadron->SetPhi0Prime(hadron->GetPhi0() - 2.0195 * alpha_offset);
 
-            hadron->SetPtPrime(hadron->GetPt() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) * mscale);
+            hadron->SetPtPrime(hadron->GetPt() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
 
             if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
                 hadron->SetQPrime(-hadron->GetCharge());
