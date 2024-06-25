@@ -164,8 +164,8 @@ void Calib(int par = 0)
     }
     
   
-    
     event_container->SetEvent(myevent);
+    if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(1000);
     continue;
     event_container->Associate_Hits_to_Leptons();
