@@ -10,6 +10,8 @@ void Fun4All_embedeval_svx(
    const char *dstout      = "/phenix/hhj/lebedev/chi_c/simulation/pairobj/pairobject_chisigembed_251500_100.root", 
    const char *ntname      = "embed.root",
    const char *ntananame   = "embedana.root",
+   const char *vtxpath     = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
+   const char *oscarpath   = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat",
    const int   runnum      = 421716
                   )
 {
@@ -146,12 +148,12 @@ void Fun4All_embedeval_svx(
   // vtx part
   SvxParManager *svxpar = new SvxParManager();
   svxpar->Verbosity(0);//hz no ppz
-  //svxpar->set_ReadGeoParFromFile(1);
-  //svxpar->set_GeometryFileName("svxPISA.par");
-  //svxpar->set_OffsetVtxToCnt(0.0, 0.0, 0.0);
-  //svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
-  //svxpar->set_BeamCenter(0.0, 0.0);
-  //svxpar->Load_ThresholdFile("svx_threshold.dat");
+  svxpar->set_ReadGeoParFromFile(1);
+  svxpar->set_GeometryFileName("svxPISA.par");
+  svxpar->set_OffsetVtxToCnt(0.0, 0.0, 0.0);
+  svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
+  svxpar->set_BeamCenter(0.0, 0.0);
+  svxpar->Load_ThresholdFile("svx_threshold.dat");
   //  svxpar->set_UseStripThresholdDatbase(false);
   //svxpar->Verbosity(1);
 
@@ -247,9 +249,9 @@ void Fun4All_embedeval_svx(
   se->registerSubsystem(svxembed);
   se->registerSubsystem(svxapplyhotdead);
   se->registerSubsystem(svxreco);
-  se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
-  se->registerSubsystem(svxstandalone ); // take a lot of time for no good reason
-  se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
+  //se->registerSubsystem(svxvtxseedfinder); // really need? copy from realDST is good enough?
+  //se->registerSubsystem(svxstandalone ); // take a lot of time for no good reason
+  //se->registerSubsystem(svxprimvtxfinder); // really need? copy from realDST is good enough?
 
   //=========================================
   // These fill the compactCNT storage nodes
@@ -336,7 +338,7 @@ void Fun4All_embedeval_svx(
   //  se->registerSubsystem(central);
   
   // my analysis module
-  embedana *ana = new embedana(ntananame);
+  embedana *ana = new embedana(ntananame,vtxpath,oscarpath);
   se->registerSubsystem(ana);
   
   Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTin1","DST","SINGLE"); 

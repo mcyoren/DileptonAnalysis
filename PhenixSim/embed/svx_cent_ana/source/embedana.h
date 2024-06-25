@@ -8,6 +8,7 @@
 
 #include "MyEvent.h"
 #include "TOAD.h"
+#include "TMath.h"
 
 class PHCompositeNode;
 class TFile;
@@ -42,12 +43,17 @@ class PHCentralTrack;
 //class svxAddress;
 //class svxDetectorGeo;
 
+struct InData {
+    double px, py, pz, vx, vy, vz;
+    int id;
+};
 
 ////////////
 
 class embedana: public SubsysReco {
 public:
-  embedana(std::string filename="embedana.root");
+  embedana(std::string filename="embedana.root", std::string filepath="/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
+  std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat");
   virtual ~embedana();
 
   int Init(PHCompositeNode *topNode);
@@ -80,6 +86,12 @@ private:
   TFile*      m_outfile;
   int fill_TTree;
   TNtuple*    m_ntp_embed;
+  std::string local_filepath;
+  std::string local_oscarpath;
+  std::vector<double> vertexes;
+
+  int ReadOrigPartMoms();
+  InData InData_read[10000];
 
 
   MyDileptonAnalysis::MyEventContainer *event_container;

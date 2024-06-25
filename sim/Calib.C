@@ -59,7 +59,7 @@ void Calib(int par = 0)
     if(event->GetNtrack()<1) continue;
     MyDileptonAnalysis::MyEvent *myevent = new MyDileptonAnalysis::MyEvent;
 
-    myevent->SetCentrality(1);
+    myevent->SetCentrality(event->GetCentrality());
     myevent->SetPreciseX(event->GetPreciseX());
     myevent->SetPreciseY(event->GetPreciseY());
     myevent->SetPreciseZ(event->GetPreciseZ());
@@ -151,7 +151,7 @@ void Calib(int par = 0)
       MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
       MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
       newHit->SetClustId(i);
-      if(oldhit.GetSensor() != 1) continue;
+      if(oldhit.GetSensor() != 0) continue;
       newHit->SetLayer(oldhit.GetLayer());
       newHit->SetLadder(oldhit.GetLadder());
       newHit->SetSensor(oldhit.GetSensor());

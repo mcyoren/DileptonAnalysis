@@ -1,4 +1,11 @@
 #include <iostream>
+#include <fstream> 
+#include <sstream>
+#include <cstdio>
+#include <stdlib.h>
+#include <cassert>
+#include <stdio.h>
+
 //#include <iomanip>
 //#include <vector>
 //#include <map>
@@ -100,12 +107,17 @@ using namespace findNode;
 
 //==============================================================
 
-embedana::embedana(string filename) : m_outFileName(filename)
+embedana::embedana(string filename, string filepath, string oscarpath) : m_outFileName(filename)
 {
   ThisName   = "embedana";
   EventNumber=0;
   event_container = nullptr;
   fill_TTree = 0;
+  local_filepath = filepath;
+  local_oscarpath = oscarpath;
+  vertexes.clear();
+
+  memset(InData_read, 0, 10000 * sizeof(InData));
 }
 
 //==============================================================
@@ -203,6 +215,28 @@ int embedana::InitRun(PHCompositeNode *topNode) {
       ":simecore:simprob:simn0:simnpe0:simch2npe0:simdisp"
       ":genpt:genmom:genphi0:genthe0:genvx:genvy:genvz:genpid:gendca2d"
     );
+
+  const int error = ReadOrigPartMoms();
+  if(error){
+        printf("Something wrong!!!!\n");
+        return 1;
+    }
+
+  std::ifstream myfile (local_filepath.c_str());
+  string line;
+  if (myfile.is_open())
+  {
+    while ( getline (myfile,line) )
+    {
+      string s;
+      std::stringstream ss(line);
+      while(getline(ss, s, ' '))
+      {
+        vertexes.push_back(atof(s.c_str()));
+      }
+    }
+    myfile.close();
+  }
     
 
   cout << "embedana::InitRun ended." << endl;
@@ -224,6 +258,8 @@ int embedana::process_event(PHCompositeNode *topNode) {
     topNode->print();
     first_event++;
   }
+
+  if(EventNumber>(int)vertexes.size()/4) return 0;
 
   // event info
   //--EventHeader*  evthdr  = getClass<EventHeader>(topNode,"EventHeader");
@@ -320,9 +356,21 @@ int embedana::process_event(PHCompositeNode *topNode) {
   //////////////////////////////////////////////////////////////////////
   PHPointerList<PHEmbedMcRecoTrack>  *embedtrk = getClass< PHPointerList<PHEmbedMcRecoTrack> >(topNode, "PHEmbedMcRecoTrack");
   MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
-  event->SetPreciseX((vtxout->get_Vertex()).getX());
-  event->SetPreciseY((vtxout->get_Vertex()).getY());
-  event->SetPreciseZ((vtxout->get_Vertex()).getZ());
+  event->SetPreciseX(vertexes[4*EventNumber + 0]);
+  event->SetPreciseY(vertexes[4*EventNumber + 1]);
+  event->SetPreciseZ(vertexes[4*EventNumber + 2]);
+  event->SetCentrality(vertexes[4*EventNumber + 3]);
+
+  MyDileptonAnalysis::MyElectron initial_particle;
+  initial_particle.SetMcId(InData_read[EventNumber].id);
+  const double init_pt = sqrt(InData_read[EventNumber].px*InData_read[EventNumber].px+InData_read[EventNumber].py*InData_read[EventNumber].py);
+  initial_particle.SetPt(init_pt);
+  initial_particle.SetPhi0(atan2(InData_read[EventNumber].py,InData_read[EventNumber].px));
+  initial_particle.SetThe0(atan2(init_pt,InData_read[EventNumber].pz));
+  if(false)std::cout<<"x,y,z,cent: "<<vertexes[4*EventNumber] << " " <<vertexes[4*EventNumber+1] << " " <<vertexes[4*EventNumber+2] << " "<<vertexes[4*EventNumber+3] << " " <<std::endl;
+  if(false)std::cout<<"px,py,pz,id : "<<InData_read[EventNumber].px << " " <<InData_read[EventNumber].py << " " <<InData_read[EventNumber].pz << " "<<InData_read[EventNumber].id << " " <<std::endl;
+  if(false)std::cout<<"px,py,pz,id : "<<initial_particle.GetPx() << " " <<initial_particle.GetPy() << " " <<initial_particle.GetPz() << " "<<initial_particle.GetMcId() << " " <<std::endl;
+  event->AddElecCand(&initial_particle);
   //std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
   //event->ClearEvent();
 
@@ -360,7 +408,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
       //int idG = embed->get_dctrkidG();
       int idR = embed->get_dctrkidR();
       //int idS = embed->get_dctrkidS();
-      std::cout<<embed->get_bbccent()<<" "<<idR<<" "<<Nembed<<std::endl;
+      if(false)std::cout<<embed->get_bbccent()<<" "<<embed->get_ptG()*TMath::Cos(embed->get_phi0G())<<" "<<embed->get_ptG()*TMath::Sin(embed->get_phi0G()) <<" "<<idR<<" "<<Nembed<<std::endl;
 
       if(idR<0||Ncnt<=idR) {
         cout<<" RealtrackID is out of range = "<<idR<<" : "<<Ncnt<<endl;
@@ -551,7 +599,7 @@ int embedana::process_event(PHCompositeNode *topNode) {
         newHit.SetSensor(0);
         newHit.SetXHit(svxhit->get_xyz_global(0));
         newHit.SetYHit(svxhit->get_xyz_global(1));
-        newHit.SetZHit(svxhit->get_xyz_global(2));
+        newHit.SetZHit(svxhit->get_xyz_global(2)-event->GetPreciseZ());
         if(false)std::cout<<newHit.GetXHit()<<" "<<newHit.GetYHit()<<" "<<newHit.GetZHit()<<std::endl;
         newHit.SetiLayerFromR();
         if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()||
@@ -741,3 +789,53 @@ void embedana::calcDCA_BCbyCircleProjection
   *d2dca_bc = b_sign*(charge*(R - L));
 }
   
+int embedana::ReadOrigPartMoms() {
+    
+    int i;
+
+    printf("Small oscar file is %s\n", local_oscarpath.c_str());
+
+    fstream fin(local_oscarpath.c_str());
+    string line;
+
+    if (!fin) {
+        printf("No such small file!!\n");
+        return -1;
+    }
+
+    i = 0;
+    while(getline(fin, line))  {
+       if (line.find("#") == 0)continue;
+       int i1, i2, i3;
+       double px, py, pz, vx, vy, vz, dummy;
+       stringstream s(line);
+       s>>i1>>i2;
+       if (TMath::Abs(i2)>1) 
+       {
+            s>>i3>>px>>py>>pz>>dummy>>dummy>>vx>>vy>>vz;
+            //cout<<px<<" "<<py<<" "<<pz<<endl;
+            if (i >= 10000) {
+                printf("Too much particles in small file!\n");
+                return -1;
+            }
+
+            InData_read[i].id = i2;
+            InData_read[i].px = px;
+            InData_read[i].py = py;
+            InData_read[i].pz = pz;
+            InData_read[i].vx = vx;
+            InData_read[i].vy = vy;
+            InData_read[i].vz = vz;
+    
+            ++i;
+       }
+        
+    }
+    cout<<"Nlines: "<<i<<endl;
+    if (i!=10000) {
+        printf("Wrong number of tracks");
+        return -1;
+    }
+
+    return 0;
+};

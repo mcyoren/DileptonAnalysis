@@ -77,6 +77,8 @@ set outntana  = "$INPUT"_$7
 
 set DIR = `printf "%05d" $INPUT`
 set inputsim = /phenix/plhf/mitran/Simul/Dileptons/output_single/dst/dst_out_single_$DIR.root
+set inputoscar = /phenix/plhf/mitran/Simul/Dileptons/output_single/single/$DIR.oscar.particles.dat
+set inputvtx = /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt
 
 set scriptdir = "$DATADIR"
 
@@ -100,6 +102,8 @@ echo "inputsim     $inputsim   "
 echo "outdst       $outdst     "
 echo "outntuple    $outntuple  "
 echo "outntana     $outntana   "
+echo "inputvtx     $inputvtx   "
+echo "inputoscar   $inputoscar "
 echo "scriptdir    $scriptdir  "
 echo "outdstdir    $outdstdir  "
 echo "outntdir     $outntdir   "
@@ -135,7 +139,7 @@ pwd
 ls -ltr
 
 echo "yolo"
-echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "'"'$outntuple'"'", "'"'$outntana'"'", $runnum);" >  cmd.input
+echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "'"'$outntuple'"'", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".q" >> cmd.input
 
 ##run root
