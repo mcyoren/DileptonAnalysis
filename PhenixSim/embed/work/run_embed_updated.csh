@@ -29,6 +29,7 @@ unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
 
+set shift = 202
 
 setenv DATADIR /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/work
 
@@ -69,7 +70,6 @@ set inputreal = $4
 set outdst    = $5
 set outntuple = $6
 
-set shift = 2
 set INPUT = `expr $shift + $jobno`
 echo $INPUT
 
