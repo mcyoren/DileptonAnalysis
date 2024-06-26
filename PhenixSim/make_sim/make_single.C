@@ -171,7 +171,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
 
     //-------------------  PI0 --------------------
     TLorentzVector *PiZero = new TLorentzVector();
-    PiZero = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, n, pt_min, pt_max, IDpiplus[2]);
+    PiZero = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, n, pt_min, pt_max, IDpiminus[2]);
     h1d_pi0pt.Fill(PiZero->Pt());
     
     // Particle index
@@ -181,8 +181,8 @@ for(int ievt=0; ievt<nevt; ievt++) {
     // idpart id ist px,py,pz,E, mass, x,y,z,t
 
     //-------------------  PI0 --------------------
-    fileout << index << " " << IDpiplus[0] << " " << IDpiplus[1] << " " << PiZero->Px() << " " << PiZero->Py() << " " << PiZero->Pz() << " " << PiZero->E() << " " <<
-  IDpiplus[2] << " " << xpos << " " << ypos << " " << zpos << " " << time << endl;
+    fileout << index << " " << IDpiminus[0] << " " << IDpiminus[1] << " " << PiZero->Px() << " " << PiZero->Py() << " " << PiZero->Pz() << " " << PiZero->E() << " " <<
+  IDpiminus[2] << " " << xpos << " " << ypos << " " << zpos << " " << time << endl;
 	
   }//End of particle
   fileout << "0 0" << endl;
