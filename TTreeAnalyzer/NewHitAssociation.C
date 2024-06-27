@@ -111,6 +111,11 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     
     event_container->Associate_Hits_to_Leptons();
 
+    if (check_veto)
+      event_container->CheckVeto();
+    if (fill_true_DCA)
+      event_container->FillTrueDCA();
+
 
     n_electrons = event->GetNtrack();
         for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -121,6 +126,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
             if (mytrk.GetHitCounter(0) < 1 || mytrk.GetHitCounter(1) < 1 ||
                 (mytrk.GetHitCounter(2) < 1 && mytrk.GetHitCounter(3) < 1))
                 do_reshuf = true;
+            if(TMath::Abs(mytrk.GetDCA2())>50||mytrk.GetGhost()>0) do_reshuf = true;
 
             if (do_reshuf)
             {
@@ -161,10 +167,6 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
       event_container->FillDphiHists();
     if (do_reveal_hadron)
       event_container->Reveal_Hadron();
-    if (check_veto)
-      event_container->CheckVeto();
-    if (fill_true_DCA)
-      event_container->FillTrueDCA();
     if (fill_TTree)
       event_container->FillTree();
     if(fill_inv_mass)
