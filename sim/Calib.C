@@ -66,7 +66,7 @@ void Calib(int par = 0)
     myevent->SetEvtNo(event->GetEvtNo());
     myevent->SetRunNumber(0);
     myevent->SetBBCcharge(event->GetBBCcharge());
-    myevent->SetVtxZ(event->GetVtxZ());
+    myevent->SetVtxZ(event->GetPreciseZ());
     myevent->SetBBCtimeN(event->GetBBCtimeN());
 
     for (int i = 0; i < event->GetNtrack(); i++)
@@ -166,8 +166,7 @@ void Calib(int par = 0)
   
     event_container->SetEvent(myevent);
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
-    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(1000);
-    continue;
+    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(4);
     event_container->Associate_Hits_to_Leptons();
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -205,6 +204,7 @@ void Calib(int par = 0)
     for (int i = 0; i < myevent->GetNtrack(); i++)
     {
       MyDileptonAnalysis::MyElectron *newTrack1 = myevent->GetEntry(i);
+      //std::cout<<newTrack1->GetHitCounter(0)<<" "<<newTrack1->GetHitCounter(1)<<" "<<newTrack1->GetHitCounter(2)<<" "<<newTrack1->GetHitCounter(3)<<std::endl;
       if(newTrack1->GetGhost()>0) continue;
       if(newTrack1->GetChargePrime()<0) continue;
       const float a1=newTrack1->GetMinDist(0);
