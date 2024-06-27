@@ -72,7 +72,8 @@ unsigned int get_seed()
 }
 
 void make_single(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt", 
-                TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.0, const float pt_max = 5, const double n = 0) {
+                TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.5, const float pt_max = 5, 
+                const double n = -1, const int id = 1) {
 
 // n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 
@@ -128,6 +129,12 @@ Double_t IDkaonplus[3]  = { 321, 0, 0.493677};
 Double_t IDkaonminus[3] = {-321, 0, 0.493677};
 Double_t IDprotonplus[3]  = { 2212, 0, 0.938272};
 Double_t IDprotonminus[3] = {-2212, 0, 0.938272};
+Double_t IDs[3][3] =
+{
+  { 111, 0, 0.1349766},
+  { 211, 0, 0.13957018},
+  {-211, 0, 0.13957018}
+};
 //Double_t IDphoton[3] = {22, 0, 0.};
 
 int seed = get_seed();
@@ -171,7 +178,7 @@ for(int ievt=0; ievt<nevt; ievt++) {
 
     //-------------------  PI0 --------------------
     TLorentzVector *PiZero = new TLorentzVector();
-    PiZero = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, n, pt_min, pt_max, IDpiminus[2]);
+    PiZero = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, n, pt_min, pt_max, IDs[id][2]);
     h1d_pi0pt.Fill(PiZero->Pt());
     
     // Particle index
@@ -181,8 +188,8 @@ for(int ievt=0; ievt<nevt; ievt++) {
     // idpart id ist px,py,pz,E, mass, x,y,z,t
 
     //-------------------  PI0 --------------------
-    fileout << index << " " << IDpiminus[0] << " " << IDpiminus[1] << " " << PiZero->Px() << " " << PiZero->Py() << " " << PiZero->Pz() << " " << PiZero->E() << " " <<
-  IDpiminus[2] << " " << xpos << " " << ypos << " " << zpos << " " << time << endl;
+    fileout << index << " " << IDs[id][0] << " " << IDs[id][1] << " " << PiZero->Px() << " " << PiZero->Py() << " " << PiZero->Pz() << " " << PiZero->E() << " " <<
+  IDs[id][2] << " " << xpos << " " << ypos << " " << zpos << " " << time << endl;
 	
   }//End of particle
   fileout << "0 0" << endl;
