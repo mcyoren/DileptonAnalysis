@@ -278,7 +278,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     event_container->FillEventHist(7);
 
-    if(remove_hadron_hits && 1==0 ) 
+    if(remove_hadron_hits) 
     {
         event_container->Associate_Hits_to_Hadrons();
     }
@@ -323,7 +323,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     
     //event->ReshuffleElectrons();
-
+    event_container->CleanUpHitList();
     event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
@@ -555,13 +555,13 @@ void Run14AuAuLeptonCombyReco::fill_SVXHits_to_myevent(const SvxClusterList *svx
         
         newHit.SetClustId(ihit);
         newHit.SetLayer(svxhit->get_layer());
-        newHit.SetLadder(svxhit->get_ladder());
+        newHit.SetLadder(svxhit->get_ladder()+50);
         newHit.SetSensor(svxhit->get_sensor());
         newHit.SetXHit(svxhit->get_xyz_global(0));
         newHit.SetYHit(svxhit->get_xyz_global(1));
         newHit.SetZHit(svxhit->get_xyz_global(2));
         newHit.SetiLayerFromR();
-        if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()||
+        if( svxhit->get_layer()!=newHit.GetLayer()||svxhit->get_ladder()!=newHit.GetLadder()-50||
         svxhit->get_sensor()!=newHit.GetSensor()) 
         {
             std::cout<<" smth is wrong "<<std::endl;

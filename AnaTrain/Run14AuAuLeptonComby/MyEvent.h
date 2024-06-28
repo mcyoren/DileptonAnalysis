@@ -821,6 +821,7 @@ namespace MyDileptonAnalysis
 
             void RemoveTrackEntry(const unsigned int i){ TrackList.erase(TrackList.begin() + i); };
             void RemoveHadronEntry(const unsigned int i){ HadronList.erase(HadronList.begin() + i); };
+            void RemoveVTXHitEntry(const unsigned int i){ VTXHitList.erase(VTXHitList.begin() + i); };
 
             std::vector<MyDileptonAnalysis::MyElectron> GetTracks() { return TrackList; };
             std::vector<MyDileptonAnalysis::MyHadron> GetHadrons() { return HadronList; };
@@ -980,6 +981,7 @@ namespace MyDileptonAnalysis
             void fill_evtbuff_list();
             void fill_inv_mass();
             void correct_beam_offset();
+            void CleanUpHitList();
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };

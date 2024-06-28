@@ -290,6 +290,12 @@ namespace MyDileptonAnalysis
 
                         const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        
+                        const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
+                        const float dthe = (dilep_the_projection[ilayer] - theta_hit);
+                        if (abs(dphi) > 0.1 || abs(dthe) > 0.1) continue;
+
+                        if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -306,8 +312,6 @@ namespace MyDileptonAnalysis
                             mean_theta_value  = mytrk->get_dynamic_mean_theta_data (0, cycle_layer, dthe_previous_layer);
                         }
 
-                        const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
-                        const float dthe = (dilep_the_projection[ilayer] - theta_hit);
                         const float sdphi = (dphi - mean_phi_value) / sigma_phi_value - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
                         const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
 
@@ -511,8 +515,10 @@ namespace MyDileptonAnalysis
                 const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                 const float dthe = (dilep_the_projection[ilayer] - theta_hit);
 
-                if (abs(dphi) > 0.2 || abs(dthe) > 0.2)
+                if (abs(dphi) > 0.05 || abs(dthe) > 0.05)
                     continue;
+                
+                if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
                 const float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
                 const float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
@@ -562,13 +568,16 @@ namespace MyDileptonAnalysis
                         mytrk->SetHitIndex(ihit, layer);
                         mytrk->AddHitCounter(layer);
                     }
-                    vtxhit->AddAssociatedTrack(itrk, diff);
-                    myvtx_hist->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                    +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunNumber(),0.5);
-                    myvtx_hist->Fill(event->GetPreciseY()-vtxhit->GetYHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                    +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Sin(mytrk->GetPhi0Prime()),event->GetRunNumber(),1.5);
-                    myvtx_hist->Fill(event->GetPreciseZ()-vtxhit->GetZHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                    +SQR(vtxhit->GetYHit()-event->GetPreciseY()))/TMath::Tan(mytrk->GetThe0Prime()),event->GetRunNumber(),2.5);
+                    if(false)vtxhit->AddAssociatedTrack(itrk, diff);
+                    if(is_fill_hadron_hsits)
+                    {
+                        myvtx_hist->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunNumber(),0.5);
+                        myvtx_hist->Fill(event->GetPreciseY()-vtxhit->GetYHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Sin(mytrk->GetPhi0Prime()),event->GetRunNumber(),1.5);
+                        myvtx_hist->Fill(event->GetPreciseZ()-vtxhit->GetZHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))/TMath::Tan(mytrk->GetThe0Prime()),event->GetRunNumber(),2.5);
+                    }
                 }
                 else
                 {
@@ -725,6 +734,23 @@ namespace MyDileptonAnalysis
                 this->AddElecCand(&mytrk);
                 n_electrons--;
                 itrk--;
+                continue;
+            }
+        }
+    }
+
+    void MyEventContainer::CleanUpHitList()
+    {
+        int n_hits = event->GetNVTXhit();
+        for (int ihit = 0; ihit < n_hits; ihit++)
+        {
+            MyDileptonAnalysis::MyVTXHit myhit = *event->GetVTXHitEntry(ihit);
+
+            if (myhit.GetLadder()>49)
+            {
+                event->RemoveVTXHitEntry(ihit);
+                n_hits--;
+                ihit--;
                 continue;
             }
         }
@@ -1030,7 +1056,6 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::correct_beam_offset()
     {
-        const int rg_beamoffset = event->GetRunNumber();
         const int n_rtk = event->GetNhadron();
         for (int i = 0; i < n_rtk; i++)
         {
