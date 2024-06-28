@@ -106,7 +106,7 @@ void Fun4All_embedeval_svx(
   rc->set_FloatFlag("TOFTIMINGRESOLUTION", 0.100);
 
   ///setting my module
-  rc->set_IntFlag("Remove_hadron_hits", 0);
+  rc->set_IntFlag("Remove_hadron_hits", 1);
   rc->set_IntFlag("Fill_QA_hadron_hists", 0);
   rc->set_IntFlag("Fill_QA_lepton_hists", 0);
   rc->set_IntFlag("Fill_TTree", 1);

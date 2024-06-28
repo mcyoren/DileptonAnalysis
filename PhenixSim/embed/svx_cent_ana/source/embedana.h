@@ -6,6 +6,52 @@
 #include <vector>
 #include <map>
 
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <stdlib.h>
+#include <cassert>
+#include <stdio.h>
+
+#include "TMath.h"
+#include "phool.h"
+#include "PHTypedNodeIterator.h"
+#include "PHCompositeNode.h"
+#include "PHIODataNode.h"
+#include "Fun4AllReturnCodes.h"
+#include "Fun4AllServer.h"
+#include "recoConsts.h"
+
+
+#include "PHCentralTrack.h"
+#include "PHSnglCentralTrack.h"
+#include "EventHeader.h"
+#include "VtxOut.h"
+#include "PHGlobal.h"
+
+#include <DchHitLineTable.hh>
+#include <PadCluster.h>
+#include <CrkHit.h>
+#include <PHTrackOut.h>
+#include <PHDchTrackOut.h>
+#include <CglTrack.h>
+#include "SvxClusterList.h"
+#include "SvxGhitClusterList.h"
+#include "SvxCluster.h"
+#include "SvxGhitCluster.h"
+#include <PHPointerList.h>
+#include <PHEmbedMcRecoTrack.hh>
+
+#include "TFile.h"
+#include "TNtuple.h"
+
+#include "getClass.h"
+
+using namespace std;
+using namespace findNode;
+
 #include "MyEvent.h"
 #include "TOAD.h"
 #include "TMath.h"
@@ -13,35 +59,8 @@
 class PHCompositeNode;
 class TFile;
 class TNtuple;
-//class TTree;
-//class TH1F;
-//class TH2F;
-//class TH3F;
-//class TH3D;
-
-//class SvxRawhitClusterList;
-//class SvxRawhitList;
-//class SvxClusterList;
-//class SvxCluster;
 
 class PHCentralTrack;
-//class SvxCentralTrackList;
-//class SvxCentralTrack;
-
-//class BbcOut;
-//class VtxOut;
-//class EventHeader;
-//class SvxClusterContainer;
-//class SvxClusterInfo;
-//class RpSumXYObject;
-//class McEvalSingleList;
-//class SvxGhitList;
-//class SvxGhit;
-//class SvxGhitRawhitList;
-//class SvxHitMap;
-//class fkinWrapper;
-//class svxAddress;
-//class svxDetectorGeo;
 
 struct InData {
     double px, py, pz, vx, vy, vz;
@@ -84,7 +103,7 @@ private:
 
   std::string m_outFileName;
   TFile*      m_outfile;
-  int fill_TTree;
+  int fill_TTree, remove_hadron_hits;
   TNtuple*    m_ntp_embed;
   std::string local_filepath;
   std::string local_oscarpath;

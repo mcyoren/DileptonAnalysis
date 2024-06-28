@@ -146,7 +146,7 @@ echo ".q" >> cmd.input
 root -b < cmd.input #>& $HOME/root.log
 #ls -ltr
 #move
-mv -f $outdst    $outdstdir
+#mv -f $outdst    $outdstdir
 mv -f $outntuple $outntdir
 mv -f $outntana  $outntanadir
 mv -f my-$outntana $outntanadir
