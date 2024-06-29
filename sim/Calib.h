@@ -16,11 +16,11 @@
 #include "../AnaTrain/Run14AuAuLeptonComby/MyEvent.h"
 #include "MyEvent_OLD.h"
 
-const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/event_display/input/my-2M_piplus_embed_hagedorn_v1.root", 
-                            "/home/yoren/bnl/PHENIX/ee/event_display/input/analysis_output_ccbar_pthat0.root", 
-                            "/home/yoren/bnl/PHENIX/ee/event_display/input/merged_output_photon.root",
-                            "/home/yoren/bnl/PHENIX/ee/event_display/input/jpsi_sim.root",
-                            "/home/yoren/bnl/PHENIX/ee/event_display/input/phi_ee_sim.root"};
+const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-2M_piminus_embed_v1.root", //2M_piplus_embed_hagedorn_v1
+                            "/home/yoren/bnl/PHENIX/ee/AuAu/analysis_output_ccbar_pthat0.root", 
+                            "/home/yoren/bnl/PHENIX/ee/AuAu/merged_output_photon.root",
+                            "/home/yoren/bnl/PHENIX/ee/AuAu/jpsi_sim.root",
+                            "/home/yoren/bnl/PHENIX/ee/AuAu/phi_ee_sim.root"};
 const char field_file_path[200]="../AnaTrain/November/field_map.root";
 
 // #include "AnaTrain/MyEvent.C"
