@@ -515,7 +515,7 @@ namespace MyDileptonAnalysis
                 const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                 const float dthe = (dilep_the_projection[ilayer] - theta_hit);
 
-                if (abs(dphi) > 0.05 || abs(dthe) > 0.05)
+                if (abs(dphi) > 0.1 || abs(dthe) > 0.1)
                     continue;
                 
                 if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
