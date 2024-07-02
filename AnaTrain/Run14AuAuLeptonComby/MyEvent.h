@@ -261,11 +261,13 @@ namespace MyDileptonAnalysis
             float get_mean_theta_data(int rungroup, int centr_bin, int layer) { return mean_theta_pars[rungroup][centr_bin][layer]; };
             float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
             {
-                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime);
+                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime)
+                  +sigma_phi_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
             float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
             {
-                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime);
+                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime)
+                  +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
 
             float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 

@@ -297,10 +297,10 @@ namespace MyDileptonAnalysis
 
                         if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
-                        float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
-                        float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
-                        float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
-                        float mean_theta_value = mytrk->get_mean_theta_data(rungroup, central_bin, layer);
+                        float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
+                        float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
+                        float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin, layer);
+                        float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin, layer);
 
                         int cycle_layer = layer;
                         if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
