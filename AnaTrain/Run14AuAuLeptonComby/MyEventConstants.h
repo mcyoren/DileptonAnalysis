@@ -29,7 +29,7 @@
 #define nvtx_layers 4
 #define N_centr 5
 #define N_rg 7
-#define N_dynamic 12
+#define N_dynamic 24
 
 #define MIX_CENTBIN 10
 #define MIX_ZVTXBIN 10 
