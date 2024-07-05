@@ -261,34 +261,36 @@ namespace MyDileptonAnalysis
             float get_mean_theta_data(int rungroup, int centr_bin, int layer) { return mean_theta_pars[rungroup][centr_bin][layer]; };
             float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
             {
+                  layer = arm + (1-q_prime) + 4 * layer;
                   return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime)
                   +sigma_phi_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
             float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
             {
+                  layer = arm + (1-q_prime) + 4 * layer;
                   return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime)
                   +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
 
             float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 
             { 
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return phi_mean_phi_params[rungroup][arg0][0]+phi_mean_phi_params[rungroup][arg0][1]*phi_prev; 
             };
             float get_dynamic_mean_theta_data(int rungroup, int ilay, float phi_prev)
             { 
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return the_mean_the_params[rungroup][arg0][0]+the_mean_the_params[rungroup][arg0][1]*phi_prev; 
             };
             float get_dynamic_sigma_phi_data(int rungroup, int ilay, float phi_prev)
             {
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
                   return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
             float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
             {
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
             };
             float get_dynamic_smean_phi_data(int rungroup, int ilay, float phi_prev)
