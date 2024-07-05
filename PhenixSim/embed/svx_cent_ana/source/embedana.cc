@@ -176,19 +176,18 @@ int embedana::process_event(PHCompositeNode *topNode)
   event->SetPreciseZ(vertexes[4 * EventNumber + 2]);
   event->SetCentrality(vertexes[4 * EventNumber + 3]);
 
-  MyDileptonAnalysis::MyElectron initial_particle;
-  initial_particle.SetMcId(InData_read[EventNumber].id);
+  event->SetEvtNo(InData_read[EventNumber].id);
   const double init_pt = sqrt(InData_read[EventNumber].px * InData_read[EventNumber].px + InData_read[EventNumber].py * InData_read[EventNumber].py);
-  initial_particle.SetPt(init_pt);
-  initial_particle.SetPhi0(atan2(InData_read[EventNumber].py, InData_read[EventNumber].px));
-  initial_particle.SetThe0(atan2(init_pt, InData_read[EventNumber].pz));
+  event->SetBBCcharge(init_pt);
+  event->SetBBCchargeN(atan2(InData_read[EventNumber].py, InData_read[EventNumber].px));
+  event->SetBBCchargeS(atan2(init_pt, InData_read[EventNumber].pz));
+  
   if (false)
     std::cout << "x,y,z,cent: " << vertexes[4 * EventNumber] << " " << vertexes[4 * EventNumber + 1] << " " << vertexes[4 * EventNumber + 2] << " " << vertexes[4 * EventNumber + 3] << " " << std::endl;
   if (false)
     std::cout << "px,py,pz,id : " << InData_read[EventNumber].px << " " << InData_read[EventNumber].py << " " << InData_read[EventNumber].pz << " " << InData_read[EventNumber].id << " " << std::endl;
   if (false)
-    std::cout << "px,py,pz,id : " << initial_particle.GetPx() << " " << initial_particle.GetPy() << " " << initial_particle.GetPz() << " " << initial_particle.GetMcId() << " " << std::endl;
-  event->AddElecCand(&initial_particle);
+    std::cout << "px,py,pz,id : " << event->GetBBCcharge()*cos(event->GetBBCchargeN()) << " " << event->GetBBCcharge()*sin(event->GetBBCchargeN())<< " " << event->GetBBCcharge()/tan(event->GetBBCchargeS()) << " " << event->GetEvtNo() << " " << std::endl;
   // std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
   // event->ClearEvent();
 
@@ -329,7 +328,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       m_ntp_embed->Fill(ntp);
 
       MyDileptonAnalysis::MyElectron newElectron;
-
+      itrk = idR;
       newElectron.SetPt(embed->get_momS() * sin(embed->get_the0S()));
       newElectron.SetPtPrime(sngl->get_mom() * sin(sngl->get_the0()));
       newElectron.SetReconPT(embed->get_momG() * sin(embed->get_the0G()));
@@ -350,7 +349,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetAlphaPrime(trk->get_alpha(itrk));
       newElectron.SetEmcId(trk->get_emcid(itrk));
       newElectron.SetEcore(trk->get_ecore(itrk));
-      // newElectron.SetDep(trk->get_dep(itrk));
+      newElectron.SetDep(trk->get_emce(itrk));
       newElectron.SetProb(trk->get_prob(itrk));
       newElectron.SetEmcdz(trk->get_emcdz(itrk));
       newElectron.SetEmcdphi(trk->get_emcdphi(itrk));
@@ -370,10 +369,61 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetEmcdz_e(trk->get_emcsdz_e(itrk));
       newElectron.SetEmcdphi_e(trk->get_emcsdphi_e(itrk));
       newElectron.SetMcId(embed->get_partidG());
-
+      if(false) std::cout<<trk->get_ecore(itrk)<<" "<<trk->get_e9(itrk)<<" "<<trk->get_emce(itrk)<<" "<<trk->get_E(itrk)<<std::endl;
+      if(false) std:: cout<<"embed trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
       event->AddTrack(&newElectron);
     }
   }
+//////////////////////////single sim trk////////////////////////////
+  for (unsigned int itrk = 0; itrk < trk_mc->get_npart(); itrk++)
+  {
+    
+      MyDileptonAnalysis::MyElectron newElectron;
+
+      newElectron.SetPt(trk_mc->get_pt(itrk));
+      newElectron.SetPtPrime(trk_mc->get_pt(itrk));
+      newElectron.SetReconPT(trk_mc->get_pt(itrk));
+      newElectron.SetTrkId(itrk);
+      newElectron.SetTrkQuality(trk_mc->get_quality(itrk));
+      newElectron.SetArm(trk_mc->get_dcarm(itrk));
+      newElectron.SetDCSide(trk_mc->get_dcside(itrk));
+      newElectron.SetSect(trk_mc->get_sect(itrk));
+      newElectron.SetQ(trk_mc->get_charge(itrk));
+      newElectron.SetQPrime(trk_mc->get_charge(itrk));
+      newElectron.SetPhiDC(trk_mc->get_phi(itrk));
+      newElectron.SetPhi0(trk_mc->get_phi0(itrk));
+      newElectron.SetThe0(trk_mc->get_the0(itrk));
+      newElectron.SetPhi0Prime(trk_mc->get_phi0(itrk));
+      newElectron.SetThe0Prime(trk_mc->get_the0(itrk));
+      newElectron.SetZDC(trk_mc->get_zed(itrk));
+      newElectron.SetAlpha(trk_mc->get_alpha(itrk));
+      newElectron.SetAlphaPrime(trk_mc->get_alpha(itrk));
+      newElectron.SetEmcId(trk_mc->get_emcid(itrk));
+      newElectron.SetEcore(trk_mc->get_ecore(itrk));
+      newElectron.SetDep(trk->get_emce(itrk));
+      newElectron.SetProb(trk_mc->get_prob(itrk));
+      newElectron.SetEmcdz(trk_mc->get_emcdz(itrk));
+      newElectron.SetEmcdphi(trk_mc->get_emcdphi(itrk));
+      newElectron.SetEmcTower(trk_mc->get_sect(itrk), trk->get_ysect(itrk), trk->get_zsect(itrk));
+      newElectron.SetTOFDPHI(trk_mc->get_n0(itrk));
+      newElectron.SetTOFDZ(trk_mc->get_plemc(itrk));
+      newElectron.SetPC3SDPHI(trk_mc->get_pc3sdphi(itrk));
+      newElectron.SetPC3SDZ(trk_mc->get_pc3sdz(itrk));
+      newElectron.SetCrkphi(trk_mc->get_center_phi(itrk));
+      newElectron.SetCrkz(trk_mc->get_center_z(itrk));
+      newElectron.SetTOFE(trk_mc->get_m2tof(itrk));
+      newElectron.SetEmcTOF(trk_mc->get_temc(itrk));
+      newElectron.SetChi2(trk_mc->get_chi2(itrk));
+      newElectron.SetN0(trk_mc->get_n0(itrk));
+      newElectron.SetNPE0(trk_mc->get_npe0(itrk));
+      newElectron.SetDISP(trk_mc->get_disp(itrk));
+      newElectron.SetEmcdz_e(trk_mc->get_emcsdz_e(itrk));
+      newElectron.SetEmcdphi_e(trk_mc->get_emcsdphi_e(itrk));
+      newElectron.SetMcId(trk_mc->get_mcid(itrk));
+      if(false) std:: cout<<"sim trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
+      event->AddElecCand(&newElectron);
+  }
+  
   /////////////////////////single sim hits///////////////////////
   for (int ihit = 0; ihit < svxsim->get_nClusters(); ihit++)
   {
@@ -407,11 +457,13 @@ int embedana::process_event(PHCompositeNode *topNode)
     event->AddVTXHit(&newHit);
   }
   ///////////////embeded+sim hits////////////////
+  std::vector<int> embed_ids;
   for (int ihit = 0; ihit < svxembed->get_nGhitClusters(); ihit++)
   {
 
     SvxGhitCluster *svxembeshit = svxembed->get_GhitCluster(ihit);
     SvxCluster *svxhit = svx->get_Cluster(svxembeshit->get_clusterID());
+    embed_ids.push_back(svxembeshit->get_clusterID());
 
     if (svxhit == nullptr)
     {
@@ -444,7 +496,7 @@ int embedana::process_event(PHCompositeNode *topNode)
   {
     for (int ihit = 0; ihit < svx->get_nClusters(); ihit++)
     {
-
+      
       SvxCluster *svxhit = svx->get_Cluster(ihit);
 
       if (svxhit == nullptr)
@@ -453,6 +505,13 @@ int embedana::process_event(PHCompositeNode *topNode)
         continue;
       }
 
+      bool already_used = false;
+      for (unsigned int iid = 0; iid < embed_ids.size(); iid++)
+      {
+        if(svxhit->get_hitID()==embed_ids[iid]) already_used = true;
+      }
+      if(already_used) continue;
+      
       MyDileptonAnalysis::MyVTXHit newHit;
 
       newHit.SetClustId(ihit);
