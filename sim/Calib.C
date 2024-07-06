@@ -151,7 +151,7 @@ void Calib(int par = 0)
       MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
       MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
       newHit->SetClustId(i);
-      if(oldhit.GetSensor() != 0) continue;
+      if(oldhit.GetSensor() == 1) continue;
       newHit->SetLayer(oldhit.GetLayer());
       newHit->SetLadder(oldhit.GetLadder());
       newHit->SetSensor(oldhit.GetSensor());
@@ -167,7 +167,7 @@ void Calib(int par = 0)
     event_container->SetEvent(myevent);
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
-    event_container->Associate_Hits_to_Leptons(20,20);
+    event_container->Associate_Hits_to_Leptons(10,10);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
