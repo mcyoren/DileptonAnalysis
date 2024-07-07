@@ -986,6 +986,7 @@ namespace MyDileptonAnalysis
             void fill_inv_mass();
             void correct_beam_offset();
             void CleanUpHitList();
+            void FillQAHist(const int mc_id = -1);
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };

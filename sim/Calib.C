@@ -15,7 +15,7 @@ void Calib(int par = 0)
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 0;
-  const int do_track_QA = 0;
+  const int do_track_QA = 1;
   const int do_reveal_hadron = 0;
   const int Use_ident = 1;
   const int fill_true_DCA = 1;
@@ -101,8 +101,11 @@ void Calib(int par = 0)
       newTrack->SetCrkz(trk.GetCrkz());
       newTrack->SetChi2(trk.GetChi2());
       newTrack->SetN0(trk.GetN0());
+      newTrack->SetDISP(trk.GetDisp());
+      newTrack->SetNPE0(trk.GetNpe0());
       newTrack->SetEmcdz_e(trk.GetEmcdz());
       newTrack->SetEmcdphi_e(trk.GetEmcdphi());
+      newTrack->SetMcId(trk.GetMcId());
       myevent->AddTrack(newTrack);
     }
 
@@ -139,8 +142,11 @@ void Calib(int par = 0)
       newTrack->SetCrkz(trk.GetCrkz());
       newTrack->SetChi2(trk.GetChi2());
       newTrack->SetN0(trk.GetN0());
+      newTrack->SetDISP(trk.GetDisp());
+      newTrack->SetNPE0(trk.GetNpe0());
       newTrack->SetEmcdz_e(trk.GetEmcdz());
       newTrack->SetEmcdphi_e(trk.GetEmcdphi());
+      newTrack->SetMcId(trk.GetMcId());
       myevent->AddHadron(newTrack);
     }
     if(myevent->GetNhadron()<1 && fill_QA_hadron_hists ) continue;
@@ -167,7 +173,8 @@ void Calib(int par = 0)
     event_container->SetEvent(myevent);
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
-    event_container->Associate_Hits_to_Leptons(10,10);
+    if(do_track_QA) event_container->FillQAHist(in_id);
+    event_container->Associate_Hits_to_Leptons(5,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {

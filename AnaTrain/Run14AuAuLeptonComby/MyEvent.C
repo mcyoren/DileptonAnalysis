@@ -1076,6 +1076,30 @@ namespace MyDileptonAnalysis
         }
     }
 
+    void MyEventContainer::FillQAHist(const int mc_id)
+    {
+        const int Nelectrons = event->GetNtrack();
+        for (int i = 0; i < Nelectrons; i++)
+        {
+            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
+            if (electron->GetMcId()!=mc_id) continue;
+            if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
+               electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>5||electron->GetChi2()/electron->GetNpe0()>10) continue;
+            n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(),event->GetCentrality());
+            ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),event->GetCentrality());
+            prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(),event->GetCentrality());
+            disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(),event->GetCentrality());
+            chi2npe0_hist->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetPtPrime(),event->GetCentrality());
+            //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
+            n0_hist_el->Fill(electron->GetN0(),electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime());
+            ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetDisp(),electron->GetPtPrime());
+            prob_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetN0()-2*electron->GetDisp()+10,electron->GetPtPrime());
+            disp_hist_el->Fill(electron->GetDisp(),electron->GetN0(),electron->GetPtPrime());
+            chi2npe0_hist_el->Fill(10-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+10,electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime());
+        }
+        
+    }
+
     void MyEventContainer::GetHistsFromFile(const std::string loc)
     {
         infile = TFile::Open(loc.c_str(), "read");
@@ -1163,21 +1187,27 @@ namespace MyDileptonAnalysis
         }
         if (fill_track_QA)
         {
-            INIT_HIST(3, temc, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ttof, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, n0_hist, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ep_hist, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, prob_hist, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, disp_hist, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, chi2npe0_hist, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, temc, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, ttof, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
+            INIT_HIST(3, n0_hist, 10, 0, 10, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, ep_hist, 50, 0, 1.5, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, prob_hist, 50, 0, 1, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, disp_hist, 5, 0, 5, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, chi2npe0_hist, 50, 0, 10, 50, 0., 5.0, 5, 0, 100);
+            //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
+            INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 1.5, 50, 0., 5.0);
+            INIT_HIST(3, ep_hist_el, 50, 0, 1.5,  5, 0, 5, 50, 0., 5.0);
+            INIT_HIST(3, prob_hist_el, 50, 0, 1.5, 20, 0, 20, 50, 0., 5.0);
+            INIT_HIST(3, disp_hist_el, 5, 0, 5, 10, 0, 10, 50, 0., 5.0);
+            INIT_HIST(3, chi2npe0_hist_el, 30, 0, 30, 50, 0, 1.5, 50, 0., 5.0);
 
-            INIT_HIST(3, el_had_dphi, 100, -0.05, 0.05, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, el_had_dz, 100, -50, 50, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, n0_hist_el, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ep_hist_el, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, prob_hist_el, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, disp_hist_el, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, chi2npe0_hist_el, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, el_had_dphi, 100, -0.05, 0.05, 24, 0.2, 5.0, 10, 0, 10);
+            //INIT_HIST(3, el_had_dz, 100, -50, 50, 24, 0.2, 5.0, 10, 0, 10);
+            //INIT_HIST(3, n0_hist_el, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, ep_hist_el, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, prob_hist_el, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, disp_hist_el, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, chi2npe0_hist_el, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
 
             is_fill_track_QA = 1;
         }
