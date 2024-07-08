@@ -336,7 +336,11 @@ namespace MyDileptonAnalysis
                             mytrk->AddHitCounter(layer);
                             mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
                             iter_nums[layer]++;
-                            if((iter_nums[layer]>99&&layer>2)||iter_nums[layer]>999) std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
+                            if((iter_nums[layer]>99&&layer>=2)||iter_nums[layer]>999) 
+                            {
+                                std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
+                                return;
+                            }
                             if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
                             if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*100  );
                             if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
@@ -367,7 +371,7 @@ namespace MyDileptonAnalysis
                 }
             }
             float min_chi2=1000000.;
-            int final_number = 0;
+            long final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 float chi2 = 0;
@@ -376,7 +380,7 @@ namespace MyDileptonAnalysis
                 const int inum2 = numbers[0][inum] / 10000 %1000-1;
                 const int inum3 = numbers[0][inum] / 100 %100-1;
                 const int inum4 = numbers[0][inum] %100-1;
-
+                    
                 if(inum1>=0 && inum2>=0)
                 {   
                     mytrk->SetHitIndex(mytrk->GetHits(0,inum1), 0);
