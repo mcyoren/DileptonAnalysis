@@ -29,7 +29,7 @@ unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
 
-set shift = 200
+set shift = 400
 
 setenv DATADIR /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/work
 

@@ -305,14 +305,14 @@ namespace MyDileptonAnalysis
             virtual float GetChi2() const { return 0; };
             virtual int GetN0() const { return 0; };
             virtual int GetNpe0() const { return 0; };
-            virtual int GetDisp() const { return 0; };
+            virtual float GetDisp() const { return 0; };
             virtual float GetEmcdz_e() const { return 0; };
             virtual float GetEmcdphi_e() const { return 0; };
 
             virtual void SetChi2(float schi2) { };
             virtual void SetN0(int sn0) { };
             virtual void SetNPE0(int snpe0) { };
-            virtual void SetDISP(int sdisp) { };
+            virtual void SetDISP(float sdisp) { };
             virtual void SetEmcdz_e(float semcdz) { };
             virtual void SetEmcdphi_e(float semcdphi) { }
 
@@ -409,14 +409,14 @@ namespace MyDileptonAnalysis
             float GetChi2() const { return chi2; };
             int GetN0() const { return n0; };
             int GetNpe0() const { return npe0; };
-            int GetDisp() const { return disp; };
+            float GetDisp() const { return disp; };
             float GetEmcdz_e() const { return emcdz_e; };
             float GetEmcdphi_e() const { return emcdphi_e; };
 
             void SetChi2(float schi2) { chi2 = schi2; };
             void SetN0(int sn0) { n0 = sn0; };
             void SetNPE0(int snpe0) { npe0 = snpe0; };
-            void SetDISP(int sdisp) { disp = sdisp; };
+            void SetDISP(float sdisp) { disp = sdisp; };
             void SetEmcdz_e(float semcdz) { emcdz_e = semcdz; };
             void SetEmcdphi_e(float semcdphi) { emcdphi_e = semcdphi; }
 

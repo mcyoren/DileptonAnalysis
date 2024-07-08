@@ -243,10 +243,9 @@ int embedana::process_event(PHCompositeNode *topNode)
       if (!sngl)
         continue;
       /// SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
-      if (false)
+      for (unsigned int imctrk = 0; imctrk < trk_mc->get_npart(); imctrk++)
       {
-        PHSnglCentralTrack *mcsngl = trk_mc->get_track(0);
-        std::cout << "mom of embed, mc, embed sim, geant " << sngl->get_mom() << " " << mcsngl->get_mom() << " " << embed->get_momS() << " " << embed->get_momG() << std::endl;
+        if( fabs( embed->get_momS() - trk_mc->get_mom(imctrk) ) < 0.002 ) trk_mc->set_mcid(imctrk,embed->get_partidG());
       }
 
       float ntp[100];
@@ -365,10 +364,32 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetN0(sngl->get_n0());
       newElectron.SetNPE0(sngl->get_npe0());
       newElectron.SetDISP(sngl->get_disp());
-      newElectron.SetEmcdz_e(sngl->get_emcsdz_e());
-      newElectron.SetEmcdphi_e(sngl->get_emcsdphi_e());
       newElectron.SetMcId(embed->get_partidG());
       if(false) std:: cout<<"embed trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
+      float min_dist = 99999;
+      int n_had = 0;
+      if (sngl->get_n0()>0)  n_had = (int) trk->get_npart();
+      for (int ihadron = 0; ihadron < n_had; ihadron++)
+      {
+        if(trk->get_center_phi(ihadron)<-99) continue;
+        if((int)ihadron == idR) continue;
+        const float dcenter_z = (sngl->get_center_z() - trk->get_center_z(ihadron)) / 5.0;
+        const float dcenter_phi = (sngl->get_center_phi() - trk->get_center_phi(ihadron)) / 0.013;
+        const float dist = sqrt(dcenter_z*dcenter_z + dcenter_phi*dcenter_phi);
+        if(dist<min_dist)
+        {
+          min_dist = dist;
+          newElectron.SetEmcdz_e(dcenter_z);
+          newElectron.SetEmcdphi_e(dcenter_phi);
+          newElectron.SetTOFDPHI(trk->get_n0(ihadron)+10*((int)(10*trk->get_disp(ihadron))));
+          if(trk->get_npe0(ihadron)>0)newElectron.SetTOFE(trk->get_chi2(ihadron)/trk->get_npe0(ihadron));
+          newElectron.SetTOFDZ(trk->get_mom(ihadron));
+          if(false) std::cout<<newElectron.GetPtPrime()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetDisp()<<" "<<newElectron.GetChi2()/newElectron.GetNpe0()<<" "
+                            <<newElectron.GetEcore()/trk->get_mom(ihadron)<<" "<<newElectron.GetTOFDPHI()<<" "<<newElectron.GetTOFE()<<std::endl;
+        }
+      }
+      
+      
       event->AddTrack(&newElectron);
     }
   }
