@@ -388,8 +388,7 @@ int embedana::process_event(PHCompositeNode *topNode)
                             <<newElectron.GetEcore()/trk->get_mom(ihadron)<<" "<<newElectron.GetTOFDPHI()<<" "<<newElectron.GetTOFE()<<std::endl;
         }
       }
-      
-      
+            
       event->AddTrack(&newElectron);
     }
   }
