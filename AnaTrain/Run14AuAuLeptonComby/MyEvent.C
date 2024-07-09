@@ -1091,7 +1091,7 @@ namespace MyDileptonAnalysis
             el_had_dphi->Fill(electron->GetEmcdphi_e(),electron->GetPtPrime(),event->GetCentrality());
             el_had_dz  ->Fill(electron->GetEmcdz_e()  ,electron->GetPtPrime(),event->GetCentrality());
             if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
-               electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>6||electron->GetChi2()/electron->GetNpe0()>10) continue;
+               electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>10||electron->GetChi2()/electron->GetNpe0()>20) continue;
             n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(),event->GetCentrality());
             ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),event->GetCentrality());
             prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(),event->GetCentrality());
@@ -1103,14 +1103,34 @@ namespace MyDileptonAnalysis
             //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
             n0_hist_el->Fill(electron->GetN0(),electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime());
             ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetDisp(),electron->GetPtPrime());
-            prob_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetN0()-2*electron->GetDisp()+10,electron->GetPtPrime());
+            prob_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetDisp()/electron->GetN0(),electron->GetPtPrime());
             disp_hist_el->Fill(electron->GetDisp(),electron->GetN0(),electron->GetPtPrime());
-            chi2npe0_hist_el->Fill(10-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+10,electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime());
+            chi2npe0_hist_el->Fill(20-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+20,electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime());
 
-            if(electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetDisp()<4&&electron->GetChi2()/electron->GetNpe0()<10&&electron->GetProb()>0.01)
+            if(electron->GetN0()>=2&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<5&&electron->GetChi2()/electron->GetNpe0()<10)
                 el_pt_hist->Fill(electron->GetPtPrime(),2.5,event->GetCentrality());
-            if(10-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+10>15&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetProb()>0.01)
+            if(electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<4&&electron->GetChi2()/electron->GetNpe0()<10)
                 el_pt_hist->Fill(electron->GetPtPrime(),3.5,event->GetCentrality());
+            if(electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<4&&electron->GetChi2()/electron->GetNpe0()<10&&electron->GetProb()>0.01)
+                el_pt_hist->Fill(electron->GetPtPrime(),4.5,event->GetCentrality());
+            if(electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<4&&electron->GetChi2()/electron->GetNpe0()<5&&electron->GetProb()>0.01)
+                el_pt_hist->Fill(electron->GetPtPrime(),5.5,event->GetCentrality());
+            if(electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<4&&electron->GetChi2()/electron->GetNpe0()<5&&electron->GetProb()>0.03)
+                el_pt_hist->Fill(electron->GetPtPrime(),6.5,event->GetCentrality());
+            if(20-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+20>35&&electron->GetEcore()/electron->GetPtot()>0.8)
+                el_pt_hist->Fill(electron->GetPtPrime(),7.5,event->GetCentrality());
+            if(20-electron->GetChi2()/electron->GetNpe0()+electron->GetN0()-2*electron->GetDisp()+20>35&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetProb()>0.01)
+                el_pt_hist->Fill(electron->GetPtPrime(),8.5,event->GetCentrality());
+
+            if(electron->GetMcId()>7&&electron->GetN0()>=3&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
+               &&electron->GetDisp()<5&&electron->GetChi2()/electron->GetNpe0()<10&&electron->GetProb()>0.01) 
+               std::cout<<electron->GetPtPrime()<<" "<<electron->GetN0()<<" "<<electron->GetEcore()/electron->GetPtot()<<" "<<electron->GetNpe0()
+               <<" "<<electron->GetDisp()<<" "<<electron->GetChi2()/electron->GetNpe0()<<" "<<electron->GetProb()<<std::endl;
         }
         
     }
@@ -1206,19 +1226,19 @@ namespace MyDileptonAnalysis
             //INIT_HIST(3, ttof, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
             INIT_HIST(3, n0_hist, 10, 0, 10, 50, 0, 5.0, 5, 0, 100);
             INIT_HIST(3, ep_hist, 50, 0, 1.5, 50, 0, 5.0, 5, 0, 100);
-            INIT_HIST(3, prob_hist, 50, 0, 1, 50, 0, 5.0, 5, 0, 100);
-            INIT_HIST(3, disp_hist, 5, 0, 5, 50, 0, 5.0, 5, 0, 100);
-            INIT_HIST(3, chi2npe0_hist, 50, 0, 10, 50, 0., 5.0, 5, 0, 100);
+            INIT_HIST(3, prob_hist, 100, 0, 1, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, disp_hist, 50, 0, 10, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, chi2npe0_hist, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
             //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 1.5, 50, 0., 5.0);
             INIT_HIST(3, ep_hist_el, 50, 0, 1.5,  5, 0, 5, 50, 0., 5.0);
-            INIT_HIST(3, prob_hist_el, 50, 0, 1.5, 20, 0, 20, 50, 0., 5.0);
-            INIT_HIST(3, disp_hist_el, 5, 0, 5, 10, 0, 10, 50, 0., 5.0);
-            INIT_HIST(3, chi2npe0_hist_el, 30, 0, 30, 50, 0, 1.5, 50, 0., 5.0);
+            INIT_HIST(3, prob_hist_el, 25, 0, 1.5, 50, 0, 5, 50, 0., 5.0);
+            INIT_HIST(3, disp_hist_el, 50, 0, 10, 10, 0, 10, 50, 0., 5.0);
+            INIT_HIST(3, chi2npe0_hist_el, 50, 0, 50, 50, 0, 1.5, 50, 0., 5.0);
 
             INIT_HIST(3, el_had_dphi, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dz, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
-            INIT_HIST(3, el_pt_hist, 50, 0, 5, 4, 0, 4, 100, 0, 100);
+            INIT_HIST(3, el_pt_hist, 50, 0, 5, 10, 0, 10, 100, 0, 100);
 
             //INIT_HIST(3, el_had_dphi, 100, -0.05, 0.05, 24, 0.2, 5.0, 10, 0, 10);
             //INIT_HIST(3, el_had_dz, 100, -50, 50, 24, 0.2, 5.0, 10, 0, 10);
