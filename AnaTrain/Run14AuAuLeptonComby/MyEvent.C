@@ -1101,11 +1101,21 @@ namespace MyDileptonAnalysis
                 el_pt_hist->Fill(electron->GetPtPrime(),1.5,event->GetCentrality());
             if(sqrt(SQR(electron->GetEmcdphi_e())+SQR(electron->GetEmcdz_e()))<5)continue;
             //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
+            TF1 func = TF1("func","pow(x,[0]-1)*exp(-x/2.)/TMath::Gamma([0])/pow(2,[0])",0,100);
+            func.SetNpx(100000);
+            func.SetParameter(0,electron->GetNpe0()/2.);
+            const float p1 = func.Integral(0,electron->GetChi2()/electron->GetNpe0()*electron->GetN0()/2,1.e-3);
+            func.SetParameter(0,electron->GetN0()/2.);
+            const float p2 = func.Integral(0,electron->GetDep()*electron->GetN0()/electron->GetPtPrime(),1.e-3);
+
             n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),electron->GetPtPrime());
             ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime());
             prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),electron->GetPtPrime());
             disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),electron->GetPtPrime());
             chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),electron->GetPtPrime());
+            rich_prob1->Fill(1.0-p1,electron->GetNpe0(),electron->GetPtPrime());
+            rich_prob2->Fill(1.0-p2,electron->GetNpe0(),electron->GetPtPrime());
+            rich_prob3->Fill(1.0-p1,1-p2,electron->GetPtPrime());
 
             if(electron->GetN0()>=2&&electron->GetEcore()/electron->GetPtot()>0.8&&electron->GetEcore()/electron->GetPtot()<1.2
                &&electron->GetDisp()<5&&electron->GetChi2()/electron->GetNpe0()<10)
@@ -1231,10 +1241,13 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, chi2npe0_hist, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
             //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 50, 0., 5.0);
-            INIT_HIST(3, ep_hist_el, 50, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
+            INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
             INIT_HIST(3, prob_hist_el, 20, 0, 20, 50, 0, 10, 50, 0., 5.0);
             INIT_HIST(3, disp_hist_el, 50, 0, 10, 30, 0, 30, 50, 0., 5.0);
             INIT_HIST(3, chi2npe0_hist_el, 50, 0, 20, 30, 0, 30, 50, 0., 5.0);
+            INIT_HIST(3, rich_prob1, 100, 0, 1, 30, 0, 30, 50, 0., 5.0);
+            INIT_HIST(3, rich_prob2, 100, 0, 1, 30, 0, 30, 50, 0., 5.0);
+            INIT_HIST(3, rich_prob3, 50, 0, 1, 50, 0, 1, 50, 0., 5.0);
 
             INIT_HIST(3, el_had_dphi, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dz, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);

@@ -8,9 +8,10 @@ void Calib(int par = 0)
     cout << "no input file" << endl;
     return;
   }
+  const int associate_hits = 0;
   const int remove_hadron_hits = 0;
-  const int fill_QA_hadron_hists = 1;
-  const int fill_QA_lepton_hists = 1;
+  const int fill_QA_hadron_hists = 0;
+  const int fill_QA_lepton_hists = 0;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -52,7 +53,7 @@ void Calib(int par = 0)
     if (ievent % 5000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 200000)
+    if (ievent > 20000000)
       break;
 
 
@@ -152,7 +153,7 @@ void Calib(int par = 0)
     if(myevent->GetNhadron()<1 && fill_QA_hadron_hists ) continue;
 
 
-    for (int i = 0; i < event->GetNVTXhit(); i++)
+    for (int i = 0; i < event->GetNVTXhit()*associate_hits; i++)
     {
       MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
       MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
@@ -174,7 +175,7 @@ void Calib(int par = 0)
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    event_container->Associate_Hits_to_Leptons(5,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
