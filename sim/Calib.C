@@ -106,6 +106,7 @@ void Calib(int par = 0)
       newTrack->SetNPE0(trk.GetNpe0());
       newTrack->SetEmcdz_e(trk.GetEmcdz_e());
       newTrack->SetEmcdphi_e(trk.GetEmcdphi_e());
+      newTrack->SetSect(trk.GetSect());
       newTrack->SetMcId(trk.GetMcId());
       myevent->AddTrack(newTrack);
     }
@@ -147,6 +148,7 @@ void Calib(int par = 0)
       newTrack->SetNPE0(trk.GetNpe0());
       newTrack->SetEmcdz_e(trk.GetEmcdz_e());
       newTrack->SetEmcdphi_e(trk.GetEmcdphi_e());
+      newTrack->SetSect(trk.GetSect());
       newTrack->SetMcId(trk.GetMcId());
       myevent->AddHadron(newTrack);
     }
