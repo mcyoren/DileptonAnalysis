@@ -57,7 +57,7 @@ void Calib(int par = 0)
       break;
 
 
-    if(event->GetNtrack()<1) continue;
+    if(event->GetNtrack()<1 && !do_track_QA) continue;
     MyDileptonAnalysis::MyEvent *myevent = new MyDileptonAnalysis::MyEvent;
 
     myevent->SetCentrality(event->GetCentrality());
