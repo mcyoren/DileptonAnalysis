@@ -96,6 +96,8 @@ void Calib(int par = 0)
       newTrack->SetProb(trk.GetProb());
       newTrack->SetEmcdz(trk.GetEmcdz());
       newTrack->SetEmcdphi(trk.GetEmcdphi());
+      newTrack->SetTOFDPHI(trk.GetTOFDPHI());
+      newTrack->SetTOFDZ(trk.GetTOFDZ());
       newTrack->SetTOFE(trk.GetTOFE());
       newTrack->SetEmcTOF(trk.GetEmcTOF());
       newTrack->SetCrkphi(trk.GetCrkphi());

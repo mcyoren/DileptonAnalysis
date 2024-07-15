@@ -1125,15 +1125,17 @@ namespace MyDileptonAnalysis
                         el_pt_hist->Fill(electron->GetPtPrime(),11.5,event->GetCentrality());
                     if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetDisp()<4 && electron->GetProb()>0.03)
                         el_pt_hist->Fill(electron->GetPtPrime(),12.5,event->GetCentrality());
-                    if(electron->GetN0() >= electron->GetDisp() && electron->GetChi2()/electron->GetNpe0()<10 )
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetDisp()<4 && electron->GetProb()>0.03 && 
+                       (Rghost>3 || electron->GetN0()- electron->GetDisp() > ((int)electron->GetTOFDPHI())%10 - electron->GetTOFDPHI()/100 || electron->GetTOFE()>electron->GetChi2()/electron->GetNpe0()))
                         el_pt_hist->Fill(electron->GetPtPrime(),13.5,event->GetCentrality());
                     if(electron->GetN0() >= electron->GetDisp() && electron->GetN0() >= 3 && electron->GetChi2()/electron->GetNpe0()<10 )
                         el_pt_hist->Fill(electron->GetPtPrime(),14.5,event->GetCentrality());
                     
                 }
             }
-
-            if(Rghost<3) continue;
+            
+            if(Rghost<3 && electron->GetN0()- electron->GetDisp() < ((int)electron->GetTOFDPHI())%10 - electron->GetTOFDPHI()/100 && electron->GetTOFE()<electron->GetChi2()/electron->GetNpe0() ) continue;
+            
             ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime());
             n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality());
             prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality());
