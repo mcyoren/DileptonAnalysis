@@ -16,6 +16,7 @@ noinst_HEADERS = \
   MyEventConstants.h 
 
 include_HEADERS = \
+  Run14AuAuLeptonCombyConstants.h \
   embedana.h 
 
 libRun14AuAuLeptonEvent_la_SOURCES = \
@@ -24,6 +25,7 @@ libRun14AuAuLeptonEvent_la_SOURCES = \
 
 libsvxcentana_la_SOURCES = \
   embedana.cc \
+  QACuts.C \
   embedana_Dict.C
 
 libRun14AuAuLeptonEvent_la_LIBADD = \
@@ -53,6 +55,7 @@ MyEvent_Dict.C: \
 # Rule for generating CINT dictionaries from class headers.                                                                                                                                     
 embedana_Dict.C: \
   embedana.h \
+  Run14AuAuLeptonCombyConstants.h \
   embedanaLinkDef.h 
 	  rootcint -f $@ -c $(DEFAULT_INCLUDES) $(INCLUDES) $^
 

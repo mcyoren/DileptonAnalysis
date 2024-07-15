@@ -11,6 +11,8 @@ embedana::embedana(string filename, string filepath, string oscarpath) : m_outFi
   local_filepath = filepath;
   local_oscarpath = oscarpath;
   vertexes.clear();
+  
+  InitParams();
 
   memset(InData_read, 0, 10000 * sizeof(InData));
 }
@@ -155,8 +157,10 @@ int embedana::process_event(PHCompositeNode *topNode)
   SvxClusterList *svx = getClass<SvxClusterList>(topNode, "SvxClusterList");
   SvxClusterList *svxsim = getClass<SvxClusterList>(mcnode, "SvxClusterList");
   SvxGhitClusterList *svxembed = getClass<SvxGhitClusterList>(topNode, "SvxGhitClusterList");
+  const RunHeader *runHDR = findNode::getClass<RunHeader>(topNode, "RunHeader");
 
-  std::cout << "real embed and sim Nhits and Ntraks: " << svx->get_nClusters() << " " << svxsim->get_nClusters() << " " << svxembed->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
+  std::cout << "RN, real embed and sim Nhits and Ntraks: " << runHDR->get_RunNumber() << " "<< svx->get_nClusters() << " " << svxsim->get_nClusters() << " " 
+  << svxembed->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
   // cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
 
   if (EventNumber >= 10)
@@ -175,6 +179,7 @@ int embedana::process_event(PHCompositeNode *topNode)
   event->SetPreciseY(vertexes[4 * EventNumber + 1]);
   event->SetPreciseZ(vertexes[4 * EventNumber + 2]);
   event->SetCentrality(vertexes[4 * EventNumber + 3]);
+  event->SetRunNumber(runHDR->get_RunNumber());
 
   event->SetEvtNo(InData_read[EventNumber].id);
   const double init_pt = sqrt(InData_read[EventNumber].px * InData_read[EventNumber].px + InData_read[EventNumber].py * InData_read[EventNumber].py);
@@ -247,6 +252,13 @@ int embedana::process_event(PHCompositeNode *topNode)
       {
         if( fabs( embed->get_momS() - trk_mc->get_mom(imctrk) ) < 0.002 ) trk_mc->set_mcid(imctrk,embed->get_partidG());
       }
+
+      if(applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<-1) 
+      {
+        std::cout<<"TRACK DEADMAP CHECK: "<<applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<<std::endl;
+        return -1;
+      }
+      if(applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
 
       float ntp[100];
       for (int i = 0; i < 100; i++)
@@ -372,6 +384,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       for (int ihadron = 0; ihadron < n_had; ihadron++)
       {
         if(trk->get_center_phi(ihadron)<-99) continue;
+        if(applySingleTrackCut(trk, ihadron, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
         if((int)ihadron == idR) continue;
         const float dcenter_z = (sngl->get_center_z() - trk->get_center_z(ihadron)) / 5.0;
         const float dcenter_phi = (sngl->get_center_phi() - trk->get_center_phi(ihadron)) / 0.013;
@@ -438,7 +451,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetEmcdz_e(trk_mc->get_emcsdz_e(itrk));
       newElectron.SetEmcdphi_e(trk_mc->get_emcsdphi_e(itrk));
       newElectron.SetMcId(trk_mc->get_mcid(itrk));
-      if(false) std:: cout<<"sim trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
+      if(false) std:: cout<<"sim trk pt n0 e/p id cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<newElectron.GetMcId()<<" "<<event->GetCentrality()<<std::endl;
       event->AddElecCand(&newElectron);
   }
   
@@ -670,4 +683,99 @@ void embedana::calcDCA_BCbyCircleProjection(
 
   // DCA value
   *d2dca_bc = b_sign * (charge * (R - L));
+}
+
+
+int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, const float vertex, const float centrality, const int run_number)
+{
+    const float px = d_trk->get_px(itrk);
+    const float py = d_trk->get_py(itrk);
+    const float pz = d_trk->get_pz(itrk);
+    const float ecore = d_trk->get_ecore(itrk);
+    const float p = sqrt(px * px + py * py + pz * pz);
+    const float pT = sqrt(px * px + py * py);
+    const float rich_phi = d_trk->get_center_phi(itrk);
+    
+    const float dep = d_trk->get_dep(itrk);
+
+    if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL)
+        return -1;
+
+    if( ( pT<0.09 || d_trk->get_quality(itrk)<0 )) return -1;
+    //if(IsCentralSupportCut(d_trk->get_the0(itrk), vertex)) 
+    //    return -1;
+
+    if (DC_DEADMAP)
+    {
+        const int run_grp = get_rungroup(run_number);
+        const int side = d_trk->get_dcside(itrk);
+        const int arm = d_trk->get_dcarm(itrk);
+        const float board = get_board(d_trk->get_phi(itrk));
+        const float alpha = d_trk->get_alpha(itrk);
+        for (int iarea = 0; iarea < MAX_DEAD_AREA; ++iarea)
+        {
+            if (dead_region(board, alpha, dcmap_xx1[run_grp][side][arm][iarea], dcmap_yy1[run_grp][side][arm][iarea], dcmap_xx2[run_grp][side][arm][iarea], dcmap_yy2[run_grp][side][arm][iarea], dcmap_xx3[run_grp][side][arm][iarea], dcmap_yy3[run_grp][side][arm][iarea], dcmap_xx4[run_grp][side][arm][iarea], dcmap_yy4[run_grp][side][arm][iarea]))
+            {
+                return -2;
+            }
+        }
+    }
+    return 0;
+    bool pass_quality0 = true, pass_quality1 = true, pass_quality2 = true;
+    if (QUALITY[0] > -99 && d_trk->get_quality(itrk) != QUALITY[0])
+        pass_quality0 = false;
+    if (QUALITY[1] > -99 && d_trk->get_quality(itrk) != QUALITY[1])
+        pass_quality1 = false;
+    if (QUALITY[2] > -99 && d_trk->get_quality(itrk) != QUALITY[2])
+        pass_quality2 = false;
+    if (!pass_quality0 && !pass_quality1 && !pass_quality2 && rich_phi<-99)
+        return 0;
+    
+    if (E_PT > -99 && pT <= E_PT*0.9 &&  rich_phi<-99)
+        return 0;
+
+    if (MAX_PT > -99 && pT >= MAX_PT*1.05 &&  rich_phi<-99)
+        return 0;
+        
+    if (dep < -2 && ecore < 0.3 && d_trk->get_n0(itrk)<0 /*&& rich_phi<-99*/)
+        return 1;
+
+    if(rich_phi>-99 && ((E_PT > -99 && pT <= E_PT*0.8) || (!pass_quality0 && !pass_quality1 && !pass_quality2) ||
+        (MAX_PT > -99 && pT >= MAX_PT*1.2) )) return 3;
+    //if (TEMC>-99 && d_trk->get_temc(itrk) > TEMC)
+    //    return 1;
+    if (N0 > -99 && d_trk->get_n0(itrk) <= N0)
+        return 3;
+    if (DISP > -99 && d_trk->get_disp(itrk) >= DISP)
+        return 3;
+    if (CHI2_NPE0 > -99 && (d_trk->get_chi2(itrk) / d_trk->get_npe0(itrk)) >= CHI2_NPE0)
+        return 3;
+    if (EMCDPHI > -99 && fabs(d_trk->get_emcdphi(itrk)) >= EMCDPHI)
+        return 3;
+    if (EMCDZ > -99 && fabs(d_trk->get_emcdz(itrk)) >= EMCDZ)
+        return 3;
+    if (EOVERP > -99 && ecore / p <= EOVERP)
+        return 3;
+    if (DEP[0] > -99 && dep <= DEP[0])
+        return 3;
+    if (DEP[1] > -99 && dep >= DEP[1])
+        return 3;
+    if(centrality<60)
+    {
+        if(pT > 0.40)
+        {
+            if (EMCSDPHI > -99 && fabs(d_trk->get_emcsdphi_e(itrk)) >= EMCSDPHI)
+                return 3;
+            if (EMCSDZ > -99 && fabs(d_trk->get_emcsdz_e(itrk)) >= EMCSDZ)
+                return 3;
+        }else{
+            if (fabs(d_trk->get_emcdphi(itrk)) >= 0.02)
+                return 3;
+            if (fabs(d_trk->get_emcdz(itrk)-0.8) >= 8)
+                return 3;
+        }
+    }
+    if (PROB > -99 && d_trk->get_prob(itrk) <= PROB)
+        return 3;
+    return 2;
 }
