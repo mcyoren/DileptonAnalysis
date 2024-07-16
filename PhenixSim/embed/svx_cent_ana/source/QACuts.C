@@ -82,23 +82,26 @@ void embedana::InitParams()
         std::cout << "RICH ghost cut in: decenter < " << RICH_GHOST << "cm" << std::endl;
     }
 
-    std::cout << "reading init_dead_area: " << std::endl;
-    for (int i = 0; i < N_RUN_GRP; ++i)
+    if(!DC_DEADMAP)
     {
-        for (int j = 0; j < N_SIDE; ++j)
+        std::cout << "setting init_dead_area to -9999" << std::endl;
+        for (int i = 0; i < N_RUN_GRP; ++i)
         {
-            for (int k = 0; k < N_ARM; ++k)
+            for (int j = 0; j < N_SIDE; ++j)
             {
-                for (int l = 0; l < MAX_DEAD_AREA; ++l)
+                for (int k = 0; k < N_ARM; ++k)
                 {
-                    dcmap_xx1[i][j][k][l] = -9999;
-                    dcmap_yy1[i][j][k][l] = -9999;
-                    dcmap_xx2[i][j][k][l] = -9999;
-                    dcmap_yy2[i][j][k][l] = -9999;
-                    dcmap_xx3[i][j][k][l] = -9999;
-                    dcmap_yy3[i][j][k][l] = -9999;
-                    dcmap_xx4[i][j][k][l] = -9999;
-                    dcmap_yy4[i][j][k][l] = -9999;
+                    for (int l = 0; l < MAX_DEAD_AREA; ++l)
+                    {
+                        dcmap_xx1[i][j][k][l] = -9999;
+                        dcmap_yy1[i][j][k][l] = -9999;
+                        dcmap_xx2[i][j][k][l] = -9999;
+                        dcmap_yy2[i][j][k][l] = -9999;
+                        dcmap_xx3[i][j][k][l] = -9999;
+                        dcmap_yy3[i][j][k][l] = -9999;
+                        dcmap_xx4[i][j][k][l] = -9999;
+                        dcmap_yy4[i][j][k][l] = -9999;
+                    }
                 }
             }
         }
