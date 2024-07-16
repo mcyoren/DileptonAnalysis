@@ -31,6 +31,9 @@ TF1 *phiHagedorn     = HagedornYield("phiHagedorn",   phiMass,  0.2, 25, 377., 0
 TF1 *jpsiHagedorn    = HagedornYield("jpsiHagedorn",  jpsiMass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
 TF1 *psipHagedorn    = HagedornYield("psipHagedorn",  psipMass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
 
+TF1 *InHagedorn[8] = {pi0Hagedorn, etaHagedorn, rho0Hagedorn, omegaHagedorn, etapHagedorn, phiHagedorn, jpsiHagedorn, psipHagedorn};
+TString allpartnames[8]={"pi0","eta","rho0","omega","etap","phi","jpsi","psip"};
+
 void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const TString part_name = "phi", const TString decay_name = "phi->ee", const double pt_min = 0.2, const double pt_max = 10.){
 
 	TRandom3 MyRandy = TRandom3(0);
@@ -64,6 +67,13 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 
 	Particle pi0(part_name);
 
+	int ipart = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		if (allpartnames[i]==part_name) ipart = i;
+	}
+	std::cout<<"algortm suggest that the following paricle was chosen: "<<allpartnames[ipart]<<std::endl;
+	
 	Int_t nevt = Nev; 
 	Int_t nentry = 0;
 
@@ -78,7 +88,7 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 	 	double trk_wt = 1;
 
 		pi0.DecaySingleBranch(decay_name);
-		pi0.SetWeight((phiHagedorn->Eval(pi0.Pt())));
+		pi0.SetWeight((InHagedorn[ipart]->Eval(pi0.Pt())));
 		ndecay = pi0.GetNumberOfDaughters();                          	// 2 for pi0->gg and 3 for pi0-e+e-g
 
 		DecayNumber = pi0.GetDecayNumber();								// 0 for pi0->gg and 1 for pi0-e+e-g
