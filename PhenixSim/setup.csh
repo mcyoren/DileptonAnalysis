@@ -17,3 +17,12 @@ mkdir -p $tmpdir
 endif
 echo "cd $tmpdir"
 cd       $tmpdir
+
+cd sim
+./pida_preporator.csh
+
+./run_sim_single.csh
+
+condor_submit runs_sim_single.job
+
+cd $PWD/real
