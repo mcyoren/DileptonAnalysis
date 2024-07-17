@@ -9,17 +9,53 @@
 #include <TLorentzVector.h>
 #include "TVector3.h"
 #include "Pythia8/Pythia.h"
+#include <chrono>
+#include <ctime>
+
+struct MyEvent {
+    int ntracks;
+    std::vector<int> pid;
+    std::vector<double> mass;
+    std::vector<double> energy;
+    std::vector<double> px;
+    std::vector<double> py;
+    std::vector<double> pz;
+    std::vector<double> vx;
+    std::vector<double> vy;
+    std::vector<double> vz;
+
+    void set_to_null() {
+        ntracks = 0;
+        pid.clear();
+        mass.clear();
+        energy.clear();
+        px.clear();
+        py.clear();
+        pz.clear();
+        vx.clear();
+        vy.clear();
+        vz.clear();
+        return;
+    };
+};
 
 using namespace Pythia8;
 
 const int MaxTracks = 10;
 const double pi = TMath::ACos(-1);
 
-int main(){
+int main(int argc, char* argv[]){
 	
   std::cout<<"lets begin"<<std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  std::string str_seed = argv[1];
+  std::string InnEv = argv[2];
+  int nevents = std::stoi(InnEv);
+
+
+  bool IsWriteOscar = true;
   int nevt = 20000;
-  int nevents = 1000;
   Pythia pythia;
   std::cout<<"pythia was initialized"<<std::endl;
 
@@ -30,7 +66,7 @@ int main(){
   pythia.readString("HardQCD:hardccbar = on");  
 
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
+  pythia.readString("Random:seed = " + str_seed);
   pythia.readString("Next:numberCount = 100000");
  
   //Pythia8 tune for STAR (2110.09447 )
@@ -49,7 +85,8 @@ int main(){
   //Intialize the tree 
 
   TTree* tree = new TTree("T","RECREATE");
-  int ntracks = -999;
+  MyEvent myevent;
+  int ntracks = 0;
   int pid[MaxTracks] = {-999};
   double mass[MaxTracks] = {-999};
   double px[MaxTracks] = {-999};
@@ -60,16 +97,26 @@ int main(){
   double vy[MaxTracks] = {-999};
   double vz[MaxTracks] = {-999};
 
-  tree->Branch("ntracks", &ntracks,"ntracks/I");
-  tree->Branch("pid",pid,"pid[ntracks]/I");
-  tree->Branch("mass",mass,"mass[ntracks]/D");
-  tree->Branch("px",px,"px[ntracks]/D");
-  tree->Branch("py",py,"py[ntracks]/D");
-  tree->Branch("pz",pz,"pz[ntracks]/D");
-  tree->Branch("energy",energy,"energy[ntracks]/D");
-  tree->Branch("vx",vx,"vx[ntracks]/D");
-  tree->Branch("vy",vy,"vy[ntracks]/D");
-  tree->Branch("vz",vz,"vz[ntracks]/D");
+  tree->Branch("ntracks", &myevent.ntracks,"ntracks/I");
+  tree->Branch("pid",&myevent.pid);
+  tree->Branch("mass",&myevent.mass);
+  tree->Branch("energy",&myevent.energy);
+  tree->Branch("px",&myevent.px);
+  tree->Branch("py",&myevent.py);
+  tree->Branch("pz",&myevent.pz);
+  tree->Branch("vx",&myevent.vx);
+  tree->Branch("vy",&myevent.vy);
+  tree->Branch("vz",&myevent.vz);
+
+  ofstream file("oscar.particles.dat");
+	if(IsWriteOscar)
+  {
+    file << "# OSC1999A" << endl;
+	  file << "# final_id_p_x" << endl;
+	  file << "# SimName 1.0" << endl;
+	  file << "#" << endl;
+	  file << "# Some comments..." << endl;
+  }
 
   int evt_count = 0;
 
@@ -91,11 +138,13 @@ int main(){
 
     for(int j = 0; j < nparticles; j++){
 
-      if (!( pythia.event[j].daughter1() == 0 &&  pythia.event[j].daughter2() == 0 && fabs(pythia.event[j].eta()) < 0.5 ) ) continue;
-
+      if (!( (pythia.event[j].daughter1() == 0 || fabs(pythia.event[pythia.event[j].daughter1()].id()) == 11 ) &&  
+             (pythia.event[j].daughter2() == 0 || fabs(pythia.event[pythia.event[j].daughter2()].id()) == 11 ) && 
+             fabs(pythia.event[j].eta()) < 0.5 ) ) continue;
+      
       int pdg = pythia.event[j].id();
       if (! (pdg == 11 ||  pdg == -11) ) continue;
-
+       
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
       double Pt = sqrt(Px*Px + Py*Py);
@@ -112,7 +161,7 @@ int main(){
 	                          mother_id == 20433 || mother_id == 435;
 
       if(!(mother_D_meson)) continue;
-
+      
       bool parentisB = false;
 
       int mother_index1 = pythia.event[mother_index].mother1();
@@ -138,16 +187,20 @@ int main(){
 
     }
 
-    if(npart<1){ nevt++; continue; }
+    if(npart<2){ nevt++; continue; }
 
     int count = 0;
+    myevent.set_to_null();
 
     for(int j = 0; j < nparticles; j++){
 
-      if (!( pythia.event[j].daughter1() == 0 &&  pythia.event[j].daughter2() == 0 && fabs(pythia.event[j].eta()) < 0.5 ) ) continue;
+      if (!( (pythia.event[j].daughter1() == 0 || fabs(pythia.event[pythia.event[j].daughter1()].id()) == 11 ) &&  
+             (pythia.event[j].daughter2() == 0 || fabs(pythia.event[pythia.event[j].daughter2()].id()) == 11 ) && 
+             fabs(pythia.event[j].eta()) < 0.5 ) ) continue;
 
       int pdg = pythia.event[j].id();
       if (! (pdg == 11 ||  pdg == -11) ) continue;
+      if ( fabs(pythia.event[pythia.event[j].daughter1()].id()) == 11  || fabs(pythia.event[pythia.event[j].daughter2()].id()) == 11  ) std::cout<<"keks"<<std::endl;
 
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
@@ -204,6 +257,9 @@ int main(){
       energy[count] = Energy; vx[count] = Vx; vy[count] = Vy; vz[count] = Vz;
       pid[count] = pdg; 
 
+      myevent.mass.push_back(Mass); myevent.px.push_back(Px); myevent.py.push_back(Py); myevent.pz.push_back(Pz); myevent.energy.push_back(Energy); 
+      myevent.pid.push_back(pdg);   myevent.vx.push_back(Vx); myevent.vy.push_back(Vy); myevent.vz.push_back(Vz);
+      
       count++;
 
     }
@@ -211,7 +267,19 @@ int main(){
     pTHat->Fill(pythia.info.pTHat());
     ntracks = count;
 
+    myevent.ntracks = ntracks;
     tree->Fill();
+    
+    if(IsWriteOscar && ntracks>0)
+    {
+	    file << 0 << "\t" << ntracks << endl;
+	    for(int i = 0; i < ntracks; i++){
+	      if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
+	      else file << i+1 << "\t" << pid[i] << "\t" << 0 << "\t" << px[i] << "\t" << py[i] << "\t" << pz[i] << "\t" << energy[i] << "\t" << mass[i] << "\t" << vx[i]*pow(10,12) << "\t" << vy[i]*pow(10,12)  << "\t" << vz[i]*pow(10,12) << "\t" << 0 << endl;
+		  }
+		  file << 0 << "\t" << 0 << endl;  
+    }
+
     evt_count++;
     if(evt_count%1000==0) cout << evt_count << "\t" << "Completed" << endl;
     nevt++;
@@ -246,6 +314,11 @@ int main(){
   pTHat->Write();
   norm->Write();
   fout->Close();
+
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+  std::cout << duration.count() << std::endl;
 
   return 0;
 
