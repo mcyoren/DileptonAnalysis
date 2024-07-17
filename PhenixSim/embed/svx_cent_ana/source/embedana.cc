@@ -14,7 +14,7 @@ embedana::embedana(string filename, string filepath, string oscarpath) : m_outFi
   
   InitParams();
 
-  memset(InData_read, 0, 10000 * sizeof(InData));
+  memset(InData_read, 0, 20000 * sizeof(InData));
 }
 
 //==============================================================
@@ -30,9 +30,9 @@ embedana::~embedana()
 int embedana::Init(PHCompositeNode *topNode)
 {
 
-  cout << "embedana::Init started..." << endl;
+  std::cout << "embedana::Init started..." << std::endl;
   // OutputNtupleFile = new TFile(OutputFileName.c_str(),"RECREATE");
-  // cout << "embedana::Init: output file " << OutputFileName << " opened." << endl;
+  // std::cout << "embedana::Init: output file " << OutputFileName << " opened." << std::endl;
   recoConsts *rc = recoConsts::instance();
   remove_hadron_hits = rc->get_IntFlag("Remove_hadron_hits", 0);
   const int fill_QA_hadron_hists = rc->get_IntFlag("Fill_QA_hadron_hists", 0);
@@ -71,7 +71,7 @@ int embedana::Init(PHCompositeNode *topNode)
   if (fill_TTree)
     event_container->ResetTree();
 
-  cout << "embedana::Init ended." << endl;
+  std::cout << "embedana::Init ended." << std::endl;
   return 0;
 }
 
@@ -79,7 +79,7 @@ int embedana::Init(PHCompositeNode *topNode)
 
 int embedana::InitRun(PHCompositeNode *topNode)
 {
-  cout << "embedana::InitRun started..." << endl;
+  std::cout << "embedana::InitRun started..." << std::endl;
 
   m_outfile = new TFile(m_outFileName.c_str(), "RECREATE");
 
@@ -116,7 +116,7 @@ int embedana::InitRun(PHCompositeNode *topNode)
     myfile.close();
   }
 
-  cout << "embedana::InitRun ended." << endl;
+  std::cout << "embedana::InitRun ended." << std::endl;
   return 0;
 }
 
@@ -134,7 +134,7 @@ int embedana::process_event(PHCompositeNode *topNode)
   static int first_event = 0;
   if (first_event == 0)
   {
-    cout << "embedana::process_event firstevent" << endl;
+    std::cout << "embedana::process_event firstevent" << std::endl;
     topNode->print();
     first_event++;
   }
@@ -161,7 +161,7 @@ int embedana::process_event(PHCompositeNode *topNode)
 
   std::cout << "RN, real embed and sim Nhits and Ntraks: " << runHDR->get_RunNumber() << " "<< svx->get_nClusters() << " " << svxsim->get_nClusters() << " " 
   << svxembed->get_nGhitClusters() << " " << trk->get_npart() << " " << trk_mc->get_npart() << std::endl;
-  // cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
+  // std::cout<<"event : "<<EventNumber<<"  "<<((evthdr!=NULL) ? evthdr->get_EvtSequence() : -1 ) <<endl;
 
   if (EventNumber >= 10)
   {
@@ -198,7 +198,7 @@ int embedana::process_event(PHCompositeNode *topNode)
 
   if (embedtrk == nullptr)
   {
-    cout << " no PHEmbedMcRecoTrack" << endl;
+    std::cout << " no PHEmbedMcRecoTrack" << std::endl;
   }
   else
   {
@@ -220,7 +220,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       }
       else
       {
-        cout << "out of range : " << dcidr << momr << momr1 << endl;
+        std::cout << "out of range : " << dcidr << momr << momr1 << std::endl;
       }
     }
 
@@ -240,7 +240,7 @@ int embedana::process_event(PHCompositeNode *topNode)
 
       if (idR < 0 || Ncnt <= idR)
       {
-        cout << " RealtrackID is out of range = " << idR << " : " << Ncnt << endl;
+        std::cout << " RealtrackID is out of range = " << idR << " : " << Ncnt << std::endl;
         continue;
       }
 
@@ -253,11 +253,9 @@ int embedana::process_event(PHCompositeNode *topNode)
         if( fabs( embed->get_momS() - trk_mc->get_mom(imctrk) ) < 0.002 ) trk_mc->set_mcid(imctrk,embed->get_partidG());
       }
 
-      if(applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<-1) 
-      {
-        std::cout<<"TRACK DEADMAP CHECK: "<<applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<<std::endl;
-        return -1;
-      }
+      if(false) 
+        std::cout<<"\n\n    TRACK DEADMAP CHECK: "<<applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<<"\n\n"<<std::endl;
+      
       if(applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
 
       float ntp[100];
@@ -377,14 +375,14 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetNPE0(sngl->get_npe0());
       newElectron.SetDISP(sngl->get_disp());
       newElectron.SetMcId(embed->get_partidG());
-      if(false) std:: cout<<"embed trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
+      if(false) std::cout<<"embed trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
       float min_dist = 99999;
       int n_had = 0;
       if (sngl->get_n0()>0)  n_had = (int) trk->get_npart();
       for (int ihadron = 0; ihadron < n_had; ihadron++)
       {
         if(trk->get_center_phi(ihadron)<-99) continue;
-        if(applySingleTrackCut(trk, ihadron, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
+        if(applySingleTrackCut(trk, ihadron, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<-1) continue;
         if((int)ihadron == idR) continue;
         const float dcenter_z = (sngl->get_center_z() - trk->get_center_z(ihadron)) / 5.0;
         const float dcenter_phi = (sngl->get_center_phi() - trk->get_center_phi(ihadron)) / 0.013;
@@ -451,7 +449,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetEmcdz_e(trk_mc->get_emcsdz_e(itrk));
       newElectron.SetEmcdphi_e(trk_mc->get_emcsdphi_e(itrk));
       newElectron.SetMcId(trk_mc->get_mcid(itrk));
-      if(false) std:: cout<<"sim trk pt n0 e/p id cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<newElectron.GetMcId()<<" "<<event->GetCentrality()<<std::endl;
+      if(false) std::cout<<"sim trk pt n0 e/p id cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<newElectron.GetMcId()<<" "<<event->GetCentrality()<<std::endl;
       event->AddElecCand(&newElectron);
   }
   
@@ -577,9 +575,9 @@ int embedana::process_event(PHCompositeNode *topNode)
 
 int embedana::End(PHCompositeNode *topNode)
 {
-  cout << "Writing out..." << endl;
+  std::cout << "Writing out..." << std::endl;
   m_outfile->Write();
-  cout << "Closing output file..." << endl;
+  std::cout << "Closing output file..." << std::endl;
   m_outfile->Close();
   delete m_outfile;
   event_container->WriteOutFile();
@@ -612,11 +610,11 @@ int embedana::ReadOrigPartMoms()
     double px, py, pz, vx, vy, vz, dummy;
     stringstream s(line);
     s >> i1 >> i2;
-    if (TMath::Abs(i2) > 1)
+    if (TMath::Abs(i2) > 3)
     {
       s >> i3 >> px >> py >> pz >> dummy >> dummy >> vx >> vy >> vz;
-      // cout<<px<<" "<<py<<" "<<pz<<endl;
-      if (i >= 10000)
+      //std::cout<<px<<" "<<py<<" "<<pz<<endl;
+      if (i > 20000)
       {
         printf("Too much particles in small file!\n");
         return -1;
@@ -633,8 +631,8 @@ int embedana::ReadOrigPartMoms()
       ++i;
     }
   }
-  cout << "Nlines: " << i << endl;
-  if (i != 10000)
+  std::cout << "Nlines: " << i << std::endl;
+  if (i != 10000 && i != 20000 && i != 20001)
   {
     printf("Wrong number of tracks");
     return -1;

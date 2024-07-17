@@ -29,7 +29,7 @@ unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
 
-set shift = 400
+set shift = 2000
 
 setenv DATADIR /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/work
 
@@ -85,7 +85,7 @@ set scriptdir = "$DATADIR"
 set outdstdir   = $DATADIR/output
 set outntdir    = $DATADIR/output
 set outntanadir = $DATADIR/output
-set tmpdir      = "/home/tmp/${USER}_job_$jobno"
+set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
 
 set inreal = `basename $inputreal`
 set insim  = `basename $inputsim`
