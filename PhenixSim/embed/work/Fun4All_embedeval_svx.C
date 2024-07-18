@@ -22,7 +22,7 @@ void Fun4All_embedeval_svx(
   cout << "Output evaluation ntuple : " << ntname << endl;
   cout << "Output evaluation anantuple : " << ntananame << endl;
    
-  float vtxmatch = 1.0;
+  float vtxmatch = 2.0;
   float vtxmax = 30.0;
 
   int   dataFlag = 1; // 2 is for pp

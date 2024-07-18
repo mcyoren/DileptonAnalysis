@@ -15,7 +15,7 @@ embedana::embedana(string filename, string filepath, string oscarpath) : m_outFi
   
   InitParams();
 
-  memset(InData_read, 0, 20000 * sizeof(InData));
+  memset(InData_read, 0, 22000 * sizeof(InData));
 }
 
 //==============================================================
@@ -633,7 +633,7 @@ int embedana::ReadOrigPartMoms()
     {
       s >> i3 >> px >> py >> pz >> dummy >> dummy >> vx >> vy >> vz;
       //std::cout<<i2<<" "<<px<<" "<<py<<" "<<pz<<" "<<nn<<endl;
-      if (i >= 20000)
+      if (i >= 22000)
       {
         printf("Too much particles in small file!\n");
         return -1;
