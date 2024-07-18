@@ -5,6 +5,7 @@ embedana::embedana(string filename, string filepath, string oscarpath) : m_outFi
 {
   ThisName = "embedana";
   EventNumber = 0;
+  InPartNumber = 0;
   event_container = nullptr;
   fill_TTree = 0;
   remove_hadron_hits = 0;
@@ -181,20 +182,33 @@ int embedana::process_event(PHCompositeNode *topNode)
   event->SetCentrality(vertexes[4 * EventNumber + 3]);
   event->SetRunNumber(runHDR->get_RunNumber());
 
-  event->SetEvtNo(InData_read[EventNumber].id);
-  const double init_pt = sqrt(InData_read[EventNumber].px * InData_read[EventNumber].px + InData_read[EventNumber].py * InData_read[EventNumber].py);
+  event->SetEvtNo(InData_read[InPartNumber].id);
+  const double init_pt = sqrt(InData_read[InPartNumber].px * InData_read[InPartNumber].px + InData_read[InPartNumber].py * InData_read[InPartNumber].py);
   event->SetBBCcharge(init_pt);
-  event->SetBBCchargeN(atan2(InData_read[EventNumber].py, InData_read[EventNumber].px));
-  event->SetBBCchargeS(atan2(init_pt, InData_read[EventNumber].pz));
+  event->SetBBCchargeN(atan2(InData_read[InPartNumber].py, InData_read[InPartNumber].px));
+  event->SetBBCchargeS(atan2(init_pt, InData_read[InPartNumber].pz));
+  const int nn_loc = InData_read[InPartNumber].nn;
+  if(nn_loc>1)
+  {
+    InPartNumber++;
+    event->SetBBCtimeN(InData_read[InPartNumber].id);
+    const double init_pt = sqrt(InData_read[InPartNumber].px * InData_read[InPartNumber].px + InData_read[InPartNumber].py * InData_read[InPartNumber].py);
+    event->SetBBCtimeS(init_pt);
+    event->SetPsi3BBC(atan2(InData_read[InPartNumber].py, InData_read[InPartNumber].px));
+    event->SetPsi3FVTXA0(atan2(init_pt, InData_read[InPartNumber].pz));
+  }
   
   if (false)
     std::cout << "x,y,z,cent: " << vertexes[4 * EventNumber] << " " << vertexes[4 * EventNumber + 1] << " " << vertexes[4 * EventNumber + 2] << " " << vertexes[4 * EventNumber + 3] << " " << std::endl;
   if (false)
-    std::cout << "px,py,pz,id : " << InData_read[EventNumber].px << " " << InData_read[EventNumber].py << " " << InData_read[EventNumber].pz << " " << InData_read[EventNumber].id << " " << std::endl;
+    std::cout << "px,py,pz,id : " << InData_read[InPartNumber].px << " " << InData_read[InPartNumber].py << " " << InData_read[InPartNumber].pz << " " << InData_read[InPartNumber].id << " " << std::endl;
+  if (false)
+    std::cout << "px,py,pz,id : " << InData_read[InPartNumber-1].px << " " << InData_read[InPartNumber-1].py << " " << InData_read[InPartNumber-1].pz << " " << InData_read[InPartNumber-1].id << " " << std::endl;
   if (false)
     std::cout << "px,py,pz,id : " << event->GetBBCcharge()*cos(event->GetBBCchargeN()) << " " << event->GetBBCcharge()*sin(event->GetBBCchargeN())<< " " << event->GetBBCcharge()/tan(event->GetBBCchargeS()) << " " << event->GetEvtNo() << " " << std::endl;
   // std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
   // event->ClearEvent();
+  InPartNumber += nn_loc - 1;
 
   if (embedtrk == nullptr)
   {
@@ -588,7 +602,7 @@ int embedana::End(PHCompositeNode *topNode)
 int embedana::ReadOrigPartMoms()
 {
 
-  int i;
+  int i, k, nn;
 
   printf("Small oscar file is %s\n", local_oscarpath.c_str());
 
@@ -601,7 +615,7 @@ int embedana::ReadOrigPartMoms()
     return -1;
   }
 
-  i = 0;
+  i = 0; k = 0; nn = 0;
   while (getline(fin, line))
   {
     if (line.find("#") == 0)
@@ -610,17 +624,23 @@ int embedana::ReadOrigPartMoms()
     double px, py, pz, vx, vy, vz, dummy;
     stringstream s(line);
     s >> i1 >> i2;
-    if (TMath::Abs(i2) > 3)
+    if ( i2 > 0 && i2 < 6)
+    {
+       nn = i2;
+       k++;
+    }
+    if (TMath::Abs(i2) > 5 && TMath::Abs(i2)<9999)
     {
       s >> i3 >> px >> py >> pz >> dummy >> dummy >> vx >> vy >> vz;
-      //std::cout<<px<<" "<<py<<" "<<pz<<endl;
-      if (i > 20000)
+      //std::cout<<i2<<" "<<px<<" "<<py<<" "<<pz<<" "<<nn<<endl;
+      if (i >= 20000)
       {
         printf("Too much particles in small file!\n");
         return -1;
       }
 
       InData_read[i].id = i2;
+      InData_read[i].nn = nn;
       InData_read[i].px = px;
       InData_read[i].py = py;
       InData_read[i].pz = pz;
@@ -631,10 +651,10 @@ int embedana::ReadOrigPartMoms()
       ++i;
     }
   }
-  std::cout << "Nlines: " << i << std::endl;
-  if (i != 10000 && i != 20000 && i != 20001)
+  std::cout << "Nlines: " << i << ";  Nev: " << k << std::endl;
+  if (k != 10000 )
   {
-    printf("Wrong number of tracks");
+    printf("Wrong number of events");
     return -1;
   }
 

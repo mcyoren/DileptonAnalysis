@@ -14,7 +14,7 @@
 #include "TTree.h"
 #include "TBranch.h"
 
-#include "../source/HELIOSLibrary/WriteEvent.h"
+#include "/phenix/plhf/mitran/Simul/Dileptons/sim/gen/HELIOS/source/HELIOSLibrary/WriteEvent.h"
 
 using namespace std;
 
@@ -35,8 +35,8 @@ void WriteROOT2Oscar(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf
 
 	ofstream file(output);
 
-	const int nstart = nfolder * 10000;
-	const int nend = nstart + 10000;
+	const int nstart = nfolder * Nev;
+	const int nend = nstart + Nev;
 
 	//Read in the TTrees 
 
@@ -86,7 +86,7 @@ void WriteROOT2Oscar(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf
 		br->GetEntry(ievt);
 
 		file << 0 << "\t" << event->GetNStable() << endl;
-
+		const int ivertexevent = ievt - nstart;
 		for(int i = 0; i < event->GetNEntries(); i++){
 
 			WriteTrack Track = event->GetWriteTrack(i);
@@ -95,7 +95,7 @@ void WriteROOT2Oscar(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf
 
 				file << Track.GetNum() << "\t" << Track.GetID() << "\t" << 0 << "\t" << Track.GetPx() << "\t" << Track.GetPy() << "\t" << Track.GetPz() 
 				<< "\t" << Track.GetEnergy() << "\t" << Track.GetMass() << "\t" 
-				<< Track.GetXpos()+vertexes[4*ievt] << "\t" << Track.GetYpos()+vertexes[4*ievt+1] << "\t" << Track.GetZpos()+vertexes[4*ievt+2] << "\t" << 0 << endl;
+				<< Track.GetXpos()+vertexes[4*ivertexevent] << "\t" << Track.GetYpos()+vertexes[4*ivertexevent+1] << "\t" << Track.GetZpos()+vertexes[4*ivertexevent+2] << "\t" << 0 << endl;
 			}
 		}
 

@@ -66,15 +66,16 @@ class PHCentralTrack;
 
 struct InData {
     double px, py, pz, vx, vy, vz;
-    int id;
+    int id, nn;
 };
 
 ////////////
 
 class embedana: public SubsysReco {
 public:
-  embedana(std::string filename="embedana.root", std::string filepath="/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
-  std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat");
+  embedana(std::string filename="embedana.root", 
+           std::string filepath="/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
+           std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat");
   virtual ~embedana();
 
   int Init(PHCompositeNode *topNode);
@@ -112,7 +113,7 @@ private:
     
 
 private:
-  int EventNumber;
+  int EventNumber, InPartNumber;
 
   std::string m_outFileName;
   TFile*      m_outfile;

@@ -7,7 +7,7 @@ setenv PYTHIA8DATA /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/env/EIC2
 
 
 root -l -b << EOF
-    .L ../source/HELIOSLibrary/WriteEvent.C+
+    .L /phenix/plhf/mitran/Simul/Dileptons/sim/gen/HELIOS/source/HELIOSLibrary/WriteEvent.C+
     .L WriteROOT2Oscar.C+
 EOF
 
@@ -17,7 +17,7 @@ if( $#argv != 0) then
  if( $1 == 0) then
  echo "running all standard params"
   root -l -b << EOF
-    gSystem->Load("../source/HELIOSLibrary/WriteEvent_C.so")
+    gSystem->Load("/phenix/plhf/mitran/Simul/Dileptons/sim/gen/HELIOS/source/HELIOSLibrary/WriteEvent_C.so")
     gSystem->Load("WriteROOT2Oscar_C.so")
     WriteROOT2Oscar()
 EOF
@@ -40,7 +40,7 @@ EOF
  echo "running WriteROOT2Oscar("$vtxfile","$iter",$nev,"$infile","$outfile")"
 
   root -l -b << EOF
-    gSystem->Load("../source/HELIOSLibrary/WriteEvent_C.so")
+    gSystem->Load("/phenix/plhf/mitran/Simul/Dileptons/sim/gen/HELIOS/source/HELIOSLibrary/WriteEvent_C.so")
     gSystem->Load("WriteROOT2Oscar_C.so")
     WriteROOT2Oscar("$vtxfile",$iter,$nev,"$infile","$outfile")
 EOF

@@ -10,8 +10,37 @@
 #include <TLorentzVector.h>
 #include <TString.h>
 #include <TVector.h>
+#include "TTree.h"
+#include "TBranch.h"
 
 using namespace std;
+
+struct MyEvent {
+    int ntracks;
+    std::vector<int> *pid;
+    std::vector<double> *mass;
+    std::vector<double> *energy;
+    std::vector<double> *px;
+    std::vector<double> *py;
+    std::vector<double> *pz;
+    std::vector<double> *vx;
+    std::vector<double> *vy;
+    std::vector<double> *vz;
+
+    void set_to_null() {
+        ntracks = 0;
+        pid = 0;
+        mass = 0;
+        energy = 0;
+        px = 0;
+        py = 0;
+        pz = 0;
+        vx = 0;
+        vy = 0;
+        vz = 0;
+        return;
+    };
+};
 
 void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString output = "oscar.txt"){
 
@@ -29,26 +58,20 @@ void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString
 	TTree* T = (TTree*)input->Get("T");
   	const int max_trks = 200;
   	int ntracks = -999;
-	int pid[max_trks] = {-999};
-  	double px[max_trks] = {-999};
-	double py[max_trks] = {-999};
-	double pz[max_trks] = {-999};
-	double mass[max_trks] = {-999};
-	double energy[max_trks] = {-999};
-	double vx[max_trks] = {-999};
-	double vy[max_trks] = {-999};
-	double vz[max_trks] = {-999};
+	MyEvent myevent;
+	myevent.set_to_null();
 
+	TBranch *branch[8];
 	T->SetBranchAddress("ntracks",&ntracks);
-	T->SetBranchAddress("pid",pid);
-	T->SetBranchAddress("px",px);
-	T->SetBranchAddress("py",py);
-	T->SetBranchAddress("pz",pz);
-	T->SetBranchAddress("mass",mass);
-	T->SetBranchAddress("energy",energy);
-	T->SetBranchAddress("vx",vx);
-	T->SetBranchAddress("vy",vy);
-	T->SetBranchAddress("vz",vz);
+	T->SetBranchAddress("pid",&myevent.pid, &branch[0]);
+	T->SetBranchAddress("px",&myevent.px, &branch[1]);
+	T->SetBranchAddress("py",&myevent.py, &branch[2]);
+	T->SetBranchAddress("pz",&myevent.pz, &branch[3]);
+	T->SetBranchAddress("energy",&myevent.energy, &branch[4]);
+	T->SetBranchAddress("mass",&myevent.mass, &branch[5]);
+	T->SetBranchAddress("vx",&myevent.vx, &branch[6]);
+	T->SetBranchAddress("vy",&myevent.vy, &branch[7]);
+	T->SetBranchAddress("vz",&myevent.vz, &branch[8]);
 
 	file << "# OSC1999A" << endl;
 	file << "# final_id_p_x" << endl;
@@ -58,15 +81,15 @@ void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString
 	file << endl;
 
 	for(int ievt = 0; ievt < (int)T->GetEntries(); ievt++){
-
+		myevent.set_to_null();
 	  T->GetEntry(ievt);
        
-	  file << 0 << "\t" << ntracks+1 << endl;
+	  file << 0 << "\t" << ntracks << endl;
 
-	  for(int i = -1; i < ntracks; i++){
+	  for(int i = 0; i < ntracks; i++){
 		  
 	    if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
-	    else file << i+1 << "\t" << pid[i] << "\t" << 0 << "\t" << px[i] << "\t" << py[i] << "\t" << pz[i] << "\t" << energy[i] << "\t" << mass[i] << "\t" << vx[i]*pow(10,12) << "\t" << vy[i]*pow(10,12)  << "\t" << vz[i]*pow(10,12) << "\t" << 0 << endl;
+	    else file << i+1 << "\t" << myevent.pid->at(i) << "\t" << 0 << "\t" << myevent.px->at(i) << "\t" << myevent.py->at(i) << "\t" << myevent.pz->at(i) << "\t" << myevent.energy->at(i) << "\t" << myevent.mass->at(i) << "\t" << myevent.vx->at(i)*pow(10,12) << "\t" << myevent.vy->at(i)*pow(10,12)  << "\t" << myevent.vz->at(i)*pow(10,12) << "\t" << 0 << endl;
 		}
 
 		file << 0 << "\t" << 0 << endl;

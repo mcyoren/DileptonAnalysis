@@ -1,0 +1,16 @@
+
+Universe       = vanilla
+Notification   = Error
+GetEnv         = True
+Initialdir     = $ENV(PWD)
+Executable     = /bin/csh
+Priority       = +20
+Log            = /dev/null 
+Output         = /dev/null
+Error          = /dev/null
+Requirements   = (CPU_Speed >= 1) 
+Rank		       = CPU_Speed
+
+Arguments      = Run_pythia8.csh 0 $(Process) 10000
+
+Queue 200

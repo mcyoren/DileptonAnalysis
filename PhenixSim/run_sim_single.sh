@@ -1,7 +1,7 @@
 #!/bin/sh
 
 itype=$2  #0 -- only single, 1 -- only pisa, 2 --only pisaToDST, 3 -- all
-shift=0
+shift=2000
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/gpfs/mnt/gpfs02/phenix/plhf/plhf3/nnovitzk/mazsi_Test/ccnt/source/emc-evaluation/build/.libs/
 #:/gpfs/mnt/gpfs02/phenix/plhf/plhf1/vborisov/Pasha/install
@@ -52,10 +52,10 @@ echo start the single simulation in directory $DIR
 
 pwd
 NEVT=10000
-ptmin=0.5
-ptmax=5.0
+ptmin=0.2
+ptmax=0.5
 n=-1 #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
-id=3 #0,1,2,3,4,5-pi0,pi+,pi-,e+,e-
+id=4 #0,1,2,3,4-pi0,pi+,pi-,e+,e-
 
 if [[ $itype == 0 || $itype == 3 ]];then
 cp /phenix/plhf/mitran/Simul/Dileptons/make_sim/make_single.C .
@@ -63,6 +63,11 @@ cp /phenix/plhf/mitran/Simul/Dileptons/make_sim/heau200_bbcz.root .
 
 root -l -b -q 'make_single.C("'$vertex_txt_dir'","oscar.particles.dat",'$NEVT','$ptmin','$ptmax','$n','$id')'
 
+export heliosdir=/phenix/plhf/mitran/Simul/Dileptons/sim/gen/HELIOS
+cp $heliosdir/work/Convert_HELIOS.csh .
+cp $heliosdir/work/WriteROOT2Oscar.C .
+
+tcsh Convert_HELIOS.csh $vertex_txt_dir $1 $NEVT $heliosdir/work/helios_jpsi.root oscar.particles.dat
 
 NLINE=`wc -l < oscar.particles.dat`
 
