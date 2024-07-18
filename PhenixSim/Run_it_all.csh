@@ -39,9 +39,9 @@ echo "   type of input  = single, helios, pythia8"
 exit -1
 endif
 
-set shift = 0
+set shift = 200
 set jobno = $1
-set NEVT = 10000
+set NEVT = 100
 
 setenv DATADIR $PWD
 
@@ -90,22 +90,23 @@ echo "==============================================="
 echo "============= START SIMULATION  ==============="
 echo "==============================================="
 
-if( ( $2 == 0 || $2 == 3 ) && $3 == 1 ) then
+set inputvtx = $DATADIR/real/work/output/vertexes.txt
+set oscarname = $DIR.oscar.parcticles.dat
+
+if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
-set inputpythia = $DATADIR/output_single/helios/helios_phi_ee.root
-set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set oscarname = $DIR.oscar.parcticles.dat
-set scriptdir  = $DATADIR/sim/gen/pythia8
-set scriptname = Convert_pythia8.csh
-set macroname  = WriteROOT2OscarPythia.C
-set outsingle  = $DATADIR/output_single/dst
+set inputhelios = $DATADIR/output_single/helios/helios_phi_ee.root
+set scriptdir   = $DATADIR/sim/gen/HELIOS/work
+set scriptname  = Convert_HELIOS.csh
+set macroname   = WriteROOT2Oscar.C
+set outsingle   = $DATADIR/output_single/helios
 set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
 
 echo "jobno          $jobno            "
 echo "run_number     $run_number       "
-echo "inputpythia    $inputpythia      "
+echo "inputhelios    $inputhelios      "
 echo "inputvtx       $inputvtx         "
 echo "oscarname      $oscarname        "
 echo "scriptdir      $scriptdir        "
@@ -123,11 +124,11 @@ cd       $tmpdir
 
 cp $scriptdir/$scriptname .
 cp $scriptdir/$macroname .
-echo running "./$scriptname $inputvtx $inputpythia $oscarname"
-./$scriptname $inputvtx $inputpythia $oscarname
+echo running "./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarname"
+./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarname
 echo "finished rinnung"
 echo "copying"
-cp $oscarname  $outputsingle_dir/pythia8/
+cp $oscarname  $outsingle/
 echo "finished copying"
 #remove tmp dir
 cd $DATADIR
@@ -136,17 +137,15 @@ echo "removed $tmpdir"
 
 endif
 
-if( ( $2 == 0 || $2 == 3 ) && $3 == 2 ) then
+if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 2 ) then
 echo "==============================================="
 echo "============= PYTHIA TO OSCAR ================="
 echo "==============================================="
 set inputpythia = $DATADIR/output_single/pythia8/ccbartree$DIR.root
-set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set oscarname = $DIR.oscar.parcticles.dat
-set scriptdir  = $DATADIR/sim/gen/pythia8
-set scriptname = Convert_pythia8.csh
-set macroname  = WriteROOT2OscarPythia.C
-set outsingle  = $DATADIR/output_single/dst
+set scriptdir   = $DATADIR/sim/gen/pythia8
+set scriptname  = Convert_pythia8.csh
+set macroname   = WriteROOT2OscarPythia.C
+set outsingle   = $DATADIR/output_single/pythia8
 set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
 
 echo "jobno          $jobno            "
@@ -173,7 +172,7 @@ echo running "./$scriptname $inputvtx $inputpythia $oscarname"
 ./$scriptname $inputvtx $inputpythia $oscarname
 echo "finished rinnung"
 echo "copying"
-cp $oscarname  $outputsingle_dir/pythia8/
+cp $oscarname  $outsingle/
 echo "finished copying"
 #remove tmp dir
 cd $DATADIR
@@ -183,13 +182,19 @@ echo "removed $tmpdir"
 endif
 
 
-if( ( $2 == 1 || $2 == 3 ) && $3 == 2 ) then
+if( $2 == 1 || $2 == 3 || $2 == 4 ) then
 
 echo "==============================================="
 echo "============= START PISA NOW =================="
 echo "==============================================="
 
+if ( $3 == 1 ) then 
+set oscarname = $DATADIR/output_single/helios/$DIR.oscar.parcticles.dat
+else if ( $3 == 2 ) then 
 set oscarname = $DATADIR/output_single/pythia8/$DIR.oscar.parcticles.dat
+else 
+set oscarname = $DATADIR/output_single/single/$DIR.oscar.parcticles.dat
+endif
 
 set pisadir  = $DATADIR/make_sim/pisa
 
@@ -254,9 +259,7 @@ endif
 ################EMBEDDING#################
 #################STARTS###################
 ##########################################
-if( ( $2 == 2 || $2 == 3 ) && $3 == 2 ) then
-
-
+if( $2 == 2 || $2 == 4 ) then
 echo "==============================================="
 echo "================= EMBEDDING ==================="
 echo "==============================================="
@@ -279,8 +282,14 @@ echo $INPUT
 
 set outntana  = "$INPUT"_tree.root
 
-set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
+if ( $3 == 1 ) then 
+set inputoscar = $DATADIR/output_single/helios/$DIR.oscar.parcticles.dat
+else if ( $3 == 2 ) then 
 set inputoscar = $DATADIR/output_single/pythia8/$DIR.oscar.parcticles.dat
+else 
+set inputoscar = $DATADIR/output_single/single/$DIR.oscar.parcticles.dat
+endif
+set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
 set inputreal = $DATADIR/real/work/output/CNTmerge_MB-0000$run_number-0000.root
 set outdst    = kek0.root
@@ -296,7 +305,7 @@ echo "creating $outmytreedir"
 mkdir -p $outmytreedir
 endif
 
-set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
+set tmpdir      = "/home/tmp/${USER}_embed_$INPUT"
 
 set inreal = `basename $inputreal`
 set insim  = `basename $inputsim`
