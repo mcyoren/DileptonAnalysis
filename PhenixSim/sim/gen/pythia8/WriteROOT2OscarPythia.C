@@ -42,7 +42,9 @@ struct MyEvent {
     };
 };
 
-void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString output = "oscar.txt"){
+void WriteROOT2OscarPythia(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
+						   const TString infile = "single_pi0_HELIOS_1B.root", 
+						   const TString output = "oscar.txt"){
 
 	TFile* input = new TFile(infile,"READ");
 	if(!(input))
@@ -50,6 +52,34 @@ void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString
 	  cout << "no input file" << endl;
 	  exit(1);
 	}
+
+	//vertex staff
+	const double scale = 1e13; //cm to fm conversion
+ 	std::ifstream myfile (filepath);
+ 	vector<double> vertexes;
+ 	string line;
+ 	if (myfile.is_open())
+ 	{
+ 	  while ( getline (myfile,line) )
+ 	  {
+ 	    string s;
+ 	    std::stringstream ss(line);
+ 	    while(getline(ss, s, ' '))
+ 	    {
+ 	      vertexes.push_back(atof(s.c_str())*scale);
+ 	    }
+ 	  }
+ 	  myfile.close();
+ 	}
+	if(false)
+	{
+		for (int i = 0; i < (int) vertexes.size()/4; i++)
+  		{
+  		  std::cout<<vertexes[4*i] << "     " <<vertexes[4*i+1] << "     " <<vertexes[4*i+2] << " "<<vertexes[4*i+3] << " " <<std::endl;
+  		}
+	}
+	// ------------end for vertexes---------------
+
 
 	ofstream file(output);
 
@@ -89,7 +119,10 @@ void WriteROOT2OscarPythia(TString infile = "single_pi0_HELIOS_1B.root", TString
 	  for(int i = 0; i < ntracks; i++){
 		  
 	    if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
-	    else file << i+1 << "\t" << myevent.pid->at(i) << "\t" << 0 << "\t" << myevent.px->at(i) << "\t" << myevent.py->at(i) << "\t" << myevent.pz->at(i) << "\t" << myevent.energy->at(i) << "\t" << myevent.mass->at(i) << "\t" << myevent.vx->at(i)*pow(10,12) << "\t" << myevent.vy->at(i)*pow(10,12)  << "\t" << myevent.vz->at(i)*pow(10,12) << "\t" << 0 << endl;
+	    else file << i+1 << "\t" << myevent.pid->at(i) << "\t" << 0 << "\t" << myevent.px->at(i) << "\t" << myevent.py->at(i) << "\t" <<
+		 							myevent.pz->at(i) << "\t" << myevent.energy->at(i) << "\t" << myevent.mass->at(i) << "\t" << 
+									myevent.vx->at(i)*pow(10,12)+vertexes[4*ievt] << "\t" << myevent.vy->at(i)*pow(10,12)+vertexes[4*ievt+1]  << "\t" << 
+									myevent.vz->at(i)*pow(10,12) +vertexes[4*ievt+2] << "\t" << 0 << endl;
 		}
 
 		file << 0 << "\t" << 0 << endl;
