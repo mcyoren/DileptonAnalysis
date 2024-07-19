@@ -17,7 +17,7 @@
 #include "MyEvent_OLD.h"
 
 const int in_id = 2; //pi+,pi-,e+,e- = 8,9,3,2
-const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-2M_ccbar_embed_pythia8_v0.root", //2M_piplus_embed_hagedorn_v1
+const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-2M_jpsi_embed_helios_v0.root", //2M_ccbar_embed_pythia8_v0  2M_phi_embed_helios_v0
                             "/home/yoren/bnl/PHENIX/ee/AuAu/analysis_output_ccbar_pthat0.root", 
                             "/home/yoren/bnl/PHENIX/ee/AuAu/merged_output_photon.root",
                             "/home/yoren/bnl/PHENIX/ee/AuAu/jpsi_sim.root",

@@ -1,23 +1,17 @@
 #!/usr/local/bin/tcsh -f
 
 
-#Do the embedding
+#Do the real, sim, and embedding
 
 ################################################################
 # This is based on the original logic by Takashi.
 #
 # The idea is to set up the environment in a uniform way to facilitate
-# accessing data among the various stages of the embedding process.
+# accessing data among the various stages of the full embedding process.
 #
-# For that reason the script embed/setup/embedding_setup template
-# needs to be used (after modification appropriate for the user)
+# You can find all sources on git
+# https://github.com/mcyoren/DileptonAnalysis
 
-# --Maxim Potekhin /mxp/--
-
-#if (! $?EMBEDDING_HOME) then       
-#echo "Environment not set, exiting..."
-#exit -1   
-#endif
 
 setenv prompt 1
 source /etc/csh.login
@@ -41,7 +35,7 @@ endif
 
 set shift = 200
 set jobno = $1
-set NEVT = 100
+set NEVT = 10000
 
 setenv DATADIR $PWD
 
@@ -97,7 +91,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
-set inputhelios = $DATADIR/output_single/helios/helios_phi_ee.root
+set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02-3.root
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C

@@ -691,7 +691,10 @@ namespace MyDileptonAnalysis
 
         const float L = sqrt(X_circle * X_circle + Y_circle * Y_circle);
         const float dca = (L - R) * 10000; // In Micro Meters
-
+        //const int dir = +1 * mytrk->GetChargePrime();
+        //const float phi = mytrk->GetPhi0Prime();
+        //const float vx = X_circle - dir * R * sin(phi);
+        //const float vy = Y_circle + dir * R * cos(phi);
         mytrk->SetDCA2(dca);
 
         mytrk->SetDCAX2(X_circle * dca / L);
@@ -952,8 +955,8 @@ namespace MyDileptonAnalysis
                 const float dca1 = abs(newTrack1->GetDCAY2() + newTrack2->GetDCAY2());
                 const float dca2 = abs(newTrack1->GetDCAX2() - newTrack2->GetDCAX2());
                 const float dca3 = abs(newTrack1->GetDCAY2() - newTrack2->GetDCAY2());
-                const float dca4 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
-                const float dca5 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
+                const float dca4 = sqrt( SQR(newTrack1->GetDCAX2() - newTrack2->GetDCAX2()) + SQR(newTrack1->GetDCAY2() - newTrack2->GetDCAY2()) );
+                const float dca5 = abs(  abs(newTrack1->GetDCAX2() - newTrack2->GetDCAX2()) + abs(newTrack1->GetDCAY2() - newTrack2->GetDCAY2()) );
                 const float dca6 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
                 const float dca7 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
 
