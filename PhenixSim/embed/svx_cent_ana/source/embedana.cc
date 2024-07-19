@@ -422,6 +422,7 @@ int embedana::process_event(PHCompositeNode *topNode)
   {
     
       MyDileptonAnalysis::MyElectron newElectron;
+      if(applySingleTrackCut(trk_mc, itrk, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
 
       newElectron.SetPt(trk_mc->get_pt(itrk));
       newElectron.SetPtPrime(trk_mc->get_pt(itrk));
