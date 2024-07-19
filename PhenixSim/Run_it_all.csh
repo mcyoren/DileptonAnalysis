@@ -11,6 +11,8 @@
 #
 # You can find all sources on git
 # https://github.com/mcyoren/DileptonAnalysis
+# If you have any questions please contact me:
+# Yuri Mitrankov (mitrankovy@gmail.com)
 
 
 setenv prompt 1
@@ -18,9 +20,7 @@ source /etc/csh.login
 foreach i (/etc/profile.d/*.csh)
 source $i
 end
-#source $HOME/.login
-source /opt/phenix/bin/phenix_setup.csh  new
-setenv LD_LIBRARY_PATH .:/opt/phenix/bin:$LD_LIBRARY_PATH
+source $HOME/.login
 unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
@@ -39,7 +39,7 @@ set NEVT = 10000
 
 setenv DATADIR $PWD
 
-#source /opt/phenix/bin/phenix_setup.csh new
+source /opt/phenix/bin/phenix_setup.csh new
 setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf3/nnovitzk/mazsi_Test/ccnt/source/emc-evaluation/build/.libs:$LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH $DATADIR/embedreco/install/lib:$LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH $DATADIR/embed/svx_cent_ana/install/lib:$LD_LIBRARY_PATH
@@ -85,13 +85,60 @@ echo "============= START SIMULATION  ==============="
 echo "==============================================="
 
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set oscarname = $DIR.oscar.parcticles.dat
+set oscarname = $DIR.oscar.particles.dat
+
+if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 0 ) then
+echo "==============================================="
+echo "============= HELIOS TO OSCAR ================="
+echo "==============================================="
+set scriptdir   = $DATADIR/sim/gen/single
+set macroname   = make_single.C
+set outsingle   = $DATADIR/output_single/single
+set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
+set ptmin = 0.2
+set ptmax = 5
+set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
+set id    = 0 #0,1,2,3,4-pi0,pi+,pi-,e+,e-
+
+echo "jobno          $jobno            "
+echo "run_number     $run_number       "
+echo "ptmin          $ptmin            "
+echo "ptmax          $ptmax            "
+echo "n              $n                "
+echo "id             $id               "
+echo "inputvtx       $inputvtx         "
+echo "oscarname      $oscarname        "
+echo "scriptdir      $scriptdir        "
+echo "macroname      $macroname        "
+echo "outsingle      $outsingle        "
+echo "tmpdir         $tmpdir           "
+
+#move to wrk directory
+if( ! -d $tmpdir ) then
+mkdir -p $tmpdir
+endif
+echo "cd $tmpdir"
+cd       $tmpdir
+
+cp $scriptdir/$macroname .
+echo "start running root -l -b -q" 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'
+root -l -b -q 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'10000','$ptmin','$ptmax','$n','$id')'
+echo "finished rinnung"
+echo "copying"
+cp $oscarname  $outsingle/
+echo "finished copying"
+#remove tmp dir
+cd $DATADIR
+rm -fr $tmpdir
+echo "removed $tmpdir"
+
+endif
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
-set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02-3.root
+set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02-5.root
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
@@ -183,11 +230,11 @@ echo "============= START PISA NOW =================="
 echo "==============================================="
 
 if ( $3 == 1 ) then 
-set oscarname = $DATADIR/output_single/helios/$DIR.oscar.parcticles.dat
+set oscarname = $DATADIR/output_single/helios/$DIR.oscar.particles.dat
 else if ( $3 == 2 ) then 
-set oscarname = $DATADIR/output_single/pythia8/$DIR.oscar.parcticles.dat
+set oscarname = $DATADIR/output_single/pythia8/$DIR.oscar.particles.dat
 else 
-set oscarname = $DATADIR/output_single/single/$DIR.oscar.parcticles.dat
+set oscarname = $DATADIR/output_single/single/$DIR.oscar.particles.dat
 endif
 
 set pisadir  = $DATADIR/make_sim/pisa
@@ -277,11 +324,11 @@ echo $INPUT
 set outntana  = "$INPUT"_tree.root
 
 if ( $3 == 1 ) then 
-set inputoscar = $DATADIR/output_single/helios/$DIR.oscar.parcticles.dat
+set inputoscar = $DATADIR/output_single/helios/$DIR.oscar.particles.dat
 else if ( $3 == 2 ) then 
-set inputoscar = $DATADIR/output_single/pythia8/$DIR.oscar.parcticles.dat
+set inputoscar = $DATADIR/output_single/pythia8/$DIR.oscar.particles.dat
 else 
-set inputoscar = $DATADIR/output_single/single/$DIR.oscar.parcticles.dat
+set inputoscar = $DATADIR/output_single/single/$DIR.oscar.particles.dat
 endif
 set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
 set inputvtx = $DATADIR/real/work/output/vertexes.txt

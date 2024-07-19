@@ -466,7 +466,13 @@ int embedana::process_event(PHCompositeNode *topNode)
       if(false) std::cout<<"sim trk pt n0 e/p id cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<newElectron.GetMcId()<<" "<<event->GetCentrality()<<std::endl;
       event->AddElecCand(&newElectron);
   }
-  
+  //////////////////////////end of tracks////////////////////////
+  if ( event->GetNtrack() == 0 && event->GetNeleccand() == 0 )
+    {////for conversion sim////
+      if (fill_TTree) event_container->FillTree();
+      EventNumber++;
+      return 0;
+    }
   /////////////////////////single sim hits///////////////////////
   for (int ihit = 0; ihit < svxsim->get_nClusters(); ihit++)
   {
