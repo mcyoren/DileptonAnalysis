@@ -179,7 +179,7 @@ void InvMass(int par = 0)
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(2.5,2.5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
