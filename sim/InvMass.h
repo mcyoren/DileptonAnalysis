@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
 #include <TMath.h>
 #include <TLorentzVector.h>
 #include <TF1.h>
@@ -16,8 +17,9 @@
 #include "../AnaTrain/Run14AuAuLeptonComby/MyEvent.h"
 #include "MyEvent_OLD.h"
 
+
 const int in_id = 2; //pi+,pi-,e+,e- = 8,9,3,2
-const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-10M_photon_embed_single_v0.root", //2M_ccbar_embed_pythia8_v0  2M_phi_embed_helios_v0 
+const TString inFile[] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-10M_photon_embed_single_v0.root", //2M_ccbar_embed_pythia8_v0  2M_phi_embed_helios_v0 
                             "/home/yoren/bnl/PHENIX/ee/AuAu/2M_ccbar_embed_pythia8_v0.root", 
                             "/home/yoren/bnl/PHENIX/ee/AuAu/2M_jpsi_embed_helios_v0.root",
                             "/home/yoren/bnl/PHENIX/ee/AuAu/2M_phi_embed_helios_v0.root",

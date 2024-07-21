@@ -1,8 +1,8 @@
 #include "InvMass.h"
-void InvMass(int par = 0)
+void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 {
   std::cout<<"start"<<std::endl;
-  TFile *input = new TFile(inFile[par], "READ");
+  TFile *input = new TFile(inname, "READ");
   if (!(input))
   {
     cout << "no input file" << endl;
@@ -23,13 +23,14 @@ void InvMass(int par = 0)
   const int check_veto = 1;
   const int fill_inv_mass = 1;
 
-
+  char outname[200];
+  sprintf(outname,"kek_%d.root",itread);
   TTree *T = (TTree *)input->Get("tree");
   TBranch *br = T->GetBranch("MyEvent");
   MyDileptonAnalysis::MyEventContainer *event_container = new MyDileptonAnalysis::MyEventContainer();
   event_container->InitEvent();
   event_container->GetHistsFromFile("../../ee_QA/AnaTrain/Run14AuAuLeptonComby/field_map.root");
-  event_container->CreateOutFileAndInitHists("kek.root",fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
+  event_container->CreateOutFileAndInitHists(outname,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
                                                fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass);
   MyDileptonAnalysis::MyEvent *event = 0;                                             
   //event = 0;
@@ -37,7 +38,9 @@ void InvMass(int par = 0)
 
   cout << "Trees read!" << endl;
 
-  int nevt = T->GetEntries();
+  const int nevt = T->GetEntries();
+  const int beggin = nevt * (itread - 1) / ntreads;
+  const int endish = nevt * itread / ntreads;
 
   TH3D *myhist0 = new TH3D("myhist0","myhist0",500,-2000,2000,500,0,5,10,0,10);
   TH3D *myhist1 = new TH3D("myhist1","myhist1",500,-2000,2000,500,0,5,10,0,10);
@@ -48,12 +51,12 @@ void InvMass(int par = 0)
   TH3D *myhist6 = new TH3D("myhist6","myhist6",500,-2000,2000,500,0,5,10,0,10);
   TH3D *myhist7 = new TH3D("myhist7","myhist7",500,-2000,2000,500,0,5,10,0,10);
  
-  for (int ievent = 0; ievent < nevt; ievent++)
+  for (int ievent = beggin; ievent < endish; ievent++)
   {
-    if (ievent % 5000 == 0)
-      cout << "Event: " << ievent << " / " << nevt << endl;
+    if (ievent % 50000 == 0)
+      cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     br->GetEntry(ievent);
-    if (ievent > 20000000)
+    if (ievent - beggin > 2000000)
       break;
 
 
