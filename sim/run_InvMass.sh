@@ -3,7 +3,7 @@
 echo "$1"
 
 start=`date +%s`
-echo $SECONDS
+
 root -l -b << EOF
     gSystem->Load("MyEvent_OLD_C.so")
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyEvent_C.so")
