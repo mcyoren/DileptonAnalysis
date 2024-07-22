@@ -13,6 +13,6 @@ do
     ./run_InvMass.sh $1 $i $2 &
 done
 wait
-hadd -f -k -O output/invmass_embed/$3.root my-kek*
+hadd -f -k -O $3 my-kek*
 rm my-kek*
 echo "done!"

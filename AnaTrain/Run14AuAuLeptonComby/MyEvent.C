@@ -892,7 +892,7 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::fill_evtbuff_list()
+    void MyEventContainer::fill_evtbuff_list(const unsigned int pool_depth)
     {
         int icent_mix = event->GetCentrality() / 5;
         if (icent_mix > 3)
@@ -912,7 +912,7 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::fill_inv_mass()
+    void MyEventContainer::fill_inv_mass(const unsigned int pool_depth)
     {
         int icent_mix = event->GetCentrality() / 5;
         if (icent_mix > 3)
@@ -1041,7 +1041,7 @@ namespace MyDileptonAnalysis
                 }
             }
         }
-        if(event->GetNtrack()>0)this->fill_evtbuff_list();
+        if(event->GetNtrack()>0)this->fill_evtbuff_list(pool_depth);
     }
 
     int MyEventContainer::GetNGoodElectrons()

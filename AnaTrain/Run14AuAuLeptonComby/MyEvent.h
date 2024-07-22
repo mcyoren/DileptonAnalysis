@@ -983,8 +983,8 @@ namespace MyDileptonAnalysis
             void FillCentrHist(const float centr){ centr_hist->Fill(centr); };
             int GetNGoodElectrons();
 
-            void fill_evtbuff_list();
-            void fill_inv_mass();
+            void fill_evtbuff_list(const unsigned int pool_depth = 10);
+            void fill_inv_mass(const unsigned int pool_depth = 10);
             void correct_beam_offset();
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -1);
