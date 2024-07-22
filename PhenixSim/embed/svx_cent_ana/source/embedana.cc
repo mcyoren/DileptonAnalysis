@@ -1,11 +1,12 @@
 #include "embedana.h"
 //==============================================================
 
-embedana::embedana(string filename, string filepath, string oscarpath) : m_outFileName(filename)
+embedana::embedana(string filename, string filepath, string oscarpath, const int InID) : m_outFileName(filename)
 {
   ThisName = "embedana";
   EventNumber = 0;
   InPartNumber = 0;
+  InIDread = InID;
   event_container = nullptr;
   fill_TTree = 0;
   remove_hadron_hits = 0;
@@ -470,7 +471,7 @@ int embedana::process_event(PHCompositeNode *topNode)
   //////////////////////////end of tracks////////////////////////
   if ( event->GetNtrack() == 0 && event->GetNeleccand() == 0 )
     {////for conversion sim////
-      if (fill_TTree) event_container->FillTree();
+      if (fill_TTree && InIDread != 0) event_container->FillTree();
       EventNumber++;
       return 0;
     }

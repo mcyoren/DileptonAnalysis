@@ -75,7 +75,8 @@ class embedana: public SubsysReco {
 public:
   embedana(std::string filename="embedana.root", 
            std::string filepath="/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
-           std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat");
+           std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat",
+           const int InID = 0);
   virtual ~embedana();
 
   int Init(PHCompositeNode *topNode);
@@ -114,6 +115,7 @@ private:
 
 private:
   int EventNumber, InPartNumber;
+  int InIDread;
 
   std::string m_outFileName;
   TFile*      m_outfile;
