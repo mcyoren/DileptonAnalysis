@@ -261,32 +261,36 @@ namespace MyDileptonAnalysis
             float get_mean_theta_data(int rungroup, int centr_bin, int layer) { return mean_theta_pars[rungroup][centr_bin][layer]; };
             float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
             {
-                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime);
+                  layer = arm + (1-q_prime) + 4 * layer;
+                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime)
+                  +sigma_phi_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
             float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
             {
-                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime);
+                  layer = arm + (1-q_prime) + 4 * layer;
+                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime)
+                  +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
 
             float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 
             { 
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return phi_mean_phi_params[rungroup][arg0][0]+phi_mean_phi_params[rungroup][arg0][1]*phi_prev; 
             };
             float get_dynamic_mean_theta_data(int rungroup, int ilay, float phi_prev)
             { 
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return the_mean_the_params[rungroup][arg0][0]+the_mean_the_params[rungroup][arg0][1]*phi_prev; 
             };
             float get_dynamic_sigma_phi_data(int rungroup, int ilay, float phi_prev)
             {
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
                   return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
             float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
             {
-                  const int arg0 = 2*ilay + (1-q_prime)/2;
+                  const int arg0 = 4*ilay + (1-q_prime) + arm;
                   return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
             };
             float get_dynamic_smean_phi_data(int rungroup, int ilay, float phi_prev)
@@ -301,14 +305,14 @@ namespace MyDileptonAnalysis
             virtual float GetChi2() const { return 0; };
             virtual int GetN0() const { return 0; };
             virtual int GetNpe0() const { return 0; };
-            virtual int GetDisp() const { return 0; };
+            virtual float GetDisp() const { return 0; };
             virtual float GetEmcdz_e() const { return 0; };
             virtual float GetEmcdphi_e() const { return 0; };
 
             virtual void SetChi2(float schi2) { };
             virtual void SetN0(int sn0) { };
             virtual void SetNPE0(int snpe0) { };
-            virtual void SetDISP(int sdisp) { };
+            virtual void SetDISP(float sdisp) { };
             virtual void SetEmcdz_e(float semcdz) { };
             virtual void SetEmcdphi_e(float semcdphi) { }
 
@@ -405,14 +409,14 @@ namespace MyDileptonAnalysis
             float GetChi2() const { return chi2; };
             int GetN0() const { return n0; };
             int GetNpe0() const { return npe0; };
-            int GetDisp() const { return disp; };
+            float GetDisp() const { return disp; };
             float GetEmcdz_e() const { return emcdz_e; };
             float GetEmcdphi_e() const { return emcdphi_e; };
 
             void SetChi2(float schi2) { chi2 = schi2; };
             void SetN0(int sn0) { n0 = sn0; };
             void SetNPE0(int snpe0) { npe0 = snpe0; };
-            void SetDISP(int sdisp) { disp = sdisp; };
+            void SetDISP(float sdisp) { disp = sdisp; };
             void SetEmcdz_e(float semcdz) { emcdz_e = semcdz; };
             void SetEmcdphi_e(float semcdphi) { emcdphi_e = semcdphi; }
 
@@ -858,7 +862,7 @@ namespace MyDileptonAnalysis
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
             TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
             TH3D *DCA_2D_hist[N_centr], *sDCA_2D_hist[N_centr];
-            TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el;
+            TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el, *rich_prob1, *rich_prob2, *rich_prob3;
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
             TH3D *DCPT_ReconPT, *sDCPT_ReconPT, *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr], *charge_hist;
             TH3D *veto_hist[N_centr], *veto_hist_the[N_centr], *sveto_hist[N_centr];
@@ -882,6 +886,7 @@ namespace MyDileptonAnalysis
                   event_hist = nullptr; centr_hist = nullptr; el_pt_hist = nullptr;
                   temc = nullptr; ttof = nullptr; n0_hist = nullptr; ep_hist=nullptr; prob_hist=nullptr; disp_hist=nullptr; chi2npe0_hist=nullptr;
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
+                  rich_prob1 = nullptr; rich_prob2 = nullptr; rich_prob3 = nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
                   couter_veto_hist = nullptr;
                   adc_hist = nullptr;
@@ -978,10 +983,11 @@ namespace MyDileptonAnalysis
             void FillCentrHist(const float centr){ centr_hist->Fill(centr); };
             int GetNGoodElectrons();
 
-            void fill_evtbuff_list();
-            void fill_inv_mass();
+            void fill_evtbuff_list(const unsigned int pool_depth = 10);
+            void fill_inv_mass(const unsigned int pool_depth = 10);
             void correct_beam_offset();
             void CleanUpHitList();
+            void FillQAHist(const int mc_id = -1);
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };

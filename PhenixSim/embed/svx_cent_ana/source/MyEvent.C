@@ -297,10 +297,10 @@ namespace MyDileptonAnalysis
 
                         if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
-                        float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
-                        float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
-                        float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
-                        float mean_theta_value = mytrk->get_mean_theta_data(rungroup, central_bin, layer);
+                        float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
+                        float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
+                        float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin, layer);
+                        float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin, layer);
 
                         int cycle_layer = layer;
                         if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
@@ -312,7 +312,7 @@ namespace MyDileptonAnalysis
                             mean_theta_value  = mytrk->get_dynamic_mean_theta_data (0, cycle_layer, dthe_previous_layer);
                         }
 
-                        const float sdphi = (dphi - mean_phi_value) / sigma_phi_value - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
+                        const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;// - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
                         const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
 
                         const float diff = sqrt(pow(sdphi, 2) + pow(sdthe, 2));
@@ -336,7 +336,11 @@ namespace MyDileptonAnalysis
                             mytrk->AddHitCounter(layer);
                             mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
                             iter_nums[layer]++;
-                            if((iter_nums[layer]>99&&layer>2)||iter_nums[layer]>999) std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
+                            if((iter_nums[layer]>99&&layer>=2)||iter_nums[layer]>999) 
+                            {
+                                std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
+                                return;
+                            }
                             if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
                             if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*100  );
                             if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
@@ -349,9 +353,9 @@ namespace MyDileptonAnalysis
                             if (vtxhit->N_AssociatedTracks() > 0)
                                 SignTrack = false;
                         }
-                        int in_arg = 2*layer+charge_bin;
-                        if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=2;
-                        if(iter_layer>1 && iassociatedhit==0) in_arg+=4;
+                        int in_arg = 1*mytrk->GetArm()+4*layer+2*charge_bin;
+                        if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=4;
+                        if(iter_layer>1 && iassociatedhit==0) in_arg+=8;
 
                         if (fabs(sdthe) < sigma && SignTrack && is_fill_hsits_local)
                         {
@@ -367,7 +371,7 @@ namespace MyDileptonAnalysis
                 }
             }
             float min_chi2=1000000.;
-            int final_number = 0;
+            long final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 float chi2 = 0;
@@ -376,7 +380,7 @@ namespace MyDileptonAnalysis
                 const int inum2 = numbers[0][inum] / 10000 %1000-1;
                 const int inum3 = numbers[0][inum] / 100 %100-1;
                 const int inum4 = numbers[0][inum] %100-1;
-
+                    
                 if(inum1>=0 && inum2>=0)
                 {   
                     mytrk->SetHitIndex(mytrk->GetHits(0,inum1), 0);
@@ -515,15 +519,15 @@ namespace MyDileptonAnalysis
                 const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                 const float dthe = (dilep_the_projection[ilayer] - theta_hit);
 
-                if (abs(dphi) > 0.05 || abs(dthe) > 0.05)
+                if (abs(dphi) > 0.1 || abs(dthe) > 0.1)
                     continue;
                 
                 if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
-                const float sigma_phi_value = mytrk->get_sigma_phi_data(rungroup, central_bin, layer);
-                const float mean_phi_value = mytrk->get_mean_phi_data(rungroup, central_bin, layer);
-                const float sigma_theta_value = mytrk->get_sigma_theta_data(rungroup, central_bin, layer);
-                const float mean_theta_value = mytrk->get_mean_theta_data(rungroup, central_bin, layer);
+                const float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
+                const float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
+                const float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin, layer);
+                const float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin, layer);
 
                 const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;
                 const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
@@ -584,10 +588,11 @@ namespace MyDileptonAnalysis
                     if (vtxhit->N_AssociatedTracks() > 0)
                         SignTrack = false;
                 }
+                const int hist_2nd_arg = 2*charge_bin + 1 * mytrk->GetArm() + 4 * layer; // for dphi and dthe hists
                 if (abs(sdthe) < sigma && is_fill_hadron_hsits)
                 {
-                    dphi_hist[central_bin]->Fill(dphi, charge_bin + 2 * layer, pt);
-                    sdphi_hist[central_bin]->Fill(sdphi, charge_bin + 2 * layer, pt);
+                    dphi_hist[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
+                    sdphi_hist[central_bin]->Fill(sdphi, hist_2nd_arg, pt);
                     const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
                     dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
                     dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
@@ -598,8 +603,8 @@ namespace MyDileptonAnalysis
                 }
                 if (abs(sdphi) < sigma && is_fill_hadron_hsits)
                 {
-                    dthe_hist[central_bin]->Fill(dthe, charge_bin + 2 * layer, pt);
-                    sdthe_hist[central_bin]->Fill(sdthe, charge_bin + 2 * layer, pt);
+                    dthe_hist[central_bin] ->Fill( dthe, hist_2nd_arg, pt);
+                    sdthe_hist[central_bin]->Fill(sdthe, hist_2nd_arg, pt);
                     const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
                     const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
                     dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
@@ -686,7 +691,10 @@ namespace MyDileptonAnalysis
 
         const float L = sqrt(X_circle * X_circle + Y_circle * Y_circle);
         const float dca = (L - R) * 10000; // In Micro Meters
-
+        //const int dir = +1 * mytrk->GetChargePrime();
+        //const float phi = mytrk->GetPhi0Prime();
+        //const float vx = X_circle - dir * R * sin(phi);
+        //const float vy = Y_circle + dir * R * cos(phi);
         mytrk->SetDCA2(dca);
 
         mytrk->SetDCAX2(X_circle * dca / L);
@@ -884,7 +892,7 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::fill_evtbuff_list()
+    void MyEventContainer::fill_evtbuff_list(const unsigned int pool_depth)
     {
         int icent_mix = event->GetCentrality() / 5;
         if (icent_mix > 3)
@@ -904,7 +912,7 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::fill_inv_mass()
+    void MyEventContainer::fill_inv_mass(const unsigned int pool_depth)
     {
         int icent_mix = event->GetCentrality() / 5;
         if (icent_mix > 3)
@@ -947,8 +955,8 @@ namespace MyDileptonAnalysis
                 const float dca1 = abs(newTrack1->GetDCAY2() + newTrack2->GetDCAY2());
                 const float dca2 = abs(newTrack1->GetDCAX2() - newTrack2->GetDCAX2());
                 const float dca3 = abs(newTrack1->GetDCAY2() - newTrack2->GetDCAY2());
-                const float dca4 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
-                const float dca5 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) + newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
+                const float dca4 = sqrt( SQR(newTrack1->GetDCAX2() - newTrack2->GetDCAX2()) + SQR(newTrack1->GetDCAY2() - newTrack2->GetDCAY2()) );
+                const float dca5 = abs(  abs(newTrack1->GetDCAX2() - newTrack2->GetDCAX2()) + abs(newTrack1->GetDCAY2() - newTrack2->GetDCAY2()) );
                 const float dca6 = abs(newTrack1->GetDCAX2() / abs(newTrack1->GetDCAX2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAX2() / abs(newTrack2->GetDCAX2()) * abs(newTrack2->GetDCA2()));
                 const float dca7 = abs(newTrack1->GetDCAY2() / abs(newTrack1->GetDCAY2()) * abs(newTrack1->GetDCA2()) - newTrack2->GetDCAY2() / abs(newTrack2->GetDCAY2()) * abs(newTrack2->GetDCA2()));
 
@@ -1033,7 +1041,7 @@ namespace MyDileptonAnalysis
                 }
             }
         }
-        if(event->GetNtrack()>0)this->fill_evtbuff_list();
+        if(event->GetNtrack()>0)this->fill_evtbuff_list(pool_depth);
     }
 
     int MyEventContainer::GetNGoodElectrons()
@@ -1073,6 +1081,88 @@ namespace MyDileptonAnalysis
             else
                 hadron->SetQPrime(hadron->GetCharge());
         }
+    }
+
+    void MyEventContainer::FillQAHist(const int mc_id)
+    {
+        el_pt_hist->Fill(event->GetBBCcharge(),0.5,event->GetCentrality());
+        const int Nelectrons = event->GetNtrack();
+        for (int i = 0; i < Nelectrons; i++)
+        {
+            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
+            if (electron->GetMcId()!=mc_id && mc_id>-1) continue;
+            el_pt_hist->Fill(electron->GetPtPrime(),1.5,event->GetCentrality());
+            el_had_dphi->Fill(electron->GetEmcdphi_e(),electron->GetPtPrime(),event->GetCentrality());
+            el_had_dz  ->Fill(electron->GetEmcdz_e()  ,electron->GetPtPrime(),event->GetCentrality());
+            if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
+               electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>10||electron->GetChi2()/electron->GetNpe0()>20) continue;
+            el_pt_hist->Fill(electron->GetPtPrime(),2.5,event->GetCentrality());
+            ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),event->GetCentrality());
+            n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(),event->GetCentrality());
+            prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(),event->GetCentrality());
+            disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(),event->GetCentrality());
+            chi2npe0_hist->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetPtPrime(),event->GetCentrality());
+            const float Rghost = sqrt(SQR(electron->GetEmcdphi_e())+SQR(electron->GetEmcdz_e()));
+            el_had_dr->Fill(Rghost,electron->GetPtPrime(),event->GetCentrality());
+
+
+            if(electron->GetEcore()/electron->GetPtot()>0.8 &&electron->GetEcore()/electron->GetPtot()<1.2 )
+            {
+                el_pt_hist->Fill(electron->GetPtPrime(),3.5,event->GetCentrality());
+                if(electron->GetProb()>0.01)
+                {
+                    el_pt_hist->Fill(electron->GetPtPrime(),4.5,event->GetCentrality());
+                    if(electron->GetN0()>=2 && electron->GetDisp()<5 && electron->GetChi2()/electron->GetNpe0()<10)
+                        el_pt_hist->Fill(electron->GetPtPrime(),5.5,event->GetCentrality());
+                    if(electron->GetN0()>=3 && electron->GetDisp()<5 && electron->GetChi2()/electron->GetNpe0()<10)
+                        el_pt_hist->Fill(electron->GetPtPrime(),6.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8.)
+                        el_pt_hist->Fill(electron->GetPtPrime(),7.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 )
+                        el_pt_hist->Fill(electron->GetPtPrime(),8.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<12-electron->GetN0()+electron->GetDisp() && electron->GetN0()>electron->GetDisp() )
+                        el_pt_hist->Fill(electron->GetPtPrime(),9.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetDisp()<4 )
+                        el_pt_hist->Fill(electron->GetPtPrime(),10.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetDisp()<4 )
+                        el_pt_hist->Fill(electron->GetPtPrime(),11.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetDisp()<4 && electron->GetProb()>0.03)
+                        el_pt_hist->Fill(electron->GetPtPrime(),12.5,event->GetCentrality());
+                    if(electron->GetN0() >= 2 + SQR(electron->GetDisp())/8. && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetDisp()<4 && electron->GetProb()>0.03 && 
+                       (Rghost>3 || electron->GetN0()- electron->GetDisp() > ((int)electron->GetTOFDPHI())%10 - electron->GetTOFDPHI()/100 || electron->GetTOFE()>electron->GetChi2()/electron->GetNpe0()))
+                        el_pt_hist->Fill(electron->GetPtPrime(),13.5,event->GetCentrality());
+                    if(electron->GetN0() >= electron->GetDisp() && electron->GetN0() >= 3 && electron->GetChi2()/electron->GetNpe0()<10 )
+                        el_pt_hist->Fill(electron->GetPtPrime(),14.5,event->GetCentrality());
+                    
+                }
+            }
+            
+            //if(Rghost<3 && electron->GetN0()- electron->GetDisp() < ((int)electron->GetTOFDPHI())%10 - electron->GetTOFDPHI()/100 && electron->GetTOFE()<electron->GetChi2()/electron->GetNpe0() ) continue;
+            
+            ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime());
+            n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality());
+            prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality());
+            disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),event->GetCentrality());
+            chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),event->GetCentrality());
+            rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
+            rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
+            rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality());
+
+
+            if(electron->GetMcId()>7 && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetEcore()/electron->GetPtot()<1.2 &&
+               electron->GetProb()>0.01 && electron->GetN0() >= 2 + SQR(electron->GetDisp())/8.) 
+               std::cout<<electron->GetPtPrime()<<" "<<electron->GetN0()<<" "<<electron->GetEcore()/electron->GetPtot()<<" "<<electron->GetNpe0()
+               <<" "<<electron->GetDisp()<<" "<<electron->GetChi2()/electron->GetNpe0()<<" "<<electron->GetProb()
+               <<" "<<electron->GetChi2()/electron->GetNpe0()-6-electron->GetDisp()<<" "<<electron->GetN0()-1*electron->GetDisp()<<std::endl;
+            //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
+            //TF1 func = TF1("func","pow(x,[0]-1)*exp(-x/2.)/TMath::Gamma([0])/pow(2,[0])",0,100);
+            //func.SetNpx(100000);
+            //func.SetParameter(0,electron->GetNpe0()/2.);
+            //const float p1 = func.Integral(0,electron->GetChi2()/electron->GetNpe0()*electron->GetN0()/2,1.e-3);
+            //func.SetParameter(0,electron->GetNpe0()/2.);
+            //const float p2 = func.Integral(0,electron->GetChi2()/electron->GetNpe0()*electron->GetDep()*electron->GetN0(),1.e-3);
+        }
+    
     }
 
     void MyEventContainer::GetHistsFromFile(const std::string loc)
@@ -1118,10 +1208,10 @@ namespace MyDileptonAnalysis
 
         if (fill_had)
         {
-            INIT_HISTOS(3, dphi_hist,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist,  N_centr, 100, -0.1, 0.1, 16, 0, 16, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist,  N_centr, 100, -0.1, 0.1, 16, 0, 16, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10,   16, 0, 16, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10,   16, 0, 16, 50, 0, 5);
             INIT_HISTOS(3, dphi_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
             INIT_HISTOS(3, dthe_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
             INIT_HISTOS(3, dphi_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
@@ -1144,12 +1234,12 @@ namespace MyDileptonAnalysis
         }
         if (fill_dphi)
         {
-            INIT_HISTOS(3, d_dphi_hist, N_centr, 240, -0.12, 0.12, 6, 0, 6, 28, 0.2, 3);
-            INIT_HISTOS(3, d_dthe_hist, N_centr, 240, -0.12, 0.12, 6, 0, 6, 28, 0.2, 3);
-            INIT_HISTOS(3, DCA_hist, N_centr, 240, -1000, 1000, 6, 0, 6, 28, 0.2, 3);
-            INIT_HISTOS(3, sd_dphi_hist, N_centr, 100, -10, 10, 6, 0, 6, 28, 0.2, 3);
-            INIT_HISTOS(3, sd_dthe_hist, N_centr, 100, -10, 10, 6, 0, 6, 28, 0.2, 3);
-            INIT_HISTOS(3, sDCA_hist, N_centr, 100, -20, 20, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, d_dphi_hist,  N_centr, 240, -0.12, 0.12, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, d_dthe_hist,  N_centr, 240, -0.12, 0.12, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, DCA_hist,     N_centr, 240, -1000, 1000, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, sd_dphi_hist, N_centr, 100,   -10,   10, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, sd_dthe_hist, N_centr, 100,   -10,   10, 6, 0, 6, 28, 0.2, 3);
+            INIT_HISTOS(3, sDCA_hist,    N_centr, 100,   -20,   20, 6, 0, 6, 28, 0.2, 3);
             is_fill_dphi_hist = 1;
         }
         if (fill_DCA)
@@ -1162,21 +1252,35 @@ namespace MyDileptonAnalysis
         }
         if (fill_track_QA)
         {
-            INIT_HIST(3, temc, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ttof, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, n0_hist, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ep_hist, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, prob_hist, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, disp_hist, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, chi2npe0_hist, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, temc, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, ttof, 50, -50, 50, 18, 0.2, 2.0, 5, 0, 5);
+            INIT_HIST(3, ep_hist, 50, 0, 1.5, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, n0_hist, 10, 0, 10, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, prob_hist, 100, 0, 1, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, disp_hist, 50, 0, 10, 50, 0, 5.0, 5, 0, 100);
+            INIT_HIST(3, chi2npe0_hist, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
+            //n0_ep, ep_disp, ep_n0-disp+5, disp_n0, chi2_ep
+            INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
+            INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
+            INIT_HIST(3, prob_hist_el, 20, 0, 20, 50, 0, 10, 10, 0., 100);
+            INIT_HIST(3, disp_hist_el, 50, 0, 10, 30, 0, 30, 10, 0., 100);
+            INIT_HIST(3, chi2npe0_hist_el, 50, 0, 20, 30, 0, 30, 10, 0., 100);
+            INIT_HIST(3, rich_prob1, 50, 0, 20, 50, -10, 10, 10, 0., 100);
+            INIT_HIST(3, rich_prob2, 30, 0, 30, 50, -10, 10, 10, 0., 100);
+            INIT_HIST(3, rich_prob3, 100, -0.05, 0.05, 100, -25, 25, 10, 0., 100);
 
-            INIT_HIST(3, el_had_dphi, 100, -0.05, 0.05, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, el_had_dz, 100, -50, 50, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, n0_hist_el, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, ep_hist_el, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, prob_hist_el, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, disp_hist_el, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
-            INIT_HIST(3, chi2npe0_hist_el, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            INIT_HIST(3, el_had_dphi, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
+            INIT_HIST(3, el_had_dz, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
+            INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
+            INIT_HIST(3, el_pt_hist, 50, 0, 5, 15, 0, 15, 100, 0, 100);
+
+            //INIT_HIST(3, el_had_dphi, 100, -0.05, 0.05, 24, 0.2, 5.0, 10, 0, 10);
+            //INIT_HIST(3, el_had_dz, 100, -50, 50, 24, 0.2, 5.0, 10, 0, 10);
+            //INIT_HIST(3, n0_hist_el, 10, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, ep_hist_el, 50, 0, 1.5, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, prob_hist_el, 50, 0, 1, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, disp_hist_el, 5, 0, 5, 18, 0.2, 2.0, 5, 0, 5);
+            //INIT_HIST(3, chi2npe0_hist_el, 50, 0, 10, 18, 0.2, 2.0, 5, 0, 5);
 
             is_fill_track_QA = 1;
         }
