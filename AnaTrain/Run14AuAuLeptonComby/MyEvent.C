@@ -1064,22 +1064,39 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::correct_beam_offset()
     {
-        const int n_rtk = event->GetNhadron();
-        for (int i = 0; i < n_rtk; i++)
+        const int n_had = event->GetNhadron();
+        for (int i = 0; i < n_had; i++)
         {
             MyDileptonAnalysis::MyHadron *hadron = event->GetHadronEntry(i);
             const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(hadron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(hadron->GetPhiDC());
      
             hadron->SetAlphaPrime(hadron->GetAlpha() - alpha_offset);
             // set Phi0 to right value
-            hadron->SetPhi0Prime(hadron->GetPhi0() - 2.0195 * alpha_offset);
+            hadron->SetPhi0Prime(hadron->GetPhi0Prime() - 2.0195 * alpha_offset);
 
-            hadron->SetPtPrime(hadron->GetPt() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
+            hadron->SetPtPrime(hadron->GetPtPrime() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
 
             if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
                 hadron->SetQPrime(-hadron->GetCharge());
             else
                 hadron->SetQPrime(hadron->GetCharge());
+        }
+        const int n_elec = event->GetNtrack();
+        for (int i = 0; i < n_elec; i++)
+        {
+            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
+            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(electron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(electron->GetPhiDC());
+     
+            electron->SetAlphaPrime(electron->GetAlpha() - alpha_offset);
+            // set Phi0 to right value
+            electron->SetPhi0Prime(electron->GetPhi0Prime() - 2.0195 * alpha_offset);
+
+            electron->SetPtPrime(electron->GetPtPrime() * fabs(electron->GetAlpha() / electron->GetAlphaPrime()) );
+
+            if (electron->GetAlpha() * electron->GetAlphaPrime() < 0)
+                electron->SetQPrime(-electron->GetCharge());
+            else
+                electron->SetQPrime(electron->GetCharge());
         }
     }
 

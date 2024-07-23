@@ -8,10 +8,10 @@ void Calib(int par = 0)
     cout << "no input file" << endl;
     return;
   }
-  const int associate_hits = 0;
+  const int associate_hits = 1;
   const int remove_hadron_hits = 0;
-  const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 0;
+  const int fill_QA_hadron_hists = 1;
+  const int fill_QA_lepton_hists = 1;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -78,13 +78,13 @@ void Calib(int par = 0)
       newTrack->SetArm(trk.GetArm());
       newTrack->SetSect(trk.GetSect());
       newTrack->SetTrkQuality(63);
-      newTrack->SetPt(trk.GetPt());
+      newTrack->SetPt(trk.GetPtPrime());
       newTrack->SetPtPrime(trk.GetPtPrime());
       newTrack->SetQ(trk.GetCharge());
       newTrack->SetQPrime(trk.GetChargePrime());
       newTrack->SetPhiDC(trk.GetPhiDC());
-      newTrack->SetPhi0(trk.GetPhi0());
-      newTrack->SetThe0(trk.GetThe0());
+      newTrack->SetPhi0(trk.GetPhi0Prime());
+      newTrack->SetThe0(trk.GetThe0Prime());
       newTrack->SetPhi0Prime(trk.GetPhi0Prime());
       newTrack->SetThe0Prime(trk.GetThe0Prime());
       newTrack->SetZDC(trk.GetZDC());
@@ -177,7 +177,7 @@ void Calib(int par = 0)
   
     event_container->SetEvent(myevent);
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
-    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
+    if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(5);
     if(do_track_QA) event_container->FillQAHist(in_id);
     if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
