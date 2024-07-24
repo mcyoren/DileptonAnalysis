@@ -8,19 +8,24 @@ void Fun4All_embedeval_svx(
    const char *mcinputname = "/phenix/hhj/lebedev/chi_c/simulation/simdst/simDST_chisig_100_shvtx251500.root", 
    const char *rdinputname = "/phenix/hhj/lebedev/chi_c/embed/skip251500_0/DST_ERT_run8dAu_Central_200GeV_pro82-0000251500-0001.root", 
    const char *dstout      = "/phenix/hhj/lebedev/chi_c/simulation/pairobj/pairobject_chisigembed_251500_100.root", 
-   const char *ntname      = "embed.root",
+   const int   partid      = 1,
    const char *ntananame   = "embedana.root",
    const char *vtxpath     = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
    const char *oscarpath   = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat",
    const int   runnum      = 421716
                   )
 {
-  
+  const char *ntname      = "kek2.root";
+  cout << "nevent : " << nevent << endl;
   cout << "Input RD dst : " << rdinputname << endl;
   cout << "Input MC dst : " << mcinputname << endl;
   cout << "Output dst name          : " << dstout << endl;
   cout << "Output evaluation ntuple : " << ntname << endl;
   cout << "Output evaluation anantuple : " << ntananame << endl;
+  cout << "vtxpath : " << vtxpath << endl;
+  cout << "oscarpath : " << oscarpath << endl;
+  cout << "runnum : " << runnum << endl;
+  cout << "partid : " << partid << endl;
    
   float vtxmatch = 2.0;
   float vtxmax = 30.0;
@@ -338,7 +343,7 @@ void Fun4All_embedeval_svx(
   //  se->registerSubsystem(central);
   
   // my analysis module
-  embedana *ana = new embedana(ntananame,vtxpath,oscarpath);
+  embedana *ana = new embedana(ntananame,vtxpath,oscarpath,partid);
   se->registerSubsystem(ana);
   
   Fun4AllInputManager *in1 = new Fun4AllNoSyncDstInputManager("DSTin1","DST","SINGLE"); 

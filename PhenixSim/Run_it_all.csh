@@ -26,17 +26,28 @@ unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
 
-if( $#argv != 3) then
+if( $#argv != 6) then
 echo "   Run_it_all.csh num"
 echo "   num       = job number"
-echo "   type of sim = single, pisa, embed, all sim, all"
+echo "   type of sim = single, pisa, embed, all sim (no embed), all"
 echo "   type of input  = single, helios, pythia8"
+echo "   type of particle  = photon, other"
+echo "   shift  = 1-10000 - Nev"
+echo "   Number of events  = 1-10000"
 exit -1
 endif
 
-set shift = 1000
 set jobno = $1
-set NEVT = 10000
+set selected_paticle = $4
+set shift = $5
+set NEVT = $6
+
+echo "jobno is set to     $jobno              "
+echo "type of sim         $2                  "
+echo "type of input       $3                  "
+echo "selected_paticle    $selected_paticle   "
+echo "shift               $shift              "
+echo "NEVT                $NEVT               "
 
 setenv DATADIR $PWD
 
@@ -96,8 +107,8 @@ set scriptdir   = $DATADIR/sim/gen/single
 set macroname   = make_single.C
 set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
-set ptmin = 0.2
-set ptmax = 5
+set ptmin = 3.0
+set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = 0 #0,1,2,3,4-pi0,pi+,pi-,e+,e-
 
@@ -139,7 +150,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
-set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02-5.root
+set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
@@ -322,7 +333,7 @@ set evtnum    = $NEVT
 set INPUT = `expr $shift + $jobno`
 echo $INPUT
 
-set outntana  = "$INPUT"_tree.root
+set outntana  = tree"$DIR".root
 
 if ( $3 == 1 ) then 
 set inputoscar = $DATADIR/output_single/helios/$DIR.oscar.particles.dat
@@ -335,7 +346,7 @@ set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
 set inputreal = $DATADIR/real/work/output/CNTmerge_MB-0000$run_number-0000.root
 set outdst    = kek0.root
-set outntuple = kek2.root
+set embedpartID = $selected_paticle
 
 set scriptdir = $DATADIR/embed/work
 
@@ -362,7 +373,7 @@ echo "evtnum       $evtnum         "
 echo "inputreal    $inputreal      "
 echo "inputsim     $inputsim       "
 echo "outdst       $outdst         "
-echo "outntuple    $outntuple      "
+echo "embedpartID  $embedpartID    "
 echo "outntana     $outntana       "
 echo "inputvtx     $inputvtx       "
 echo "inputoscar   $inputoscar     "
@@ -399,7 +410,7 @@ pwd
 ls -ltr
 
 echo "yolo"
-echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "'"'$outntuple'"'", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
+echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".q" >> cmd.input
 
 ##run root
@@ -407,7 +418,7 @@ root -b < cmd.input #>& $HOME/root.log
 #ls -ltr
 #move
 #mv -f $outdst    $outdstdir
-mv -f $outntuple $outmytreedir/
+mv -f kek2.root $outmytreedir/
 mv -f $outntana  $outmytreedir/
 mv -f my-$outntana $outmytreedir/
 

@@ -11,6 +11,6 @@ Error          = /dev/null
 Requirements   = (CPU_Speed >= 1) 
 Rank		       = CPU_Speed
 
-Arguments      = Run_it_all.csh $(Process) 4 0
+Arguments      = Run_it_all.csh $(Process) 4 1 1 0 10000
 
 Queue 1000
