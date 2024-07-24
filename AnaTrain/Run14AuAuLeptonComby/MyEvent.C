@@ -1077,28 +1077,26 @@ namespace MyDileptonAnalysis
             hadron->SetPtPrime(hadron->GetPtPrime() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
 
             if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
-                hadron->SetQPrime(-hadron->GetCharge());
+                hadron->SetQPrime(-hadron->GetChargePrime());
             else
-                hadron->SetQPrime(hadron->GetCharge());
+                hadron->SetQPrime(hadron->GetChargePrime());
         }
         const int n_elec = event->GetNtrack();
         for (int i = 0; i < n_elec; i++)
         {
-            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(electron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(electron->GetPhiDC());
+            MyDileptonAnalysis::MyElectron *hadron = event->GetEntry(i);
+            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(hadron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(hadron->GetPhiDC());
      
-            electron->SetAlphaPrime(electron->GetAlpha() - alpha_offset);
+            hadron->SetAlphaPrime(hadron->GetAlpha() - alpha_offset);
             // set Phi0 to right value
-            //if(fabs(electron->GetPhi0Prime()-electron->GetPhi0())>0.001 || fabs(electron->GetPtPrime()-electron->GetPt())>0.1*electron->GetPt() )
-            //    std::cout<<electron->GetPhi0Prime()<<" "<<electron->GetPhi0()<<" "<<electron->GetPtPrime()<<" "<<electron->GetPt()<<std::endl;
-            electron->SetPhi0Prime(electron->GetPhi0Prime() - 2.0195 * alpha_offset);
+            hadron->SetPhi0Prime(hadron->GetPhi0Prime() - 2.0195 * alpha_offset);
 
-            electron->SetPtPrime(electron->GetPtPrime() * fabs(electron->GetAlpha() / electron->GetAlphaPrime()) );
+            hadron->SetPtPrime(hadron->GetPtPrime() * fabs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
 
-            if (electron->GetAlpha() * electron->GetAlphaPrime() < 0)
-                electron->SetQPrime(-electron->GetCharge());
+            if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
+                hadron->SetQPrime(-hadron->GetChargePrime());
             else
-                electron->SetQPrime(electron->GetCharge());
+                hadron->SetQPrime(hadron->GetChargePrime());
         }
     }
 
