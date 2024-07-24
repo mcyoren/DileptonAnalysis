@@ -53,7 +53,7 @@ void Calib(int par = 0)
     if (ievent % 5000 == 0)
       cout << "Event: " << ievent << " / " << nevt << endl;
     br->GetEntry(ievent);
-    if (ievent > 20000000)
+    if (ievent > 200000)
       break;
 
 
@@ -162,7 +162,7 @@ void Calib(int par = 0)
       MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
       MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
       newHit->SetClustId(i);
-      if(oldhit.GetSensor() == 1) continue;
+      if(oldhit.GetSensor() == 0) continue;
       newHit->SetLayer(oldhit.GetLayer());
       newHit->SetLadder(oldhit.GetLadder());
       newHit->SetSensor(oldhit.GetSensor());
