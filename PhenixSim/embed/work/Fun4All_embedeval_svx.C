@@ -154,11 +154,11 @@ void Fun4All_embedeval_svx(
   svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
   svxpar->set_BeamCenter(0.0, 0.0);
   svxpar->Load_ThresholdFile("svx_threshold.dat");
-  //  svxpar->set_UseStripThresholdDatbase(false);
+  svxpar->set_UseStripThresholdDatbase(false);
   //svxpar->Verbosity(1);
 
   SvxEmbedSimhit *svxembed = new SvxEmbedSimhit();
-  svxembed->set_StripixelNoise(0.0); // no noise
+  //svxembed->set_StripixelNoise(0.0); // no noise
   svxembed->copyPHCentralTrack(false);
   svxembed->copyMcSingle(false);
   svxembed->Verbosity(0);
@@ -171,7 +171,7 @@ void Fun4All_embedeval_svx(
   svxreco->set_ThisIsSimulation();
   //svxreco->Load_ThresholdFile("threshold_zero.h");
   //svxreco->set_UseStripThresholdDatbase(false);
-  //svxreco->set_StripixelAdcSumThreshold(0);
+  svxreco->set_StripixelAdcSumThreshold(0);
 
   SubsysReco *svxvtxseedfinder = new SvxPriVertexSeedFinder();
 

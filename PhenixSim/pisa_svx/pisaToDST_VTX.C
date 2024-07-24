@@ -231,7 +231,7 @@ void pisaToDST_VTX(
   // VTX simulation
   // register first 
   SvxParManager *svxpar = new SvxParManager();
-  svxpar->set_ReadGeoParFromFile(1);  // read parameters from ascii file
+  svxpar->set_ReadGeoParFromFile(1);  // read parameters from ascii file/// probaly we should add: svxpar->set_GeometryFileName("svxPISA.par");
   svxpar->set_OffsetVtxToCnt  (0.0, 0.0, 0.0);
   svxpar->set_OffsetEastToWest(0.0, 0.0, 0.0);
   svxpar->set_BeamCenter(0.0, 0.0);
