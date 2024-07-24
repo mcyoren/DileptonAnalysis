@@ -525,7 +525,6 @@ int embedana::process_event(PHCompositeNode *topNode)
     embed_ids.push_back(svxembeshit->get_clusterID());
 
     MyDileptonAnalysis::MyVTXHit newHit;
-    MyDileptonAnalysis::MyVTXHit *prevHit = event->GetVTXHitEntry(event->GetNVTXhit()-1);
 
     newHit.SetClustId(ihit);
     newHit.SetLayer(svxhit->get_layer());
@@ -534,11 +533,16 @@ int embedana::process_event(PHCompositeNode *topNode)
     newHit.SetXHit(svxhit->get_xyz_global(0));
     newHit.SetYHit(svxhit->get_xyz_global(1));
     newHit.SetZHit(svxhit->get_xyz_global(2) - event->GetPreciseZ()*0);
-    if (prevHit->GetXHit()==newHit.GetXHit() && prevHit->GetYHit()==newHit.GetYHit() && prevHit->GetZHit()==newHit.GetZHit())
+
+    if(event->GetNVTXhit()>=1)
     {
-      if (false)std::cout<<"repeat"<<std::endl;
-      continue;
-    }
+      MyDileptonAnalysis::MyVTXHit *prevHit = event->GetVTXHitEntry(event->GetNVTXhit()-1);
+      if (prevHit->GetXHit()==newHit.GetXHit() && prevHit->GetYHit()==newHit.GetYHit() && prevHit->GetZHit()==newHit.GetZHit())
+      {
+        if (false)std::cout<<"repeat"<<std::endl;
+        continue;
+      }
+    }else std::cout<<"found bug"<<std::endl;
     if (false)
       std::cout << " 0 " << newHit.GetXHit() << " " << newHit.GetYHit() << " " << newHit.GetZHit() <<" "<<svxhit->get_adc(0)<<" "<<svxhit->get_adc(1) << std::endl;
     newHit.SetiLayerFromR();
@@ -731,11 +735,11 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
     const float rich_phi = d_trk->get_center_phi(itrk);
     
     const float dep = d_trk->get_dep(itrk);
-
+    if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL) std::cout<<"WTF:::: "<<d_trk->get_zed(itrk)<< " "<< Z_GLOBAL<<std::endl;
     if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL)
         return -1;
 
-    if( ( pT<0.09 || d_trk->get_quality(itrk)<0 )) return -1;
+    if( ( pT<0.09 || d_trk->get_quality(itrk)<0 || pT>25 )) return -2;
     //if(IsCentralSupportCut(d_trk->get_the0(itrk), vertex)) 
     //    return -1;
 
@@ -750,7 +754,7 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
         {
             if (dead_region(board, alpha, dcmap_xx1[run_grp][side][arm][iarea], dcmap_yy1[run_grp][side][arm][iarea], dcmap_xx2[run_grp][side][arm][iarea], dcmap_yy2[run_grp][side][arm][iarea], dcmap_xx3[run_grp][side][arm][iarea], dcmap_yy3[run_grp][side][arm][iarea], dcmap_xx4[run_grp][side][arm][iarea], dcmap_yy4[run_grp][side][arm][iarea]))
             {
-                return -2;
+                return -3;
             }
         }
     }

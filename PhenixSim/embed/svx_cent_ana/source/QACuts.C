@@ -9,7 +9,7 @@ void embedana::InitParams()
     QUALITY[0] = 31;
     QUALITY[1] = 51;
     QUALITY[2] = 63;
-    Z_GLOBAL = 75;
+    Z_GLOBAL = 80;
     DC_DEADMAP = 1; // by default, DC deadmap is on
     N0 = 2;
     DISP = 5;

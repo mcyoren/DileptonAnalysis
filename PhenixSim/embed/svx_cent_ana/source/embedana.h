@@ -76,7 +76,7 @@ public:
   embedana(std::string filename="embedana.root", 
            std::string filepath="/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
            std::string oscarpath = "/phenix/plhf/mitran/Simul/Dileptons/output_single/single/00002.oscar.particles.dat",
-           const int InID = 0);
+           const int InID = 1);
   virtual ~embedana();
 
   int Init(PHCompositeNode *topNode);
