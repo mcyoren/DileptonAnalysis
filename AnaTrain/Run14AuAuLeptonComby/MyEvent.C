@@ -1089,6 +1089,8 @@ namespace MyDileptonAnalysis
      
             electron->SetAlphaPrime(electron->GetAlpha() - alpha_offset);
             // set Phi0 to right value
+            //if(fabs(electron->GetPhi0Prime()-electron->GetPhi0())>0.001 || fabs(electron->GetPtPrime()-electron->GetPt())>0.1*electron->GetPt() )
+            //    std::cout<<electron->GetPhi0Prime()<<" "<<electron->GetPhi0()<<" "<<electron->GetPtPrime()<<" "<<electron->GetPt()<<std::endl;
             electron->SetPhi0Prime(electron->GetPhi0Prime() - 2.0195 * alpha_offset);
 
             electron->SetPtPrime(electron->GetPtPrime() * fabs(electron->GetAlpha() / electron->GetAlphaPrime()) );

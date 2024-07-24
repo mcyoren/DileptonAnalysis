@@ -207,7 +207,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     std::cout << "px,py,pz,id : " << InData_read[InPartNumber-1].px << " " << InData_read[InPartNumber-1].py << " " << InData_read[InPartNumber-1].pz << " " << InData_read[InPartNumber-1].id << " " << std::endl;
   if (false)
     std::cout << "px,py,pz,id : " << event->GetBBCcharge()*cos(event->GetBBCchargeN()) << " " << event->GetBBCcharge()*sin(event->GetBBCchargeN())<< " " << event->GetBBCcharge()/tan(event->GetBBCchargeS()) << " " << event->GetEvtNo() << " " << std::endl;
-  // std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
+   
   // event->ClearEvent();
   InPartNumber += nn_loc - 1;
 
@@ -476,6 +476,8 @@ int embedana::process_event(PHCompositeNode *topNode)
       return 0;
     }
   /////////////////////////single sim hits///////////////////////
+  if(false)std::cout<<(vtxout->get_Vertex()).getX()<<" "<<(vtxout->get_Vertex()).getY()<<" "<<(vtxout->get_Vertex()).getZ()<<std::endl;
+  if(false)std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<" "<<event->GetCentrality()<<std::endl;
   for (int ihit = 0; ihit < svxsim->get_nClusters(); ihit++)
   {
 
@@ -497,7 +499,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     newHit.SetYHit(svxhit->get_xyz_global(1));
     newHit.SetZHit(svxhit->get_xyz_global(2));
     if (false)
-      std::cout << newHit.GetXHit() << " " << newHit.GetYHit() << " " << newHit.GetZHit() << std::endl;
+      std::cout<<" 1 " << newHit.GetXHit() << " " << newHit.GetYHit() << " " << newHit.GetZHit()<<" "<<svxhit->get_adc(0)<<" "<<svxhit->get_adc(1) << std::endl;
     newHit.SetiLayerFromR();
     if (svxhit->get_layer() != newHit.GetLayer() || svxhit->get_ladder() != newHit.GetLadder() ||
         newHit.GetSensor() != 1)
@@ -523,6 +525,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     embed_ids.push_back(svxembeshit->get_clusterID());
 
     MyDileptonAnalysis::MyVTXHit newHit;
+    MyDileptonAnalysis::MyVTXHit *prevHit = event->GetVTXHitEntry(event->GetNVTXhit()-1);
 
     newHit.SetClustId(ihit);
     newHit.SetLayer(svxhit->get_layer());
@@ -530,9 +533,14 @@ int embedana::process_event(PHCompositeNode *topNode)
     newHit.SetSensor(0);
     newHit.SetXHit(svxhit->get_xyz_global(0));
     newHit.SetYHit(svxhit->get_xyz_global(1));
-    newHit.SetZHit(svxhit->get_xyz_global(2) - event->GetPreciseZ());
+    newHit.SetZHit(svxhit->get_xyz_global(2) - event->GetPreciseZ()*0);
+    if (prevHit->GetXHit()==newHit.GetXHit() && prevHit->GetYHit()==newHit.GetYHit() && prevHit->GetZHit()==newHit.GetZHit())
+    {
+      if (false)std::cout<<"repeat"<<std::endl;
+      continue;
+    }
     if (false)
-      std::cout << newHit.GetXHit() << " " << newHit.GetYHit() << " " << newHit.GetZHit() << std::endl;
+      std::cout << " 0 " << newHit.GetXHit() << " " << newHit.GetYHit() << " " << newHit.GetZHit() <<" "<<svxhit->get_adc(0)<<" "<<svxhit->get_adc(1) << std::endl;
     newHit.SetiLayerFromR();
     if (svxhit->get_layer() != newHit.GetLayer() || svxhit->get_ladder() != newHit.GetLadder() ||
         newHit.GetSensor() != 0)

@@ -221,9 +221,9 @@ int SvxEmbedSimhit::process_event(PHCompositeNode *topNode)
   PHPoint mc_vtx     = mc_vtxout->get_Vertex("SIM"); 
   PHPoint real_vtx   = real_vtxout->get_Vertex();
   PHPoint real_vtxbc = real_vtxout->get_Vertex("SVX");
-  //float mc_vtx_xyz[3] = {mc_vtx.getX(), mc_vtx.getY(), mc_vtx.getZ()};  // NO shift
+  float mc_vtx_xyz[3] = {(float)mc_vtx.getX(), (float)mc_vtx.getY(), (float)mc_vtx.getZ()};  // NO shift
   //float mc_vtx_xyz[3] = {mc_vtx.getX(), mc_vtx.getY(), real_vtx.getZ()+mc_vtx.getZ()}; 
-  float mc_vtx_xyz[3] = {0., 0., (float) real_vtx.getZ() }; 
+  //float mc_vtx_xyz[3] = {0., 0., (float) real_vtx.getZ() }; 
   float mc_vtx_xyz_err[3] = {0.01, 0.01, 0.01};
   vtxout->AddVtx("SIM", mc_vtx_xyz, mc_vtx_xyz_err, VTX::SIMORDER);
   //cout << "===============================================" << endl;
@@ -248,7 +248,7 @@ int SvxEmbedSimhit::process_event(PHCompositeNode *topNode)
 //	 << vtx_xyz[0] <<" "<< vtx_xyz[1] <<" "<< vtx_xyz[2] << endl;
 //  }
   /// vertex difference in z-direction is used to shift rawhit in simulation.
-  float diff_vtxz = real_vtx.getZ() - mc_zvtx_mean;
+  float diff_vtxz = real_vtx.getZ()*0 - mc_zvtx_mean;
   //if(fabs(diff_vtxz)>0.5) return ABORTEVENT;
 
 //  diff_vtxz = 0.; // don't shift
@@ -257,19 +257,41 @@ int SvxEmbedSimhit::process_event(PHCompositeNode *topNode)
   ///
   /// start embedding
   ///
-  int nraw_embed = embed_simhit(topNode, diff_vtxz);
+  int nraw_embed = 0*diff_vtxz;//embed_simhit(topNode, diff_vtxz);
+
+  ////////////////////////////////////////////////////////
+  /////Takashi and Sasha used this for embed sim//////////
+  /////It converts convert ghit to rawhit/////////////////
+  /////My code below just merge rawhit in mc and real/////
+  /////Choose your fighter////////////////////////////////
+  /////Mine produces a lot of replicas////////////////////
+  /////Yuri Mitrankov mitrankovy@gmail.com////////////////
+  ////////////////////////////////////////////////////////
+  int Takashi_Sasha_embed = 1;
+  int Yura_embed = 0;
+  if(Takashi_Sasha_embed) nraw_embed = embed_simhit(topNode, diff_vtxz);
 
   ///
   /// save rawhits of real data
   ///
   SvxRawhitList *rawhitlist  = findNode::getClass<SvxRawhitList>(topNode,   "SvxRawhitList");
   SvxRawhitList *real_rawhit = findNode::getClass<SvxRawhitList>(m_realnode,"SvxRawhitList");
+  SvxRawhitList *mc_rawhit   = findNode::getClass<SvxRawhitList>(m_mcnode,  "SvxRawhitList");
+  SvxGhitRawhitList *g2rlist = findNode::getClass<SvxGhitRawhitList>(topNode,"SvxGhitRawhitList");
   if ( !rawhitlist ) {
-    cerr << "SvxRawhitList node (sim) not found : " << m_ievt << endl;
+    cerr << "SvxRawhitList node (embed) not found : " << m_ievt << endl;
     return EVENT_OK;
   }
   if ( !real_rawhit ) {
     cerr << "SvxRawhitList node (real) not found : " << m_ievt << endl;
+    return EVENT_OK;
+  }
+  if ( !mc_rawhit ) {
+    cerr << "SvxRawhitList node (mc) not found : " << m_ievt << endl;
+    return EVENT_OK;
+  }
+  if ( !g2rlist ) {
+    cerr << "SvxGhitRawhitList node (geant) not found : " << m_ievt << endl;
     return EVENT_OK;
   }
 
@@ -289,6 +311,33 @@ int SvxEmbedSimhit::process_event(PHCompositeNode *topNode)
     tmphit->set_adc(          realhit->get_adc());
     tmphit->set_pixelROC(     realhit->get_pixelROC());
     tmphit->set_pixelModule(  realhit->get_pixelModule());
+  }
+  int nsimhit = mc_rawhit->get_nRawhits()*Yura_embed;
+  int k = 0;
+  for ( int i=0; i<nsimhit; i++ ) {
+    SvxRawhit *simhit = mc_rawhit->get_Rawhit(i);
+    int adc = simhit->get_adc();//(int) floor(0.0019*static_cast<float>(simhit->get_adc()));
+    //std::cout<<simhit->get_adc()<<" "<<adc<<std::endl;
+    if(adc<1)///adcthreshold is 1; adcgain = 0.0019 counts/electron
+    {
+      continue;
+    }
+    if(adc>255) continue;//adc = 255; ///adctop value is 255
+    SvxRawhit *tmphit  = rawhitlist->addRawhit();
+    tmphit->set_layer(        simhit->get_layer());
+    tmphit->set_ladder(       simhit->get_ladder());
+    tmphit->set_sensor(       simhit->get_sensor());
+    tmphit->set_sensorSection(simhit->get_sensorSection());
+    tmphit->set_channel(      simhit->get_channel());
+    tmphit->set_sensorType(   simhit->get_sensorType());
+    tmphit->set_sensorReadout(simhit->get_sensorReadout());
+    tmphit->set_adc(          adc);
+    tmphit->set_pixelROC(     simhit->get_pixelROC());
+    tmphit->set_pixelModule(  simhit->get_pixelModule());
+    SvxGhitRawhit *ghit  = g2rlist->addGhitRawhit();
+    ghit->set_ghitID(k);
+    ghit->set_rawhitID(tmphit->get_hitID());
+    k++;
   }
 
   if ( verbosity>0 ) {
@@ -612,8 +661,10 @@ int SvxEmbedSimhit::embed_simhit(PHCompositeNode *topNode, float zshift)
 	  int ng2r = g2rlist->get_nGhitRawhits();
 	  svxsen = m_svxgeo->GetSensorPtr(ilr, ild, isn);
 	  svxsen->Reset();
-	  int nreal = svxsen->makeRawhits(ghitlist,rawhitlist,g2rlist,&SvxAddObj);
+	  int nreal = svxsen->makeRawhits(ghitlist,rawhitlist,g2rlist,&SvxAddObj);///defined in SvxStripixel.h
 	  int nnoise = svxsen->AddNoise(nrawhit,nrawhit+nreal,rawhitlist,g2rlist,ng2r);
+    if(false)std::cout<<svxsen->get_adcthresh()<<std::endl;
+    if(false)svxsen->printPar();
 	  nrawhit += nreal+nnoise;
 	} // isn
       } // ild
