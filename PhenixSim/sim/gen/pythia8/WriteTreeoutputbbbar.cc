@@ -9,18 +9,54 @@
 #include <TLorentzVector.h>
 #include "TVector3.h"
 #include "Pythia8/Pythia.h"
+#include <chrono>
+#include <ctime>
 
+struct MyEvent {
+    int ntracks;
+    std::vector<int> pid;
+    std::vector<double> mass;
+    std::vector<double> energy;
+    std::vector<double> px;
+    std::vector<double> py;
+    std::vector<double> pz;
+    std::vector<double> vx;
+    std::vector<double> vy;
+    std::vector<double> vz;
+
+    void set_to_null() {
+        ntracks = 0;
+        pid.clear();
+        mass.clear();
+        energy.clear();
+        px.clear();
+        py.clear();
+        pz.clear();
+        vx.clear();
+        vy.clear();
+        vz.clear();
+        return;
+    };
+};
 using namespace Pythia8;
 
 const int MaxTracks = 10;
 const double pi = TMath::ACos(-1);
 
-int main(){
+int main(int argc, char* argv[]){
+	
+  std::cout<<"lets begin"<<std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
 
-  int nevt = 1;
-  int nevents = 20000;
+  std::string str_seed = argv[1];
+  std::string InnEv = argv[2];
+  int nevents = std::stoi(InnEv);
+
+
+  bool IsWriteOscar = true;
+  int nevt = 20000;
   Pythia pythia;
-
+  std::cout<<"pythia was initialized"<<std::endl;
   pythia.readString("Beams:idA = 2212");
   pythia.readString("Beams:idB = 2212");
   pythia.readString("Beams:eCM = 200");
@@ -28,7 +64,7 @@ int main(){
   pythia.readString("HardQCD:hardbbbar = on");  
 
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
+  pythia.readString("Random:seed = " + str_seed);
   pythia.readString("Next:numberCount = 100000");
  
   //Pythia8 tune for STAR (2110.09447)
@@ -43,11 +79,12 @@ int main(){
   pythia.readString("ColourReconnection:range = 5.4");
 
   pythia.init();
-
+  std::cout<<"pythia params were set"<<std::endl;
   //Intialize the tree
 
   TTree* tree = new TTree("T","RECREATE");
-  int ntracks = -999;
+  MyEvent myevent;
+  int ntracks = 0;
   int pid[MaxTracks] = {-999};
   double mass[MaxTracks] = {-999};
   double px[MaxTracks] = {-999};
@@ -58,16 +95,26 @@ int main(){
   double vy[MaxTracks] = {-999};
   double vz[MaxTracks] = {-999};
 
-  tree->Branch("ntracks", &ntracks,"ntracks/I");
-  tree->Branch("pid",pid,"pid[ntracks]/I");
-  tree->Branch("mass",mass,"mass[ntracks]/D");
-  tree->Branch("px",px,"px[ntracks]/D");
-  tree->Branch("py",py,"py[ntracks]/D");
-  tree->Branch("pz",pz,"pz[ntracks]/D");
-  tree->Branch("energy",energy,"energy[ntracks]/D");
-  tree->Branch("vx",vx,"vx[ntracks]/D");
-  tree->Branch("vy",vy,"vy[ntracks]/D");
-  tree->Branch("vz",vz,"vz[ntracks]/D");
+  tree->Branch("ntracks", &myevent.ntracks,"ntracks/I");
+  tree->Branch("pid",&myevent.pid);
+  tree->Branch("mass",&myevent.mass);
+  tree->Branch("energy",&myevent.energy);
+  tree->Branch("px",&myevent.px);
+  tree->Branch("py",&myevent.py);
+  tree->Branch("pz",&myevent.pz);
+  tree->Branch("vx",&myevent.vx);
+  tree->Branch("vy",&myevent.vy);
+  tree->Branch("vz",&myevent.vz);
+
+  ofstream file("oscar.particles.dat");
+	if(IsWriteOscar)
+  {
+    file << "# OSC1999A" << endl;
+	  file << "# final_id_p_x" << endl;
+	  file << "# SimName 1.0" << endl;
+	  file << "#" << endl;
+	  file << "# Some comments..." << endl;
+  }
 
   int evt_count = 0;
 
@@ -75,8 +122,10 @@ int main(){
   TH1D* pTHat = new TH1D("pTHat", "pTHat Distribution", 100, 0, 10);
   TH1D* norm = new TH1D("norm","EVENT COUNTER", 2,-0.5,1.5);
 
-  for(int ievt = 0; ievt < nevt; ievt++){
+  std::cout<<"tree and histos were created"<<std::endl;
 
+  for(int ievt = 0; ievt < nevt; ievt++){
+	//std::cout<<ievt<<std::endl;
     if(evt_count == nevents) break;
 
     if(!pythia.next()){ nevt++; continue; }
@@ -100,19 +149,19 @@ int main(){
       int daughter_index = j;
       int mother_index = pythia.event[daughter_index].mother1();
       int mother_id = fabs(pythia.event[mother_index].id());
+      /////////////////monte-carlo ID: L Q3 Q2 Q1 J : J = 2S+1; L = L; d u s c b t = 1 2 3 4 5 6 
+      bool mother_D_meson = mother_id == 411 || mother_id == 421 || mother_id == 10411 || mother_id == 10421 ||   ///  D+(1870)  D0(1865)    D*(2400)+   D*(2400)0 
+                            mother_id == 413 || mother_id == 423 || mother_id == 10413 || mother_id == 10423 ||   ///  D*(2010)+ D*(2007)0   D1(2420)+   D1(2420)0 
+                            mother_id == 20413 || mother_id == 20423 || mother_id == 415 || mother_id == 425 ||   ///  D1(H)+    D1(2430)0   D2*(2460)+  D2*(2460)0
+                            mother_id == 431 || mother_id == 10431 || mother_id == 433 || mother_id == 10433 ||   ///  Ds(1970)+ Ds0*(2317)+ Ds*+        Ds1(2536)+
+	                          mother_id == 20433 || mother_id == 435;                                               ///  Ds1*(2460)+ Ds2*(2573)+                      
 
-      bool mother_D_meson = mother_id == 411 || mother_id == 421 || mother_id == 10411 || mother_id == 10421 ||
-                            mother_id == 413 || mother_id == 423 || mother_id == 10413 || mother_id == 10423 ||
-                            mother_id == 20413 || mother_id == 20423 || mother_id == 415 || mother_id == 425 ||
-                            mother_id == 431 || mother_id == 10431 || mother_id == 433 || mother_id == 10433 ||
-	                          mother_id == 20433 || mother_id == 435;
-
-      bool mother_B_meson = mother_id == 511 || mother_id == 521 || mother_id == 10511 || mother_id == 10521 ||
-                            mother_id == 513 || mother_id == 523 || mother_id == 10513 || mother_id == 10523 ||
-                            mother_id == 20513 || mother_id == 20523 || mother_id == 515 || mother_id == 525 ||
-                            mother_id == 531 || mother_id == 10531 || mother_id == 533 || mother_id == 10533 ||
-                            mother_id == 20533 || mother_id == 535 || mother_id == 541 || mother_id == 10541 ||
-                            mother_id == 543 || mother_id == 10543 || mother_id == 20543 || mother_id == 545;
+      bool mother_B_meson = mother_id == 511 || mother_id == 521 || mother_id == 10511 || mother_id == 10521 ||   ///  B0(5280)  B(5279)+    B0*0        B0*+
+                            mother_id == 513 || mother_id == 523 || mother_id == 10513 || mother_id == 10523 ||   ///  B*0       B*+         B1(L)0      B1(L)+ 
+                            mother_id == 20513 || mother_id == 20523 || mother_id == 515 || mother_id == 525 ||   ///  B1(H)0    B1(H)+      B2*0        B2*+ 
+                            mother_id == 531 || mother_id == 10531 || mother_id == 533 || mother_id == 10533 ||   ///  Bs0(5367) Bs0*0       Bs*0        Bs1(L)0 
+                            mother_id == 20533 || mother_id == 535 || mother_id == 541 || mother_id == 10541 ||   ///  Bs1(H)0   Bs2*0       Bc+(6275)   Bc0*+ 
+                            mother_id == 543 || mother_id == 10543 || mother_id == 20543 || mother_id == 545;     ///  Bc*+      Bc1(L)+     Bc1(H)+     Bc2*+ 
 
       if(!(mother_D_meson || mother_B_meson)) continue;
 
@@ -141,9 +190,10 @@ int main(){
 
     }
 
-    if(npart<1){ nevt++; continue; }
+    if(npart<2){ nevt++; continue; }
 
     int count = 0;
+    myevent.set_to_null();
 
     for(int j = 0; j < nparticles; j++){
 
@@ -151,6 +201,7 @@ int main(){
 
       int pdg = pythia.event[j].id();
       if (! (pdg == 11 ||  pdg == -11) ) continue;
+      if ( fabs(pythia.event[pythia.event[j].daughter1()].id()) == 11  || fabs(pythia.event[pythia.event[j].daughter2()].id()) == 11  ) std::cout<<"keks"<<std::endl;
 
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
@@ -214,6 +265,9 @@ int main(){
       energy[count] = Energy; vx[count] = Vx; vy[count] = Vy; vz[count] = Vz;
       pid[count] = pdg; 
 
+      myevent.mass.push_back(Mass); myevent.px.push_back(Px); myevent.py.push_back(Py); myevent.pz.push_back(Pz); myevent.energy.push_back(Energy); 
+      myevent.pid.push_back(pdg);   myevent.vx.push_back(Vx); myevent.vy.push_back(Vy); myevent.vz.push_back(Vz);
+      
       count++;
 
     }
@@ -221,7 +275,19 @@ int main(){
     pTHat->Fill(pythia.info.pTHat());
     ntracks = count;
 
+    myevent.ntracks = ntracks;
     tree->Fill();
+     
+    if(IsWriteOscar && ntracks>0)
+    {
+	    file << 0 << "\t" << ntracks << endl;
+	    for(int i = 0; i < ntracks; i++){
+	      if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
+	      else file << i+1 << "\t" << pid[i] << "\t" << 0 << "\t" << px[i] << "\t" << py[i] << "\t" << pz[i] << "\t" << energy[i] << "\t" << mass[i] << "\t" << vx[i]*pow(10,12) << "\t" << vy[i]*pow(10,12)  << "\t" << vz[i]*pow(10,12) << "\t" << 0 << endl;
+		  }
+		  file << 0 << "\t" << 0 << endl;  
+    }
+
     evt_count++;
     if(evt_count%1000==0) cout << evt_count << "\t" << "Completed" << endl;
     nevt++;
@@ -256,6 +322,11 @@ int main(){
   pTHat->Write();
   norm->Write();
   fout->Close();
+
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+  std::cout << duration.count() << std::endl;
 
   return 0;
 
