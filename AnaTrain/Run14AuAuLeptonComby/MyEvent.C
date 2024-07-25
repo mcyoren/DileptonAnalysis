@@ -576,11 +576,11 @@ namespace MyDileptonAnalysis
                     if(is_fill_hadron_hsits)
                     {
                         myvtx_hist->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunNumber(),0.5);
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunGroup(),0.5);
                         myvtx_hist->Fill(event->GetPreciseY()-vtxhit->GetYHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Sin(mytrk->GetPhi0Prime()),event->GetRunNumber(),1.5);
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Sin(mytrk->GetPhi0Prime()),event->GetRunGroup(),1.5);
                         myvtx_hist->Fill(event->GetPreciseZ()-vtxhit->GetZHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
-                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))/TMath::Tan(mytrk->GetThe0Prime()),event->GetRunNumber(),2.5);
+                                        +SQR(vtxhit->GetYHit()-event->GetPreciseY()))/TMath::Tan(mytrk->GetThe0Prime()),event->GetRunGroup(),2.5);
                     }
                 }
                 else
@@ -594,12 +594,13 @@ namespace MyDileptonAnalysis
                     dphi_hist[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, hist_2nd_arg, pt);
                     const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
-                    dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+
+                    dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
                 }
                 if (abs(sdphi) < sigma && is_fill_hadron_hsits)
                 {
@@ -607,8 +608,8 @@ namespace MyDileptonAnalysis
                     sdthe_hist[central_bin]->Fill(sdthe, hist_2nd_arg, pt);
                     const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
                     const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
-                    dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
-                    dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunNumber());
+                    dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
+                    dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin + 4*event->GetRunGroup());
                 }
             } // enf of hit loop
         }     // end of hadron loop
@@ -638,6 +639,7 @@ namespace MyDileptonAnalysis
 
     int MyEvent::GetRunGroup(int in_run_number) const
     {
+        if(in_run_number == 0) in_run_number = run_number;
         for (int irun = 0; irun < N_rg_beam_offset; irun++)
         {
             if (in_run_number >= RunBoarders[irun] && in_run_number < RunBoarders[irun + 1])
@@ -1107,7 +1109,7 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < Nelectrons; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            if (electron->GetMcId()!=mc_id && mc_id>-1) continue;
+            if (fabs(electron->GetMcId()-mc_id)>1 && mc_id>-1) continue;
             el_pt_hist->Fill(electron->GetPtPrime(),1.5,event->GetCentrality());
             el_had_dphi->Fill(electron->GetEmcdphi_e(),electron->GetPtPrime(),event->GetCentrality());
             el_had_dz  ->Fill(electron->GetEmcdz_e()  ,electron->GetPtPrime(),event->GetCentrality());
@@ -1167,7 +1169,7 @@ namespace MyDileptonAnalysis
 
 
             if(electron->GetMcId()>7 && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetEcore()/electron->GetPtot()<1.2 &&
-               electron->GetProb()>0.01 && electron->GetN0() >= 2 + SQR(electron->GetDisp())/8.) 
+               electron->GetProb()>0.01 && electron->GetN0() >= 2 + SQR(electron->GetDisp())/8.&& false) 
                std::cout<<electron->GetPtPrime()<<" "<<electron->GetN0()<<" "<<electron->GetEcore()/electron->GetPtot()<<" "<<electron->GetNpe0()
                <<" "<<electron->GetDisp()<<" "<<electron->GetChi2()/electron->GetNpe0()<<" "<<electron->GetProb()
                <<" "<<electron->GetChi2()/electron->GetNpe0()-6-electron->GetDisp()<<" "<<electron->GetN0()-1*electron->GetDisp()<<std::endl;

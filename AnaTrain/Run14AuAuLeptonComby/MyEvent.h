@@ -806,7 +806,7 @@ namespace MyDileptonAnalysis
             void SetPsi3FVTXA0(float spsi3_FVTXA0) { psi3_FVTXA0 = spsi3_FVTXA0; };
             float GetPsi3FVTXA0() { return psi3_FVTXA0; };
 
-            int GetRunGroup(int in_run_number) const;
+            int GetRunGroup(int in_run_number = 0) const;
 
             void AddTrack(const MyElectron *newTrack) { TrackList.push_back(*newTrack); };
             void AddHadron(const MyHadron *newTrack) { HadronList.push_back(*newTrack); };

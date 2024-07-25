@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <stdio.h> //sptintf
 #include <TMath.h>
 #include <TLorentzVector.h>
 #include <TF1.h>
@@ -16,7 +17,7 @@
 #include "../AnaTrain/Run14AuAuLeptonComby/MyEvent.h"
 #include "MyEvent_OLD.h"
 
-const int in_id = 2; //pi+,pi-,e+,e- = 8,9,3,2
+const int in_id = 8; //pi+,pi-,e+,e- = 8,9,3,2
 const char inFile[][200] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-10M_jpsi_embed_helios_v0.root", //2M_piplus_embed_hagedorn_v1
                             "/home/yoren/bnl/PHENIX/ee/AuAu/analysis_output_ccbar_pthat0.root", 
                             "/home/yoren/bnl/PHENIX/ee/AuAu/merged_output_photon.root",
