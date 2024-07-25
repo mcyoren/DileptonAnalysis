@@ -118,9 +118,7 @@ private:
   int InIDread;
 
   std::string m_outFileName;
-  TFile*      m_outfile;
   int fill_TTree, remove_hadron_hits;
-  TNtuple*    m_ntp_embed;
   std::string local_filepath;
   std::string local_oscarpath;
   std::vector<double> vertexes;

@@ -101,16 +101,16 @@ set oscarname = $DIR.oscar.particles.dat
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 0 ) then
 echo "==============================================="
-echo "============= HELIOS TO OSCAR ================="
+echo "============= SINGLE SIM STARTS ==============="
 echo "==============================================="
 set scriptdir   = $DATADIR/sim/gen/single
 set macroname   = make_single.C
 set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
-set ptmin = 3.0
+set ptmin = 0.4
 set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
-set id    = 0 #0,1,2,3,4-pi0,pi+,pi-,e+,e-
+set id    = $selected_paticle #0,1,2,3,4-pi0,pi+,pi-,e+,e-################helios jpsi and phi####pythia ccbar bbar
 
 echo "jobno          $jobno            "
 echo "run_number     $run_number       "
@@ -150,7 +150,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
-set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
+set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02_5_10M.root
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
@@ -195,6 +195,9 @@ echo "==============================================="
 echo "============= PYTHIA TO OSCAR ================="
 echo "==============================================="
 set inputpythia = $DATADIR/output_single/pythia8/ccbartree$DIR.root
+if( $selected_paticle == 2) then
+ set inputpythia = $DATADIR/output_single/pythia8/bbbartree$DIR.root
+endif
 set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh
 set macroname   = WriteROOT2OscarPythia.C
@@ -418,8 +421,8 @@ root -b < cmd.input #>& $HOME/root.log
 #ls -ltr
 #move
 #mv -f $outdst    $outdstdir
-mv -f kek2.root $outmytreedir/
-mv -f $outntana  $outmytreedir/
+#mv -f kek2.root $outmytreedir/
+#mv -f $outntana  $outmytreedir/
 mv -f my-$outntana $outmytreedir/
 
 #remove tmp dir

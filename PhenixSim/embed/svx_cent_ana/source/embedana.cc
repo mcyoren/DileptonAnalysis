@@ -83,18 +83,7 @@ int embedana::InitRun(PHCompositeNode *topNode)
 {
   std::cout << "embedana::InitRun started..." << std::endl;
 
-  m_outfile = new TFile(m_outFileName.c_str(), "RECREATE");
-
-  m_ntp_embed = new TNtuple("ntp_embed", "embedding",
-                            "zvtx"
-                            ":pt:charge:mom:phi0:the0:dcqual"
-                            ":emcdz:emcdphi:pc3dz:pc3dphi"
-                            ":ecore:prob:n0:npe0:ch2npe0:disp"
-                            ":dca2d:dcaz:chi2ndf:hitptn"
-                            ":simpt:simmom:simphi0:simthe0"
-                            ":simecore:simprob:simn0:simnpe0:simch2npe0:simdisp"
-                            ":genpt:genmom:genphi0:genthe0:genvx:genvy:genvz:genpid:gendca2d");
-
+  
   const int error = ReadOrigPartMoms();
   if (error)
   {
@@ -273,12 +262,12 @@ int embedana::process_event(PHCompositeNode *topNode)
       
       if(applySingleTrackCut(trk, idR, event->GetPreciseZ(), event->GetCentrality(), event->GetRunNumber())<0) continue;
 
-      float ntp[100];
+      /*float ntp[100];
       for (int i = 0; i < 100; i++)
         ntp[i] = -9999.;
 
       float charge = sngl->get_charge();
-
+    
       ntp[0] = vtxout->get_ZVertex(); // zvtx
       ntp[1] = sngl->get_mom() * sin(sngl->get_the0());
       ntp[2] = charge;
@@ -349,7 +338,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       ntp[38] = embed->get_partidG();
       ntp[39] = gendca2d;
 
-      m_ntp_embed->Fill(ntp);
+      m_ntp_embed->Fill(ntp);*/
 
       MyDileptonAnalysis::MyElectron newElectron;
       newElectron.SetPt(embed->get_momS() * sin(embed->get_the0S()));
@@ -610,11 +599,8 @@ int embedana::process_event(PHCompositeNode *topNode)
 int embedana::End(PHCompositeNode *topNode)
 {
   std::cout << "Writing out..." << std::endl;
-  m_outfile->Write();
-  std::cout << "Closing output file..." << std::endl;
-  m_outfile->Close();
-  delete m_outfile;
   event_container->WriteOutFile();
+  std::cout << "Closing.." << std::endl;
 
   return 0;
 }
