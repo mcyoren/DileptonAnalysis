@@ -163,7 +163,7 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, bool not_fill)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, bool not_fill)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
@@ -319,8 +319,9 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        //if(layer==0) sigma=2;
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma_veto && sdphi*mytrk->GetChargePrime() < sigma && fabs(sdthe) < sigma)
+                        float sigma_veto0 = sigma, sigma_inner0=sigma;
+                        if(layer == 0) {sigma_veto0=sigma_veto;sigma_inner0=sigma_inner;}
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner && fabs(sdthe) < sigma)
                         {
                             if (diff < min[layer])
                             {
@@ -456,6 +457,8 @@ namespace MyDileptonAnalysis
                 }        
                 if(is_fill_hsits_local) truehithist->Fill(istruehitcounter,mytrk->GetPtPrime(),event->GetCentrality());
                 if(is_fill_hsits_local) chi2_ndf[central_bin]->Fill(min_chi2, 10+istruehitcounter, pt);
+                if(is_fill_hsits_local&&true) 
+                                        truehitsigmahist->Fill(istruehitcounter+(sigma-2)*10,mytrk->GetPtPrime(),event->GetCentrality());
 
             }else{
                 mytrk->SetHitCounter(0,0);
@@ -807,6 +810,7 @@ namespace MyDileptonAnalysis
     void MyEventContainer::CheckVeto()
     {   
         const int centr_bin = event->GetCentrality()/20;
+        const int centrality = event->GetCentrality();
         if(centr_bin<0||centr_bin>4) return;
         for (int ielectron = 0; ielectron < event->GetNtrack(); ielectron++)
         {
@@ -816,6 +820,35 @@ namespace MyDileptonAnalysis
             const float pt = electron->GetPtPrime();
             if (pt < 0.4)
                 continue;
+            if(is_check_veto)
+            {
+                counter_assoc_eff_hist->Fill(0.5,pt,centrality);
+                for (int isigma = 5; isigma > 1; isigma--)
+                {
+                    const int ientry = 5-isigma;
+                    if(fabs(electron->GetMinsDphi(3))<isigma||fabs(electron->GetMinsDphi(2))<isigma) 
+                    {
+                        counter_assoc_eff_hist->Fill(ientry*7+1.5,pt,centrality);
+                        if(fabs(electron->GetMinsDphi(1))<isigma)
+                        {
+                            counter_assoc_eff_hist->Fill(ientry*7+2.5,pt,centrality);
+                            if(fabs(electron->GetMinsDphi(0))<isigma)
+                            {
+                                counter_assoc_eff_hist->Fill(ientry*7+3.5,pt,centrality);
+                                if(fabs(electron->GetMinsDphi(3))<isigma&&fabs(electron->GetMinsDphi(2))<isigma) 
+                                    counter_assoc_eff_hist->Fill(ientry*7+4.5,pt,centrality);
+                                if(electron->GetMinsDphi(0)>-2) 
+                                    counter_assoc_eff_hist->Fill(ientry*7+5.5,pt,centrality);
+                                if(electron->GetMinsDphi(0)>-1) 
+                                    counter_assoc_eff_hist->Fill(ientry*7+6.5,pt,centrality);
+                                if(electron->GetMinsDphi(0)>-0) 
+                                    counter_assoc_eff_hist->Fill(ientry*7+7.5,pt,centrality);
+                            }
+                        }   
+                    }
+                }
+            }
+            
             if (electron->GetHitCounter(0) < 1 || electron->GetHitCounter(1) < 1 ||
                 (electron->GetHitCounter(2) < 1 && electron->GetHitCounter(3) < 1))
                 continue;
@@ -890,7 +923,15 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            if(is_check_veto) couter_veto_hist->Fill(count,centr_bin);
+            if(is_check_veto) 
+            {
+                couter_veto_hist->Fill(count,pt,centr_bin);
+                int icut = 0;
+                icut+= (fabs(electron->GetMinsDphi(3))<2.0||fabs(electron->GetMinsDphi(2))<2.0)&&(fabs(electron->GetMinsDphi(1))<2.0)&&fabs((electron->GetMinsDphi(0))<2.0);
+                icut+= 2*(electron->GetMinsDphi(0)>0);
+                icut+= 4*(electron->GetGhost()==0);
+                counter_assoc_ghost_hist->Fill(icut,pt,centrality);
+            }
         }
     }
 
@@ -1252,7 +1293,8 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 25, 0, 5);
             INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
             INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
-            INIT_HIST  (3, truehithist, 10, 0, 10, 50, 0, 5, 10, 0, 100);
+            INIT_HIST  (3, truehithist,      10, 0, 10, 50, 0, 5, 10, 0, 100);
+            INIT_HIST  (3, truehitsigmahist, 50, 0, 50, 50, 0, 5, 10, 0, 100);
             if(fill_ell>1)
             {
                 INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
@@ -1368,8 +1410,9 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, veto_hist,     N_centr, 200, -0.15, 0.15, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, veto_hist_the, N_centr, 200, -0.15, 0.15, 16,0,16, 28, 0.2, 3);
             INIT_HISTOS(3, sveto_hist,    N_centr, 200, 0, 20,       16,0,16, 28, 0.2, 3);
-            INIT_HIST(2, couter_veto_hist, 8, 0, 8, 5, 0, 5);
-            INIT_HIST(3, adc_hist, 500,0,500, 50, 0, 2.5, 6, 0, 6);
+            INIT_HIST(3, couter_veto_hist,         8, 0, 8, 50, 0, 5, 5, 0, 5);
+            INIT_HIST(3, counter_assoc_eff_hist,   30,0,30, 50, 0, 5, 10, 0, 100);
+            INIT_HIST(3, counter_assoc_ghost_hist,  8,0, 8, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);
             is_check_veto = 1;

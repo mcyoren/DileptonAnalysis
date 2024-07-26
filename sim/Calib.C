@@ -10,18 +10,19 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   }
   const int associate_hits = 1;
   const int remove_hadron_hits = 0;
-  const int fill_QA_hadron_hists = 1;
-  const int fill_QA_lepton_hists = 1;
+  const int fill_QA_hadron_hists = 0;
+  const int fill_QA_lepton_hists = 0;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 0;
-  const int do_track_QA = 1;
+  const int do_track_QA = 0;
   const int do_reveal_hadron = 0;
-  const int Use_ident = 1;
-  const int fill_true_DCA = 1;
+  const int Use_ident = 0;
+  const int fill_true_DCA = 0;
   const int check_veto = 1;
-  const int fill_inv_mass = 1;
+  const int fill_inv_mass = 0;
+  const int istruehitsigmacounter = 0;
 
 
   char outname[200];
@@ -119,7 +120,17 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(5);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
+    if(istruehitsigmacounter) 
+    {
+      event_container->Associate_Hits_to_Leptons(2,5);
+      event_container->Associate_Hits_to_Leptons(3,5);
+      event_container->Associate_Hits_to_Leptons(4,5);
+      event_container->Associate_Hits_to_Leptons(5,5);
+      event_container->Associate_Hits_to_Leptons(6,5);
+      event_container->Associate_Hits_to_Leptons(8,5);
+      event_container->Associate_Hits_to_Leptons(10,5);
+    }
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
