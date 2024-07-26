@@ -376,48 +376,86 @@ namespace MyDileptonAnalysis
             {
                 float chi2 = 0;
                 float recon_pt = 0;
-                const int inum1 = numbers[0][inum] / 10000000-1;
-                const int inum2 = numbers[0][inum] / 10000 %1000-1;
-                const int inum3 = numbers[0][inum] / 100 %100-1;
-                const int inum4 = numbers[0][inum] %100-1;
+                const int inum0 = numbers[0][inum] / 10000000-1;
+                const int inum1 = numbers[0][inum] / 10000 %1000-1;
+                const int inum2 = numbers[0][inum] / 100 %100-1;
+                const int inum3 = numbers[0][inum] %100-1;
                     
-                if(inum1>=0 && inum2>=0)
+                if(inum0>=0 && inum1>=0)
                 {   
-                    mytrk->SetHitIndex(mytrk->GetHits(0,inum1), 0);
-                    mytrk->SetHitIndex(mytrk->GetHits(1,inum2), 1);
-                    if (mytrk->GetHitCounter(2)>0) mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5), 2);
-                    if (mytrk->GetHitCounter(3)>0) mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);
-                    if( inum4>=0) 
+                    mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
+                    mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
+                    if (inum2>=0) mytrk->SetHitIndex(mytrk->GetHits(2,inum2), 2);
+                    if (inum3>=0) mytrk->SetHitIndex(mytrk->GetHits(3,inum3), 3);
+                    if( inum3>=0) 
                     {
                         event->SetDCA2(itrk,3);
                         recon_pt += mytrk->GetReconPT();
                     }
-                    if( inum3>=0) 
+                    if( inum2>=0) 
                     {
                         event->SetDCA2(itrk,2);
                         recon_pt += mytrk->GetReconPT();
-                        if (inum4>=0) recon_pt/=2;
+                        if (inum3>=0) recon_pt/=2;
                     }
-                    chi2 = fabs(recon_pt-pt)/pt*10;
+                    chi2 = fabs(recon_pt-pt)/pt*30/(2+(int)(inum2>=0)+(int)(inum3>=0));
                     if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
                     
-                    if (is_fill_hsits_local) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
+                    if (is_fill_hsits_local&&numbers[0].size()<10) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
                 }
             }
             if(is_fill_hsits_local) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
-                mytrk->SetHitIndex(mytrk->GetHits(0,(int) final_number/10000000-0.5), 0);
-                mytrk->SetHitIndex(mytrk->GetHits(1,(int) final_number/10000 %1000-0.5), 1);
-                if (final_number/100 %100>0) {mytrk->SetHitIndex(mytrk->GetHits(2,(int) final_number/100 %100 -0.5 ), 2);mytrk->SetHitCounter(2,1);}
-                if (final_number%100>0) {mytrk->SetHitIndex(mytrk->GetHits(3,(int) final_number%100 -0.5), 3);mytrk->SetHitCounter(3,1);}
+
+                const int inum0 = final_number / 10000000-1;
+                const int inum1 = final_number / 10000 %1000-1;
+                const int inum2 = final_number / 100 %100-1;
+                const int inum3 = final_number %100-1;
+                mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
+                mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
+                if (inum2>=0) 
+                {
+                    mytrk->SetHitIndex(mytrk->GetHits(2,inum2 ), 2);
+                    mytrk->SetHitCounter(2,1);
+                    mytrk->SetMinsDphi(mytrk->GetsdPhi(2, inum2) * mytrk->GetChargePrime(), 2);
+                    mytrk->SetMinsDthe(mytrk->GetsdThe(2, inum2) * mytrk->GetChargePrime(), 2);
+                }
+                if (inum3>=0) 
+                {
+                    mytrk->SetHitIndex(mytrk->GetHits(3,inum3 ), 3);
+                    mytrk->SetHitCounter(3,1);
+                    mytrk->SetMinsDphi(mytrk->GetsdPhi(3, inum3) * mytrk->GetChargePrime(), 3);
+                    mytrk->SetMinsDthe(mytrk->GetsdThe(3, inum3) * mytrk->GetChargePrime(), 3);
+                }
                 mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
-                mytrk->SetMinsDphi(mytrk->GetsdPhi(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
-                mytrk->SetMinsDthe(mytrk->GetsdThe(0,(int) final_number/10000000-0.5) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(0, inum0) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(0, inum0) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(1, inum1) * mytrk->GetChargePrime(), 1);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(1, inum1) * mytrk->GetChargePrime(), 1);
                 event->SetDCA(itrk, 1);
                 if (mytrk->GetHitCounter(3)>0)  event->SetDCA2(itrk, 3);
                 if (mytrk->GetHitCounter(2)>0)  event->SetDCA2(itrk, 2);
+
+                ////////////////////////////////cheking hit assoc effinceincy in sim////////////////////////
+                MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
+                MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
+                MyVTXHit *vtxhit2 = nullptr,*vtxhit3 = nullptr; 
+                const int hit_count = 2+mytrk->GetHitCounter(2)+mytrk->GetHitCounter(3);
+                if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
+                else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
+                if (hit_count==4) vtxhit3 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
+                MyVTXHit *vtxhits[4] = {vtxhit0,vtxhit1,vtxhit2,vtxhit3};
+                int istruehitcounter = (hit_count==4)*4;
+                for (int i = 0; i < hit_count; i++)
+                {
+                    if(!vtxhits[i]) std::cout<<"kek"<<std::endl;
+                    if(!vtxhits[i]) continue;
+                    if(vtxhits[i]->GetSensor() == 0) istruehitcounter++;
+                }        
+                if(is_fill_hsits_local) truehithist->Fill(istruehitcounter,mytrk->GetPtPrime(),event->GetCentrality());
+                if(is_fill_hsits_local) chi2_ndf[central_bin]->Fill(min_chi2, 10+istruehitcounter, pt);
 
             }else{
                 mytrk->SetHitCounter(0,0);
@@ -1214,6 +1252,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 25, 0, 5);
             INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
             INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
+            INIT_HIST  (3, truehithist, 10, 0, 10, 50, 0, 5, 10, 0, 100);
             if(fill_ell>1)
             {
                 INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);

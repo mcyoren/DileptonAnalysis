@@ -851,7 +851,7 @@ namespace MyDileptonAnalysis
             TH1D *event_hist, *centr_hist;
             TH3D *el_pt_hist;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
-            TH3D *chi2_ndf[N_centr];
+            TH3D *chi2_ndf[N_centr], *truehithist;
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
@@ -895,6 +895,7 @@ namespace MyDileptonAnalysis
                   inv_mass_dca_bg0=nullptr;inv_mass_dca_bg1=nullptr;inv_mass_dca_bg2=nullptr;inv_mass_dca_bg3=nullptr;
                   inv_mass_dca_bg4=nullptr;inv_mass_dca_bg5=nullptr;inv_mass_dca_bg6=nullptr;inv_mass_dca_bg7=nullptr;
                   myvtx_hist = nullptr;
+                  truehithist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
