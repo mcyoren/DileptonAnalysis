@@ -41,6 +41,30 @@ void Run14AuAuLeptonCombyReco::InitParams()
         std::cout << "quality = " << QUALITY[2] << std::endl;
     if (Z_GLOBAL > -99)
         std::cout << "|z_global| < " << Z_GLOBAL << std::endl;
+    if(True)
+    {
+        std::cout << "setting init_dead_area to -9999" << std::endl;
+        for (int i = 0; i < N_RUN_GRP; ++i)
+        {
+            for (int j = 0; j < N_SIDE; ++j)
+            {
+                for (int k = 0; k < N_ARM; ++k)
+                {
+                    for (int l = 0; l < MAX_DEAD_AREA; ++l)
+                    {
+                        dcmap_xx1[i][j][k][l] = -9999;
+                        dcmap_yy1[i][j][k][l] = -9999;
+                        dcmap_xx2[i][j][k][l] = -9999;
+                        dcmap_yy2[i][j][k][l] = -9999;
+                        dcmap_xx3[i][j][k][l] = -9999;
+                        dcmap_yy3[i][j][k][l] = -9999;
+                        dcmap_xx4[i][j][k][l] = -9999;
+                        dcmap_yy4[i][j][k][l] = -9999;
+                    }
+                }
+            }
+        }
+    }
     if (DC_DEADMAP)
     {
         std::cout << "dc dead map in" << std::endl;
@@ -80,31 +104,6 @@ void Run14AuAuLeptonCombyReco::InitParams()
     if (RICH_GHOST > -99)
     {
         std::cout << "RICH ghost cut in: decenter < " << RICH_GHOST << "cm" << std::endl;
-    }
-
-    if(!DC_DEADMAP)
-    {
-        std::cout << "setting init_dead_area to -9999" << std::endl;
-        for (int i = 0; i < N_RUN_GRP; ++i)
-        {
-            for (int j = 0; j < N_SIDE; ++j)
-            {
-                for (int k = 0; k < N_ARM; ++k)
-                {
-                    for (int l = 0; l < MAX_DEAD_AREA; ++l)
-                    {
-                        dcmap_xx1[i][j][k][l] = -9999;
-                        dcmap_yy1[i][j][k][l] = -9999;
-                        dcmap_xx2[i][j][k][l] = -9999;
-                        dcmap_yy2[i][j][k][l] = -9999;
-                        dcmap_xx3[i][j][k][l] = -9999;
-                        dcmap_yy3[i][j][k][l] = -9999;
-                        dcmap_xx4[i][j][k][l] = -9999;
-                        dcmap_yy4[i][j][k][l] = -9999;
-                    }
-                }
-            }
-        }
     }
 }
 
