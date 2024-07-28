@@ -991,31 +991,59 @@ namespace MyDileptonAnalysis
                         if(electron->GetGhost()<5) electron->SetGhost(ilayer);
                         count++;
                     }
-                    if (ilayer==1 && dphi_index + charge_bin == 1 && fabs(dphi) < 0.006 && fabs(dthe) < 0.001)
-                    {
-                        if(electron->GetGhost()<10) electron->SetGhost(ilayer+5);
-                        count++;
-                    }
-                    if (ilayer>1 && fabs(dphi) < 0.004  && fabs(dthe) < 0.001 )
-                    {
-                        if(electron->GetGhost()<10) electron->SetGhost(ilayer+5);
-                        count++;
-                    }
-                    if(electron->GetGhost()<10 && ilayer>0 && sdphi>2.5*ilayer && sdphi<16*(ilayer)       && fabs(sdthe)<3.0+ilayer)   electron->SetGhost(ilayer+10);
-                    if(electron->GetGhost()<15 && ilayer>0 && sdphi>2.5*ilayer && sdphi<16*(ilayer<2?1:2) && fabs(sdthe)<3.0+ilayer)   electron->SetGhost(ilayer+15);
-                    if(electron->GetGhost()<20 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer       && fabs(sdthe)<3.0+ilayer)   electron->SetGhost(ilayer+20);
-                    if(electron->GetGhost()<25 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer       && fabs(sdthe)<3.0)          electron->SetGhost(ilayer+25);
+                    if(electron->GetGhost()<5. && ilayer>0 && sdphi>2.5*ilayer && sdphi<20.0*(ilayer<2?1:2) && fabs(sdthe)<3.0+ilayer)   electron->SetGhost(ilayer+5);
+                    if(electron->GetGhost()<10 && ilayer>0 && sdphi>2.5*ilayer && sdphi<16.0*(ilayer<2?1:2) && fabs(sdthe)<2.0+ilayer)   electron->SetGhost(ilayer+10);
+                    if(electron->GetGhost()<15 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer         && fabs(sdthe)<2.0+ilayer)   electron->SetGhost(ilayer+15);
+                    if(electron->GetGhost()<20 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer         && fabs(sdthe)<2.0)          electron->SetGhost(ilayer+20);
+                    if(electron->GetGhost()<25 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*(ilayer<2?1:2) && fabs(sdthe)<2.0)          electron->SetGhost(ilayer+25);
                 }
             }
             if(is_check_veto) 
             {
                 couter_veto_hist->Fill(count,pt,centr_bin);
                 veto_type_hist->Fill(electron->GetGhost(),pt,centrality);
-                int icut = 0;
-                icut+= (fabs(electron->GetMinsDphi(3))<2.0||fabs(electron->GetMinsDphi(2))<2.0)&&(fabs(electron->GetMinsDphi(1))<2.0)&&fabs((electron->GetMinsDphi(0))<2.0);
-                icut+= 2*((electron->GetMinsDphi(2)<0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)<0||electron->GetHitCounter(3)<1));
-                icut+= 4*(electron->GetGhost()<10);
-                counter_assoc_ghost_hist->Fill(icut,pt,centrality);
+                counter_assoc_ghost_hist->Fill(0.,pt,centrality);
+                if ((fabs(electron->GetMinsDphi(3))<2.0||fabs(electron->GetMinsDphi(2))<2.0)&&(fabs(electron->GetMinsDphi(1))<2.0)&&fabs((electron->GetMinsDphi(0))<2.0))
+                {
+                    int cut = electron->GetGhost()<10 ? 10 : 0;
+                    counter_assoc_ghost_hist->Fill(1+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>-1||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>-1||electron->GetHitCounter(3)<1))
+                        counter_assoc_ghost_hist->Fill(2+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1))
+                        counter_assoc_ghost_hist->Fill(3+cut,pt,centrality);
+                    if(electron->GetMinsDphi(0)>-1)
+                        counter_assoc_ghost_hist->Fill(4+cut,pt,centrality);
+                    if(electron->GetMinsDphi(0)>0)
+                        counter_assoc_ghost_hist->Fill(5+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>-1||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>-1||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>-1)
+                        counter_assoc_ghost_hist->Fill(6+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>-1)
+                        counter_assoc_ghost_hist->Fill(7+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>-1||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>-1||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>0)
+                        counter_assoc_ghost_hist->Fill(8+cut,pt,centrality);
+                    if((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>0)
+                        counter_assoc_ghost_hist->Fill(9+cut,pt,centrality);
+                    ////-----------------------------------------
+                    cut = 20;
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1))||electron->GetGhost()<20)
+                        counter_assoc_ghost_hist->Fill(1+cut,pt,centrality);
+                    if(electron->GetMinsDphi(0)>0 || electron->GetGhost()<20)
+                        counter_assoc_ghost_hist->Fill(2+cut,pt,centrality);
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1))||electron->GetMinsDphi(0)>0||electron->GetGhost()<20)
+                        counter_assoc_ghost_hist->Fill(3+cut,pt,centrality);
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>0)||electron->GetGhost()<20)
+                        counter_assoc_ghost_hist->Fill(4+cut,pt,centrality);
+                    ////-----------------------------------------
+                    cut = 25;
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1))||electron->GetGhost()<10)
+                        counter_assoc_ghost_hist->Fill(1+cut,pt,centrality);
+                    if(electron->GetMinsDphi(0)>0 || electron->GetGhost()<10)
+                        counter_assoc_ghost_hist->Fill(2+cut,pt,centrality);
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1))||electron->GetMinsDphi(0)>0||electron->GetGhost()<10)
+                        counter_assoc_ghost_hist->Fill(3+cut,pt,centrality);
+                    if(((electron->GetMinsDphi(2)>0||electron->GetHitCounter(2)<1)&&(electron->GetMinsDphi(3)>0||electron->GetHitCounter(3)<1)&&electron->GetMinsDphi(0)>0)||electron->GetGhost()<10)
+                        counter_assoc_ghost_hist->Fill(4+cut,pt,centrality);
+                }
             }
         }
     }
@@ -1219,10 +1247,10 @@ namespace MyDileptonAnalysis
             if (mytrk->GetHitCounter(0) > 0 && mytrk->GetHitCounter(1) > 0 &&
                (mytrk->GetHitCounter(2) > 0 || mytrk->GetHitCounter(3) > 0)) 
                {
-                    el_pt_hist->Fill(mytrk->GetPtPrime(),0.5,event->GetCentrality());
+                    if(is_fill_tree)el_pt_hist->Fill(mytrk->GetPtPrime(),0.5,event->GetCentrality());
                     n_good_el++;
                }else{
-                    el_pt_hist->Fill(mytrk->GetPtPrime(),1.5,event->GetCentrality());
+                   if(is_fill_tree) el_pt_hist->Fill(mytrk->GetPtPrime(),1.5,event->GetCentrality());
                }
         }
         return n_good_el;
@@ -1500,7 +1528,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, veto_the_the_hist,   N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
             INIT_HIST(3, couter_veto_hist,         8, 0, 8, 50, 0, 5, 5, 0, 5);
             INIT_HIST(3, counter_assoc_eff_hist,   30,0,30, 50, 0, 5, 10, 0, 100);
-            INIT_HIST(3, counter_assoc_ghost_hist,  8,0, 8, 50, 0, 5, 10, 0, 100);
+            INIT_HIST(3, counter_assoc_ghost_hist, 30,0,30, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, veto_type_hist,           30,0,30, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);

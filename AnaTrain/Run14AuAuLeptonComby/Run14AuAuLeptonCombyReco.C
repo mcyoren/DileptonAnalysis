@@ -102,7 +102,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         printf("Ncalls = %dk\n", ncalls / 1000);
     }
 
-    event_container->FillEventHist(0);
+    if(fill_TTree) event_container->FillEventHist(0);
     
     const PHGlobal *globalCNT =
         findNode::getClass<PHGlobal>(TopNode, "PHGlobal");
@@ -138,7 +138,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!rpobject)
         std::cout << "NO ReactionPlaneObject!!!!!!!!!!!!!!!\n";
 
-    event_container->FillEventHist(1);
+    if(fill_TTree) event_container->FillEventHist(1);
 
     const int run_number = runHDR->get_RunNumber();
     int run_group = get_rungroup(run_number) - 1;
@@ -150,7 +150,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!trigscaled_on)
         return false;
 
-    event_container->FillEventHist(2);
+    if(fill_TTree) event_container->FillEventHist(2);
 
     // ZDC coincidence
     const float zdc1 = globalCNT->getZdcEnergyN();
@@ -160,20 +160,20 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (!isZDCOK)
         return false;
 
-    event_container->FillEventHist(3);
+    if(fill_TTree) event_container->FillEventHist(3);
 
     if (run_number < 0)
         return 0;
     if (fabs(bbc_vertex) > BBC_VERTEX_CUT)
         return 0;
 
-    event_container->FillEventHist(4);
+    if(fill_TTree) event_container->FillEventHist(4);
 
     if (centrality < 0 || centrality > 93)
         return 0;
 
-    event_container->FillEventHist(5);
-    event_container->FillCentrHist(centrality);
+    if(fill_TTree) event_container->FillEventHist(5);
+    if(fill_TTree) event_container->FillCentrHist(centrality);
 
     npassed++;
     
@@ -218,7 +218,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     event->SetPsi2FVTXA0(psi2_FVTXA0);
     event->SetPsi3FVTXA0(psi3_FVTXA0);
 
-    if(psi2_BBC>-9000 || psi2_FVTXA0 >-9000) event_container->FillEventHist(6);
+    if(fill_TTree && (psi2_BBC>-9000 || psi2_FVTXA0 >-9000)) event_container->FillEventHist(6);
 
     const int run_group_beamoffset = event->GetRunGroup(run_number);
     const int n_tracks = particleCNT->get_npart();
@@ -276,7 +276,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<2 ) return 0;
 
-    event_container->FillEventHist(7);
+    if(fill_TTree) event_container->FillEventHist(7);
 
     if(remove_hadron_hits) 
     {
@@ -339,15 +339,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
-        if (  mytrk ->GetGhost()==0 ||  mytrk->GetMinsDphi(0) > 0 ) addit_reject = 1;
-        if ( addit_reject == 1 &&  mytrk->GetMinsDphi(0) < 2 )
+        if (  ((mytrk->GetMinsDphi(2)>0||mytrk->GetHitCounter(2)<1)&&(mytrk->GetMinsDphi(3)>0||mytrk->GetHitCounter(3)<1)&&
+                centrality<60&&mytrk->GetMinsDphi(0)>0)||mytrk->GetGhost()<10) addit_reject = 1;
+        if ( mytrk->GetGhost()==0 )
              addit_reject += 10;
         
         int hadron_reject = 0;
-        if ( (mytrk->GetN0()>5 && mytrk->GetPtPrime()<=0.3) || (mytrk->GetN0()>4 && mytrk->GetPtPrime()>0.3 && mytrk->GetPtPrime()<=0.5) ||
-             (mytrk->GetN0()>3 && mytrk->GetPtPrime()>0.5 && mytrk->GetPtPrime()<=0.9) || mytrk->GetPtPrime()>0.9 ) hadron_reject=1;
-        if ( mytrk->GetPtPrime() > 0.4) hadron_reject+=10;
-        if ( (mytrk->GetN0()>4 && mytrk->GetPtPrime() > 0.4 && mytrk->GetPtPrime()<=0.6 ) || (mytrk->GetN0()>3 && mytrk->GetPtPrime() > 0.6 )  )  hadron_reject=100;
+        if ( mytrk->GetPtPrime() > 0.5 )  hadron_reject=1;
+        if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + SQR(mytrk->GetDisp()) / 8. ) hadron_reject+=10;
+        if ( mytrk->GetProb()>0.03 && mytrk->GetDisp() < 4) hadron_reject+=100;
         
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
         //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
@@ -522,6 +522,7 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
     newTrack->SetCrkz(trk->get_center_z(itrk_reco));
 
     newTrack->SetPrimes(bbcz, svxz, rg_beamoffset);
+    newTrack->ResetPrimes(bbcz, svxz, rg_beamoffset);
     newTrack->SetTOFE((trk->get_m2tof(itrk_reco))*100);
     newTrack->SetEmcTOF(trk->get_temc(itrk_reco));
 	if(trk->get_emcid(itrk_reco) >= 0)

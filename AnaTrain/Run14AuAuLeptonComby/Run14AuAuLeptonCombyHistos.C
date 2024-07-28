@@ -201,7 +201,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -214,10 +214,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( ghost1 < 10 || ghost2 < 10 ) return -999;
+  if ( match1 < 10 || match2 < 10 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -228,7 +228,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -244,7 +244,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 11 || ghost2 < 11 ) return -999;
+  if ( ghost1 < 110 || ghost2 < 110 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -255,7 +255,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -271,7 +271,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 11 || ghost2 < 11 ) return -999;
+  if ( ghost1 < 110 || ghost2 < 110 ) return -999;
 
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
@@ -287,7 +287,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -303,7 +303,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 11 || ghost2 < 11 ) return -999;
+  if ( ghost1 < 110 || ghost2 < 110 ) return -999;
 
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
@@ -319,7 +319,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -335,7 +335,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 100 || ghost2 < 100 ) return -999;
+  if ( ghost1 < 111 || ghost2 < 111 ) return -999;
 
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
@@ -351,7 +351,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   const double DCA_pip = DCA_X_pip*DCA_X_pip + DCA_Y_pip*DCA_Y_pip;
   const double DCA_pim = DCA_X_pim*DCA_X_pim + DCA_Y_pim*DCA_Y_pim;
 
-  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) - DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
+  const double DCA = DCA_Y_pip/fabs(DCA_Y_pip)*sqrt(DCA_pip) + DCA_Y_pim/fabs(DCA_Y_pim)*sqrt(DCA_pim);
   
   return fabs(DCA);
 }
@@ -364,13 +364,10 @@ float Run14AuAuLeptonCombyHistos::get_phi_ee(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const double phi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PHI0);
-  const double phi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PHI0);
+  const TVector3 ee1(p1->get_px(), p1->get_py(), p1->get_pz());
+  const TVector3 ee2(p2->get_px(), p2->get_py(), p2->get_pz());
 
-  const double dphi = fabs(phi_pip - phi_pim);
-
-  if ( dphi < TMath::Pi() ) return dphi;
-  return 2*TMath::Pi() - dphi;
+  return ee1.Angle(ee2);
 }
 
 float Run14AuAuLeptonCombyHistos::get_phi_V_ee(const UltraLightTrack *p1, const UltraLightTrack *p2)
