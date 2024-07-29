@@ -271,12 +271,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 110 || ghost2 < 110 ) return -999;
-
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-
-  if ( match1%2 == 0 || match2%2 == 0 ) return -999;
+  if ( ghost1 %2 == 0 || ghost2 %2 == 0 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
