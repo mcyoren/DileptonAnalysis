@@ -11,7 +11,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int associate_hits = 1;
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 1;
+  const int fill_QA_lepton_hists = 0;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -19,8 +19,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int do_track_QA = 0;
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
-  const int fill_true_DCA = 1;
-  const int check_veto = 1;
+  const int fill_true_DCA = 0;
+  const int check_veto = 0;
   const int fill_inv_mass = 1;
 
   char outname[200];
@@ -198,7 +198,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(2.5,0,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(2,2,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
@@ -224,7 +224,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    if(check_veto) event_container->CheckVeto();
+    event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
     myevent->ReshuffleElectrons();
