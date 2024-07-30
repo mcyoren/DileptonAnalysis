@@ -75,7 +75,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto);
+                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto,1);
 
     return 0;
 }
@@ -292,9 +292,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
           skip = true;
-        if ( fabs(mytrk.GetEmcTOF())>5)
-          skip = true;
-        if (mytrk.GetEmcdphi()>0.05 || mytrk.GetEmcdz()>25 )
+        if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
           skip = true;
         if (mytrk.GetPtPrime()<1.0 && mytrk.GetChi2()/(mytrk.GetNpe0()+0.1)>10)
           skip = true;
@@ -332,9 +330,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
           skip = true;
-        if ( fabs(mytrk.GetEmcTOF())>5)
-          skip = true;
-        if (mytrk.GetEmcdphi()>0.05 || mytrk.GetEmcdz()>25 )
+        if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
           skip = true;
         if (mytrk.GetPtPrime()<0.8 && mytrk.GetChi2()/(mytrk.GetNpe0()+0.1)>10)
           skip = true;
@@ -362,13 +358,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     
 
-    if(event->GetNtrack()<2) return 0;
+    if(event->GetNtrack()<1) return 0;
 
     fill_SVXHits_to_myevent(svxhitlist, event);
 
     event_container->Associate_Hits_to_Leptons(2,2,5);
     const int n_good_el = event_container->GetNGoodElectrons();
-    if( n_good_el<1 || (n_good_el<2&&centrality<20) ) return 0;
+    if( n_good_el<1  ) return 0;
 
     if(fill_TTree) event_container->FillEventHist(7);
 
@@ -415,6 +411,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             } 
         }
     }
+
+    event_container->CheckVeto();
+
     n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
@@ -436,6 +435,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       if( event->GetCentrality()<60)
       {
         bool skip = false; 
+        if (!(((mytrk.GetMinsDphi(2)>0||mytrk.GetHitCounter(2)<1)&&(mytrk.GetMinsDphi(3)>0||mytrk.GetHitCounter(3)<1)&&mytrk.GetMinsDphi(0)>0)||mytrk.GetGhost()<10) && mytrk.GetPtPrime()<0.7)
+          skip = true;
+        if (!((((mytrk.GetMinsDphi(2)>0||mytrk.GetHitCounter(2)<1)&&(mytrk.GetMinsDphi(3)>0||mytrk.GetHitCounter(3)<1))||mytrk.GetMinsDphi(0)>0)||mytrk.GetGhost()<10) && mytrk.GetPtPrime()>0.7&& mytrk.GetPtPrime()<0.9)
+          skip = true;
+        if (!((((mytrk.GetMinsDphi(2)>-1||mytrk.GetHitCounter(2)<1)&&(mytrk.GetMinsDphi(3)>-1||mytrk.GetHitCounter(3)<1))||mytrk.GetMinsDphi(0)>-1)||mytrk.GetGhost()<25) && mytrk.GetPtPrime()>0.9)
+          skip = true;
+        if ( fabs(mytrk.GetEmcTOF())>5)
+          skip = true;
         if( skip ){
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -453,6 +460,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         if (!((((mytrk.GetMinsDphi(2)>-1||mytrk.GetHitCounter(2)<1)&&(mytrk.GetMinsDphi(3)>-1||mytrk.GetHitCounter(3)<1))||mytrk.GetMinsDphi(0)>-1)||mytrk.GetGhost()<25) && mytrk.GetPtPrime()>0.5)
           skip = true;
+        if ( fabs(mytrk.GetEmcTOF())>5)
+          skip = true;
                     
         if( skip ){
           event->RemoveTrackEntry(itrk);
@@ -465,12 +474,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     
     //event->ReshuffleElectrons();
-    event_container->CleanUpHitList();
+    if(fill_TTree) event_container->CleanUpHitList();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
-    //event_container->fill_inv_mass();
+    event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
@@ -488,7 +497,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         int hadron_reject = 0;
         if ( mytrk->GetPtPrime() > 0.4 )  hadron_reject=+110;
-        if ( mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)>10) hadron_reject+=1;
+        if ( mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10) hadron_reject+=1;
         
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
         //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;

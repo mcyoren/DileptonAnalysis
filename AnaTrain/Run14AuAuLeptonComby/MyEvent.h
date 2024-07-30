@@ -940,10 +940,10 @@ namespace MyDileptonAnalysis
                   for (int i = 0; i < N_centr*3; i++)
                   { 
                         veto_sphi_phi_hist[i] = nullptr, veto_sthe_the_hist[i] = nullptr;
-                        inv_mass_dca_fg0[i]=nullptr;inv_mass_dca_fg1[i]=nullptr;inv_mass_dca_fg2[i]=nullptr;inv_mass_dca_fg3[i]=nullptr;
-                        inv_mass_dca_bg0[i]=nullptr;inv_mass_dca_bg1[i]=nullptr;inv_mass_dca_bg2[i]=nullptr;inv_mass_dca_bg3[i]=nullptr;
-                        delt_phi_dca_fg0[i]=nullptr;delt_phi_dca_fg1[i]=nullptr;delt_phi_dca_fg2[i]=nullptr;delt_phi_dca_fg3[i]=nullptr;
-                        delt_phi_dca_bg0[i]=nullptr;delt_phi_dca_bg1[i]=nullptr;delt_phi_dca_bg2[i]=nullptr;delt_phi_dca_bg3[i]=nullptr;
+                        inv_mass_dca_fg0[i]=nullptr;inv_mass_dca_fg1[i]=nullptr;inv_mass_dca_fg2[i]=nullptr;inv_mass_dca_fg3[i]=nullptr;inv_mass_dca_fg4[i]=nullptr;
+                        inv_mass_dca_bg0[i]=nullptr;inv_mass_dca_bg1[i]=nullptr;inv_mass_dca_bg2[i]=nullptr;inv_mass_dca_bg3[i]=nullptr;inv_mass_dca_bg4[i]=nullptr;
+                        delt_phi_dca_fg0[i]=nullptr;delt_phi_dca_fg1[i]=nullptr;delt_phi_dca_fg2[i]=nullptr;delt_phi_dca_fg3[i]=nullptr;delt_phi_dca_fg4[i]=nullptr;
+                        delt_phi_dca_bg0[i]=nullptr;delt_phi_dca_bg1[i]=nullptr;delt_phi_dca_bg2[i]=nullptr;delt_phi_dca_bg3[i]=nullptr;delt_phi_dca_bg4[i]=nullptr;
                   }
                   is_fill_hsits = 0;
                   is_fill_hadron_hsits = 0;

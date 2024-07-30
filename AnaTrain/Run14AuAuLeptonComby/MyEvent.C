@@ -1078,8 +1078,10 @@ namespace MyDileptonAnalysis
                 
                 event->SetDCA2(itrk, ilayer);
                 DCPT_ReconPT->Fill(mytrk->GetReconPT(), pt, central_bin + 5 * (ilayer - 2));
-                if (mytrk->GetGhost()==0)
-                sDCPT_ReconPT->Fill(mytrk->GetReconPT(), pt, central_bin + 5 * (ilayer - 2));
+                if (mytrk->GetGhost()==0&&mytrk->GetMcId()<-1)
+                    sDCPT_ReconPT->Fill(mytrk->GetReconPT(), pt, central_bin + 5 * (ilayer - 2));
+                if (mytrk->GetMcId()>-1)
+                    sDCPT_ReconPT->Fill(mytrk->GetReconPT(), event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
                 float third_bin_input = 0.1 + (1 - mytrk->GetChargePrime()) * 1.5 + 6 * mytrk->GetArm();
                 if (is_fill_DCA_hist)
                     DCA2_2D_hist[central_bin]->Fill(mytrk->GetDCAX2(), mytrk->GetDCAY2(), third_bin_input);
