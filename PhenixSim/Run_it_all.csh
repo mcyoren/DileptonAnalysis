@@ -151,6 +151,12 @@ echo "==============================================="
 echo "============= HELIOS TO OSCAR ================="
 echo "==============================================="
 set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02_5_10M.root
+if( $selected_paticle == 2) then
+ set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
+endif
+if( $selected_paticle == 0) then
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_3_10_50M.root
+endif
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
