@@ -983,7 +983,7 @@ namespace MyDileptonAnalysis
                     if (dphi < 0)
                         dphi_index = 0;
                     
-                    if (ilayer==10&&LiLayer==1) 
+                    if (ilayer==1&&LiLayer==1) 
                     {
                         dphivec.push_back(dphi0);
                         dthevec.push_back(dthe0);
@@ -998,11 +998,11 @@ namespace MyDileptonAnalysis
                         
                         if(ilayer!=0)
                         {
-                            const int countvec = ilayer>10 ? (int) dphivec.size() : 0;
+                            const int countvec = (ilayer>1) ? (int) dphivec.size() : 0;
                             for (int ivec = 0; ivec < countvec; ivec++)
                             {
                                 if(fabs(sdthe)<4)veto_sphi_sphi_hist[1-1+3*centr_bin]->Fill(dphi0-dphivec[ivec]*(radii[LiLayer]-radii[0])/(radii[1]-radii[0]),  dphivec[ivec],pt);
-                                if(fabs(sdthe)<4)veto_sphi_sphi_hist[ilayer-1+3*centr_bin]->Fill(dphi0*0-dphivec[ivec]*(radii[LiLayer]-radii[0]*0)/(radii[1]-radii[0]*0),  dphi0,pt);
+                                if(fabs(sdthe)<4)veto_sphi_sphi_hist[ilayer-1+3*centr_bin]->Fill(+dphivec[ivec]*(radii[LiLayer]-radii[0])/(radii[1]-radii[0]),  dphi0,pt);
                                 if(sdphi>3.5*ilayer&&sdphi<12.5*ilayer)veto_sthe_sthe_hist[ilayer-1+3*centr_bin]->Fill(dthe0-dthevec[ivec],  dthevec[ivec],pt);      
                             }
                             if(fabs(sdthe)<2)veto_sphi_phi_hist[ilayer-1+3*centr_bin]->Fill(sdphi,  dphi_prev,pt);
@@ -1014,12 +1014,12 @@ namespace MyDileptonAnalysis
                             }
                         }
                     }
-                    if (ilayer<2 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.04+0.04*exp(-2*pt) && fabs(dthe) < 0.01)
+                    if (ilayer<2  && fabs(dphi) < 0.04+0.04*exp(-2*pt) && fabs(dthe) < 0.01)
                     {
                         if(electron->GetGhost()<5) electron->SetGhost(ilayer);
                         count++;
                     }
-                    if (ilayer>1 && dphi_index + charge_bin != 1 && fabs(dphi) < 0.1  && fabs(dthe) < 0.01 )
+                    if (ilayer>1 && fabs(dphi) < 0.1  && fabs(dthe) < 0.01 )
                     {
                         if(electron->GetGhost()<5) electron->SetGhost(ilayer);
                         count++;
