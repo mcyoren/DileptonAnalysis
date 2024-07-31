@@ -866,7 +866,7 @@ namespace MyDileptonAnalysis
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
             TH3D *DCPT_ReconPT, *sDCPT_ReconPT, *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr], *charge_hist;
             TH3D *veto_phi_hist[N_centr], *veto_the_hist[N_centr], *veto_phi_phi_hist[N_centr], *veto_the_the_hist[N_centr];
-            TH3D *veto_sphi_phi_hist[N_centr*3], *veto_sthe_the_hist[N_centr*3];
+            TH3D *veto_sphi_phi_hist[N_centr*3], *veto_sthe_the_hist[N_centr*3], *veto_sphi_sphi_hist[N_centr*3], *veto_sthe_sthe_hist[N_centr*3];
             TH3D *couter_veto_hist, *counter_assoc_eff_hist, *counter_assoc_ghost_hist, *veto_type_hist;
             TH3D *inv_mass_dca_fg0[N_centr*3],*inv_mass_dca_fg1[N_centr*3],*inv_mass_dca_fg2[N_centr*3],*inv_mass_dca_fg3[N_centr*3],*inv_mass_dca_fg4[N_centr*3];
             TH3D *inv_mass_dca_bg0[N_centr*3],*inv_mass_dca_bg1[N_centr*3],*inv_mass_dca_bg2[N_centr*3],*inv_mass_dca_bg3[N_centr*3],*inv_mass_dca_bg4[N_centr*3];
@@ -939,7 +939,7 @@ namespace MyDileptonAnalysis
                   }
                   for (int i = 0; i < N_centr*3; i++)
                   { 
-                        veto_sphi_phi_hist[i] = nullptr, veto_sthe_the_hist[i] = nullptr;
+                        veto_sphi_phi_hist[i] = nullptr, veto_sthe_the_hist[i] = nullptr, veto_sphi_sphi_hist[i] = nullptr, veto_sthe_sthe_hist[i] = nullptr;
                         inv_mass_dca_fg0[i]=nullptr;inv_mass_dca_fg1[i]=nullptr;inv_mass_dca_fg2[i]=nullptr;inv_mass_dca_fg3[i]=nullptr;inv_mass_dca_fg4[i]=nullptr;
                         inv_mass_dca_bg0[i]=nullptr;inv_mass_dca_bg1[i]=nullptr;inv_mass_dca_bg2[i]=nullptr;inv_mass_dca_bg3[i]=nullptr;inv_mass_dca_bg4[i]=nullptr;
                         delt_phi_dca_fg0[i]=nullptr;delt_phi_dca_fg1[i]=nullptr;delt_phi_dca_fg2[i]=nullptr;delt_phi_dca_fg3[i]=nullptr;delt_phi_dca_fg4[i]=nullptr;

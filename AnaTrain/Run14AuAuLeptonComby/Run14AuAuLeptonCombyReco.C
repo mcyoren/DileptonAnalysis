@@ -290,6 +290,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         bool skip = false; 
         if (mytrk.GetPtPrime()>5)
           skip = true;
+        if (mytrk.GetCrkphi()<-99)
+          skip = true;
         if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
           skip = true;
         if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
@@ -327,6 +329,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       {
         bool skip = false; 
         if (mytrk.GetPtPrime()>5)
+          skip = true;
+        if (mytrk.GetCrkphi()<-99)
           skip = true;
         if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
           skip = true;

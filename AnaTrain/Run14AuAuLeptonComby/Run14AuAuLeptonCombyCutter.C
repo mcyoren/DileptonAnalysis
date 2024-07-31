@@ -111,5 +111,5 @@ float Run14AuAuLeptonCombyCutter::GetRichGhost(float phi1, float z1, float phi2,
     const float dcenter_z = (z1 - z2) / dcenter_z_sigma;
     const float dcenter_phi = (phi1 - phi2) / dcenter_phi_sigma;
 
-    return sqrt(dcenter_phi * dcenter_phi + dcenter_z * dcenter_z);
+    return sqrt(dcenter_phi * dcenter_phi + 0*dcenter_z * dcenter_z);
 }

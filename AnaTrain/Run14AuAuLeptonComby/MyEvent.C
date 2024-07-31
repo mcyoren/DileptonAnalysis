@@ -917,6 +917,8 @@ namespace MyDileptonAnalysis
                 rp += step_size;
             }
             std::vector<double> prevphis, prevthes;
+            std::vector<double> dphivec, dthevec;
+            float phi00=-999, the00=999;
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
                 if(electron->GetHitCounter(ilayer)<1) continue;
@@ -926,10 +928,15 @@ namespace MyDileptonAnalysis
 
                 const float phi_orig = hit_orig->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                 const float the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                if(ilayer==0)
+                {
+                    phi00 = phi_orig;
+                    the00 = the_orig;
+                }
                 const float dphi_this  = (dilep_phi_projection[hit_orig->GetiLayer()] - phi_orig)*electron->GetChargePrime();
                 const float dthe_this  = (dilep_the_projection[hit_orig->GetiLayer()] - the_orig)*electron->GetChargePrime();
-                const float dphi_prev = ilayer == 0 ? 0 : prevphis[prevphis.size()-1];
-                const float dthe_prev = ilayer == 0 ? 0 : prevthes[prevphis.size()-1];
+                float dphi_prev = ilayer == 0 ? 0 : prevphis[prevphis.size()-1];
+                float dthe_prev = ilayer == 0 ? 0 : prevthes[prevphis.size()-1];
                 //const float ddphi_this = dphi_this - dphi_prev;
                 //const float ddthe_this = dthe_this - dthe_prev;
                 const float sigma_phi_value   = electron->get_dynamic_sigma_phi_data  (0, ilayer==0 ? 0 : ilayer-1, dphi_prev);
@@ -961,6 +968,9 @@ namespace MyDileptonAnalysis
                     const float dphi = (phi_hit - phi_orig)*electron->GetChargePrime();
                     const float dthe = (theta_hit - the_orig)*electron->GetChargePrime();
 
+                    const float dphi0 = -(phi_hit - phi00)*electron->GetChargePrime();
+                    const float dthe0 = -(theta_hit - the00)*electron->GetChargePrime();
+
                     const float newdphi = (dilep_phi_projection[LiLayer] - phi_hit)*electron->GetChargePrime();
                     const float newdthe = (dilep_the_projection[LiLayer] - theta_hit)*electron->GetChargePrime();
                     const float sdphi = (newdphi - mean_phi_value) / sigma_phi_value;
@@ -972,6 +982,12 @@ namespace MyDileptonAnalysis
                     int dphi_index = 1;
                     if (dphi < 0)
                         dphi_index = 0;
+                    
+                    if (ilayer==10&&LiLayer==1) 
+                    {
+                        dphivec.push_back(dphi0);
+                        dthevec.push_back(dthe0);
+                    }
 
                     //const float mean = veto_window_mean_par0[layer][charge_bin][dphi_index] + veto_window_mean_par1[layer][charge_bin][dphi_index]*exp(veto_window_mean_par2[layer][charge_bin][dphi_index] * pt);
                     //const float sigma = veto_window_sigma_par0[layer][charge_bin][dphi_index] + veto_window_sigma_par1[layer][charge_bin][dphi_index]*exp(veto_window_sigma_par2[layer][charge_bin][dphi_index] * pt);
@@ -979,8 +995,16 @@ namespace MyDileptonAnalysis
                     {
                         if (fabs(dthe) < 0.01  ) veto_phi_hist[centr_bin]->   Fill(dphi,ilayer+4*dphi_index+8*charge_bin,pt);
                         if (fabs(dphi) < 0.01 + 0.03*ilayer )veto_the_hist[centr_bin]->Fill(dthe,ilayer+4*dphi_index+8*charge_bin,pt);
+                        
                         if(ilayer!=0)
                         {
+                            const int countvec = ilayer>10 ? (int) dphivec.size() : 0;
+                            for (int ivec = 0; ivec < countvec; ivec++)
+                            {
+                                if(fabs(sdthe)<4)veto_sphi_sphi_hist[1-1+3*centr_bin]->Fill(dphi0-dphivec[ivec]*(radii[LiLayer]-radii[0])/(radii[1]-radii[0]),  dphivec[ivec],pt);
+                                if(fabs(sdthe)<4)veto_sphi_sphi_hist[ilayer-1+3*centr_bin]->Fill(dphi0*0-dphivec[ivec]*(radii[LiLayer]-radii[0]*0)/(radii[1]-radii[0]*0),  dphi0,pt);
+                                if(sdphi>3.5*ilayer&&sdphi<12.5*ilayer)veto_sthe_sthe_hist[ilayer-1+3*centr_bin]->Fill(dthe0-dthevec[ivec],  dthevec[ivec],pt);      
+                            }
                             if(fabs(sdthe)<2)veto_sphi_phi_hist[ilayer-1+3*centr_bin]->Fill(sdphi,  dphi_prev,pt);
                             if(sdphi>3.5*ilayer&&sdphi<12.5*ilayer)veto_sthe_the_hist[ilayer-1+3*centr_bin]->Fill(sdthe,  dthe_prev,pt);
                             if(centr_bin>2)
@@ -1148,6 +1172,20 @@ namespace MyDileptonAnalysis
                     continue;
                 //if (!(((newTrack2->GetMinsDphi(2)>0||newTrack2->GetHitCounter(2)<1)&&(newTrack2->GetMinsDphi(3)>0||newTrack2->GetHitCounter(3)<1)&&newTrack2->GetMinsDphi(0)>0)||newTrack2->GetGhost()<10))
                 //    continue;
+                ////////pair cuts
+                const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
+                const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
+                const float crkphi_pip = newTrack1->GetChargePrime() != newTrack2->GetChargePrime() ? newTrack1->GetCrkphi() : 9999;
+                const float crkphi_pim = newTrack2->GetCrkphi();
+                const float dcenter_phi = fabs(crkphi_pip - crkphi_pim) / 0.013;
+                if (phi_pip < phi_pim && dcenter_phi<5 && newTrack1->GetChargePrime() != newTrack2->GetChargePrime()) continue;
+                const float dalpha = newTrack1->GetAlpha() - newTrack2->GetAlpha();
+                const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
+                const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
+                if (fabs(dzed) < 6.0 && fabs(dphiDC - (0.13 * dalpha)) < 0.015) continue;
+                if (fabs(dphiDC - (0.04 * dalpha)) < 0.015) continue;
+                if (fabs(dphiDC - (-0.065 * dalpha)) < 0.015) continue;
+                //////////////end of pair cuts
                 
                 const int in_hist = (int) (event->GetCentrality() / 20) + N_centr*((newTrack1->GetChargePrime()+newTrack2->GetChargePrime()+2)/2);
                 //const float a2 = newTrack2->GetMinDist(0);
@@ -1209,6 +1247,20 @@ namespace MyDileptonAnalysis
                     // const float a2 = newTrack2->GetMinDist(0);
                     // const float b2 = newTrack2->GetMinDist(1);
                     // const float c2 = newTrack2->GetMinDist(2);
+                    ////////pair cuts
+                    const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
+                    const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
+                    const float crkphi_pip = newTrack1->GetChargePrime() != newTrack2->GetChargePrime() ? newTrack1->GetCrkphi() : 9999;
+                    const float crkphi_pim = newTrack2->GetCrkphi();
+                    const float dcenter_phi = fabs(crkphi_pip - crkphi_pim) / 0.013;
+                    if (phi_pip < phi_pim && dcenter_phi<5 && newTrack1->GetChargePrime() != newTrack2->GetChargePrime()) continue;
+                    const float dalpha = newTrack1->GetAlpha() - newTrack2->GetAlpha();
+                    const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
+                    const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
+                    if (fabs(dzed) < 6.0 && fabs(dphiDC - (0.13 * dalpha)) < 0.015) continue;
+                    if (fabs(dphiDC - (0.04 * dalpha)) < 0.015) continue;
+                    if (fabs(dphiDC - (-0.065 * dalpha)) < 0.015) continue;
+                    //////////////end of pair cuts
                     const int in_hist = (int) (event->GetCentrality() / 20) + N_centr*((newTrack1->GetChargePrime()+newTrack2->GetChargePrime()+2)/2);
 
                     const float dca0 = abs(newTrack1->GetDCAY2() + newTrack2->GetDCAY2());
@@ -1538,12 +1590,14 @@ namespace MyDileptonAnalysis
         }
         if(check_veto)
         {
-            INIT_HISTOS(3, veto_phi_hist,       N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_the_hist,       N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_sphi_phi_hist,3*N_centr, 150,   -5,    40, 150,-0.15,0.15, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_sthe_the_hist,3*N_centr, 150,   -15,   15, 150,-0.15,0.15, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_phi_phi_hist,   N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_the_the_hist,   N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_phi_hist,        N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_the_hist,        N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_sphi_phi_hist, 3*N_centr, 150,    -5,   70, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_sthe_the_hist, 3*N_centr, 150,   -15,   15, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_sphi_sphi_hist,3*N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_sthe_sthe_hist,3*N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_phi_phi_hist,    N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_the_the_hist,    N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
             INIT_HIST(3, couter_veto_hist,         8, 0, 8, 50, 0, 5, 5, 0, 5);
             INIT_HIST(3, counter_assoc_eff_hist,   30,0,30, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, counter_assoc_ghost_hist, 30,0,30, 50, 0, 5, 10, 0, 100);
