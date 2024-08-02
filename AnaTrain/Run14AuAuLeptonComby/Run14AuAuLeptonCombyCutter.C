@@ -76,7 +76,12 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float dzed = zed_pip - zed_pim;
 
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0)
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 && 
+                     p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI)>-99 && p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI)>-99)
+        return false;
+    if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 &&
+                     phi_pip < phi_pim)
         return false;
 
     // pc1
@@ -111,5 +116,5 @@ float Run14AuAuLeptonCombyCutter::GetRichGhost(float phi1, float z1, float phi2,
     const float dcenter_z = (z1 - z2) / dcenter_z_sigma;
     const float dcenter_phi = (phi1 - phi2) / dcenter_phi_sigma;
 
-    return sqrt(dcenter_phi * dcenter_phi + 0*dcenter_z * dcenter_z);
+    return sqrt(dcenter_phi * dcenter_phi + dcenter_z * dcenter_z);
 }

@@ -4,13 +4,13 @@ void Run14AuAuLeptonCombyReco::InitParams()
 {
     BBC_VERTEX_CUT = 10;
     TRIGGERBIT = 4; // 4 - BBCLL1(>1 tubes) narrowvtx, 5 - BBCLL1(>1 tubes), 6 - BBCLL1(>1 tubes) novertex
-    E_PT = 0.4;     // 0.15 in RDanalyzer for simulation to study smearing effect
-    MAX_PT = 5;
+    E_PT = 0.2;    // 0.15 in RDanalyzer for simulation to study smearing effect
+    MAX_PT = 10;
     QUALITY[0] = 31;
     QUALITY[1] = 51;
     QUALITY[2] = 63;
-    Z_GLOBAL = 75;
-    DC_DEADMAP = 1; // by default, DC deadmap is on
+    Z_GLOBAL = 85;
+    DC_DEADMAP = 0; // by default, DC deadmap is on
     N0 = 2;
     DISP = 5;
     CHI2_NPE0 = 10;
