@@ -19,7 +19,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int do_track_QA = 0;
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
-  const int fill_true_DCA = 0;
+  const int fill_true_DCA = 1;
   const int check_veto = 0;
   const int fill_inv_mass = 1;
 
@@ -50,7 +50,10 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   TH3D *myhist5 = new TH3D("myhist5","myhist5",500,-2000,2000,500,0,5,10,0,10);
   TH3D *myhist6 = new TH3D("myhist6","myhist6",500,-2000,2000,500,0,5,10,0,10);
   TH3D *myhist7 = new TH3D("myhist7","myhist7",500,-2000,2000,500,0,5,10,0,10);
- 
+  TF1 f("f","gaus",-5.*250./10000,5.*250./10000);
+  f.SetParameter(0,1);
+  f.SetParameter(1,0);
+  f.SetParameter(2,250./10000);
   for (int ievent = beggin; ievent < endish; ievent++)
   {
     if ((ievent -beggin) % 50000 == 0)
@@ -63,7 +66,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
 
-
+    myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
+    myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*0);
     myevent->SetVtxZ(myevent->GetPreciseZ());
     /*myevent->SetCentrality(event->GetCentrality());
     myevent->SetPreciseX(event->GetPreciseX());
@@ -227,7 +231,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
-    myevent->ReshuffleElectrons();
+    //myevent->ReshuffleElectrons();
     if(fill_inv_mass) event_container->fill_inv_mass();
     myevent->ClearEvent();
     //event->ClearEvent();

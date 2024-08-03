@@ -21,7 +21,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int Use_ident = 0;
   const int fill_true_DCA = 1;
   const int check_veto = 0;
-  const int fill_inv_mass = 0;
+  const int fill_inv_mass = 1;
   const int istruehitsigmacounter = 0;
 
 

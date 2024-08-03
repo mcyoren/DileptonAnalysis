@@ -75,12 +75,11 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float dphi = phi_pip - phi_pim;
     const float dzed = zed_pip - zed_pim;
 
-    if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 && 
-                     p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI)>-99 && p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI)>-99)
+    if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 2 )
         return false;
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 &&
+                     p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 &&
                      phi_pip < phi_pim)
         return false;
 
