@@ -79,8 +79,7 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
                      p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 2 )
         return false;
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 &&
-                     phi_pip < phi_pim)
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 )
         return false;
 
     // pc1
