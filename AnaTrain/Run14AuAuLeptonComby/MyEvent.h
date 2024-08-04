@@ -865,7 +865,7 @@ namespace MyDileptonAnalysis
             TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el, *rich_prob1, *rich_prob2, *rich_prob3;
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
             TH3D *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr];
-            TH3D *DCPT_ReconPT, *sDCPT_ReconPT,  *charge_hist, *phi_hist, *the_hist;
+            TH3D *DCPT_ReconPT, *sDCPT_ReconPT,  *charge_hist, *phi_hist, *the_hist, *pt_corr;
             TH3D *veto_phi_hist[N_centr], *veto_the_hist[N_centr], *veto_phi_phi_hist[N_centr], *veto_the_the_hist[N_centr];
             TH3D *veto_sphi_phi_hist[N_centr*3], *veto_sthe_the_hist[N_centr*3], *veto_sphi_sphi_hist[N_centr*3], *veto_sthe_sthe_hist[N_centr*3];
             TH3D *couter_veto_hist, *counter_assoc_eff_hist, *counter_assoc_ghost_hist, *veto_type_hist;
@@ -891,7 +891,7 @@ namespace MyDileptonAnalysis
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   rich_prob1 = nullptr; rich_prob2 = nullptr; rich_prob3 = nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr;
-                  DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr;
+                  DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr, pt_corr = nullptr;
                   couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
                   myvtx_hist = nullptr;
                   truehithist = nullptr; truehitsigmahist = nullptr;
