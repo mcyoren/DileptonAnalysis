@@ -933,20 +933,24 @@ namespace MyDileptonAnalysis
             float phi00=-999, the00=999;
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
-                if(electron->GetHitCounter(ilayer)<1) continue;
-                int id_hit = electron->GetHitIndex(ilayer);
 
-                MyDileptonAnalysis::MyVTXHit *hit_orig = event->GetVTXHitEntry(id_hit);
-
-                const float phi_orig = hit_orig->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
-                const float the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                MyDileptonAnalysis::MyVTXHit *hit_orig = nullptr;
+                int id_hit = -999;
+                float phi_orig = -999, the_orig = -999, dphi_this = -999, dthe_this = -999;  
+                if(electron->GetHitCounter(ilayer)>0) 
+                {
+                    id_hit = electron->GetHitIndex(ilayer);
+                    hit_orig = event->GetVTXHitEntry(id_hit);
+                    phi_orig = hit_orig->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                    the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                    dphi_this  = (dilep_phi_projection[hit_orig->GetiLayer()] - phi_orig)*electron->GetChargePrime();
+                    dthe_this  = (dilep_the_projection[hit_orig->GetiLayer()] - the_orig)*electron->GetChargePrime();
+                }
                 if(ilayer==0)
                 {
                     phi00 = phi_orig;
                     the00 = the_orig;
                 }
-                const float dphi_this  = (dilep_phi_projection[hit_orig->GetiLayer()] - phi_orig)*electron->GetChargePrime();
-                const float dthe_this  = (dilep_the_projection[hit_orig->GetiLayer()] - the_orig)*electron->GetChargePrime();
                 float dphi_prev = ilayer == 0 ? 0 : prevphis[prevphis.size()-1];
                 float dthe_prev = ilayer == 0 ? 0 : prevthes[prevphis.size()-1];
                 //const float ddphi_this = dphi_this - dphi_prev;
@@ -988,14 +992,14 @@ namespace MyDileptonAnalysis
                     const float sdphi = (newdphi - mean_phi_value) / sigma_phi_value;
                     const float sdthe = (newdthe - mean_theta_value) / sigma_theta_value;
 
-                    if (abs(dphi) > 0.5 || abs(dthe) > 0.5 || abs(dphi) < 0.0005)
+                    if (abs(dphi0) > 0.5 || abs(dthe0) > 0.5 || abs(dphi) < 0.0005)
                         continue;
 
                     int dphi_index = 1;
                     if (dphi < 0)
                         dphi_index = 0;
                     
-                    if (false&&ilayer==1&&LiLayer==1) 
+                    if (true&&ilayer==1&&LiLayer==1) 
                     {
                         dphivec.push_back(dphi0);
                         dthevec.push_back(dthe0);
@@ -1017,7 +1021,7 @@ namespace MyDileptonAnalysis
                                 if(fabs(sdthe)<4)veto_sphi_sphi_hist[ilayer-1+3*centr_bin]->Fill(+dphivec[ivec]*(radii[LiLayer]-radii[0])/(radii[1]-radii[0]),  dphi0,pt);
                                 if(sdphi>3.5*ilayer&&sdphi<12.5*ilayer)veto_sthe_sthe_hist[ilayer-1+3*centr_bin]->Fill(dthe0-dthevec[ivec],  dthevec[ivec],pt);      
                             }
-                            if(fabs(sdthe)<2)veto_sphi_phi_hist[ilayer-1+3*centr_bin]->Fill(sdphi,  dphi_prev,pt);
+                            if(fabs(sdthe)<2)veto_sphi_phi_hist[ilayer-1+3*centr_bin]->Fill(sdphi,  dphi0,pt);
                             if(sdphi>3.5*ilayer&&sdphi<12.5*ilayer)veto_sthe_the_hist[ilayer-1+3*centr_bin]->Fill(sdthe,  dthe_prev,pt);
                             if(centr_bin>2)
                             {
@@ -1040,7 +1044,7 @@ namespace MyDileptonAnalysis
                     if(electron->GetGhost()<10 && ilayer>0 && sdphi>2.5*ilayer && sdphi<16.0*(ilayer<2?1:2) && fabs(sdthe)<2.0+ilayer)   electron->SetGhost(ilayer+10);
                     if(electron->GetGhost()<15 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer         && fabs(sdthe)<2.0+ilayer)   electron->SetGhost(ilayer+15);
                     if(electron->GetGhost()<20 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*ilayer         && fabs(sdthe)<2.0)          electron->SetGhost(ilayer+20);
-                    if(electron->GetGhost()<25 && ilayer>0 && sdphi>2.5*ilayer && sdphi<12.5*(ilayer<2?1:2) && fabs(sdthe)<2.0)          electron->SetGhost(ilayer+25);
+                    if(electron->GetGhost()<25 && ilayer>0 && dphi0>0          && sdphi<12.5*(ilayer<2?1:2) && fabs(sdthe)<2.0)          electron->SetGhost(ilayer+25);
                 }
             }
             if(is_check_veto) 
@@ -1559,14 +1563,14 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dthe_hist,  N_centr, 100, -0.1, 0.1, 16, 0, 16, 50, 0, 5);
             INIT_HISTOS(3, sdphi_hist, N_centr, 100, -10, 10,   16, 0, 16, 50, 0, 5);
             INIT_HISTOS(3, sdthe_hist, N_centr, 100, -10, 10,   16, 0, 16, 50, 0, 5);
-            INIT_HISTOS(3, dphi_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
-            INIT_HISTOS(3, dthe_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
-            INIT_HISTOS(3, dphi_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
-            INIT_HISTOS(3, dthe_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
-            INIT_HISTOS(3, dthe_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
-            INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
-            INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 32, 0, 32);
-            INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 32, 0, 32);
+            INIT_HISTOS(3, dphi_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 52, 0, 52);
+            INIT_HISTOS(3, dthe_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 52, 0, 52);
+            INIT_HISTOS(3, dphi_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 52, 0, 52);
+            INIT_HISTOS(3, dthe_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 52, 0, 52);
+            INIT_HISTOS(3, dthe_phi0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 52, 0, 52);
+            INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 52, 0, 52);
+            INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 52, 0, 52);
+            INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 52, 0, 52);
             INIT_HIST(3, myvtx_hist, 1000, -5, 5, 8 , 0 ,8, 4, 0 ,4);
             is_fill_hadron_hsits = 1;
         }
