@@ -1134,11 +1134,11 @@ namespace MyDileptonAnalysis
                 {
                     DCPT_ReconPT ->Fill(pt,                  event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
                     sDCPT_ReconPT->Fill(mytrk->GetReconPT(), event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
-                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0 - (mytrk->GetReconPT() - pt)/pt;
+                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0;
                     const float alpha = mytrk->GetAlphaPrime();
                     const float alphaprime = alpha + (mytrk->GetPhi0() - mytrk->GetPhi0Prime())/2.0195;
                     const float ptprime = pt+0*fabs(alpha / alphaprime);
-                    pt_corr ->Fill((event->GetBBCcharge()-ptprime)/ptprime,ptprime,  corr_fac);
+                    if(mytrk->GetReconPT()>pt*1.2)pt_corr ->Fill((event->GetBBCcharge()-ptprime)/ptprime,ptprime,  corr_fac);
                     charge_hist->Fill( (( mytrk->GetCharge() - event->GetEvtNo()/abs(event->GetEvtNo()) )==0)+ (event->GetEvtNo()>0)*2 +  4*mytrk->GetArm(), pt, central_bin);
                     charge_hist->Fill( (( mytrk->GetChargePrime() - event->GetEvtNo()/abs(event->GetEvtNo()) )==0)+ (event->GetEvtNo()>0)*2 +  4*mytrk->GetArm(), pt, central_bin+5);
                     phi_hist   ->Fill((mytrk->GetPhi0()-event->GetBBCchargeN())*mytrk->GetChargePrime(), pt, central_bin);
@@ -1150,11 +1150,11 @@ namespace MyDileptonAnalysis
                 {
                     DCPT_ReconPT ->Fill(pt,                  event->GetBBCtimeS(), central_bin + 5 * (ilayer - 2));
                     sDCPT_ReconPT->Fill(mytrk->GetReconPT(), event->GetBBCtimeS(), central_bin + 5 * (ilayer - 2));
-                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0- (mytrk->GetReconPT() - pt)/pt;
+                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0;
                     const float alpha = mytrk->GetAlphaPrime();
                     const float alphaprime = alpha + (mytrk->GetPhi0() - mytrk->GetPhi0Prime())/2.0195;
                     const float ptprime = pt+0*fabs(alpha / alphaprime);
-                    pt_corr ->Fill((event->GetBBCtimeS()-ptprime)/ptprime,ptprime,  corr_fac);
+                    if(mytrk->GetReconPT()>pt*1.2)pt_corr ->Fill((event->GetBBCtimeS()-ptprime)/ptprime,ptprime,  corr_fac);
                     charge_hist->Fill( (( mytrk->GetCharge() - event->GetBBCtimeN()/abs(event->GetBBCtimeN()) )==0)+ (event->GetBBCtimeN()>0)*2 +  4*mytrk->GetArm(), pt, central_bin);
                     charge_hist->Fill( (( mytrk->GetChargePrime() - event->GetBBCtimeN()/abs(event->GetBBCtimeN()) )==0)+ (event->GetBBCtimeN()>0)*2 +  4*mytrk->GetArm(), pt, central_bin+5);
                     phi_hist   ->Fill((mytrk->GetPhi0()-event->GetPsi3BBC())*mytrk->GetChargePrime(), pt, central_bin);
