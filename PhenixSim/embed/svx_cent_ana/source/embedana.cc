@@ -198,7 +198,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     std::cout << "px,py,pz,id : " << event->GetBBCcharge()*cos(event->GetBBCchargeN()) << " " << event->GetBBCcharge()*sin(event->GetBBCchargeN())<< " " << event->GetBBCcharge()/tan(event->GetBBCchargeS()) << " " << event->GetEvtNo() << " " << std::endl;
    
   // event->ClearEvent();
-  InPartNumber += nn_loc - 1;
+  InPartNumber++;//InPartNumber += nn_loc - 1;
 
   if (embedtrk == nullptr)
   {
@@ -608,7 +608,7 @@ int embedana::End(PHCompositeNode *topNode)
 int embedana::ReadOrigPartMoms()
 {
 
-  int i, k, nn;
+  int i, k, nn, j;
 
   printf("Small oscar file is %s\n", local_oscarpath.c_str());
 
@@ -621,7 +621,7 @@ int embedana::ReadOrigPartMoms()
     return -1;
   }
 
-  i = 0; k = 0; nn = 0;
+  i = 0; k = 0; j = 0; nn = 0;
   while (getline(fin, line))
   {
     if (line.find("#") == 0)
@@ -633,11 +633,14 @@ int embedana::ReadOrigPartMoms()
     if ( i2 > 0 && i2 < 6)
     {
        nn = i2;
+       j = 0;
        k++;
     }
     if (TMath::Abs(i2) > 5 && TMath::Abs(i2)<9999)
     {
       s >> i3 >> px >> py >> pz >> dummy >> dummy >> vx >> vy >> vz;
+
+      if(j>1) continue;
       //std::cout<<i2<<" "<<px<<" "<<py<<" "<<pz<<" "<<nn<<endl;
       if (i >= 22000)
       {
@@ -655,6 +658,7 @@ int embedana::ReadOrigPartMoms()
       InData_read[i].vz = vz;
 
       ++i;
+      ++j;
     }
   }
   std::cout << "Nlines: " << i << ";  Nev: " << k << std::endl;
@@ -721,7 +725,7 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
     const float rich_phi = d_trk->get_center_phi(itrk);
     
     const float dep = d_trk->get_dep(itrk);
-    if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL) std::cout<<"WTF:::: "<<d_trk->get_zed(itrk)<< " "<< Z_GLOBAL<<std::endl;
+    //if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL) std::cout<<"WTF:::: "<<d_trk->get_zed(itrk)<< " "<< Z_GLOBAL<<std::endl;
     if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL)
         return -1;
 

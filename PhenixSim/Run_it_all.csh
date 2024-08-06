@@ -157,6 +157,9 @@ endif
 if( $selected_paticle == 0) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_3_10_50M.root
 endif
+if( $selected_paticle == 3) then
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_3_10_10M.root
+endif
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
