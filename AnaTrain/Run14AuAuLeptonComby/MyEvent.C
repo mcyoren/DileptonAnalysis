@@ -384,8 +384,6 @@ namespace MyDileptonAnalysis
             long final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
-                float chi2 = 0;
-                float recon_pt = 0;
                 const int inum0 = numbers[0][inum] / 10000000-1;
                 const int inum1 = numbers[0][inum] / 10000 %1000-1;
                 const int inum2 = numbers[0][inum] / 100 %100-1;
@@ -393,6 +391,8 @@ namespace MyDileptonAnalysis
                     
                 if(inum0>=0 && inum1>=0)
                 {   
+                    float chi2 = 0;
+                    float recon_pt = 0;
                     mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
                     mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
                     if (inum2>=0) mytrk->SetHitIndex(mytrk->GetHits(2,inum2), 2);
@@ -903,7 +903,18 @@ namespace MyDileptonAnalysis
                     dphi_this  = (phi00 - phi_orig)*electron->GetChargePrime();
                     dthe_this  = (the00 - the_orig)*electron->GetChargePrime();
                 }else{
-                    the_orig = the00;///needs a doctor
+                    if(ilayer==2 && electron->GetHitCounter(3)>0)
+                    {
+                        id_hit = electron->GetHitIndex(3);
+                        hit_orig = event->GetVTXHitEntry(id_hit);
+                        the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());      
+                    }
+                    if(ilayer==3 && electron->GetHitCounter(2)>0)
+                    {
+                        id_hit = electron->GetHitIndex(2);
+                        hit_orig = event->GetVTXHitEntry(id_hit);
+                        the_orig = hit_orig->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());      
+                    }
                 }
                 float dphi_prev = ilayer == 0 ? 0 : prevphis[prevphis.size()-1];
                 float dthe_prev = ilayer == 0 ? 0 : prevthes[prevphis.size()-1];
@@ -968,9 +979,9 @@ namespace MyDileptonAnalysis
                         const int countvec0 = (ilayer>0) ? (int) dphivec0.size() : 0;
                         for (int ivec = 0; ivec < countvec0; ivec++)
                         {
-                            if(fabs(sdthe)<2)veto_sphi_sphi_hist[ilayer-1+5*centr_bin]->Fill(dphi0-dphivec0[ivec],dphivec0[ivec],pt);///need a doctor
-                            if(sdphi>0&&sdphi<12.5*(ilayer<2?1:2))veto_sthe_sthe_hist[ilayer-1+5*centr_bin]->Fill(dthe0-dthevec0[ivec],  dthevec0[ivec],pt);  
-                            if (fabs(dthe0-dthevec0[ivec])<0.01) check_2hit = true;    
+                            if(fabs(sdthe)<7)veto_sphi_sphi_hist[ilayer-1+5*centr_bin]->Fill(dphi0-dphivec0[ivec],dphivec0[ivec],pt);///need a doctor
+                            if(sdphi>0&&sdphi<12.5*(ilayer<2?4:4))veto_sthe_sthe_hist[ilayer-1+5*centr_bin]->Fill(dthe0-dthevec0[ivec]*0.5,  dthevec0[ivec]*0.5,pt);  
+                            if (fabs(dthe0-dthevec0[ivec]*0.5)<0.01&&dphi0-dphivec0[ivec]>0) check_2hit = true;    
                         }
                         const int countvec1 = (ilayer>1) ? (int) dphivec1.size() : 0;
                         for (int ivec = 0; ivec < countvec1; ivec++)
@@ -1484,7 +1495,7 @@ namespace MyDileptonAnalysis
     
     }
 
-    void MyEventContainer::GetHistsFromFile(const std::string loc)
+    void MyEventContainer::GetHistsFromFile(const std::string &loc)
     {
         infile = TFile::Open(loc.c_str(), "read");
         if (!infile)
@@ -1633,7 +1644,7 @@ namespace MyDileptonAnalysis
         {
             INIT_HISTOS(3, veto_phi_hist,        N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
             INIT_HISTOS(3, veto_the_hist,        N_centr, 150, -0.15, 0.15,  16,    0,  16, 28, 0.2, 3);
-            INIT_HISTOS(3, veto_sphi_phi_hist, 4*N_centr, 150,    -5,   70, 150,-0.15,0.15, 28, 0.2, 3);
+            INIT_HISTOS(3, veto_sphi_phi_hist, 4*N_centr, 150,   -15,   60, 150,-0.15,0.15, 28, 0.2, 3);
             INIT_HISTOS(3, veto_sthe_the_hist, 4*N_centr, 150,   -15,   15, 150,-0.15,0.15, 28, 0.2, 3);
             INIT_HISTOS(3, veto_sphi_sphi_hist,5*N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);
             INIT_HISTOS(3, veto_sthe_sthe_hist,5*N_centr, 150, -0.15, 0.15, 150,-0.15,0.15, 28, 0.2, 3);

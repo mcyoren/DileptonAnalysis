@@ -652,7 +652,7 @@ namespace MyDileptonAnalysis
             {
                   std::map<int, float>::const_iterator iterator = associated_tracks.begin();
                   for (int iass = 0; iass < itrack; iass++)
-                        iterator++;
+                        ++iterator;
                   return iterator->first;
             };
             float GetAssociatedTrackDistance(int itrackid) { return associated_tracks[itrackid]; };
@@ -977,7 +977,7 @@ namespace MyDileptonAnalysis
 
             void InitEvent() { event = new MyEvent; };
             void ClearEvent() { event->ClearEvent(); };
-            void GetHistsFromFile(const std::string loc);
+            void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
             const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
             void ResetTree() {tree->Reset();};
