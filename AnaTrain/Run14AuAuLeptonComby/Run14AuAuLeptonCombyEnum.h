@@ -25,6 +25,9 @@ public:
       MATCH,
       GHOST,
       PTYPE,
+      ID1,
+      ID2,
+      ID3,
       LAST_INTEGER  // special...always use this
     };
 };

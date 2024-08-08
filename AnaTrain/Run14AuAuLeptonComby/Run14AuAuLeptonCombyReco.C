@@ -428,8 +428,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
 
-    if(check_veto || fill_inv_mass) event_container->CheckVeto();
-
     n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
@@ -449,6 +447,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           continue;
       }
     }
+
+    if(check_veto || fill_inv_mass) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();
     if(fill_TTree) event_container->CleanUpHitList();
@@ -467,8 +467,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            
         int addit_reject = 0;
         if (  ((mytrk->GetMinsDphi(2)>0||mytrk->GetHitCounter(2)<1)&&(mytrk->GetMinsDphi(3)>0||mytrk->GetHitCounter(3)<1)&&
-                centrality<60&&mytrk->GetMinsDphi(0)>0)||mytrk->GetGhost()<5) addit_reject = 1;
-        if ( mytrk->GetGhost()<25 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. && mytrk->GetDisp() < 4)
+                centrality<60&&mytrk->GetMinsDphi(0)>0)||mytrk->GetGhost()<1) addit_reject = 1;
+        if ( mytrk->GetGhost()<15 )
              addit_reject += 10;
         
         int hadron_reject = 0;
@@ -503,6 +503,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         ult.set_integer(Run14AuAuLeptonCombyEnum::PTYPE, ptype);
         ult.set_integer(Run14AuAuLeptonCombyEnum::MATCH, addit_reject);
+        ult.set_integer(Run14AuAuLeptonCombyEnum::ID1, mytrk->GetHitIndex(0));
+        ult.set_integer(Run14AuAuLeptonCombyEnum::ID2, mytrk->GetHitIndex(1));
+        ult.set_integer(Run14AuAuLeptonCombyEnum::ID3, mytrk->GetHitCounter(2)>0? mytrk->GetHitIndex(2):mytrk->GetHitIndex(3));
         ult.set_integer(Run14AuAuLeptonCombyEnum::GHOST, hadron_reject);
 
         ul->AddTrack(&ult);
