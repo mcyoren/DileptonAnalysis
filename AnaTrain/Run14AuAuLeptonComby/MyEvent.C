@@ -1110,12 +1110,10 @@ namespace MyDileptonAnalysis
                 if(!(mytrk->GetMcId()>-499 && mytrk->GetMcId()-event->GetEvtNo()!=-8))
                 {
                     DCPT_ReconPT ->Fill(pt,                  event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
-                    sDCPT_ReconPT->Fill(mytrk->GetReconPT(), event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
-                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0;
-                    const float alpha = mytrk->GetAlphaPrime();
-                    const float alphaprime = alpha + (mytrk->GetPhi0() - mytrk->GetPhi0Prime())/2.0195;
-                    const float ptprime = pt+0*fabs(alpha / alphaprime);
-                    if(mytrk->GetReconPT()>pt*1.2)pt_corr ->Fill((event->GetBBCcharge()-ptprime)/ptprime,ptprime,  corr_fac);
+                    sDCPT_ReconPT->Fill((mytrk->GetReconPT()>pt)?mytrk->GetReconPT():pt, event->GetBBCcharge(), central_bin + 5 * (ilayer - 2));
+                    const float dphinew = 1000*(mytrk->GetPhi0Prime()-mytrk->GetPhi0())*mytrk->GetChargePrime();
+                    //if(dphinew<0) std::cout<<"Recharge: "<<dphinew<<" "<< pt << " " <<mytrk->GetChargePrime()<<" "<<event->GetEvtNo()<<std::endl;
+                    pt_corr ->Fill(dphinew,event->GetBBCcharge(),  pt);
                     charge_hist->Fill( (( mytrk->GetCharge() - event->GetEvtNo()/abs(event->GetEvtNo()) )==0)+ (event->GetEvtNo()>0)*2 +  4*mytrk->GetArm(), pt, central_bin);
                     charge_hist->Fill( (( mytrk->GetChargePrime() - event->GetEvtNo()/abs(event->GetEvtNo()) )==0)+ (event->GetEvtNo()>0)*2 +  4*mytrk->GetArm(), pt, central_bin+5);
                     phi_hist   ->Fill((mytrk->GetPhi0()-event->GetBBCchargeN())*mytrk->GetChargePrime(), pt, central_bin);
@@ -1126,12 +1124,10 @@ namespace MyDileptonAnalysis
                 if(!(mytrk->GetMcId()>-499 && mytrk->GetMcId()-event->GetBBCtimeN()!=13))
                 {
                     DCPT_ReconPT ->Fill(pt,                  event->GetBBCtimeS(), central_bin + 5 * (ilayer - 2));
-                    sDCPT_ReconPT->Fill(mytrk->GetReconPT(), event->GetBBCtimeS(), central_bin + 5 * (ilayer - 2));
-                    const float corr_fac = mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1)-mytrk->GetMinsDphi(ilayer)*0;
-                    const float alpha = mytrk->GetAlphaPrime();
-                    const float alphaprime = alpha + (mytrk->GetPhi0() - mytrk->GetPhi0Prime())/2.0195;
-                    const float ptprime = pt+0*fabs(alpha / alphaprime);
-                    if(mytrk->GetReconPT()>pt*1.2)pt_corr ->Fill((event->GetBBCtimeS()-ptprime)/ptprime,ptprime,  corr_fac);
+                    sDCPT_ReconPT->Fill((mytrk->GetReconPT()>pt)?mytrk->GetReconPT():pt, event->GetBBCtimeS(), central_bin + 5 * (ilayer - 2));
+                    const float dphinew = 1000*(mytrk->GetPhi0Prime()-mytrk->GetPhi0())*mytrk->GetChargePrime();
+                    //if(dphinew<0) std::cout<<"Recharge: "<<dphinew<<" "<< pt << " " <<mytrk->GetChargePrime()<<" "<<event->GetBBCtimeN()<<std::endl;
+                    pt_corr ->Fill(dphinew, event->GetBBCtimeS(), pt);
                     charge_hist->Fill( (( mytrk->GetCharge() - event->GetBBCtimeN()/abs(event->GetBBCtimeN()) )==0)+ (event->GetBBCtimeN()>0)*2 +  4*mytrk->GetArm(), pt, central_bin);
                     charge_hist->Fill( (( mytrk->GetChargePrime() - event->GetBBCtimeN()/abs(event->GetBBCtimeN()) )==0)+ (event->GetBBCtimeN()>0)*2 +  4*mytrk->GetArm(), pt, central_bin+5);
                     phi_hist   ->Fill((mytrk->GetPhi0()-event->GetPsi3BBC())*mytrk->GetChargePrime(), pt, central_bin);
@@ -1139,6 +1135,8 @@ namespace MyDileptonAnalysis
                     the_hist   ->Fill(mytrk->GetThe0()-event->GetPsi3FVTXA0(), pt, central_bin);
                     the_hist   ->Fill(mytrk->GetThe0Prime()-event->GetPsi3FVTXA0(), pt, central_bin+5);
                 }
+                if((ilayer==3||mytrk->GetHitCounter(3)<1)&&1000*(mytrk->GetPhi0Prime()-mytrk->GetPhi0())*mytrk->GetChargePrime()<-5) 
+                mytrk->SetPtPrime((mytrk->GetReconPT()>pt*1.05)?mytrk->GetReconPT():pt);
             }
         }
     }
@@ -1631,7 +1629,7 @@ namespace MyDileptonAnalysis
         {
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 10);
             INIT_HIST(3, sDCPT_ReconPT,50, 0, 5, 50,  0,  5, 10, 0, 10);
-            INIT_HIST(3, pt_corr, 200, -2, 2, 50,  0,  5, 90,-9,  9);
+            INIT_HIST(3, pt_corr, 500, -50, 50, 50,  0,  5, 50, 0,  5);
             INIT_HISTOS(3, DCA12_hist, N_centr, 100, -2000, 2000, 100, -2000, 2000, 12, 0, 12);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 4, 2, 6, 28, 0.2, 3);
             INIT_HISTOS(3, sDCA2_hist, N_centr, 200, -4000, 4000, 4, 2, 6, 28, 0.2, 3);
