@@ -157,7 +157,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    if(check_veto) event_container->CheckVeto();
+    if(check_veto||fill_inv_mass) event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
     myevent->ReshuffleElectrons();
