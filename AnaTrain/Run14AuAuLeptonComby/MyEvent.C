@@ -886,6 +886,10 @@ namespace MyDileptonAnalysis
             float phi00=-999, the00=999;
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
+                
+                if((ilayer==3||electron->GetHitCounter(3)<1)&&1000*(electron->GetPhi0Prime()-electron->GetPhi0())*electron->GetChargePrime()<-5) 
+                electron->SetPtPrime((electron->GetReconPT()>pt*1.05)?electron->GetReconPT():pt);
+
                 MyDileptonAnalysis::MyVTXHit *hit_orig = nullptr;
                 int id_hit = -999;
                 float phi_orig = -999, the_orig = -999, dphi_this = -999, dthe_this = -999;  
