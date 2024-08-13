@@ -181,6 +181,14 @@ namespace MyDileptonAnalysis
             mytrk->ClearNumberVectors();
             // mytrk = static_cast<MyDileptonAnalysis::MyHadron*>(myhad);
             const float pt = mytrk->GetPtPrime();
+            
+            if(is_fill_hsits_local)
+            {
+                charge_recover_hist->Fill(mytrk->GetCharge(),0.,pt);
+                charge_recover_hist->Fill(mytrk->GetChargePrime(),1,pt);
+                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,2,pt);
+                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,3,pt);
+            }
 
             const float thetaprime = mytrk->GetThe0Prime();
 
@@ -243,8 +251,8 @@ namespace MyDileptonAnalysis
 
             float min[nvtx_layers] = {100, 100, 100, 100};
             
-            std::vector<long> numbers[4];
-            int iter_nums[4] = {0,0,0,0};
+            std::vector<long long> numbers[4];
+            long long iter_nums[4] = {0,0,0,0};
 
             for (int iter_layer = 3; iter_layer >= 0; iter_layer--)
             {
@@ -348,7 +356,7 @@ namespace MyDileptonAnalysis
                             iter_nums[layer]++;
                             if((iter_nums[layer]>99&&layer>=2)||iter_nums[layer]>999) 
                             {
-                                std::cout<<layer<<" "<<iter_nums[layer]<<std::endl;
+                                std::cout<<layer<<" "<<iter_nums[layer]<< " " <<mytrk->GetChargePrime()<<std::endl;
                                 return;
                             }
                             if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
@@ -378,10 +386,17 @@ namespace MyDileptonAnalysis
                             sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
                         }
                     } // enf of hit loop
-                }
+                } // end of hits in prev layer 
+            } //ens of layers   
+            if(is_fill_hsits_local)
+            {
+                charge_recover_hist->Fill(mytrk->GetCharge(),4.,pt);
+                charge_recover_hist->Fill(mytrk->GetChargePrime(),5,pt);
+                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,6,pt);
+                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,7,pt);
             }
             float min_chi2=1000000.;
-            long final_number = 0;
+            long long final_number = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 const int inum0 = numbers[0][inum] / 10000000-1;
@@ -468,9 +483,23 @@ namespace MyDileptonAnalysis
                 if(is_fill_hsits_local) chi2_ndf[central_bin]->Fill(min_chi2, 10+istruehitcounter, pt);
                 if(is_fill_hsits_local&&true) 
                                         truehitsigmahist->Fill(istruehitcounter+(sigma-2)*10,mytrk->GetPtPrime(),event->GetCentrality());
+                if(is_fill_hsits_local)
+                {
+                    charge_recover_hist->Fill(mytrk->GetCharge(),8,pt);
+                    charge_recover_hist->Fill(mytrk->GetChargePrime(),9,pt);
+                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,10,pt);
+                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,11,pt);
+                }
 
             }else{
                 mytrk->SetHitCounter(0,0);
+                if(is_fill_hsits_local)
+                {
+                    charge_recover_hist->Fill(mytrk->GetCharge(),12,pt);
+                    charge_recover_hist->Fill(mytrk->GetChargePrime(),13,pt);
+                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,14,pt);
+                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,15,pt);
+                }
             }
             //mytrk->ClearNumberVectors();
         }     // enf of e loop
@@ -886,10 +915,6 @@ namespace MyDileptonAnalysis
             float phi00=-999, the00=999;
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
-                
-                if((ilayer==3||electron->GetHitCounter(3)<1)&&1000*(electron->GetPhi0Prime()-electron->GetPhi0())*electron->GetChargePrime()<-5) 
-                electron->SetPtPrime((electron->GetReconPT()>pt*1.05)?electron->GetReconPT():pt);
-
                 MyDileptonAnalysis::MyVTXHit *hit_orig = nullptr;
                 int id_hit = -999;
                 float phi_orig = -999, the_orig = -999, dphi_this = -999, dthe_this = -999;  
@@ -1529,6 +1554,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   8, 0, 8, 25, 0, 5);
             INIT_HIST  (3, truehithist,      10, 0, 10, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, truehitsigmahist, 50, 0, 50, 50, 0, 5, 10, 0, 100);
+            INIT_HIST  (3, charge_recover_hist, 2, -2, 2, 16, 0, 16, 50, 0, 5);
             if(fill_ell>1)
             {
                 INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);

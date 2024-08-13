@@ -2,7 +2,7 @@
 void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
 {
 
-  const float pt_cut  = 0.2;
+  const float pt_cut  = 0.4;
 
   TFile *input = new TFile(inFile0, "READ");
   if (!(input))
@@ -12,7 +12,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
   }
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 0;
+  const int fill_QA_lepton_hists = 1;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -23,7 +23,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
   const int fill_true_DCA = 0;
   const int check_veto = 0;
   const int is_only_conv = 0;
-  const int fill_inv_mass = 1;
+  const int fill_inv_mass = 0;
   const int use_only_vertex_hadrons = 0;
 
   TTree *T = (TTree *)input->Get("tree");
@@ -72,7 +72,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     {
       MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
       mytrk->ResetPrimes(event->GetVtxZ(),event->GetPreciseZ(),event->GetRunNumber());
-      if (use_only_vertex_hadrons || ((mytrk->GetIsConv() < 8 || mytrk->GetRConv()>3) && is_only_conv))
+      if (use_only_vertex_hadrons || mytrk->GetPtPrime() < pt_cut || ((mytrk->GetIsConv() < 8 || mytrk->GetRConv()>3) && is_only_conv))
       {
         event->RemoveTrackEntry(itrk);
         n_electrons--;
@@ -111,7 +111,7 @@ void NewHitAssociation(const char* inFile0, const char* outFile, int par = 0)
     //event_container->SetEvent(event);
     
     
-    event_container->Associate_Hits_to_Leptons();
+    event_container->Associate_Hits_to_Leptons(5,5,5);
 
     if (check_veto||fill_inv_mass)
       event_container->CheckVeto();

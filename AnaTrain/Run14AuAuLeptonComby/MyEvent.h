@@ -528,7 +528,8 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+5<dangle1.size()) return (int) dangle1[iter*6+5];
                   else if(layer==2 && 6*iter+5<dangle2.size()) return (int) dangle2[iter*6+5];
                   else if(layer==3 && 6*iter+5<dangle3.size()) return (int) dangle3[iter*6+5];
-                  std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()
+                  <<" "<<dangle1.size()<<" "<<dangle2.size()<<" "<<dangle3.size()<<std::endl;
                   return -999;
             };
             void ClearNumberVectors(){dangle0.clear();dangle1.clear();dangle2.clear();dangle3.clear();};
@@ -851,7 +852,7 @@ namespace MyDileptonAnalysis
             TH1D *event_hist, *centr_hist;
             TH3D *el_pt_hist;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
-            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist;
+            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist;
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
@@ -894,7 +895,7 @@ namespace MyDileptonAnalysis
                   DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr, pt_corr = nullptr;
                   couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
                   myvtx_hist = nullptr;
-                  truehithist = nullptr; truehitsigmahist = nullptr;
+                  truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;

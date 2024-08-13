@@ -396,7 +396,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     fill_SVXHits_to_myevent(svxhitlist, event);
 
-    event_container->Associate_Hits_to_Leptons(3.,2.,5);
+    event_container->Associate_Hits_to_Leptons(5.,5.,5);
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<1 && fill_inv_mass ) return 0;
 
