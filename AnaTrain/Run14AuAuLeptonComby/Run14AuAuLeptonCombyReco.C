@@ -78,7 +78,8 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto,fill_inv_mass);
+                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto,
+                                               fill_QA_lepton_hists>0?0:fill_QA_lepton_hists);
 
     return 0;
 }
@@ -221,7 +222,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(fill_TTree && (psi2_BBC>-9000 || psi2_FVTXA0 >-9000)) event_container->FillEventHist(6);
 
-    const int run_group_beamoffset = event->GetRunGroup(run_number);
+    const int run_group_beamoffset = event->GetRunGroup(run_number)<8?event->GetRunGroup(run_number):7;
     const int n_tracks = particleCNT->get_npart();
     
     for (int itrk_reco = 0; itrk_reco < n_tracks; ++itrk_reco)
@@ -396,7 +397,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     fill_SVXHits_to_myevent(svxhitlist, event);
 
-    event_container->Associate_Hits_to_Leptons(5.,5.,5);
+    event_container->Associate_Hits_to_Leptons(3.,3.,2);
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<1 && fill_inv_mass ) return 0;
 
@@ -456,7 +457,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
-    if(fill_inv_mass)event_container->fill_inv_mass();
+    if(fill_inv_mass&&!fill_QA_lepton_hists)event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
@@ -464,12 +465,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=15 || mytrk->GetPtPrime() < 0.4) continue;
+        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
         if (  mytrk->GetMinsDphi(0)>0 ) addit_reject = 1;
-        if ( mytrk->GetGhost()==0 )
+        if ( mytrk->GetGhost()<15 && mytrk->GetIsConv()<1)
              addit_reject += 10;
         
         int hadron_reject = 0;
