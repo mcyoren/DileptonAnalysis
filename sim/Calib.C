@@ -106,7 +106,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     {
       MyDileptonAnalysis::MyVTXHit myhit = *myevent->GetVTXHitEntry(ihit);
 
-     if (myhit.GetSensor() == 1)
+     if (myhit.GetSensor() == 1)//no sim hits
      {
          myevent->RemoveVTXHitEntry(ihit);
          n_hits--;
