@@ -586,7 +586,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     }
 
     event_container->Associate_Hits_to_Leptons();
-    event_container->CleanUpHitList();
+    if(true)event_container->CleanUpHitList();
   }
 
   if (fill_TTree)

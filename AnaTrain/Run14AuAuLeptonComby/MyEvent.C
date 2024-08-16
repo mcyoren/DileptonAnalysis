@@ -187,7 +187,7 @@ namespace MyDileptonAnalysis
                 charge_recover_hist->Fill(mytrk->GetCharge(),0.,pt);
                 charge_recover_hist->Fill(mytrk->GetChargePrime(),1,pt);
                 charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,2,pt);
-                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,3,pt);
+                charge_recover_hist->Fill(mytrk->GetMcId()<3?1:-1,3,pt);
             }
 
             const float thetaprime = mytrk->GetThe0Prime();
@@ -310,7 +310,7 @@ namespace MyDileptonAnalysis
                         
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
                         const float dthe = (dilep_the_projection[ilayer] - theta_hit);
-                        if ((fabs(dphi-2*pi)<0.1||fabs(dphi+2*pi)<0.1)) std::cout<<  mytrk->GetChargePrime() << " "<<dphi<< " "<<dphi-2*pi<< " "<<dphi+2*pi<<std::endl;
+                        if ((fabs(dphi-2*pi)<0.1||fabs(dphi+2*pi)<0.1)&&mytrk->GetPtPrime()>0.4) std::cout<<  mytrk->GetChargePrime() << " "<<  mytrk->GetPtPrime() << " "<<dphi<< " "<<dphi-2*pi<< " "<<dphi+2*pi<<std::endl;
                         if (abs(dphi) > 0.1 || abs(dthe) > 0.1) continue;
 
                         if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
@@ -394,7 +394,7 @@ namespace MyDileptonAnalysis
                 charge_recover_hist->Fill(mytrk->GetCharge(),4.,pt);
                 charge_recover_hist->Fill(mytrk->GetChargePrime(),5,pt);
                 charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,6,pt);
-                charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,7,pt);
+                charge_recover_hist->Fill(mytrk->GetMcId()<3?1:-1,7,pt);
             }
             float min_chi2=1000000.;
             long long final_number = 0;
@@ -489,7 +489,7 @@ namespace MyDileptonAnalysis
                     charge_recover_hist->Fill(mytrk->GetCharge(),8,pt);
                     charge_recover_hist->Fill(mytrk->GetChargePrime(),9,pt);
                     charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,10,pt);
-                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,11,pt);
+                    charge_recover_hist->Fill(mytrk->GetMcId()<3?1:-1,11,pt);
                 }
 
             }else{
@@ -499,7 +499,7 @@ namespace MyDileptonAnalysis
                     charge_recover_hist->Fill(mytrk->GetCharge(),12,pt);
                     charge_recover_hist->Fill(mytrk->GetChargePrime(),13,pt);
                     charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0()?1:-1,14,pt);
-                    charge_recover_hist->Fill(mytrk->GetPhiDC()>mytrk->GetPhi0Prime()?1:-1,15,pt);
+                    charge_recover_hist->Fill(mytrk->GetMcId()<3?1:-1,15,pt);
                 }
             }
             //mytrk->ClearNumberVectors();

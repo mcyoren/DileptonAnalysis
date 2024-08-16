@@ -120,7 +120,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(5);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(4,4,4);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
     if(istruehitsigmacounter) 
     {
       event_container->Associate_Hits_to_Leptons(2,5);
