@@ -11,6 +11,6 @@ Error          = /dev/null
 Requirements   = (CPU_Speed >= 1) 
 Rank		       = CPU_Speed
 
-Arguments      = Run_pythia8.csh 1 $(Process) 10000 0
+Arguments      = Run_pythia8.csh 2 $(Process) 10000 0
 
 Queue 1000

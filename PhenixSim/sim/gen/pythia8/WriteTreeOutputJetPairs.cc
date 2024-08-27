@@ -12,16 +12,51 @@
 #include <chrono>
 #include <ctime>
 
-using namespace std;
+struct MyEvent {
+    int ntracks;
+    std::vector<int> pid;
+    std::vector<double> mass;
+    std::vector<double> energy;
+    std::vector<double> px;
+    std::vector<double> py;
+    std::vector<double> pz;
+    std::vector<double> vx;
+    std::vector<double> vy;
+    std::vector<double> vz;
+
+    void set_to_null() {
+        ntracks = 0;
+        pid.clear();
+        mass.clear();
+        energy.clear();
+        px.clear();
+        py.clear();
+        pz.clear();
+        vx.clear();
+        vy.clear();
+        vz.clear();
+        return;
+    };
+};
 using namespace Pythia8;
 
-int main(){
+const int MaxTracks = 100;
+const double pi = TMath::ACos(-1);
 
-  int nevt = 1;
+int main(int argc, char* argv[]){
 
-  int nevents = 100000;
+  std::cout<<"lets begin"<<std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
+
+  std::string str_seed = argv[1];
+  std::string InnEv = argv[2];
+  int nevents = std::stoi(InnEv);
+
+
+  bool IsWriteOscar = true;
+  int nevt = 20000;
   Pythia pythia;
-
+  std::cout<<"pythia was initialized"<<std::endl;
   TH1D* hsect = new TH1D("hsect","Sector Distribution", 9, -0.5, 8.5);
 
   pythia.readString("Beams:idA = 2212");
@@ -30,10 +65,10 @@ int main(){
 
   pythia.readString("HardQCD:all = on");
 
-  pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
+  //pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
 
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = 0");
+  pythia.readString("Random:seed = " + str_seed);
   pythia.readString("Next:numberCount = 100000");
   pythia.readString("PhaseSpace:pTHatMin = 1.0");
  
@@ -48,23 +83,59 @@ int main(){
   pythia.readString("MultipartonInteractions:coreFraction = 0.78");
   pythia.readString("ColourReconnection:range = 5.4");
 
-  pythia.init();
+  pythia.init();  
+  std::cout<<"pythia params were set"<<std::endl;
+  //Intialize the tree
+
+  TTree* tree = new TTree("T","RECREATE");
+  MyEvent myevent;
+  int ntracks = 0;
+  int pid[MaxTracks] = {-999};
+  double mass[MaxTracks] = {-999};
+  double px[MaxTracks] = {-999};
+  double py[MaxTracks] = {-999};
+  double pz[MaxTracks] = {-999};
+  double energy[MaxTracks] = {-999};
+  double vx[MaxTracks] = {-999};
+  double vy[MaxTracks] = {-999};
+  double vz[MaxTracks] = {-999};
+
+  tree->Branch("ntracks", &myevent.ntracks,"ntracks/I");
+  tree->Branch("pid",&myevent.pid);
+  tree->Branch("mass",&myevent.mass);
+  tree->Branch("energy",&myevent.energy);
+  tree->Branch("px",&myevent.px);
+  tree->Branch("py",&myevent.py);
+  tree->Branch("pz",&myevent.pz);
+  tree->Branch("vx",&myevent.vx);
+  tree->Branch("vy",&myevent.vy);
+  tree->Branch("vz",&myevent.vz);  
+  
+  ofstream file("oscar.particles.dat");
+	if(IsWriteOscar)
+  {
+    file << "# OSC1999A" << endl;
+	  file << "# final_id_p_x" << endl;
+	  file << "# SimName 1.0" << endl;
+	  file << "#" << endl;
+	  file << "# Some comments..." << endl;
+  }
+
+  int evt_count = 0;
+
+  TH1D* hist = new TH1D("hist", "pT Distribution", 100, 0, 10);
+  TH1D* pTHat = new TH1D("pTHat", "pTHat Distribution", 100, 0, 10);
+  TH1D* norm = new TH1D("norm","EVENT COUNTER", 2,-0.5,1.5);
+
+  std::cout<<"tree and histos were created"<<std::endl;
 
   TF1* ftrigger = new TF1("ftrigger","[3] + ([0]-[3])/(1 + (x/[2])^[1])", 0, 10);
 
   //Intialize the tree
 
-  TTree* tree = new TTree("T","RECREATE");
-  MyEvent event;
-  tree->Branch("MyEvent", &event);
-
-  int event_counter = 0;
-
   for(int ievt = 0; ievt < nevt; ievt++){
-
-    if(event_counter == nevents) break;
-
-    event.ClearEvent();
+	//std::cout<<ievt<<std::endl;
+    if(evt_count == nevents) break;
 
     if(!pythia.next()){ nevt++; continue; }
     int nparticles = pythia.event.size();
@@ -87,7 +158,9 @@ int main(){
 
     if(!(BBC_North && BBC_South)){ nevt++;  continue; }
 
-    event.SetEvtNo(ievt);
+
+    int count = 0;
+    myevent.set_to_null();
 
     for(int j = 0; j < nparticles; j++){
 
@@ -98,37 +171,12 @@ int main(){
       int pdg = pythia.event[j].id();
       if (!(pdg == 11 ||  pdg == -11) ) continue;
 
-      double px = pythia.event[j].px();
-      double py = pythia.event[j].py();
-      double pz = pythia.event[j].pz();
-      double vx = pythia.event[j].xProd();
-      double vy = pythia.event[j].yProd();
-      double vz = pythia.event[j].zProd();
-      double ecore = pythia.event[j].e();
-      double charge = pythia.event[j].charge();
+
       int mother_index = pythia.event[j].mother1();
       int pdg_mother = pythia.event[mother_index].id();
 
       int isCharm = 0;
       int isBottom = 0;
-
-      double phi_EMCal = -999;
-      double theta_EMCal = -999;
-
-      TVector3 vertex(0.0, 0.0, 0.0);  // As pythia generate events at (0, 0, 0). And the purpose of this simulation is only primary or near primary particles.
-
-      TLorentzVector particle(px, py, pz, ecore);
-
-      int arm = InAcceptance(particle, charge, vertex, phi_EMCal, theta_EMCal);
-
-      if( arm == 0 ) continue;
-
-      int sector = EMCalSector(phi_EMCal);
-      hsect->Fill(sector);
-
-      //At this time, phi_EMcal and theta_EMCal will be other than -999 so the sector should not be zero. But we still put a safety condition.
-
-      if( sector == 0 ) continue;
 
       bool mother_D_meson = pdg_mother == 411 || pdg_mother == 421 || pdg_mother == 10411 || pdg_mother == 10421 ||
                             pdg_mother == 413 || pdg_mother == 423 || pdg_mother == 10413 || pdg_mother == 10423 ||
@@ -159,80 +207,63 @@ int main(){
 
       if(mother_D_meson && !parentisB) isCharm = 1;
       if(parentisB) isBottom = 1;
-
-      MyTrack track;
-
-      // ParticleA1 includes electrons that are in the PHENIX acceptance
-      // Now Calculate the Bremstruhlung Energy Loss
-
-      double eloss = BremsEnergyLoss(0.1322)*ecore;
-      double ecore_after = ecore - eloss;
-      double scale = ecore_after/ecore;
-
-      TLorentzVector particle_brem(px*scale, py*scale, pz*scale, ecore_after);
-
-      // Now inlcude the DC resolution effects
-
-      TLorentzVector particle_reco;
-      particle_reco = ReconstructTrack(particle_brem, charge, arm);
-
-      if(particle_reco.Pt() < 0.4) continue;
-
-      TLorentzVector reco_shower;
-      reco_shower = ReconstructShower(particle_brem, arm, sector, phi_EMCal, theta_EMCal, pdg);
-
-      int isERT = 0;
-      double rand = gRandom->Uniform(0,1);
-      double energy_threshold = -999;
-                                                                                                                                          
-      if (sector == 1) { ftrigger->SetParameters(0.0, 7.74596, 1.80702, 1.0); energy_threshold = 1.652; } // 1.652                                                        
-      else if (sector == 2) { ftrigger->SetParameters(0.0, 8.19638, 1.64472, 1.0); energy_threshold = 1.511; } // 1.511                                                   
-      else if (sector == 3) { ftrigger->SetParameters(0.0, 7.56855, 1.68859, 1.0); energy_threshold = 1.541; } // 1.541                                                   
-      else if (sector == 4) { ftrigger->SetParameters(0.0, 10.7913, 1.59629, 1.0); energy_threshold = 1.497; } // 1.497                                                                                
-      else if (sector == 5){ ftrigger->SetParameters(0.0, 7.05411, 1.61651, 1.0); energy_threshold = 1.465; } // 1.465
-      else if (sector == 6) { ftrigger->SetParameters(0.0, 8.078, 1.82598, 1.0); energy_threshold = 1.676; } // 1.676
-      else if (sector == 7) { ftrigger->SetParameters(0.0, 6.87068, 2.83264, 1.0); energy_threshold = 2.561; } // 2.561
-      else if (sector == 8) { ftrigger->SetParameters(0.0, 6.07937, 2.50881, 1.0); energy_threshold = 2.239; } // 2.239
-
-      if(rand < ftrigger->Eval(reco_shower.E()) && particle_reco.E() > energy_threshold) isERT = 1;
-
-      npart++;
-
-      track.SetTrkID(j);
-      track.SetCharge(charge);
-      track.SetPID(pdg);
-      track.SetMotherPID(pdg_mother);
-      track.SetMotherIndex(mother_index);
-      track.SetPx(particle_reco.Px());
-      track.SetPy(particle_reco.Py());
-      track.SetPz(particle_reco.Pz());
-      track.SetVx(vx);
-      track.SetVy(vy);
-      track.SetVz(vz);
-      track.SetPt(sqrt(particle_reco.Px()*particle_reco.Px() + particle_reco.Py()*particle_reco.Py()));
-      track.SetEnergy(particle_reco.E());
-      track.SetisCharm(isCharm);
-      track.SetisBottom(isBottom);
-      track.SetisERT(isERT);
-
-      event.AddTrack(track);
       
+      double Px = pythia.event[j].px();
+      double Py = pythia.event[j].py();
+      double Pt = sqrt(Px*Px + Py*Py);
+      if(Pt < 0.2) continue;
+
+      double Pz = pythia.event[j].pz();
+      double Energy = pythia.event[j].e();
+      double Vx = pythia.event[j].xProd();
+      double Vy = pythia.event[j].yProd();
+      double Vz = pythia.event[j].zProd();
+      double Mass = -999;
+
+      if(fabs(pdg) == 11) Mass = 0.000511;
+
+      mass[count] = Mass; px[count] = Px; py[count] = Py; pz[count] = Pz;
+      energy[count] = Energy; vx[count] = Vx; vy[count] = Vy; vz[count] = Vz;
+      pid[count] = pdg; 
+
+      myevent.mass.push_back(Mass); myevent.px.push_back(Px); myevent.py.push_back(Py); myevent.pz.push_back(Pz); myevent.energy.push_back(Energy); 
+      myevent.pid.push_back(pdg);   myevent.vx.push_back(Vx); myevent.vy.push_back(Vy); myevent.vz.push_back(Vz);
+      
+      count++;
+
+    }
+    if(count<2) continue;
+  
+    ntracks = count;
+
+    myevent.ntracks = ntracks;
+    tree->Fill();
+     
+    if(IsWriteOscar && ntracks>0)
+    {
+	    file << 0 << "\t" << ntracks << endl;
+	    for(int i = 0; i < ntracks; i++){
+	      if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
+	      else file << i+1 << "\t" << pid[i] << "\t" << 0 << "\t" << px[i] << "\t" << py[i] << "\t" << pz[i] << "\t" << energy[i] << "\t" << mass[i] << "\t" << vx[i]*pow(10,12) << "\t" << vy[i]*pow(10,12)  << "\t" << vz[i]*pow(10,12) << "\t" << 0 << endl;
+		  }
+		  file << 0 << "\t" << 0 << endl;  
     }
 
+    evt_count++;
+    if(evt_count%1000==0) cout << evt_count << "\t" << "Completed" << endl;
     nevt++;
-    if(npart > 0){
-      if(event_counter%1000 == 0) cout << "At Event Entry = " << event_counter << endl;
-      event_counter++;
-      tree->Fill();
-    }
-
   }
 
-  TFile* fout = new TFile("output.root", "RECREATE");
+  TFile* fout = new TFile("tree_out.root", "RECREATE");
   fout->cd();
   tree->Write();
   hsect->Write();
   fout->Close();
+
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+
+  std::cout << duration.count() << std::endl;
 
   return 0;
 

@@ -60,7 +60,7 @@ else
         $(error Error: $@ requires ROOT)
 endif
 
-WriteTreeoutputbbbar WriteTreeoutputDrellYan: $(PYTHIA) $$@.cc
+WriteTreeoutputbbbar WriteTreeOutputJetPairs WriteTreeoutputDrellYan: $(PYTHIA) $$@.cc
 ifeq ($(ROOT_USE),true)
 	$(CXX) $@.cc -o $@ -w $(CXX_COMMON) $(ROOT_LIB)\
 	`$(ROOT_CONFIG) --cflags --glibs`

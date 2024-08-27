@@ -19,14 +19,20 @@ if( $1 == 1) then
  set executable = WriteTreeoutputbbbar
  set outname = bbbar
 endif
+
+if( $1 == 2) then
+ set executable = WriteTreeOutputJetPairs
+ set outname = jetpairs
+endif
  
 echo "all params are set to"
 
 echo "tmpdir               $tmpdir    "
+echo "job                  $2         "
 echo "sourcedir            $sourcedir "
 echo "outputdir            $outputdir "
 echo "DIR                  $DIR       "
-echo "seed                 $2         "
+echo "seed                 $INPUT     "
 echo "Nev                  $3         "
 echo "shift                $4         "
 echo "running executable:  $executable"
@@ -49,10 +55,13 @@ cp $sourcedir/Makefile* .
 
 if( $#argv != 0) then
  if( $1 == 0) then
-  ./$executable $2 $3
+  ./$executable $INPUT $3
  endif
  if( $1 == 1) then
-  ./$executable $2 $3
+  ./$executable $INPUT $3
+ endif
+ if( $1 == 2) then
+  ./$executable $INPUT $3
  endif
  if( $1 == 3) then
   make main113_pA_nPDF
