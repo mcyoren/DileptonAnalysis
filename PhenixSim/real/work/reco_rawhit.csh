@@ -35,7 +35,7 @@ set evtnum    = $2
 set inputfile = $3
 
 set scriptdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work"
-set outputdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output"
+set outputdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/outputnew"
 set tmpdir    = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/output/000_$jobno"
 
 set infile = `basename $inputfile`

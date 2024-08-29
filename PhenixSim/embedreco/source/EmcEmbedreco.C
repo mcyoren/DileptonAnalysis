@@ -19,6 +19,21 @@
 #include "EmcMixer.hh"
 #include "Fun4AllServer.h"
 
+#include "getClass.h"
+
+#include "EmcCluster.h"
+#include "emcClusterContainer.h"
+#include "emcClusterContent.h"
+#include "emcCalibrationDataHelper.h"
+#include "EmcIndexer.h"
+#include "emcTowerContainer.h"
+#include "emcTowerContent.h"
+#include "emcCalibrationData.h"
+#include "emcCalibrationDataHelper.h"
+#include "emcCalFEM.h"
+
+using namespace findNode;
+
 using namespace std;
 
 EmcEmbedreco::EmcEmbedreco(const char *name){
@@ -83,6 +98,50 @@ int EmcEmbedreco::InitRun(PHCompositeNode *topNode){
 int EmcEmbedreco::process_event(PHCompositeNode *topNode){
   emcmixer->merge();
   clusterizer->process_event(topNode);
+  
+  if(false)
+  {
+    Fun4AllServer* se = Fun4AllServer::instance();
+    recoConsts *rc = recoConsts::instance();
+    PHCompositeNode* realnode = se->topNode(rc->get_CharFlag("EMBED_REAL_TOPNODE"));
+    const emcClusterContainer* realemccont =
+      findNode::getClass<emcClusterContainer>(realnode, "emcClusterContainer");
+    const emcTowerContainer* realtwrcont =
+      findNode::getClass<emcTowerContainer>(realnode, "emcTowerContainer");
+
+    if(!realemccont||!realtwrcont) 
+    {
+      std::cout<<"kek0 "<<std::endl;
+      return 0;
+    }
+    for (unsigned int iemc = 0; iemc < realemccont->size(); iemc++)
+    {
+      emcClusterContent* emc = realemccont->getCluster(iemc);
+      if(!emc||emc->ecore()<0.4)  {
+        continue;
+      }
+      std::vector<double> towerid, twrenergy;
+      for (int itower=0; itower < emc->multiplicity(); itower++)
+      {
+        towerid.push_back(emc->towerid(itower));
+	      emcTowerContent* twr = realtwrcont->findTower(emc->towerid(itower));
+        if(!twr) continue;
+        twrenergy.push_back(twr->Energy());
+      }
+      double twre = 0, twrecore = 0;
+      //std::cout<<towerid.size()<<" "<<twrenergy.size()<<" "<<realtwrcont->size()<<std::endl;
+      for (unsigned int itower=0; itower < twrenergy.size(); itower++)
+      {
+          twre += twrenergy[itower];
+      }
+      for (unsigned int itower=0; itower < twrenergy.size(); itower++)
+      {
+          if(twrenergy[itower]>0.02*twre) twrecore+=twrenergy[itower];
+      }
+      std::cout<<"embed ecore, e, twr ecore, e: "<<emc->ecore()<<" "<<emc->e()<<" "<<twrecore/0.932<<" "<<twre<<" "<<emc->multiplicity()<<std::endl;
+    } 
+  }
+
   return EVENT_OK;
 }
 int EmcEmbedreco::Reset(PHCompositeNode *topNode){

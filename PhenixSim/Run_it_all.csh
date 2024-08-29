@@ -356,7 +356,7 @@ set inputoscar = $DATADIR/output_single/single/$DIR.oscar.particles.dat
 endif
 set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set inputreal = $DATADIR/real/work/output/CNTmerge_MB-0000$run_number-0000.root
+set inputreal = $DATADIR/real/work/outputnew/CNTmerge_MB-0000$run_number-0000.root
 set outdst    = kek0.root
 set embedpartID = $selected_paticle
 

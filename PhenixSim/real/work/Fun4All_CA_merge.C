@@ -204,9 +204,9 @@ void Fun4All_CA_merge(int nEvents=100,
   se->registerSubsystem(svxdecode);
   se->registerSubsystem(svxhotdead);
   se->registerSubsystem(svxrec);
-  //se->registerSubsystem(svxvtxseedfinder);
-  //se->registerSubsystem(svxstandalone); /// vtx determination is a little better with it on,  but works a decade longer 
-  //se->registerSubsystem(svxprimvtxfinder);
+  se->registerSubsystem(svxvtxseedfinder);
+  se->registerSubsystem(svxstandalone); /// vtx determination is a little better with it on,  but works a decade longer 
+  se->registerSubsystem(svxprimvtxfinder);
 
   SkipEvents* skipevents = new SkipEvents(0); // select events in a vertex range
   //skipevents->Verbosity(1);

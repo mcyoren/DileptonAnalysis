@@ -51,6 +51,17 @@
 
 #include "getClass.h"
 
+#include "EmcCluster.h"
+#include "emcClusterContainer.h"
+#include "emcClusterContent.h"
+#include "emcCalibrationDataHelper.h"
+#include "EmcIndexer.h"
+#include "emcTowerContainer.h"
+#include "emcTowerContent.h"
+#include "emcCalibrationData.h"
+#include "emcCalibrationDataHelper.h"
+#include "emcCalFEM.h"
+
 using namespace std;
 using namespace findNode;
 

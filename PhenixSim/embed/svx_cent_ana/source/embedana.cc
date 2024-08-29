@@ -200,6 +200,40 @@ int embedana::process_event(PHCompositeNode *topNode)
   // event->ClearEvent();
   InPartNumber++;//InPartNumber += nn_loc - 1;
 
+  if(false)
+  {
+    const emcClusterContainer* emccont =
+      findNode::getClass<emcClusterContainer>(mcnode, "emcClusterContainer");
+    const emcTowerContainer* twrcont =
+      findNode::getClass<emcTowerContainer>(mcnode, "emcTowerContainer");
+
+    if(!emccont||!twrcont) return 0;
+    for (unsigned int iemc = 0; iemc < emccont->size(); iemc++)
+    {
+      emcClusterContent* emc = emccont->getCluster(iemc);
+      if(!emc||emc->ecore()<0.4) return 0;
+      std::vector<double> towerid, twrenergy;
+      for (int itower=0; itower < emc->multiplicity(); itower++)
+      {
+        towerid.push_back(emc->towerid(itower));
+	      emcTowerContent* twr = twrcont->findTower(emc->towerid(itower));
+        if(!twr) continue;
+        twrenergy.push_back(twr->Energy());
+      }
+      double twre = 0, twrecore = 0;
+      //std::cout<<towerid.size()<<" "<<twrenergy.size()<<" "<<twrcont->size()<<std::endl;
+      for (unsigned int itower=0; itower < twrenergy.size(); itower++)
+      {
+          twre += twrenergy[itower];
+      }
+      for (unsigned int itower=0; itower < twrenergy.size(); itower++)
+      {
+          if(twrenergy[itower]>0.02*twre) twrecore+=twrenergy[itower];
+      }
+      std::cout<<"simul ecore, e, twr ecore, e: "<<emc->ecore()<<" "<<emc->e()<<" "<<twrecore/0.932<<" "<<twre<<" "<<emc->multiplicity()<<std::endl;
+    }
+  }
+  
   if (embedtrk == nullptr)
   {
     std::cout << " no PHEmbedMcRecoTrack" << std::endl;

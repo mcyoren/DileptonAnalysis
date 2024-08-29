@@ -13,6 +13,7 @@
 #include "RunHeader.h"
 #include "TriggerHelper.h"
 
+#include "EmcCluster.h"
 #include "emcClusterContainer.h"
 #include "emcClusterContent.h"
 #include "emcCalibrationDataHelper.h"
