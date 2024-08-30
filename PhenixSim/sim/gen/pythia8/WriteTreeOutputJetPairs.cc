@@ -3,6 +3,7 @@
 #include <TF1.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TFile.h>
 #include <TRandom3.h>
 #include <TObject.h>
@@ -42,6 +43,7 @@ using namespace Pythia8;
 
 const int MaxTracks = 100;
 const double pi = TMath::ACos(-1);
+const double me2 = 0.000511*0.000511;
 
 int main(int argc, char* argv[]){
 
@@ -126,6 +128,7 @@ int main(int argc, char* argv[]){
   TH1D* hist = new TH1D("hist", "pT Distribution", 100, 0, 10);
   TH1D* pTHat = new TH1D("pTHat", "pTHat Distribution", 100, 0, 10);
   TH1D* norm = new TH1D("norm","EVENT COUNTER", 2,-0.5,1.5);
+  TH3D* m2hist = new TH3D("m2hist","m2hist",90,0,4.5,50,0,10,3,0,3);
 
   std::cout<<"tree and histos were created"<<std::endl;
 
@@ -161,6 +164,7 @@ int main(int argc, char* argv[]){
 
     int count = 0;
     myevent.set_to_null();
+    std::vector<int> already_used_pi0,already_used_eta, already_used_etap, already_used_omege;
 
     for(int j = 0; j < nparticles; j++){
 
@@ -192,10 +196,43 @@ int main(int argc, char* argv[]){
       std::vector<int> motherIndices;
       if(mother_index1 > 0 && mother_index1 < mother_index) motherIndices.push_back(mother_index1);
       if(mother_index2 > 0 && mother_index2 < mother_index) motherIndices.push_back(mother_index2);
+      bool skip_track = false;
 
       while( !motherIndices.empty() ) {
 
         int motherIndex = motherIndices.front();
+        if(pythia.event[motherIndex].id()==111)
+        {
+          for (auto aready_used_mom_id : already_used_pi0)
+          {
+            if(motherIndex==aready_used_mom_id) skip_track = true;
+          }
+          already_used_pi0.push_back(motherIndex);
+        }
+        if(pythia.event[motherIndex].id()==221)
+        {
+          for (auto aready_used_mom_id : already_used_eta)
+          {
+            if(motherIndex==aready_used_mom_id) skip_track = true;
+          }
+          already_used_eta.push_back(motherIndex);
+        }
+        if(pythia.event[motherIndex].id()==331)
+        {
+          for (auto aready_used_mom_id : already_used_etap)
+          {
+            if(motherIndex==aready_used_mom_id) skip_track = true;
+          }
+          already_used_etap.push_back(motherIndex);
+        }
+        if(pythia.event[motherIndex].id()==3334)
+        {
+          for (auto aready_used_mom_id : already_used_omege)
+          {
+            if(motherIndex==aready_used_mom_id) skip_track = true;
+          }
+          already_used_omege.push_back(motherIndex);
+        }
         motherIndices.erase(motherIndices.begin());
 
         if (abs(pythia.event[motherIndex].id()) == 5) { parentisB = true; break; }
@@ -211,8 +248,9 @@ int main(int argc, char* argv[]){
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
       double Pt = sqrt(Px*Px + Py*Py);
-      if(Pt < 0.2) continue;
-
+      if(Pt < 0.4||skip_track) continue;
+      //if(count>0)
+      //  std::cout<<mother_index1<<" "<<mother_index2<<" "<<pythia.event[mother_index1].id()<<" "<<pythia.event[mother_index2].id()<<std::endl;
       double Pz = pythia.event[j].pz();
       double Energy = pythia.event[j].e();
       double Vx = pythia.event[j].xProd();
@@ -232,7 +270,34 @@ int main(int argc, char* argv[]){
       count++;
 
     }
-    if(count<2) continue;
+    if(count<2) {nevt++; continue;}
+    for (int ipart = 0; ipart < count; ipart++)
+    {
+      for (int jpart = ipart+1; jpart < count; jpart++)
+      {
+        const float pair_pt = sqrt( ( px[ipart] + px[jpart] )*( px[ipart] + px[jpart] ) + ( py[ipart] + py[jpart] )*( py[ipart] + py[jpart] ) );
+
+        const float px1 = px[ipart];
+        const float py1 = py[ipart];
+        const float pz1 = pz[ipart];
+        const float px2 = px[jpart];
+        const float py2 = py[jpart];
+        const float pz2 = pz[jpart];
+        const float pm1 = px1 * px1 + py1 * py1 + pz1 * pz1;
+        const float pm2 = px2 * px2 + py2 * py2 + pz2 * pz2;
+        const float es = sqrt(pm1 + me2) + sqrt(pm2 + me2);
+        const float px = px1 + px2;
+        const float py = py1 + py2;
+        const float pz = pz1 + pz2;
+
+        const float invm = sqrt(es * es - px * px - py * py - pz * pz);
+        const float qbin = (pid[ipart]>0?1:0)+(pid[jpart]>0?1:0);
+        m2hist->Fill(invm,pair_pt,qbin);
+
+      }
+      
+    }
+    
   
     ntracks = count;
 
@@ -258,6 +323,7 @@ int main(int argc, char* argv[]){
   fout->cd();
   tree->Write();
   hsect->Write();
+  m2hist->Write();
   fout->Close();
 
   auto end = std::chrono::high_resolution_clock::now();
