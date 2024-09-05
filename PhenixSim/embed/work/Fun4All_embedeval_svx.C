@@ -27,7 +27,7 @@ void Fun4All_embedeval_svx(
   cout << "runnum : " << runnum << endl;
   cout << "partid : " << partid << endl;
    
-  float vtxmatch = 5.0;
+  float vtxmatch = 600.0;
   float vtxmax = 30.0;
 
   int   dataFlag = 1; // 2 is for pp
