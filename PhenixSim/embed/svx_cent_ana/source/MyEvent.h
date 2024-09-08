@@ -172,7 +172,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime / tan(the0);
+                        return pt_prime / tan(the0_prime);
                   }
             };
             float GetPtot() const
@@ -183,7 +183,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0)/tan(the0) ) );
+                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0_prime)/tan(the0_prime) ) );
                   }
             };
             float GetPt() const { return pt; };
@@ -528,7 +528,8 @@ namespace MyDileptonAnalysis
                   else if(layer==1 && 6*iter+5<dangle1.size()) return (int) dangle1[iter*6+5];
                   else if(layer==2 && 6*iter+5<dangle2.size()) return (int) dangle2[iter*6+5];
                   else if(layer==3 && 6*iter+5<dangle3.size()) return (int) dangle3[iter*6+5];
-                  std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()<<std::endl;
+                  std::cout<<"GetHits "<<layer<<" "<<6*iter+5<<" "<<dangle0.size()
+                  <<" "<<dangle1.size()<<" "<<dangle2.size()<<" "<<dangle3.size()<<std::endl;
                   return -999;
             };
             void ClearNumberVectors(){dangle0.clear();dangle1.clear();dangle2.clear();dangle3.clear();};
@@ -652,13 +653,58 @@ namespace MyDileptonAnalysis
             {
                   std::map<int, float>::const_iterator iterator = associated_tracks.begin();
                   for (int iass = 0; iass < itrack; iass++)
-                        iterator++;
+                        ++iterator;
                   return iterator->first;
             };
             float GetAssociatedTrackDistance(int itrackid) { return associated_tracks[itrackid]; };
             void DeleteAssociatedTrack(int itrackid) { associated_tracks.erase(itrackid); };
 
             ClassDef(MyVTXHit, 1)
+      };
+
+
+      class MyGenTrack
+      {
+      private:
+            float px;
+            float py;
+            float pz;
+            float vx;
+            float vy;
+            float vz;
+
+            int id;
+
+      public:
+            MyGenTrack()
+            {
+                  px = -8888;
+                  py = -8888;
+                  pz = -8888;
+                  vx = -8888;
+                  vy = -8888;
+                  vz = -8888;
+                  id = -8888;
+            };
+            virtual ~MyGenTrack(){};
+
+            float GetPx() const { return px; }
+            float GetPy() const { return py; }
+            float GetPz() const { return pz; }
+            float GetVx() const { return vx; }
+            float GetVy() const { return vy; }
+            float GetVz() const { return vz; }
+            float GetID() const { return id; }
+
+            void SetPx(float val) { px = val; }
+            void SetPy(float val) { py = val; }
+            void SetPz(float val) { pz = val; }
+            void SetVx(float val) { vx = val; }
+            void SetVy(float val) { vy = val; }
+            void SetVz(float val) { vz = val; }
+            void SetID(int val) { id = val; }
+
+            ClassDef(MyGenTrack, 1)
       };
 
       class MyPair
@@ -730,6 +776,7 @@ namespace MyDileptonAnalysis
             std::vector<MyDileptonAnalysis::MyHadron> HadronList;
             std::vector<MyDileptonAnalysis::MyVTXHit> VTXHitList;
             std::vector<MyDileptonAnalysis::MyElectron> ElecCandList;
+            std::vector<MyDileptonAnalysis::MyGenTrack> GenTrackList;
 
       public:
             MyEvent()
@@ -806,22 +853,25 @@ namespace MyDileptonAnalysis
             void SetPsi3FVTXA0(float spsi3_FVTXA0) { psi3_FVTXA0 = spsi3_FVTXA0; };
             float GetPsi3FVTXA0() { return psi3_FVTXA0; };
 
-            int GetRunGroup(int in_run_number) const;
+            int GetRunGroup(int in_run_number = 0) const;
 
             void AddTrack(const MyElectron *newTrack) { TrackList.push_back(*newTrack); };
             void AddHadron(const MyHadron *newTrack) { HadronList.push_back(*newTrack); };
             void AddVTXHit(const MyVTXHit *newVTXHit) { VTXHitList.push_back(*newVTXHit); };
             void AddElecCand(const MyElectron *newTrack) { ElecCandList.push_back(*newTrack); };
+            void AddGenTrack(const MyGenTrack *newTrack) { GenTrackList.push_back(*newTrack); }
 
             Long64_t GetNtrack() { return TrackList.size(); };
             Long64_t GetNhadron() { return HadronList.size(); };
             Long64_t GetNVTXhit() { return VTXHitList.size(); };
             Long64_t GetNeleccand() { return ElecCandList.size(); };
+            Long64_t GetNgentrack() { return GenTrackList.size(); };
 
             MyElectron *GetEntry(unsigned int i) const { return const_cast<MyElectron *>(&(TrackList[i])); };
             MyHadron *GetHadronEntry(unsigned int i) const { return const_cast<MyHadron *>(&(HadronList[i])); };
             MyVTXHit *GetVTXHitEntry(unsigned int i) const { return const_cast<MyVTXHit *>(&(VTXHitList[i])); };
             MyElectron *GetElecCand(unsigned int i) const { return const_cast<MyElectron *>(&(ElecCandList[i])); };
+            MyGenTrack *GetGenTrack(unsigned int i) const { return const_cast<MyGenTrack *>(&(GenTrackList[i])); };
 
             void RemoveTrackEntry(const unsigned int i){ TrackList.erase(TrackList.begin() + i); };
             void RemoveHadronEntry(const unsigned int i){ HadronList.erase(HadronList.begin() + i); };
@@ -851,7 +901,7 @@ namespace MyDileptonAnalysis
             TH1D *event_hist, *centr_hist;
             TH3D *el_pt_hist;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
-            TH3D *chi2_ndf[N_centr];
+            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist;
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
@@ -864,15 +914,19 @@ namespace MyDileptonAnalysis
             TH3D *DCA_2D_hist[N_centr], *sDCA_2D_hist[N_centr];
             TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el, *rich_prob1, *rich_prob2, *rich_prob3;
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
-            TH3D *DCPT_ReconPT, *sDCPT_ReconPT, *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr], *charge_hist;
-            TH3D *veto_hist[N_centr], *veto_hist_the[N_centr], *sveto_hist[N_centr];
-            TH2D *couter_veto_hist;
-            TH3D *adc_hist;
-            TH3D *inv_mass_dca_fg0,*inv_mass_dca_fg1,*inv_mass_dca_fg2,*inv_mass_dca_fg3,*inv_mass_dca_fg4,*inv_mass_dca_fg5,*inv_mass_dca_fg6,*inv_mass_dca_fg7;
-            TH3D *inv_mass_dca_bg0,*inv_mass_dca_bg1,*inv_mass_dca_bg2,*inv_mass_dca_bg3,*inv_mass_dca_bg4,*inv_mass_dca_bg5,*inv_mass_dca_bg6,*inv_mass_dca_bg7;
+            TH3D *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr];
+            TH3D *DCPT_ReconPT, *sDCPT_ReconPT,  *charge_hist, *phi_hist, *the_hist, *pt_corr;
+            TH3D *veto_phi_hist[N_centr], *veto_the_hist[N_centr], *veto_phi_phi_hist[N_centr], *veto_the_the_hist[N_centr];
+            TH3D *veto_sphi_phi_hist[N_centr*4], *veto_sthe_the_hist[N_centr*4], *veto_sphi_sphi_hist[N_centr*5], *veto_sthe_sthe_hist[N_centr*5];
+            TH3D *couter_veto_hist, *counter_assoc_eff_hist, *counter_assoc_ghost_hist, *veto_type_hist;
+            TH3D *inv_mass_dca_fg0[N_centr*3],*inv_mass_dca_fg1[N_centr*3],*inv_mass_dca_fg2[N_centr*3],*inv_mass_dca_fg3[N_centr*3],*inv_mass_dca_fg4[N_centr*3];
+            TH3D *inv_mass_dca_bg0[N_centr*3],*inv_mass_dca_bg1[N_centr*3],*inv_mass_dca_bg2[N_centr*3],*inv_mass_dca_bg3[N_centr*3],*inv_mass_dca_bg4[N_centr*3];
+            TH3D *delt_phi_dca_fg0[N_centr*3],*delt_phi_dca_fg1[N_centr*3],*delt_phi_dca_fg2[N_centr*3],*delt_phi_dca_fg3[N_centr*3],*delt_phi_dca_fg4[N_centr*3];
+            TH3D *delt_phi_dca_bg0[N_centr*3],*delt_phi_dca_bg1[N_centr*3],*delt_phi_dca_bg2[N_centr*3],*delt_phi_dca_bg3[N_centr*3],*delt_phi_dca_bg4[N_centr*3];
+            TH3D *inv_mass_dca_gen[N_centr*3];
             TH3D* myvtx_hist;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
-            is_fill_reveal, is_fill_DCA2_hist, is_check_veto;
+            is_fill_reveal, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
            
       public:
             MyEventContainer()
@@ -887,14 +941,11 @@ namespace MyDileptonAnalysis
                   temc = nullptr; ttof = nullptr; n0_hist = nullptr; ep_hist=nullptr; prob_hist=nullptr; disp_hist=nullptr; chi2npe0_hist=nullptr;
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   rich_prob1 = nullptr; rich_prob2 = nullptr; rich_prob3 = nullptr;
-                  el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr, DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr;
-                  couter_veto_hist = nullptr;
-                  adc_hist = nullptr;
-                  inv_mass_dca_fg0=nullptr;inv_mass_dca_fg1=nullptr;inv_mass_dca_fg2=nullptr;inv_mass_dca_fg3=nullptr;
-                  inv_mass_dca_fg4=nullptr;inv_mass_dca_fg5=nullptr;inv_mass_dca_fg6=nullptr;inv_mass_dca_fg7=nullptr;
-                  inv_mass_dca_bg0=nullptr;inv_mass_dca_bg1=nullptr;inv_mass_dca_bg2=nullptr;inv_mass_dca_bg3=nullptr;
-                  inv_mass_dca_bg4=nullptr;inv_mass_dca_bg5=nullptr;inv_mass_dca_bg6=nullptr;inv_mass_dca_bg7=nullptr;
+                  el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr;
+                  DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr, pt_corr = nullptr;
+                  couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
                   myvtx_hist = nullptr;
+                  truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -937,7 +988,23 @@ namespace MyDileptonAnalysis
                         DCA2_2D_hist[i] = nullptr;
                         sDCA2_2D_hist[i] = nullptr;
                         DCA12_hist[i]  = nullptr;
-                        veto_hist[i] = nullptr, veto_hist_the[i] = nullptr, sveto_hist[i] = nullptr;
+                        veto_phi_hist[i] = nullptr, veto_the_hist[i] = nullptr, veto_phi_phi_hist[i] = nullptr, veto_the_the_hist[i] = nullptr;
+                  }
+                  for (int i = 0; i < N_centr*3; i++)
+                  { 
+                        inv_mass_dca_fg0[i]=nullptr;inv_mass_dca_fg1[i]=nullptr;inv_mass_dca_fg2[i]=nullptr;inv_mass_dca_fg3[i]=nullptr;inv_mass_dca_fg4[i]=nullptr;
+                        inv_mass_dca_bg0[i]=nullptr;inv_mass_dca_bg1[i]=nullptr;inv_mass_dca_bg2[i]=nullptr;inv_mass_dca_bg3[i]=nullptr;inv_mass_dca_bg4[i]=nullptr;
+                        delt_phi_dca_fg0[i]=nullptr;delt_phi_dca_fg1[i]=nullptr;delt_phi_dca_fg2[i]=nullptr;delt_phi_dca_fg3[i]=nullptr;delt_phi_dca_fg4[i]=nullptr;
+                        delt_phi_dca_bg0[i]=nullptr;delt_phi_dca_bg1[i]=nullptr;delt_phi_dca_bg2[i]=nullptr;delt_phi_dca_bg3[i]=nullptr;delt_phi_dca_bg4[i]=nullptr;
+                        inv_mass_dca_gen[i]=nullptr;
+                  }
+                  for (int i = 0; i < N_centr*4; i++)
+                  { 
+                        veto_sphi_phi_hist[i] = nullptr, veto_sthe_the_hist[i] = nullptr;
+                  }
+                  for (int i = 0; i < N_centr*5; i++)
+                  { 
+                        veto_sphi_sphi_hist[i] = nullptr, veto_sthe_sthe_hist[i] = nullptr;
                   }
                   is_fill_hsits = 0;
                   is_fill_hadron_hsits = 0;
@@ -948,26 +1015,27 @@ namespace MyDileptonAnalysis
                   is_fill_reveal = 0;
                   is_fill_DCA2_hist = 0;
                   is_check_veto = 0;
+                  is_fill_inv_mass = 0;
             };
 
             virtual ~MyEventContainer()
             {
                   std::cout << "Starting to Delete Event in my Container" << std::endl;
                   if(is_fill_tree||is_fill_hadron_hsits||is_fill_hsits||is_fill_dphi_hist||is_fill_DCA_hist||is_fill_track_QA
-                  ||is_fill_reveal||is_fill_DCA2_hist||is_check_veto) {delete outfile;}
+                  ||is_fill_reveal||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
                   delete event;
                   std::cout << "Event in the container was deleted" << std::endl;
             };
 
             void InitEvent() { event = new MyEvent; };
             void ClearEvent() { event->ClearEvent(); };
-            void GetHistsFromFile(const std::string loc);
+            void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
             const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, bool not_fill = false);
+            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, bool not_fill = false);
             void Associate_Hits_to_Hadrons(float sigma = 2);
 
             void Reveal_Hadron();
@@ -985,9 +1053,10 @@ namespace MyDileptonAnalysis
 
             void fill_evtbuff_list(const unsigned int pool_depth = 10);
             void fill_inv_mass(const unsigned int pool_depth = 10);
+            void fill_inv_mass_sim();
             void correct_beam_offset();
             void CleanUpHitList();
-            void FillQAHist(const int mc_id = -1);
+            void FillQAHist(const int mc_id = -999);
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };

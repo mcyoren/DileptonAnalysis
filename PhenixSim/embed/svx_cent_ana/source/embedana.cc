@@ -172,33 +172,33 @@ int embedana::process_event(PHCompositeNode *topNode)
   event->SetCentrality(vertexes[4 * EventNumber + 3]);
   event->SetRunNumber(runHDR->get_RunNumber());
 
-  event->SetEvtNo(InData_read[InPartNumber].id);
-  const double init_pt = sqrt(InData_read[InPartNumber].px * InData_read[InPartNumber].px + InData_read[InPartNumber].py * InData_read[InPartNumber].py);
-  event->SetBBCcharge(init_pt);
-  event->SetBBCchargeN(atan2(InData_read[InPartNumber].py, InData_read[InPartNumber].px));
-  event->SetBBCchargeS(atan2(init_pt, InData_read[InPartNumber].pz));
-  const int nn_loc = InData_read[InPartNumber].nn;
-  if(nn_loc>1)
-  {
+  const int nGtracks = InData_read[InPartNumber].nn;
+  for (int igtrack = 0; igtrack < nGtracks; igtrack++)
+  {  
+    MyDileptonAnalysis::MyGenTrack gTrack;
+
+    gTrack.SetID(InData_read[InPartNumber].id);
+    gTrack.SetPx(InData_read[InPartNumber].px);
+    gTrack.SetPy(InData_read[InPartNumber].py);
+    gTrack.SetPz(InData_read[InPartNumber].pz);
+    gTrack.SetVx(InData_read[InPartNumber].vx);
+    gTrack.SetVy(InData_read[InPartNumber].vy);
+    gTrack.SetVz(InData_read[InPartNumber].vz);
+    event->AddGenTrack(&gTrack);
     InPartNumber++;
-    event->SetBBCtimeN(InData_read[InPartNumber].id);
-    const double init_pt = sqrt(InData_read[InPartNumber].px * InData_read[InPartNumber].px + InData_read[InPartNumber].py * InData_read[InPartNumber].py);
-    event->SetBBCtimeS(init_pt);
-    event->SetPsi3BBC(atan2(InData_read[InPartNumber].py, InData_read[InPartNumber].px));
-    event->SetPsi3FVTXA0(atan2(init_pt, InData_read[InPartNumber].pz));
+    if(true)
+    std::cout<<"read track id, px, py, pz, vx, vy, vz:  "<<gTrack.GetID()<<" "<<gTrack.GetPx()<<" "<<gTrack.GetPz()<<" "<<gTrack.GetPy()<<" "
+    <<gTrack.GetVx()<<" "<<gTrack.GetVy()<<" "<<gTrack.GetVz()<<std::endl;
   }
+  
+
   
   if (false)
     std::cout << "x,y,z,cent: " << vertexes[4 * EventNumber] << " " << vertexes[4 * EventNumber + 1] << " " << vertexes[4 * EventNumber + 2] << " " << vertexes[4 * EventNumber + 3] << " " << std::endl;
-  if (false)
-    std::cout << "px,py,pz,id : " << InData_read[InPartNumber].px << " " << InData_read[InPartNumber].py << " " << InData_read[InPartNumber].pz << " " << InData_read[InPartNumber].id << " " << std::endl;
-  if (false)
-    std::cout << "px,py,pz,id : " << InData_read[InPartNumber-1].px << " " << InData_read[InPartNumber-1].py << " " << InData_read[InPartNumber-1].pz << " " << InData_read[InPartNumber-1].id << " " << std::endl;
-  if (false)
-    std::cout << "px,py,pz,id : " << event->GetBBCcharge()*cos(event->GetBBCchargeN()) << " " << event->GetBBCcharge()*sin(event->GetBBCchargeN())<< " " << event->GetBBCcharge()/tan(event->GetBBCchargeS()) << " " << event->GetEvtNo() << " " << std::endl;
-   
-  // event->ClearEvent();
-  InPartNumber++;//InPartNumber += nn_loc - 1;
+ if (true)
+    std::cout << "n gen traks txt : read : " << nGtracks << " : " << event->GetNgentrack()<< std::endl;
+ if(nGtracks!= (int)  event->GetNgentrack() ) std::cout<<"\nBad read "<<nGtracks<<" "<<event->GetNgentrack()<<"\n"<<std::endl;
+
 
   if(false)
   {
@@ -288,7 +288,7 @@ int embedana::process_event(PHCompositeNode *topNode)
       /// SvxCentralTrack*    svxcntsngl = m_vsvxcnt[idR];
       for (unsigned int imctrk = 0; imctrk < trk_mc->get_npart(); imctrk++)
       {
-        if( fabs( embed->get_momS() - trk_mc->get_mom(imctrk) ) < 0.002 ) trk_mc->set_mcid(imctrk,embed->get_partidG());
+        if( TMath::Abs( embed->get_momS() - trk_mc->get_mom(imctrk) ) < 0.002 ) trk_mc->set_mcid(imctrk,embed->get_partidG());
       }
 
       if(false) 
@@ -676,7 +676,7 @@ int embedana::ReadOrigPartMoms()
 
       if(j>1) continue;
       //std::cout<<i2<<" "<<px<<" "<<py<<" "<<pz<<" "<<nn<<endl;
-      if (i >= 22000)
+      if (i >= 100000)
       {
         printf("Too much particles in small file!\n");
         return -1;
@@ -760,7 +760,7 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
     
     const float dep = d_trk->get_dep(itrk);
     //if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL) std::cout<<"WTF:::: "<<d_trk->get_zed(itrk)<< " "<< Z_GLOBAL<<std::endl;
-    if (Z_GLOBAL > -99 && fabs(d_trk->get_zed(itrk)) >= Z_GLOBAL)
+    if (Z_GLOBAL > -99 && TMath::Abs(d_trk->get_zed(itrk)) >= Z_GLOBAL)
         return -1;
 
     if( ( pT<0.09 || d_trk->get_quality(itrk)<0 || pT>25 )) return -2;
@@ -812,9 +812,9 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
         return 3;
     if (CHI2_NPE0 > -99 && (d_trk->get_chi2(itrk) / d_trk->get_npe0(itrk)) >= CHI2_NPE0)
         return 3;
-    if (EMCDPHI > -99 && fabs(d_trk->get_emcdphi(itrk)) >= EMCDPHI)
+    if (EMCDPHI > -99 && TMath::Abs(d_trk->get_emcdphi(itrk)) >= EMCDPHI)
         return 3;
-    if (EMCDZ > -99 && fabs(d_trk->get_emcdz(itrk)) >= EMCDZ)
+    if (EMCDZ > -99 && TMath::Abs(d_trk->get_emcdz(itrk)) >= EMCDZ)
         return 3;
     if (EOVERP > -99 && ecore / p <= EOVERP)
         return 3;
@@ -826,14 +826,14 @@ int embedana::applySingleTrackCut(const PHCentralTrack *d_trk, const int itrk, c
     {
         if(pT > 0.40)
         {
-            if (EMCSDPHI > -99 && fabs(d_trk->get_emcsdphi_e(itrk)) >= EMCSDPHI)
+            if (EMCSDPHI > -99 && TMath::Abs(d_trk->get_emcsdphi_e(itrk)) >= EMCSDPHI)
                 return 3;
-            if (EMCSDZ > -99 && fabs(d_trk->get_emcsdz_e(itrk)) >= EMCSDZ)
+            if (EMCSDZ > -99 && TMath::Abs(d_trk->get_emcsdz_e(itrk)) >= EMCSDZ)
                 return 3;
         }else{
-            if (fabs(d_trk->get_emcdphi(itrk)) >= 0.02)
+            if (TMath::Abs(d_trk->get_emcdphi(itrk)) >= 0.02)
                 return 3;
-            if (fabs(d_trk->get_emcdz(itrk)-0.8) >= 8)
+            if (TMath::Abs(d_trk->get_emcdz(itrk)-0.8) >= 8)
                 return 3;
         }
     }
