@@ -22,6 +22,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int fill_true_DCA = 1;
   const int check_veto = 0;
   const int fill_inv_mass = 1;
+  const int fill_inv_mass_sim = 1;
 
   char outname[200];
   sprintf(outname,"kek_%d.root",itread);
@@ -63,126 +64,14 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if (ievent - beggin > 3500000)
       break;
 
-
-    if(myevent->GetNtrack()<1 && !do_track_QA) continue;
-
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
     myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*0);
     myevent->SetVtxZ(myevent->GetPreciseZ());
-    /*myevent->SetCentrality(event->GetCentrality());
-    myevent->SetPreciseX(event->GetPreciseX());
-    myevent->SetPreciseY(event->GetPreciseY());
-    myevent->SetPreciseZ(event->GetPreciseZ());
-    myevent->SetEvtNo(event->GetEvtNo());
-    myevent->SetRunNumber(0);
-    myevent->SetBBCcharge(event->GetBBCcharge());
-    myevent->SetBBCtimeN(event->GetBBCtimeN());
 
-    for (int i = 0; i < event->GetNtrack(); i++)
-    {
-      MyDileptonAnalysis::MyElectron trk = *event->GetEntry(i);
-      MyDileptonAnalysis::MyElectron *newTrack = new MyDileptonAnalysis::MyElectron;
-      newTrack->SetTrkId(i);
-      newTrack->SetArm(trk.GetArm());
-      newTrack->SetSect(trk.GetSect());
-      newTrack->SetTrkQuality(63);
-      newTrack->SetPt(trk.GetPt());
-      newTrack->SetPtPrime(trk.GetPtPrime());
-      newTrack->SetQ(trk.GetCharge());
-      newTrack->SetQPrime(trk.GetChargePrime());
-      newTrack->SetPhiDC(trk.GetPhiDC());
-      newTrack->SetPhi0(trk.GetPhi0());
-      newTrack->SetThe0(trk.GetThe0());
-      newTrack->SetPhi0Prime(trk.GetPhi0Prime());
-      newTrack->SetThe0Prime(trk.GetThe0Prime());
-      newTrack->SetZDC(trk.GetZDC());
-      newTrack->SetAlpha(trk.GetAlpha());
-      newTrack->SetAlphaPrime(trk.GetAlphaPrime());
-      newTrack->SetEmcId(trk.GetEmcId());
-      newTrack->SetEcore(trk.GetEcore());
-      newTrack->SetDep(trk.GetDep());
-      newTrack->SetProb(trk.GetProb());
-      newTrack->SetEmcdz(trk.GetEmcdz());
-      newTrack->SetEmcdphi(trk.GetEmcdphi());
-      newTrack->SetTOFDPHI(trk.GetTOFDPHI());
-      newTrack->SetTOFDZ(trk.GetTOFDZ());
-      newTrack->SetTOFE(trk.GetTOFE());
-      newTrack->SetEmcTOF(trk.GetEmcTOF());
-      newTrack->SetCrkphi(trk.GetCrkphi());
-      newTrack->SetCrkz(trk.GetCrkz());
-      newTrack->SetChi2(trk.GetChi2());
-      newTrack->SetN0(trk.GetN0());
-      newTrack->SetDISP(trk.GetDisp());
-      newTrack->SetNPE0(trk.GetNpe0());
-      newTrack->SetEmcdz_e(trk.GetEmcdz_e());
-      newTrack->SetEmcdphi_e(trk.GetEmcdphi_e());
-      newTrack->SetSect(trk.GetSect());
-      newTrack->SetMcId(trk.GetMcId());
-      myevent->AddTrack(newTrack);
-    }
+    if(fill_inv_mass_sim) event_container->fill_inv_mass_sim();
 
-    for (int i = 0; i < event->GetNtrack()*fill_QA_hadron_hists; i++)
-    {
-      MyDileptonAnalysis::MyElectron trk = *event->GetEntry(i);
-      if (trk.GetPtPrime()<-1.5||trk.GetPtPrime()>10.75) continue;
-      MyDileptonAnalysis::MyHadron *newTrack = new MyDileptonAnalysis::MyHadron;
-      newTrack->SetTrkId(i);
-      newTrack->SetArm(trk.GetArm());
-      newTrack->SetSect(trk.GetSect());
-      newTrack->SetTrkQuality(63);
-      newTrack->SetPt(trk.GetPt());
-      newTrack->SetPtPrime(trk.GetPtPrime());
-      newTrack->SetQ(trk.GetCharge());
-      newTrack->SetQPrime(trk.GetCharge());
-      newTrack->SetPhiDC(trk.GetPhiDC());
-      newTrack->SetPhi0(trk.GetPhi0());
-      newTrack->SetThe0(trk.GetThe0());
-      newTrack->SetPhi0Prime(trk.GetPhi0Prime());
-      newTrack->SetThe0Prime(trk.GetThe0Prime());
-      newTrack->SetZDC(trk.GetZDC());
-      newTrack->SetAlpha(trk.GetAlpha());
-      newTrack->SetAlphaPrime(trk.GetAlphaPrime());
-      newTrack->SetEmcId(trk.GetEmcId());
-      newTrack->SetEcore(trk.GetEcore());
-      newTrack->SetDep(trk.GetDep());
-      newTrack->SetProb(trk.GetProb());
-      newTrack->SetEmcdz(trk.GetEmcdz());
-      newTrack->SetEmcdphi(trk.GetEmcdphi());
-      newTrack->SetTOFE(trk.GetTOFE());
-      newTrack->SetEmcTOF(trk.GetEmcTOF());
-      newTrack->SetCrkphi(trk.GetCrkphi());
-      newTrack->SetCrkz(trk.GetCrkz());
-      newTrack->SetChi2(trk.GetChi2());
-      newTrack->SetN0(trk.GetN0());
-      newTrack->SetDISP(trk.GetDisp());
-      newTrack->SetNPE0(trk.GetNpe0());
-      newTrack->SetEmcdz_e(trk.GetEmcdz_e());
-      newTrack->SetEmcdphi_e(trk.GetEmcdphi_e());
-      newTrack->SetSect(trk.GetSect());
-      newTrack->SetMcId(trk.GetMcId());
-      myevent->AddHadron(newTrack);
-    }
-    if(myevent->GetNhadron()<1 && fill_QA_hadron_hists ) continue;
-
-
-    for (int i = 0; i < event->GetNVTXhit()*associate_hits; i++)
-    {
-      MyDileptonAnalysis::MyVTXHit oldhit =*event->GetVTXHitEntry(i);
-      MyDileptonAnalysis::MyVTXHit *newHit = new MyDileptonAnalysis::MyVTXHit;
-      newHit->SetClustId(i);
-      if(oldhit.GetSensor() == 0) continue;
-      newHit->SetLayer(oldhit.GetLayer());
-      newHit->SetLadder(oldhit.GetLadder());
-      newHit->SetSensor(oldhit.GetSensor());
-      newHit->SetXHit(oldhit.GetXHit());
-      newHit->SetYHit(oldhit.GetYHit());
-      newHit->SetZHit(oldhit.GetZHit());
-      //newHit->SetPolars(myevent->GetPreciseX(), myevent->GetPreciseY(), myevent->GetPreciseZ());
-      newHit->SetiLayerFromR();
-      myevent->AddVTXHit(newHit);
-    }
-    */
-
+    if(myevent->GetNtrack()<1 && !do_track_QA) continue;
+    
     int n_hits = myevent->GetNVTXhit();
     for (int ihit = 0; ihit < n_hits; ihit++)
     {
@@ -202,7 +91,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(2,2,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
