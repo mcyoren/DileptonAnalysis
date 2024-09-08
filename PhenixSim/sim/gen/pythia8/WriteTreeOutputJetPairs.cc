@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
 
   pythia.readString("HardQCD:all = on");
 
-  //pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
+  pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
 
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = " + str_seed);
@@ -247,8 +247,9 @@ int main(int argc, char* argv[]){
       
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
+      double eta = TMath::Abs(pythia.event[j].eta());
       double Pt = sqrt(Px*Px + Py*Py);
-      if(Pt < 0.4||skip_track) continue;
+      if(Pt < 0.4||eta>0.5||skip_track) continue;
       //if(count>0)
       //  std::cout<<mother_index1<<" "<<mother_index2<<" "<<pythia.event[mother_index1].id()<<" "<<pythia.event[mother_index2].id()<<std::endl;
       double Pz = pythia.event[j].pz();
@@ -270,7 +271,7 @@ int main(int argc, char* argv[]){
       count++;
 
     }
-    if(count<2) {nevt++; continue;}
+    if(count<2||count>9) {nevt++; continue;}
     for (int ipart = 0; ipart < count; ipart++)
     {
       for (int jpart = ipart+1; jpart < count; jpart++)
