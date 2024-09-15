@@ -11,12 +11,10 @@ public:
       ZED,
       CRKPHI,
       CRKZED,
-      //DCA,
-      //SDCA,
-      PHI0,
       DCAX,
       DCAY,
-      KEFF,
+      PSI,
+      ZVTX,
       LAST_DOUBLE  // special...always use this
     };
 
@@ -28,6 +26,7 @@ public:
       ID1,
       ID2,
       ID3,
+      CENTR,
       LAST_INTEGER  // special...always use this
     };
 };

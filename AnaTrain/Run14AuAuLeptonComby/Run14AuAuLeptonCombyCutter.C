@@ -58,6 +58,29 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     UltraLightTrack *p1 = ct1->GetTrack(iTrack1);
     UltraLightTrack *p2 = ct2->GetTrack(iTrack2);
 
+    const int centrality_pip = p1->get_integer(Run14AuAuLeptonCombyEnum::CENTR);
+    const int centrality_pim = p2->get_integer(Run14AuAuLeptonCombyEnum::CENTR);
+    const float zvtx_pip =     p1->get_double(Run14AuAuLeptonCombyEnum::ZVTX);
+    const float zvtx_pim =     p2->get_double(Run14AuAuLeptonCombyEnum::ZVTX);
+    const float psi_pip =      p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
+    const float psi_pim =      p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
+
+    if(centrality_pip<20||centrality_pim<20)
+    {
+        if( TMath::Abs(centrality_pip-centrality_pim)>2 ) return false;
+        if( TMath::Abs(zvtx_pip-zvtx_pim)>2 ) return false;
+        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 ) return false;
+    }
+    else if(centrality_pip<60||centrality_pim<60)
+    {
+        if( TMath::Abs(centrality_pip-centrality_pim)>5 ) return false;
+        if( TMath::Abs(zvtx_pip-zvtx_pim)>4 ) return false;
+        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/4 ) return false;
+    }
+    else{
+        if( TMath::Abs(centrality_pip-centrality_pim)>20 ) return false;
+    }
+
     const float phi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PHI);
     const float phi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PHI);
 

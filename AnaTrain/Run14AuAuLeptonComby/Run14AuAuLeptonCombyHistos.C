@@ -105,57 +105,6 @@ float Run14AuAuLeptonCombyHistos::get_pt(PHParticle *Type1, const unsigned int i
   return pt;
 }
 
-float Run14AuAuLeptonCombyHistos::get_recon_pt(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const double KEFF_pip = 1./0.98;
-  const double KEFF_pim = 1./0.98;
-
-  const double px = p1->get_px()*KEFF_pip + p2->get_px()*KEFF_pim;
-  const double py = p1->get_py()*KEFF_pip + p2->get_py()*KEFF_pim;
-
-  const double pt = sqrt(px*px + py*py);
-  
-  if(pt>2.9 && pt<5.0) return 2.9;
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_mass_ee_recon(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const double me = 0.000510998918;
-
-  const double KEFF_pip = 1.0/0.98;
-  const double KEFF_pim = 1.0/0.98;
-
-  const double px1 = p1->get_px()*KEFF_pip;
-  const double py1 = p1->get_py()*KEFF_pip;
-  const double pz1 = p1->get_pz()*KEFF_pip;
-
-  const double px2 = p2->get_px()*KEFF_pim;
-  const double py2 = p2->get_py()*KEFF_pim;
-  const double pz2 = p2->get_pz()*KEFF_pim;
-
-  const double pm1 = px1 * px1 + py1 * py1 + pz1 * pz1;
-  const double pm2 = px2 * px2 + py2 * py2 + pz2 * pz2;
-  const double es = sqrt(pm1 + me * me) + sqrt(pm2 + me * me);
-  const double px = px1 + px2;
-  const double py = py1 + py2;
-  const double pz = pz1 + pz2;
-
-  return sqrt(es * es - px * px - py * py - pz * pz);
-}
-
 float Run14AuAuLeptonCombyHistos::get_mass_ee(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);

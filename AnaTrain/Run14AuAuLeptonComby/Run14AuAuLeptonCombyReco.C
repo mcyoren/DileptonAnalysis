@@ -497,11 +497,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         //ult.set_double(Run14AuAuLeptonCombyEnum::DCA,  mytrk->GetDCA());
         //ult.set_double(Run14AuAuLeptonCombyEnum::SDCA, mytrk->GetsDCA());
-        ult.set_double(Run14AuAuLeptonCombyEnum::PHI0, mytrk->GetPhi0Prime());
-        ult.set_double(Run14AuAuLeptonCombyEnum::KEFF,  mytrk->GetReconPT()/mytrk->GetPtPrime());
         
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2());
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
+
+        ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
+        ult.set_double(Run14AuAuLeptonCombyEnum::PSI,  event->GetPsi2FVTXA0());
+        ult.set_integer(Run14AuAuLeptonCombyEnum::CENTR, event->GetCentrality());
 
         ult.set_integer(Run14AuAuLeptonCombyEnum::PTYPE, ptype);
         ult.set_integer(Run14AuAuLeptonCombyEnum::MATCH, addit_reject);

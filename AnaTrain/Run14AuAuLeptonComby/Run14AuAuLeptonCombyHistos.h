@@ -30,10 +30,8 @@ public:
       static float get_DCA_V5(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_recon_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_mass_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_mass_ee_recon(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_phi_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_phi_V_ee(const UltraLightTrack *p1, const UltraLightTrack *p2);
