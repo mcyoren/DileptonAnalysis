@@ -67,15 +67,15 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
 
     if(centrality_pip<20||centrality_pim<20)
     {
-        if( TMath::Abs(centrality_pip-centrality_pim)>2 ) return false;
-        if( TMath::Abs(zvtx_pip-zvtx_pim)>2 ) return false;
-        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 ) return false;
+        if( TMath::Abs(centrality_pip-centrality_pim)>5 ) return false;
+        if( TMath::Abs(zvtx_pip-zvtx_pim)>2.5 ) return false;
+        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 && TMath::Abs(psi_pip-psi_pim)<7*TMath::Pi()/8) return false;
     }
     else if(centrality_pip<60||centrality_pim<60)
     {
-        if( TMath::Abs(centrality_pip-centrality_pim)>5 ) return false;
-        if( TMath::Abs(zvtx_pip-zvtx_pim)>4 ) return false;
-        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/4 ) return false;
+        if( TMath::Abs(centrality_pip-centrality_pim)>10 ) return false;
+        if( TMath::Abs(zvtx_pip-zvtx_pim)>5 ) return false;
+        if( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/4 && TMath::Abs(psi_pip-psi_pim)<3*TMath::Pi()/4) return false;
     }
     else{
         if( TMath::Abs(centrality_pip-centrality_pim)>20 ) return false;
@@ -99,10 +99,10 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float dzed = zed_pip - zed_pim;
 
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 2 )
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 5 )
         return false;
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 4.0 )
+                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 10.0 )
         return false;
 
     // pc1
