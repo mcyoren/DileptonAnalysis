@@ -1227,7 +1227,7 @@ namespace MyDileptonAnalysis
                 //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                 const float dcenter_phi = (newTrack1->GetChargePrime() * newTrack1->GetCrkphi()+newTrack2->GetChargePrime() * newTrack2->GetCrkphi()) / 0.013;
                 const float dcenter_zed = (newTrack1->GetChargePrime() * newTrack1->GetCrkz()+newTrack2->GetChargePrime() * newTrack2->GetCrkz())/5.;
-                if ( (TMath::Abs(dcenter_phi)<2|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 4 ) &&
+                if ( (TMath::Abs(dcenter_phi)<3|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 6 ) &&
                       newTrack1->GetChargePrime() != newTrack2->GetChargePrime() && newTrack1->GetArm()== newTrack2->GetArm()) continue;
                 const float dalpha = newTrack1->GetAlphaPrime() - newTrack2->GetAlphaPrime();
                 const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
@@ -1308,7 +1308,7 @@ namespace MyDileptonAnalysis
                     //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                     const float dcenter_phi = (newTrack1->GetChargePrime() * newTrack1->GetCrkphi()+newTrack2->GetChargePrime() * newTrack2->GetCrkphi()) / 0.013;
                     const float dcenter_zed = (newTrack1->GetChargePrime() * newTrack1->GetCrkz()+newTrack2->GetChargePrime() * newTrack2->GetCrkz())/5.;
-                    if ( (TMath::Abs(dcenter_phi)<2|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 4 ) &&
+                    if ( (TMath::Abs(dcenter_phi)<3|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 6 ) &&
                           newTrack1->GetChargePrime() != newTrack2->GetChargePrime() && newTrack1->GetArm()== newTrack2->GetArm()) continue;
                     const float dalpha = newTrack1->GetAlpha() - newTrack2->GetAlpha();
                     const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
