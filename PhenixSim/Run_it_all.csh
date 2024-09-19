@@ -207,6 +207,9 @@ set inputpythia = $DATADIR/output_single/pythia8/ccbartree$DIR.root
 if( $selected_paticle == 2) then
  set inputpythia = $DATADIR/output_single/pythia8/bbbartree$DIR.root
 endif
+if( $selected_paticle == 3) then
+ set inputpythia = $DATADIR/output_single/pythia8/jetpairstree$DIR.root
+endif
 set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh
 set macroname   = WriteROOT2OscarPythia.C
@@ -356,7 +359,7 @@ set inputoscar = $DATADIR/output_single/single/$DIR.oscar.particles.dat
 endif
 set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set inputreal = $DATADIR/real/work/outputnew/CNTmerge_MB-0000$run_number-0000.root
+set inputreal = $DATADIR/real/work/output/CNTmerge_MB-0000$run_number-0000.root
 set outdst    = kek0.root
 set embedpartID = $selected_paticle
 
