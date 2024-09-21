@@ -35,7 +35,7 @@ set evtnum    = $2
 set inputfile = $3
 
 set scriptdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work"
-set outputdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/outputnew"
+set outputdir = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/outputfull"
 set tmpdir    = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/output/000_$jobno"
 
 set infile = `basename $inputfile`
@@ -82,9 +82,10 @@ echo ".q"                                               >> cmd.input
 root -b < cmd.input
 
 #move
-echo "mv -f CNTmerge_*.root $outputdir"
-mv -f CNTmerge_*.root $outputdir
-mv vertexes.txt $outputdir
+ls
+echo "mv -f CNTmerge_MB_*.root $outputdir"
+mv -f CNTmerge_MB*.root $outputdir
+mv vertexes.txt $outputdir/vertexes_$runnum.txt
 
 #remove tmp dir
 cd $HOME

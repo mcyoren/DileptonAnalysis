@@ -7,45 +7,45 @@ void TrigSelect()
   gSystem->Load("libfun4all.so");
   gSystem->Load("libfun4allfuncs.so");
   Fun4AllServer *se = Fun4AllServer::instance();
-  string trgselname = "MU";
-  TrigSelect *mutrig = new TrigSelect(trgselname);
-  trgsel.push_back(trgselname);
-  mutrig->AddTrigger( "MUIDLL1_N1D&BBCLL1" );
-  mutrig->AddTrigger( "MUIDLL1_N2D&BBCLL1" );
-  mutrig->AddTrigger( "MUIDLL1_S1D&BBCLL1" );
-  mutrig->AddTrigger( "MUIDLL1_S2D&BBCLL1" );
+  //string trgselname = "MU";
+  //TrigSelect *mutrig = new TrigSelect(trgselname);
+  //trgsel.push_back(trgselname);
+  //mutrig->AddTrigger( "MUIDLL1_N1D&BBCLL1" );
+  //mutrig->AddTrigger( "MUIDLL1_N2D&BBCLL1" );
+  //mutrig->AddTrigger( "MUIDLL1_S1D&BBCLL1" );
+  //mutrig->AddTrigger( "MUIDLL1_S2D&BBCLL1" );
  
   trgselname = "MB";
   TrigSelect *minbias = new TrigSelect(trgselname);
   trgsel.push_back(trgselname);
-  minbias->AddTrigger("BBCLL1(>1 tubes)");
-  minbias->AddTrigger("BBCLL1(>1 tubes) narrowvertex CopyA");
-  minbias->AddTrigger("BBCLL1(>1 tubes) narrowvertex Copy B");
+  //minbias->AddTrigger("BBCLL1(>1 tubes)");
+  //minbias->AddTrigger("BBCLL1(>1 tubes) narrowvertex CopyA");
+  //minbias->AddTrigger("BBCLL1(>1 tubes) narrowvertex Copy B");
   minbias->AddTrigger("BBCLL1(>1 tubes) narrowvtx");
-  minbias->AddTrigger("BBCLL1(>1 tubes) novertex");
-  minbias->AddTrigger("BBCLL1_N(>1 tubes)");
-  minbias->AddTrigger("BBCLL1_S(>1 tubes)");
-  minbias->AddTrigger("ZDCLL1narrow");
-  minbias->AddTrigger("ZDCLL1wide");
+  //minbias->AddTrigger("BBCLL1(>1 tubes) novertex");
+  //minbias->AddTrigger("BBCLL1_N(>1 tubes)");
+  //minbias->AddTrigger("BBCLL1_S(>1 tubes)");
+  //minbias->AddTrigger("ZDCLL1narrow");
+  //minbias->AddTrigger("ZDCLL1wide");
   minbias->AddTrigger("ZDCNS");
 
-  trgselname = "ERT";
-  TrigSelect *erttrig = new TrigSelect(trgselname);
-  trgsel.push_back(trgselname);
-  erttrig->AddTrigger("ERT_2x2");
-  erttrig->AddTrigger("ERT_4x4a&BBCLL1");
-  erttrig->AddTrigger("ERT_4x4b");
-  erttrig->AddTrigger("ERT_4x4b&BBCLL1");
-  erttrig->AddTrigger("ERT_4x4c&BBCLL1");
-  erttrig->AddTrigger("ERTLL1_Electron&BBCLL1");
+  //trgselname = "ERT";
+  //TrigSelect *erttrig = new TrigSelect(trgselname);
+  //trgsel.push_back(trgselname);
+  //erttrig->AddTrigger("ERT_2x2");
+  //erttrig->AddTrigger("ERT_4x4a&BBCLL1");
+  //erttrig->AddTrigger("ERT_4x4b");
+  //erttrig->AddTrigger("ERT_4x4b&BBCLL1");
+  //erttrig->AddTrigger("ERT_4x4c&BBCLL1");
+  //erttrig->AddTrigger("ERTLL1_Electron&BBCLL1");
 
-  trgselname = "UP";
-  TrigSelect *uptrig = new TrigSelect(trgselname);
-  trgsel.push_back(trgselname);
-  uptrig->AddTrigger("UltraPeriph");
-  uptrig->AddTrigger("UltraPeriphMPC");
-  uptrig->AddTrigger("UltraPeriphMuon2DNorth");
-  uptrig->AddTrigger("UltraPeriphMuon2DSouth");
+  //trgselname = "UP";
+  //TrigSelect *uptrig = new TrigSelect(trgselname);
+  //trgsel.push_back(trgselname);
+  //uptrig->AddTrigger("UltraPeriph");
+  //uptrig->AddTrigger("UltraPeriphMPC");
+  //uptrig->AddTrigger("UltraPeriphMuon2DNorth");
+  //uptrig->AddTrigger("UltraPeriphMuon2DSouth");
 
   TrigSelect *ppg      = new TrigSelect("PPG");      // This will veto ppg triggers
   ppg->AddVetoTrigger("PPG(Laser)");
@@ -60,16 +60,16 @@ void TrigSelect()
   trgselname = "OT";
   TrigSelect *others = new TrigSelect(trgselname); 
   trgsel.push_back(trgselname);
-  others->AddNoSaveTrigger(erttrig);
+  //others->AddNoSaveTrigger(erttrig);
   others->AddNoSaveTrigger(minbias);
-  others->AddNoSaveTrigger(mutrig);
-  others->AddNoSaveTrigger(uptrig);
+  //others->AddNoSaveTrigger(mutrig);
+  //others->AddNoSaveTrigger(uptrig);
 
   se->registerSubsystem(ppg);
-  se->registerSubsystem(erttrig);
-  se->registerSubsystem(mutrig);
+  //se->registerSubsystem(erttrig);
+  //se->registerSubsystem(mutrig);
   se->registerSubsystem(minbias);
-  se->registerSubsystem(uptrig);
+  //se->registerSubsystem(uptrig);
   se->registerSubsystem(others);   
 }
 

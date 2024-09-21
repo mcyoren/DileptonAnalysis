@@ -1,7 +1,8 @@
 #!/usr/local/bin/tcsh -f
 
 #set list = `cat run421716.txt`
-set list = `cat run409471_20.txt`
+set list = `cat runs.txt`
+set Nevent = 20000
 
 @ i = 0
 
@@ -12,8 +13,8 @@ foreach file ( $list )
   set jobno  = "merge_${runnum}_${seqnum}"
 #  echo $runnum $seqnum $jobno
 
-  echo "./jobsubmit.csh reco_rawhit.csh $jobno 0 $file"
-        ./jobsubmit.csh reco_rawhit.csh $jobno 0 $file
+  echo "./jobsubmit.csh reco_rawhit.csh $i $Nevent $file"
+        ./jobsubmit.csh reco_rawhit.csh $i $Nevent $file
 
  @ i ++
 

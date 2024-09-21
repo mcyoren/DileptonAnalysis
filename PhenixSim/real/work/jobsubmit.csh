@@ -43,7 +43,7 @@ set logfile = "$jobdir/job_${jobno}.log"
 echo "Universe        = vanilla"                   >  $jobfile
 echo "Executable      = $script"                   >> $jobfile
 echo "Arguments       = "\"$arglist\"              >> $jobfile
-echo "GetEnv          = False"                     >> $jobfile
+echo "GetEnv          = True"                      >> $jobfile
 echo "+Job_Type       = "\"cas\"                   >> $jobfile
 #echo "+Job_Type       = "\"VtxProduction\"            >> $jobfile
 echo "+Experiment     = "\"phenix\"                   >> $jobfile
@@ -57,5 +57,5 @@ echo "Queue"                                       >> $jobfile
 
 
 #/opt/condor/bin/condor_submit $jobfile
-condor_submit $jobfile
+#condor_submit $jobfile
 
