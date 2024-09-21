@@ -2,7 +2,7 @@
 
 #set list = `cat run421716.txt`
 set list = `cat runs.txt`
-set Nevent = 20000
+set Nevent = 30000
 
 @ i = 0
 

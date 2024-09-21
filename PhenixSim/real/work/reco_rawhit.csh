@@ -40,12 +40,14 @@ set tmpdir    = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/
 
 set infile = `basename $inputfile`
 set runnum = `echo $infile | awk -F'-' '{printf "%d", $2}'`
+set seqnum = `basename $inputfile .PRDFF| awk -F'-' '{printf "%s", $3}'`
 
-
+echo all parameters:
 echo $jobno
 echo $evtnum
 echo $inputfile
 echo $runnum
+echo $seqnum
 echo $scriptdir
 echo $tmpdir
 
@@ -85,7 +87,7 @@ root -b < cmd.input
 ls
 echo "mv -f CNTmerge_MB_*.root $outputdir"
 mv -f CNTmerge_MB*.root $outputdir
-mv vertexes.txt $outputdir/vertexes_$runnum.txt
+mv vertexes.txt $outputdir/vertexes_MB-0000$runnum-$seqnum.txt
 
 #remove tmp dir
 cd $HOME

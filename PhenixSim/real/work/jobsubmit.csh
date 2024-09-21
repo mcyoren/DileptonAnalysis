@@ -57,5 +57,5 @@ echo "Queue"                                       >> $jobfile
 
 
 #/opt/condor/bin/condor_submit $jobfile
-#condor_submit $jobfile
+condor_submit $jobfile
 
