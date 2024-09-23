@@ -135,7 +135,6 @@ int embedana::process_event(PHCompositeNode *topNode)
 
   // event info
   //--EventHeader*  evthdr  = getClass<EventHeader>(topNode,"EventHeader");
-  VtxOut *vtxout = getClass<VtxOut>(topNode, "VtxOut");
 
   PHCentralTrack *trk = getClass<PHCentralTrack>(topNode, "PHCentralTrack");
   PHDchTrackOut *phdchtrk = getClass<PHDchTrackOut>(topNode, "PHDchTrackOut");
@@ -144,6 +143,15 @@ int embedana::process_event(PHCompositeNode *topNode)
   Fun4AllServer *se = Fun4AllServer::instance();
   PHCompositeNode *mcnode = se->topNode(rc->get_CharFlag("EMBED_MC_TOPNODE"));
   PHCentralTrack *trk_mc = getClass<PHCentralTrack>(mcnode, "PHCentralTrack");
+
+  VtxOut *vtxout   = getClass<VtxOut>(topNode, "VtxOut");
+  VtxOut *vtxoutmc = getClass<VtxOut>( mcnode, "VtxOut");
+
+  if( TMath::Abs( (vtxout->get_Vertex()).getZ() - (vtxoutmc->get_Vertex()).getZ() ) > 0.1 )
+  {
+    std::cout<<"\n\nVTX missmatch: data : sim "<<(vtxout->get_Vertex()).getZ()<< " : " <<(vtxoutmc->get_Vertex()).getZ()<<"\n"<<std::endl;
+    return 0;
+  }
 
   SvxClusterList *svx = getClass<SvxClusterList>(topNode, "SvxClusterList");
   SvxClusterList *svxsim = getClass<SvxClusterList>(mcnode, "SvxClusterList");
