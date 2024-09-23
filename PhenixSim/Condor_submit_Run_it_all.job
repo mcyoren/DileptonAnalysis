@@ -1,6 +1,6 @@
 
 Universe       = vanilla
-Notification   = Error
+Notification   = Never
 GetEnv         = True
 Initialdir     = $ENV(PWD)
 Executable     = /bin/csh

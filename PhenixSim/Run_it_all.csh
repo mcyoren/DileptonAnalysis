@@ -435,15 +435,16 @@ cp ${scriptdir}/svxPISA.par         .
 cp ${scriptdir}/svx_threshold.dat   .
 
 #copy input file
-cp $inputreal .
-cp $inputsim .
+#cp $inputreal .
+#cp $inputsim .
 
 echo "pwd"
 pwd
 ls -ltr
 
 echo "yolo"
-echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
+#echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
+echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$inputsim'"'", "'"'$inputreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".q" >> cmd.input
 
 ##run root
