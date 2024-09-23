@@ -13,4 +13,4 @@ Rank		       = CPU_Speed
 
 Arguments      = Run_it_all.csh $(Process) 4 0 3 0 10000
 
-Queue 5000
+Queue 1000

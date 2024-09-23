@@ -63,7 +63,6 @@ echo $LD_LIBRARY_PATH
 echo "TSEARCHPATH: "
 echo $TSEARCHPATH
 
-set vertex_txt_dir = $DATADIR/real/work/output/vertexes.txt
 set outputsingle_dir = $DATADIR/output_single
 
 set INPUT = `expr $shift + $jobno`
@@ -73,7 +72,6 @@ set DIR = `printf "%05d" $INPUT`
 
 echo "INPUT               $INPUT              "
 echo "DIR                 $DIR                "
-echo "vertex_txt_dir      $vertex_txt_dir     "
 echo "outputsingle_dir    $outputsingle_dir   "
 
 if( -d $outputsingle_dir ) then
@@ -90,8 +88,27 @@ set RANDOM=$$
 set rnd = `expr $RANDOM % ${#RUNNUMBERS_RG0} + 1` ### for bash use like this and numerign from 0 ${#RUNNUMBERS_RG0[@]}
 set run_number = $RUNNUMBERS_RG0[$rnd]
 
+set input_real_dir = $DATADIR/real/work/outputfull
+
+ls $input_real_dir/vertexes_MB* > runs.txt
+set list = `cat runs.txt`
+set RUNNUMBERS = ( )
+foreach file ( $list )
+
+  set runnum = `basename $file .PRDFF| awk -F'-' '{printf "%d", $2}'`
+  set seqnum = `basename $file .PRDFF| awk -F'-' '{printf "%s", $3}'`
+  set RUNNUMBERS = ( $RUNNUMBERS $runnum )
+end
+
+@ irun = $jobno % $#RUNNUMBERS + 1
+set run_number = $RUNNUMBERS[$irun]
+set vertex_txt_dir = $DATADIR/real/work/outputfull/vertexes_MB-0000$run_number-0001.txt
+
+echo $irun $RUNNUMBERS $#RUNNUMBERS
 echo "=======Generating a Random Run Number=========="
 echo "                " $run_number
+
+echo "vertex_txt_dir      $vertex_txt_dir     "
 
 echo "==============================================="
 echo "============= START SIMULATION  ==============="
@@ -107,7 +124,7 @@ echo "==============================================="
 set scriptdir   = $DATADIR/sim/gen/single
 set macroname   = make_single.C
 set outsingle   = $DATADIR/output_single/single
-set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
+set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
 set ptmin = 0.4
 set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
@@ -165,7 +182,7 @@ set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
 set macroname   = WriteROOT2Oscar.C
 set outsingle   = $DATADIR/output_single/helios
-set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
+set tmpdir      = "/phenix/plhf/${USER}/tmp/job_helios_$INPUT"
 
 echo "jobno          $jobno            "
 echo "run_number     $run_number       "
@@ -215,7 +232,7 @@ set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh
 set macroname   = WriteROOT2OscarPythia.C
 set outsingle   = $DATADIR/output_single/pythia8
-set tmpdir      = "/home/tmp/${USER}_job_$INPUT"
+set tmpdir      = "/phenix/plhf/${USER}/tmp/job_pythia_$INPUT"
 
 echo "jobno          $jobno            "
 echo "run_number     $run_number       "
@@ -269,7 +286,7 @@ set pisadir  = $DATADIR/make_sim/pisa
 
 set outpisadir  = $DATADIR/output_single/simdst
 set outdstname  = dst_out_single_$DIR.root
-set tmpdir      = "/home/tmp/${USER}_pisa_$INPUT"
+set tmpdir      = "/phenix/plhf/${USER}/tmp/job_pisa_$INPUT"
 
 echo "jobno          $jobno            "
 echo "run_number     $run_number       "
@@ -359,8 +376,8 @@ else
 set inputoscar = $DATADIR/output_single/single/$DIR.oscar.particles.dat
 endif
 set inputsim = $DATADIR/output_single/simdst/dst_out_single_$DIR.root
-set inputvtx = $DATADIR/real/work/output/vertexes.txt
-set inputreal = $DATADIR/real/work/output/CNTmerge_MB-0000$run_number-0000.root
+#set inputvtx = $DATADIR/real/work/output/vertexes.txt
+set inputreal = $DATADIR/real/work/outputfull/CNTmerge_MB-0000$run_number-0001.root
 set outdst    = kek0.root
 set embedpartID = $selected_paticle
 
@@ -374,7 +391,7 @@ echo "creating $outmytreedir"
 mkdir -p $outmytreedir
 endif
 
-set tmpdir      = "/home/tmp/${USER}_embed_$INPUT"
+set tmpdir      = "/phenix/plhf/${USER}/tmp/job_embed_$INPUT"
 
 set inreal = `basename $inputreal`
 set insim  = `basename $inputsim`
