@@ -391,7 +391,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
       }
     }
-    
+    if(fill_QA_hadron_hists)
+    {
+        event_container->Associate_Hits_to_Hadrons();
+    }
 
     if(event->GetNtrack()<1) return 0;
 
@@ -403,7 +406,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(fill_TTree) event_container->FillEventHist(7);
 
-    if(n_good_el>=0 && (remove_hadron_hits||fill_QA_hadron_hists))
+    if(n_good_el>=0 && (remove_hadron_hits))
     {
         event_container->Associate_Hits_to_Hadrons();
     }
