@@ -89,9 +89,9 @@ set rnd = `expr $RANDOM % ${#RUNNUMBERS_RG0} + 1` ### for bash use like this and
 set run_number = $RUNNUMBERS_RG0[$rnd]
 
 set input_real_dir = $DATADIR/real/work/outputfull
-
-ls $input_real_dir/vertexes_MB* > runs.txt
-set list = `cat runs.txt`
+set runlistname = $outputsingle_dir/runs_$jobno.txt
+ls $input_real_dir/vertexes_MB* > $runlistname
+set list = `cat $runlistname`
 set RUNNUMBERS = ( )
 foreach file ( $list )
 
@@ -109,6 +109,7 @@ echo "=======Generating a Random Run Number=========="
 echo "                " $run_number
 
 echo "vertex_txt_dir      $vertex_txt_dir     "
+rm $runlistname
 
 echo "==============================================="
 echo "============= START SIMULATION  ==============="
