@@ -169,7 +169,7 @@ namespace MyDileptonAnalysis
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
         const int centrality = event->GetCentrality();
-        const int rungroup = event->GetRunNumber();
+        const int rungroup = event->GetRunGroup();
         const int is_fill_hsits_local = is_fill_hsits && !not_fill;
 
         const int central_bin = (int)centrality / 20;
@@ -512,7 +512,7 @@ namespace MyDileptonAnalysis
         const int nhadron = event->GetNhadron();
         const int nvtxhits = event->GetNVTXhit();
         const int centrality = event->GetCentrality();
-        const int rungroup = event->GetRunNumber();
+        const int rungroup = event->GetRunGroup();
         const int central_bin = (int)centrality / 20;
         if (central_bin > 4 || central_bin < 0)
             return;
