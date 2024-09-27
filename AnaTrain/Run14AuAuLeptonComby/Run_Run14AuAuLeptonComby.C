@@ -13,9 +13,9 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     std::cout<<"lookup_3D_one_phi.root is located at "<<lookupfile_location.c_str()<<std::endl;
 
     recoConsts *reco_consts =  recoConsts::instance();
-    reco_consts->set_IntFlag("Remove_hadron_hits", 1);
-    reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
-    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 0);
+    reco_consts->set_IntFlag("Remove_hadron_hits", 0);
+    reco_consts->set_IntFlag("Fill_QA_hadron_hists", 1);
+    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
     reco_consts->set_IntFlag("Fill_TTree", 0);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
@@ -24,24 +24,25 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     reco_consts->set_IntFlag("Do_reveal_hadron", 0);
     reco_consts->set_IntFlag("Fill_true_DCA", 0);
     reco_consts->set_IntFlag("Check_Veto", 0);
+    reco_consts->set_IntFlag("fill_inv_mass", 1);
        
     SubsysReco *reco = new Run14AuAuLeptonCombyReco(outFile, lookupfile_location.c_str());
 
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
 
-    CabanaBoy *cb = new CabanaBoy(10,4,1, "Run14AuAuLeptonComby");
-    //CabanaBoy *cb = new CabanaBoy(10,1,1, "Run14AuAuLeptonComby");
+    CabanaBoy *cb = new CabanaBoy(5,2,2, "Run14AuAuLeptonComby");
+    //CabanaBoy *cb = new CabanaBoy(5,1,1, "Run14AuAuLeptonComby");
 	
 	cb->SetHistoFileName(outFile);
 	cb->setZVertexMax(10);
-	cb->setReactionPlaneSelectionType(CabanaBoy::ReactionPlaneNotUsed);
+	cb->setReactionPlaneSelectionType(CabanaBoy::ReactionPlaneNotUsed);//ReactionPlaneBBCSNPsi2
 	cb->setCentralitySelectionType(CabanaBoy::CentralityTypeRun12CuAu);
 	cb->setCuts(mc);
 	cb->setHistos(mh);
 	cb->setPoolType(CabanaBoy::MultiAkibaPools);
 	cb->setFastMom(false);
-	cb->setPoolDepth(20);
+	cb->setPoolDepth(50);
 	cb->setMixingType11(true);  
 	cb->setMixingType12(true);
 	cb->setMixingType22(true);
