@@ -16,7 +16,8 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
 
     remove_hadron_hits = 0;
     fill_QA_hadron_hists = 0; 
-    fill_QA_lepton_hists = 0; 
+    fill_QA_lepton_hists = 0;
+    fill_ddphi_hadron = 0; 
     fill_TTree = 0;
     fill_d_dphi_hists = 0;
     fill_DCA_hists = 0;
@@ -50,6 +51,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     remove_hadron_hits = rc->get_IntFlag("Remove_hadron_hits", 0);
     fill_QA_hadron_hists = rc->get_IntFlag("Fill_QA_hadron_hists", 0);
     fill_QA_lepton_hists = rc->get_IntFlag("Fill_QA_lepton_hists", 0);
+    fill_ddphi_hadron = rc->get_IntFlag("Fill_ddphi_hadron",0);
     fill_TTree = rc->get_IntFlag("Fill_TTree", 0);
     fill_d_dphi_hists = rc->get_IntFlag("Fill_d_dphi_hists", 0);
     fill_DCA_hists = rc->get_IntFlag("Fill_DCA_hists", 0);
@@ -64,6 +66,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     std::cout<<"Remove_hadron_hits:   "<<remove_hadron_hits<<std::endl;
     std::cout<<"fill_QA_hadron_hists: "<<fill_QA_hadron_hists<<std::endl;
     std::cout<<"fill_QA_lepton_hists: "<<fill_QA_lepton_hists<<std::endl;
+    std::cout<<"fill_ddphi_hadron:    "<<fill_ddphi_hadron<<std::endl;
     std::cout<<"fill_TTree:           "<<fill_TTree<<std::endl;
     std::cout<<"fill_d_dphi_hists:    "<<fill_d_dphi_hists<<std::endl;
     std::cout<<"fill_DCA_hists:       "<<fill_DCA_hists<<std::endl;
@@ -396,7 +399,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     fill_SVXHits_to_myevent(svxhitlist, event);
 
-    event_container->Associate_Hits_to_Leptons(3.,2.,5);
+    event_container->Associate_Hits_to_Leptons(3.,2.,4);
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<1 && fill_inv_mass ) return 0;
 
@@ -464,7 +467,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;
+        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquin cut
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
@@ -474,7 +477,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         int hadron_reject = 0;
         if ( mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 && fabs(mytrk->GetEmcTOF())<5)  hadron_reject=+110;
-        if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. && mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 ) hadron_reject+=1;
+        if ( mytrk->GetPtPrime() > 0.7 ) hadron_reject+=1;
+        //if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. && mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 ) hadron_reject+=1;
         
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
         //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;

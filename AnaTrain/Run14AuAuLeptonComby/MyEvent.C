@@ -52,7 +52,7 @@ namespace MyDileptonAnalysis
         const int DCArm = this->GetArm();
 
         const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
-        const float theta_offset = dilep_par0_theta[DCArm][rungroup] * TMath::Sin(new_the0) + dilep_par1_theta[DCArm][rungroup] * TMath::Cos(new_the0) + dilep_par2_theta[DCArm][rungroup];
+        const float theta_offset = dilep_par0_theta[DCArm][rungroup*0] * TMath::Sin(new_the0) + dilep_par1_theta[DCArm][rungroup*0] * TMath::Cos(new_the0) + dilep_par2_theta[DCArm][rungroup*0];
         this->SetThe0Prime(new_the0 - theta_offset);
     }
 
@@ -111,8 +111,8 @@ namespace MyDileptonAnalysis
 
         this->SetThe0Prime( new_the0 - theta_offset);
 
-        const float new_phi_the_offset = phi_the_offset_params[rungroup][DCArm][charge][0] * TMath::Sin(this->GetThe0Prime()) + 
-        phi_the_offset_params[rungroup][DCArm][charge][1] * TMath::Cos(this->GetThe0Prime()) + phi_the_offset_params[rungroup][DCArm][charge][2];
+        const float new_phi_the_offset = phi_the_offset_params[rungroup*0][DCArm][charge][0] * TMath::Sin(this->GetThe0Prime()) + 
+        phi_the_offset_params[rungroup*0][DCArm][charge][1] * TMath::Cos(this->GetThe0Prime()) + phi_the_offset_params[rungroup*0][DCArm][charge][2];
 
         this->SetPhi0(this->GetPhi0() -  new_phi_the_offset);        
 
@@ -1600,7 +1600,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
             INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 4, 0, 4);
             INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
-            INIT_HIST(3, myvtx_hist, 1000, -5, 5, 8 , 0 ,8, 4, 0 ,4);
+            INIT_HIST(3, myvtx_hist, 1000, -5, 5, 12, 0 ,12, 4, 0 ,4);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)

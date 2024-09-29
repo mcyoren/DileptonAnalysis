@@ -9,7 +9,7 @@ void Run14AuAuLeptonCombyReco::InitParams()
     QUALITY[0] = 31;
     QUALITY[1] = 51;
     QUALITY[2] = 63;
-    Z_GLOBAL = 85;
+    Z_GLOBAL = 75;
     DC_DEADMAP = 0; // by default, DC deadmap is on
     N0 = 2;
     DISP = 5;

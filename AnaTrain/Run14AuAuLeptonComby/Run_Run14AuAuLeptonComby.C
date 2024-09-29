@@ -16,6 +16,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     reco_consts->set_IntFlag("Remove_hadron_hits", 0);
     reco_consts->set_IntFlag("Fill_QA_hadron_hists", 1);
     reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
+    reco_consts->set_IntFlag("Fill_ddphi_hadron", 0);
     reco_consts->set_IntFlag("Fill_TTree", 0);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
@@ -31,7 +32,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
 
-    CabanaBoy *cb = new CabanaBoy(5,2,2, "Run14AuAuLeptonComby");
+    CabanaBoy *cb = new CabanaBoy(10,4,1, "Run14AuAuLeptonComby");
     //CabanaBoy *cb = new CabanaBoy(5,1,1, "Run14AuAuLeptonComby");
 	
 	cb->SetHistoFileName(outFile);
