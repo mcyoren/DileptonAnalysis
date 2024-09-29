@@ -5,12 +5,12 @@ GetEnv         = True
 Initialdir     = $ENV(PWD)
 Executable     = /bin/csh
 Priority       = +20
-Log            = /dev/null 
-Output         = /dev/null
-Error          = /dev/null
+Log            = /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/tmp/log/log.log.$(Process) 
+Output         = /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/tmp/log/log.out.$(Process)
+Error          = /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/tmp/log/log.err.$(Process)
 Requirements   = (CPU_Speed >= 1) 
 Rank		       = CPU_Speed
 
-Arguments      = Run_it_all.csh $(Process) 4 0 0 0 10000
+Arguments      = Run_it_all.csh $(Process) 4 1 0 0 10000
 
 Queue 5000
