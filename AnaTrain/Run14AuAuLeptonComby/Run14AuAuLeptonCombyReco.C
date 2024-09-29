@@ -247,6 +247,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(remove_hadron_hits||do_track_QA)event->AddHadron(&newHadron);
                 if(fill_QA_hadron_hists&&newHadron.GetPtPrime()>1.5&&fabs(newHadron.GetPC3SDPHI())<2&&fabs(newHadron.GetPC3SDZ())<2)
                     event->AddHadron(&newHadron);
+                if(fill_ddphi_hadron&&fabs(newHadron.GetPC3SDPHI())<2&&fabs(newHadron.GetPC3SDZ())<2)
+                {
+                    set_track(&newElectron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
+                    newElectron.SetCrkphi(-999);
+                    event->AddTrack(&newElectron);
+                }
             }
             break;
         case 3:
@@ -313,6 +319,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
     
+    if(fill_ddphi_hadron)
+    {
+        fill_SVXHits_to_myevent(svxhitlist, event);
+        event_container->Associate_Hits_to_Leptons(3.,2.,4,-fill_ddphi_hadron);
+    }
 
     int n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -397,9 +408,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(event->GetNtrack()<1) return 0;
 
-    fill_SVXHits_to_myevent(svxhitlist, event);
-
-    event_container->Associate_Hits_to_Leptons(3.,2.,4);
+    if(!fill_ddphi_hadron)
+    {
+        fill_SVXHits_to_myevent(svxhitlist, event);
+        event_container->Associate_Hits_to_Leptons(3.,2.,4);
+    }
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<1 && fill_inv_mass ) return 0;
 

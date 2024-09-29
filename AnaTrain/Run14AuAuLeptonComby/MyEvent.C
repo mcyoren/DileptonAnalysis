@@ -164,13 +164,12 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, bool not_fill)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
         const int centrality = event->GetCentrality();
         const int rungroup = event->GetRunGroup();
-        const int is_fill_hsits_local = is_fill_hsits && !not_fill;
 
         const int central_bin = (int)centrality / 20;
         if (central_bin > 4 || central_bin < 0)
@@ -182,6 +181,14 @@ namespace MyDileptonAnalysis
             mytrk->ClearNumberVectors();
             // mytrk = static_cast<MyDileptonAnalysis::MyHadron*>(myhad);
             const float pt = mytrk->GetPtPrime();
+
+            int is_fill_hsits_local = is_fill_hsits * (1-not_fill);  /////to be removed
+            if (not_fill<0)
+            {
+                if( mytrk->GetCrkphi()<-99)
+                    is_fill_hsits_local = 1;
+                else is_fill_hsits_local = 0;
+            }
             
             if(is_fill_hsits_local)
             {

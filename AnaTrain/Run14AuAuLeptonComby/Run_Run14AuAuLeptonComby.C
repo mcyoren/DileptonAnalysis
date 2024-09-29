@@ -16,7 +16,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     reco_consts->set_IntFlag("Remove_hadron_hits", 0);
     reco_consts->set_IntFlag("Fill_QA_hadron_hists", 1);
     reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
-    reco_consts->set_IntFlag("Fill_ddphi_hadron", 0);
+    reco_consts->set_IntFlag("Fill_ddphi_hadron", 1);
     reco_consts->set_IntFlag("Fill_TTree", 0);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
