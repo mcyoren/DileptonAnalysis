@@ -682,7 +682,7 @@ int embedana::ReadOrigPartMoms()
     {
       s >> i3 >> px >> py >> pz >> dummy >> dummy >> vx >> vy >> vz;
 
-      if(j>1) continue;
+      if(j>100) continue;
       //std::cout<<i2<<" "<<px<<" "<<py<<" "<<pz<<" "<<nn<<endl;
       if (i >= 100000)
       {
