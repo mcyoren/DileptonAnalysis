@@ -24,6 +24,7 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     use_iden = 0;
     do_track_QA = 0;
     do_reveal_hadron = 0;
+    fill_flow_hists = 0;
     fill_true_DCA = 0;
     check_veto = 0;
     fill_inv_mass = 0;
@@ -58,6 +59,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     use_iden = rc->get_IntFlag("Use_ident", 0);
     do_track_QA = rc->get_IntFlag("Do_track_QA", 0);
     do_reveal_hadron = rc->get_IntFlag("Do_reveal_hadron", 0);
+    fill_flow_hists = rc->get_IntFlag("Fill_flow", 0);
     fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
     check_veto = rc->get_IntFlag("Check_Veto", 0);
     fill_inv_mass = rc->get_IntFlag("fill_inv_mass", 0);
@@ -73,6 +75,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     std::cout<<"use_iden:             "<<use_iden<<std::endl;
     std::cout<<"Do_track_QA:          "<<do_track_QA<<std::endl;
     std::cout<<"do_reveal_hadron:     "<<do_reveal_hadron<<std::endl;
+    std::cout<<"fill_flow_hists:      "<<fill_flow_hists<<std::endl;
     std::cout<<"fill_true_DCA:        "<<fill_true_DCA<<std::endl;
     std::cout<<"check_veto:           "<<check_veto<<std::endl;
     std::cout<<"fill_inv_mass:        "<<fill_inv_mass<<std::endl;
@@ -81,7 +84,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto,
+                                               fill_DCA_hists, do_track_QA, fill_flow_hists, fill_true_DCA, check_veto,
                                                fill_QA_lepton_hists>0?0:fill_QA_lepton_hists);
 
     return 0;
@@ -222,6 +225,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     event->SetPsi2FVTXA0(psi2_FVTXA0);
     event->SetPsi3FVTXA0(psi3_FVTXA0);
+
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, 1));
+    float psi2_BBCS = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 1, 1));
+    float psi2_BBCN = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 40, 1));
+    float psi2_FVTXS = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 41, 1));
+    float psi2_FVTXN = (rpsngl) ? rpsngl->GetPsi() : -9999;
 
     if(fill_TTree && (psi2_BBC>-9000 || psi2_FVTXA0 >-9000)) event_container->FillEventHist(6);
 
@@ -413,6 +425,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         fill_SVXHits_to_myevent(svxhitlist, event);
         event_container->Associate_Hits_to_Leptons(3.,2.,4);
     }
+    if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     const int n_good_el = event_container->GetNGoodElectrons();
     if( n_good_el<1 && fill_inv_mass ) return 0;
 
@@ -490,7 +503,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         int hadron_reject = 0;
         if ( mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 && fabs(mytrk->GetEmcTOF())<5)  hadron_reject=+110;
-        if ( mytrk->GetPtPrime() > 0.7 ) hadron_reject+=1;
+        if ( (TMath::Abs(mytrk->GetMinsDphi(3))<2 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
+             (TMath::Abs(mytrk->GetMinsDthe(3))<2 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
+             (TMath::Abs(mytrk->GetMinsDthe(1))<2 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
+             (TMath::Abs(mytrk->GetMinsDthe(0))<2 && mytrk->GetMinsDphi(0)>-2)  ) hadron_reject+=1;
         //if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. && mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 ) hadron_reject+=1;
         
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)

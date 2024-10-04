@@ -272,28 +272,28 @@ namespace MyDileptonAnalysis
                   +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
 
-            float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 
+            float get_dynamic_mean_phi_data(int ilay, float phi_prev, int rungroup = 0 ) 
             { 
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return phi_mean_phi_params[rungroup][arg0][0]+phi_mean_phi_params[rungroup][arg0][1]*phi_prev; 
+                  return phi_mean_phi_params[arg0][0]+phi_mean_phi_params[arg0][1]*phi_prev; 
             };
-            float get_dynamic_mean_theta_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_mean_theta_data(int ilay, float phi_prev, int rungroup = 0 )
             { 
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return the_mean_the_params[rungroup][arg0][0]+the_mean_the_params[rungroup][arg0][1]*phi_prev; 
+                  return (the_mean_the_params[arg0][0]+the_mean_the_params[arg0][1]*phi_prev)*(1+exp( (ilay<4?-0.4:-1) * pt_prime)); 
             };
-            float get_dynamic_sigma_phi_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_sigma_phi_data(int ilay, float phi_prev, int rungroup = 0 )
             {
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
-                  return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
+                  const float sigma_pt = phi_sigma_pt_params[arg0][0] + phi_sigma_pt_params[arg0][1] * exp(phi_sigma_pt_params[arg0][2] * pt_prime);
+                  return sigma_pt;//*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
-            float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_sigma_theta_data(int ilay, float phi_prev, int rungroup = 0 )
             {
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
+                  return the_sigma_pt_params[arg0][0] + the_sigma_pt_params[arg0][1] * exp(the_sigma_pt_params[arg0][2] * pt_prime);
             };
-            float get_dynamic_smean_phi_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_smean_phi_data(int ilay, float phi_prev, int rungroup = 0 )
             { 
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
@@ -925,8 +925,9 @@ namespace MyDileptonAnalysis
             TH3D *delt_phi_dca_bg0[N_centr*3],*delt_phi_dca_bg1[N_centr*3],*delt_phi_dca_bg2[N_centr*3],*delt_phi_dca_bg3[N_centr*3],*delt_phi_dca_bg4[N_centr*3];
             TH3D *inv_mass_dca_gen[N_centr*3];
             TH3D* myvtx_hist;
+            TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
-            is_fill_reveal, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
+            is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
            
       public:
             MyEventContainer()
@@ -946,6 +947,8 @@ namespace MyDileptonAnalysis
                   couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
                   myvtx_hist = nullptr;
                   truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
+                  v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
+                  BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1012,7 +1015,7 @@ namespace MyDileptonAnalysis
                   is_fill_dphi_hist = 0;
                   is_fill_DCA_hist = 0;
                   is_fill_track_QA = 0;
-                  is_fill_reveal = 0;
+                  is_fill_flow = 0;
                   is_fill_DCA2_hist = 0;
                   is_check_veto = 0;
                   is_fill_inv_mass = 0;
@@ -1022,7 +1025,7 @@ namespace MyDileptonAnalysis
             {
                   std::cout << "Starting to Delete Event in my Container" << std::endl;
                   if(is_fill_tree||is_fill_hadron_hsits||is_fill_hsits||is_fill_dphi_hist||is_fill_DCA_hist||is_fill_track_QA
-                  ||is_fill_reveal||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
+                  ||is_fill_flow||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
                   delete event;
                   std::cout << "Event in the container was deleted" << std::endl;
             };
@@ -1031,7 +1034,7 @@ namespace MyDileptonAnalysis
             void ClearEvent() { event->ClearEvent(); };
             void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
-            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
+            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_flow = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
@@ -1057,6 +1060,7 @@ namespace MyDileptonAnalysis
             void correct_beam_offset();
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -999);
+            void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };
