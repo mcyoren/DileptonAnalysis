@@ -26,14 +26,20 @@ unsetenv OFFLINE_MAIN
 unsetenv ONLINE_MAIN
 unsetenv ROOTSYS
 
+set Green='\033[0;32m'
+set Red='\033[0;31m' 
+set Purple='\033[0;35m'
+set Color_Off='\033[0m'
+
+
 if( $#argv != 6) then
-echo "   Run_it_all.csh num"
-echo "   num       = job number"
-echo "   type of sim = single, pisa, embed, all sim (no embed), all"
-echo "   type of input  = single, helios, pythia8"
-echo "   type of particle  = photon, other"
-echo "   shift  = 1-10000 - Nev"
-echo "   Number of events  = 1-10000"
+echo "${Red}   Run_it_all.csh num                                          ${Color_Off}"
+echo "${Red}   num       = job number                                      ${Color_Off}"
+echo "${Red}   type of sim = single, pisa, embed, all sim (no embed), all  ${Color_Off}"
+echo "${Red}   type of input  = single, helios, pythia8                    ${Color_Off}"
+echo "${Red}   type of particle  = photon, other                           ${Color_Off}"
+echo "${Red}   shift  = 1-10000 - Nev                                      ${Color_Off}"
+echo "${Red}   Number of events  = 1-10000                                 ${Color_Off}"
 exit -1
 endif
 
@@ -42,12 +48,12 @@ set selected_paticle = $4
 set shift = $5
 set NEVT = $6
 
-echo "jobno is set to     $jobno              "
-echo "type of sim         $2                  "
-echo "type of input       $3                  "
-echo "selected_paticle    $selected_paticle   "
-echo "shift               $shift              "
-echo "NEVT                $NEVT               "
+echo "${Green} jobno is set to     $jobno              ${Color_Off}"
+echo "${Green} type of sim         $2                  ${Color_Off}"
+echo "${Green} type of input       $3                  ${Color_Off}"
+echo "${Green} selected_paticle    $selected_paticle   ${Color_Off}"
+echo "${Green} shift               $shift              ${Color_Off}"
+echo "${Green} NEVT                $NEVT               ${Color_Off}"
 
 setenv DATADIR $PWD
 
@@ -58,26 +64,25 @@ setenv LD_LIBRARY_PATH $DATADIR/embed/svx_cent_ana/install/lib:$LD_LIBRARY_PATH
 setenv TSEARCHPATH .:/phenix/hhj/hachiya/15.08/embed/embed:$TSEARCHPATH
 setenv TSEARCHPATH .:/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Analysis/Run14AuAuDiLeptonAnalysis/AnaTrain/install/:$TSEARCHPATH
 
-echo "LD_LIBRARY_PATH: "
+echo "${Green} LD_LIBRARY_PATH: ${Color_Off}"
 echo $LD_LIBRARY_PATH
-echo "TSEARCHPATH: "
+echo "${Green} TSEARCHPATH: ${Color_Off}"
 echo $TSEARCHPATH
 
 set outputsingle_dir = $DATADIR/output_single
 
 set INPUT = `expr $shift + $jobno`
-echo "input is " $INPUT
-
+#echo "${Green} input is " $INPUT
 set DIR = `printf "%05d" $INPUT`
 
-echo "INPUT               $INPUT              "
-echo "DIR                 $DIR                "
-echo "outputsingle_dir    $outputsingle_dir   "
+echo "${Green} INPUT               $INPUT              ${Color_Off}"
+echo "${Green} DIR                 $DIR                ${Color_Off}"
+echo "${Green} outputsingle_dir    $outputsingle_dir   ${Color_Off}"
 
 if( -d $outputsingle_dir ) then
-echo "outputsingle_dir exists"
+echo "${Green} outputsingle_dir exists ${Color_Off}"
 else 
-echo "mkdir $outputsingle_dir"
+echo "${Green} mkdir $outputsingle_dir ${Color_Off}"
 mkdir $outputsingle_dir
 chmod g+rx $outputsingle_dir
 endif
@@ -104,24 +109,24 @@ end
 set run_number = $RUNNUMBERS[$irun]
 set vertex_txt_dir = $DATADIR/real/work/outputfull/vertexes_MB-0000$run_number-0001.txt
 
-echo $irun $RUNNUMBERS $#RUNNUMBERS
-echo "=======Generating a Random Run Number=========="
-echo "                " $run_number
+echo "${Green} $irun $RUNNUMBERS $#RUNNUMBERS                 ${Color_Off}"
+echo "${Green} =======Generating a Random Run Number==========${Color_Off}"
+echo "${Green}                 $run_number                    ${Color_Off}"
 
-echo "vertex_txt_dir      $vertex_txt_dir     "
+echo "${Green} vertex_txt_dir  $vertex_txt_dir                 ${Color_Off}"
 rm $runlistname
 
-echo "==============================================="
-echo "============= START SIMULATION  ==============="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}============= START SIMULATION  ===============${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 
 set inputvtx = $DATADIR/real/work/output/vertexes.txt
 set oscarname = $DIR.oscar.particles.dat
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 0 ) then
-echo "==============================================="
-echo "============= SINGLE SIM STARTS ==============="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}============= SINGLE SIM STARTS ===============${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 set scriptdir   = $DATADIR/sim/gen/single
 set macroname   = make_single.C
 set outsingle   = $DATADIR/output_single/single
@@ -131,44 +136,44 @@ set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = $selected_paticle #0,1,2,3,4-pi0,pi+,pi-,e-,e+################helios jpsi and phi####pythia ccbar bbar
 
-echo "jobno          $jobno            "
-echo "run_number     $run_number       "
-echo "ptmin          $ptmin            "
-echo "ptmax          $ptmax            "
-echo "n              $n                "
-echo "id             $id               "
-echo "inputvtx       $inputvtx         "
-echo "oscarname      $oscarname        "
-echo "scriptdir      $scriptdir        "
-echo "macroname      $macroname        "
-echo "outsingle      $outsingle        "
-echo "tmpdir         $tmpdir           "
+echo "${Green}jobno          $jobno            ${Color_Off}"
+echo "${Green}run_number     $run_number       ${Color_Off}"
+echo "${Green}ptmin          $ptmin            ${Color_Off}"
+echo "${Green}ptmax          $ptmax            ${Color_Off}"
+echo "${Green}n              $n                ${Color_Off}"
+echo "${Green}id             $id               ${Color_Off}"
+echo "${Green}inputvtx       $inputvtx         ${Color_Off}"
+echo "${Green}oscarname      $oscarname        ${Color_Off}"
+echo "${Green}scriptdir      $scriptdir        ${Color_Off}"
+echo "${Green}macroname      $macroname        ${Color_Off}"
+echo "${Green}outsingle      $outsingle        ${Color_Off}"
+echo "${Green}tmpdir         $tmpdir           ${Color_Off}"
 
 #move to wrk directory
 if( ! -d $tmpdir ) then
 mkdir -p $tmpdir
 endif
-echo "cd $tmpdir"
+echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 cp $scriptdir/$macroname .
-echo "start running root -l -b -q" 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'
+echo "${Green}start running root -l -b -q" 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'"${Color_Off}"
 root -l -b -q 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'10000','$ptmin','$ptmax','$n','$id')'
-echo "finished rinnung"
-echo "copying"
+echo "${Green}finished running${Color_Off}"
+echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
-echo "finished copying"
+echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
 rm -fr $tmpdir
-echo "removed $tmpdir"
+echo "${Green}removed $tmpdir${Color_Off}"
 
 endif
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
-echo "==============================================="
-echo "============= HELIOS TO OSCAR ================="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}============= HELIOS TO OSCAR =================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02_5_10M.root
 if( $selected_paticle == 2) then
  set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
@@ -185,43 +190,43 @@ set macroname   = WriteROOT2Oscar.C
 set outsingle   = $DATADIR/output_single/helios
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_helios_$INPUT"
 
-echo "jobno          $jobno            "
-echo "run_number     $run_number       "
-echo "inputhelios    $inputhelios      "
-echo "inputvtx       $inputvtx         "
-echo "oscarname      $oscarname        "
-echo "scriptdir      $scriptdir        "
-echo "scriptname     $scriptname       "
-echo "macroname      $macroname        "
-echo "outsingle      $outsingle        "
-echo "tmpdir         $tmpdir           "
+echo "${Green}jobno          $jobno            ${Color_Off}"
+echo "${Green}run_number     $run_number       ${Color_Off}"
+echo "${Green}inputhelios    $inputhelios      ${Color_Off}"
+echo "${Green}inputvtx       $inputvtx         ${Color_Off}"
+echo "${Green}oscarname      $oscarname        ${Color_Off}"
+echo "${Green}scriptdir      $scriptdir        ${Color_Off}"
+echo "${Green}scriptname     $scriptname       ${Color_Off}"
+echo "${Green}macroname      $macroname        ${Color_Off}"
+echo "${Green}outsingle      $outsingle        ${Color_Off}"
+echo "${Green}tmpdir         $tmpdir           ${Color_Off}"
 
 #move to wrk directory
 if( ! -d $tmpdir ) then
 mkdir -p $tmpdir
 endif
-echo "cd $tmpdir"
+echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 cp $scriptdir/$scriptname .
 cp $scriptdir/$macroname .
-echo running "./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarname"
+echo "${Green}running ./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarname${Color_Off}"
 ./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarname
-echo "finished rinnung"
-echo "copying"
+echo "${Green}finished running${Color_Off}"
+echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
-echo "finished copying"
+echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
 rm -fr $tmpdir
-echo "removed $tmpdir"
+echo "${Green}removed $tmpdir${Color_Off}"
 
 endif
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 2 ) then
-echo "==============================================="
-echo "============= PYTHIA TO OSCAR ================="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}============= PYTHIA TO OSCAR =================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 set inputpythia = $DATADIR/output_single/pythia8/ccbartree$DIR.root
 if( $selected_paticle == 2) then
  set inputpythia = $DATADIR/output_single/pythia8/bbbartree$DIR.root
@@ -235,45 +240,45 @@ set macroname   = WriteROOT2OscarPythia.C
 set outsingle   = $DATADIR/output_single/pythia8
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_pythia_$INPUT"
 
-echo "jobno          $jobno            "
-echo "run_number     $run_number       "
-echo "inputpythia    $inputpythia      "
-echo "inputvtx       $inputvtx         "
-echo "oscarname      $oscarname        "
-echo "scriptdir      $scriptdir        "
-echo "scriptname     $scriptname       "
-echo "macroname      $macroname        "
-echo "outsingle      $outsingle        "
-echo "tmpdir         $tmpdir           "
+echo "${Green}jobno          $jobno            ${Color_Off}"
+echo "${Green}run_number     $run_number       ${Color_Off}"
+echo "${Green}inputpythia    $inputpythia      ${Color_Off}"
+echo "${Green}inputvtx       $inputvtx         ${Color_Off}"
+echo "${Green}oscarname      $oscarname        ${Color_Off}"
+echo "${Green}scriptdir      $scriptdir        ${Color_Off}"
+echo "${Green}scriptname     $scriptname       ${Color_Off}"
+echo "${Green}macroname      $macroname        ${Color_Off}"
+echo "${Green}outsingle      $outsingle        ${Color_Off}"
+echo "${Green}tmpdir         $tmpdir           ${Color_Off}"
 
 #move to wrk directory
 if( ! -d $tmpdir ) then
 mkdir -p $tmpdir
 endif
-echo "cd $tmpdir"
+echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 cp $scriptdir/$scriptname .
 cp $scriptdir/$macroname .
-echo running "./$scriptname $inputvtx $inputpythia $oscarname"
+echo "${Green}running ./$scriptname $inputvtx $inputpythia $oscarname"
 ./$scriptname $inputvtx $inputpythia $oscarname
-echo "finished rinnung"
-echo "copying"
+echo "${Green}finished running${Color_Off}"
+echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
-echo "finished copying"
+echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
 rm -fr $tmpdir
-echo "removed $tmpdir"
+echo "${Green}removed $tmpdir${Color_Off}"
 
 endif
 
 
 if( $2 == 1 || $2 == 3 || $2 == 4 ) then
 
-echo "==============================================="
-echo "============= START PISA NOW =================="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}============= START PISA NOW ==================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 
 if ( $3 == 1 ) then 
 set oscarname = $DATADIR/output_single/helios/$DIR.oscar.particles.dat
@@ -289,24 +294,24 @@ set outpisadir  = $DATADIR/output_single/simdst
 set outdstname  = dst_out_single_$DIR.root
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_pisa_$INPUT"
 
-echo "jobno          $jobno            "
-echo "run_number     $run_number       "
-echo "Nev            $NEVT             "
-echo "oscarname      $oscarname        "
-echo "pisadir        $pisadir          "
-echo "outpisadir     $outpisadir       "
-echo "tmpdir         $tmpdir           "
+echo "${Green}jobno          $jobno            ${Color_Off}"
+echo "${Green}run_number     $run_number       ${Color_Off}"
+echo "${Green}Nev            $NEVT             ${Color_Off}"
+echo "${Green}oscarname      $oscarname        ${Color_Off}"
+echo "${Green}pisadir        $pisadir          ${Color_Off}"
+echo "${Green}outpisadir     $outpisadir       ${Color_Off}"
+echo "${Green}tmpdir         $tmpdir           ${Color_Off}"
 
 #checkng outdir
 if( ! -d $outpisadir ) then
-echo "creating $outpisadir" 
+echo "${Green}creating $outpisadir${Color_Off}" 
 mkdir -p $outpisadir
 endif
 #move to wrk directory
 if( ! -d $tmpdir ) then
 mkdir -p $tmpdir
 endif
-echo "cd $tmpdir"
+echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 
@@ -315,30 +320,30 @@ cp $pisadir/* .
 
 sed -i 's/ptrig [0-9]*/ptrig '$NEVT'/' glogon.kumac
 
-echo running "pisa<pisa.input"
+echo "${Green}running pisa<pisa.input${Color_Off}"
 pisa<pisa.input
-echo "finished rinnung"
+echo "${Green}finished running${Color_Off}"
 
-echo "==============================================="
-echo "================ PISA TO DST =================="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}================ PISA TO DST ==================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 
-echo "running root -b -q -l pisaToDST_VTX.C"
-root -b -q -l 'pisaToDST_VTX.C('$NEVT', "PISAEvent.root", "dst_out.root", "svxeval.root", '$run_number', 0)'
-echo "finished rinnung"
+echo "${Green}running root -b -q -l pisaToDST_VTX.C${Color_Off}"
+root -b -q -l 'pisaToDST_VTX.C('$NEVT', "PISAEvent.root", "dst_out.root", "svxeval.root", '$run_number', 0)'"${Color_Off}"
+echo "${Green}finished running${Color_Off}"
 
 if ( -f dst_out.root ) then
-echo "moving"
+echo "${Green}moving${Color_Off}"
 mv dst_out.root $outpisadir/$outdstname
-echo "finished moving"
+echo "${Green}finished moving${Color_Off}"
 else 
-echo "something is fkng wrong"
+echo "${Green}something is fkng wrong${Color_Off}"
 endif
 
 #remove tmp dir
 cd $DATADIR
 rm -fr $tmpdir
-echo "removed $tmpdir"
+echo "${Green}removed $tmpdir${Color_Off}"
 
 endif
 
@@ -347,9 +352,9 @@ endif
 #################STARTS###################
 ##########################################
 if( $2 == 2 || $2 == 4 ) then
-echo "==============================================="
-echo "================= EMBEDDING ==================="
-echo "==============================================="
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}================= EMBEDDING ===================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 
 setenv sourcedir /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/build
 if( $1 == 0) then
@@ -358,15 +363,14 @@ make -j4
 make install
 endif
 
-echo "Setting internal variables..."
+echo "${Green}Setting internal variables...${Color_Off}"
 
 set runnum    = $run_number
 set jobno     = $1
 set evtnum    = $NEVT
 
 set INPUT = `expr $shift + $jobno`
-echo $INPUT
-
+#echo "${Green}$INPUT ${Color_Off}"
 set outntana  = tree"$DIR".root
 
 if ( $3 == 1 ) then 
@@ -388,7 +392,7 @@ set outmytreedir   = $DATADIR/output_single/embed
 
 #checkng outdir
 if( ! -d $outmytreedir ) then
-echo "creating $outmytreedir" 
+echo "${Green}creating $outmytreedir${Color_Off}" 
 mkdir -p $outmytreedir
 endif
 
@@ -399,21 +403,19 @@ set insim  = `basename $inputsim`
 
 set runnum = `echo $inreal | awk -F'-' '{printf "%d", $2}'`
 
-
-
-echo "runnum       $runnum         "
-echo "jobno        $jobno          "
-echo "evtnum       $evtnum         "
-echo "inputreal    $inputreal      "
-echo "inputsim     $inputsim       "
-echo "outdst       $outdst         "
-echo "embedpartID  $embedpartID    "
-echo "outntana     $outntana       "
-echo "inputvtx     $inputvtx       "
-echo "inputoscar   $inputoscar     "
-echo "scriptdir    $scriptdir      "
-echo "outmytreedir $outmytreedir   "
-echo "tmpdir       $tmpdir         "
+echo "${Green}runnum       $runnum         ${Color_Off}"
+echo "${Green}jobno        $jobno          ${Color_Off}"
+echo "${Green}evtnum       $evtnum         ${Color_Off}"
+echo "${Green}inputreal    $inputreal      ${Color_Off}"
+echo "${Green}inputsim     $inputsim       ${Color_Off}"
+echo "${Green}outdst       $outdst         ${Color_Off}"
+echo "${Green}embedpartID  $embedpartID    ${Color_Off}"
+echo "${Green}outntana     $outntana       ${Color_Off}"
+echo "${Green}inputvtx     $inputvtx       ${Color_Off}"
+echo "${Green}inputoscar   $inputoscar     ${Color_Off}"
+echo "${Green}scriptdir    $scriptdir      ${Color_Off}"
+echo "${Green}outmytreedir $outmytreedir   ${Color_Off}"
+echo "${Green}tmpdir       $tmpdir         ${Color_Off}"
 
 # exit
 
@@ -422,7 +424,7 @@ echo "tmpdir       $tmpdir         "
 if( ! -d $tmpdir ) then
 mkdir -p $tmpdir
 endif
-echo "cd $tmpdir"
+echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 
@@ -438,12 +440,10 @@ cp ${scriptdir}/svx_threshold.dat   .
 #copy input file
 #cp $inputreal .
 #cp $inputsim .
-
-echo "pwd"
-pwd
-ls -ltr
-
-echo "yolo"
+#echo "pwd"
+#pwd
+#ls -ltr
+#echo "yolo"
 #echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$inputsim'"'", "'"'$inputreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".q" >> cmd.input
@@ -460,7 +460,7 @@ mv -f my-$outntana $outmytreedir/
 #remove tmp dir
 cd $HOME
 rm -fr $tmpdir
-echo "removed $tmpdir"
+echo "${Green}removed: $tmpdir${Color_Off}"
 
 endif
 ##########################################
