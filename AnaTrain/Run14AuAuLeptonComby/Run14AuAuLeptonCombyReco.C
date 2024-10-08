@@ -405,7 +405,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         else if (mytrk.GetPtPrime()>0.7&&mytrk.GetPtPrime()<0.9 && !(mytrk.GetProb()>0.01 && mytrk.GetN0()>=1 && mytrk.GetDisp() < 5 ) )
           skip = true;
-        else if (mytrk.GetPtPrime()>0.9 && !( mytrk.GetProb()>0.01 && ( ( mytrk.GetDep()>0  && fabs(mytrk.GetEmcTOF())<5 ) || (mytrk.GetN0()>=2 && mytrk.GetDisp() < 5)) ) )
+        else if (mytrk.GetPtPrime()>0.9 && !( mytrk.GetProb()>0.01 && ( ( mytrk.GetDep()>-1  && fabs(mytrk.GetEmcTOF())<5 ) || (mytrk.GetN0()>=2 && mytrk.GetDisp() < 5)) ) )
           skip = true;
                     
         if( skip ){
@@ -534,7 +534,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
-        ult.set_double(Run14AuAuLeptonCombyEnum::PSI,  event->GetPsi2BBC());
+        ult.set_double(Run14AuAuLeptonCombyEnum::PSI,  event->GetPsi2FVTXA0());
         ult.set_integer(Run14AuAuLeptonCombyEnum::CENTR, event->GetCentrality());
 
         ult.set_integer(Run14AuAuLeptonCombyEnum::PTYPE, ptype);

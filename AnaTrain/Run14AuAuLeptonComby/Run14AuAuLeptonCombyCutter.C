@@ -92,6 +92,12 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     if (fabs(dphi - (-0.065 * dalpha)) < 0.015)
         return false;
 
+    const float psi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
+    const float psi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
+
+    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 && TMath::Abs(psi_pip-psi_pim)<7*TMath::Pi()/8 )
+        return false;
+
     return true;
 }
 

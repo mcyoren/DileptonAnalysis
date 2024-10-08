@@ -1185,6 +1185,8 @@ namespace MyDileptonAnalysis
         const int centrality = event->GetCentrality();
         const float psi_BBC = event->GetPsi2BBC();
         const float psi_FVTX = event->GetPsi2FVTXA0();
+        if (psi_BBCS <-99||psi_BBCN <-99||psi_BBC <-99||
+            psi_FVTXS<-99||psi_FVTXN<-99||psi_FVTX<-99) return;
         BBC_psi_hist->Fill(psi_BBCS,   centrality, 0);
         BBC_psi_hist->Fill(psi_BBCN,   centrality, 1);
         BBC_psi_hist->Fill(psi_BBC,    centrality, 2);
@@ -1208,6 +1210,8 @@ namespace MyDileptonAnalysis
         for (int itrk = 0; itrk < nleptons; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            if ( mytrk->GetGhost()>15 || mytrk->GetIsConv()>=1 ) continue;
+            if ( mytrk->GetN0()<2 || mytrk->GetDisp()>5 || mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)>10 || TMath::Abs(mytrk->GetEmcTOF())>5)  continue;
             if (mytrk->GetHitCounter(0) < 1) continue;
             const float pt = mytrk->GetPtPrime();
             const float e_phi = mytrk->GetPhi0() < TMath::Pi() ? mytrk->GetPhi0() : mytrk->GetPhi0() - TMath::Pi();
