@@ -113,7 +113,7 @@ echo "${Green} $irun $RUNNUMBERS $#RUNNUMBERS                 ${Color_Off}"
 echo "${Green} =======Generating a Random Run Number==========${Color_Off}"
 echo "${Green}                 $run_number                    ${Color_Off}"
 
-echo "${Green} vertex_txt_dir  $vertex_txt_dir                 ${Color_Off}"
+echo "${Green} vertex_txt_dir  $vertex_txt_dir                ${Color_Off}"
 rm $runlistname
 
 echo "${Purple}===============================================${Color_Off}"
@@ -260,7 +260,7 @@ cd       $tmpdir
 
 cp $scriptdir/$scriptname .
 cp $scriptdir/$macroname .
-echo "${Green}running ./$scriptname $inputvtx $inputpythia $oscarname"
+echo "${Green}running ./$scriptname $inputvtx $inputpythia $oscarname ${Color_Off}"
 ./$scriptname $inputvtx $inputpythia $oscarname
 echo "${Green}finished running${Color_Off}"
 echo "${Green}copying${Color_Off}"
@@ -329,7 +329,7 @@ echo "${Purple}================ PISA TO DST ==================${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
 
 echo "${Green}running root -b -q -l pisaToDST_VTX.C${Color_Off}"
-root -b -q -l 'pisaToDST_VTX.C('$NEVT', "PISAEvent.root", "dst_out.root", "svxeval.root", '$run_number', 0)'"${Color_Off}"
+root -b -q -l 'pisaToDST_VTX.C('$NEVT', "PISAEvent.root", "dst_out.root", "svxeval.root", '$run_number', 0)'
 echo "${Green}finished running${Color_Off}"
 
 if ( -f dst_out.root ) then
@@ -356,6 +356,7 @@ echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}================= EMBEDDING ===================${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
 
+echo "${Green}Compiling libs${Color_Off}"
 setenv sourcedir /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/build
 if( $1 == 0) then
 cd $sourcedir
@@ -363,6 +364,7 @@ make -j4
 make install
 endif
 
+echo "${Green}End of Compiling${Color_Off}"
 echo "${Green}Setting internal variables...${Color_Off}"
 
 set runnum    = $run_number
@@ -444,25 +446,34 @@ cp ${scriptdir}/svx_threshold.dat   .
 #pwd
 #ls -ltr
 #echo "yolo"
-#echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
+echo "${Green}running in root: .x Fun4All_embedeval_svx.C($evtnum, "'"'$insim'"'", "'"'$inreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);${Color_Off}"
 echo ".x Fun4All_embedeval_svx.C($evtnum, "'"'$inputsim'"'", "'"'$inputreal'"'", "'"'$outdst'"'", "$embedpartID", "'"'$outntana'"'", "'"'$inputvtx'"'", "'"'$inputoscar'"'", $runnum);" >  cmd.input
 echo ".q" >> cmd.input
 
 ##run root
 root -b < cmd.input #>& $HOME/root.log
+echo "${Green}end of running${Color_Off}"
 #ls -ltr
 #move
 #mv -f $outdst    $outdstdir
 #mv -f kek2.root $outmytreedir/
 #mv -f $outntana  $outmytreedir/
+
+echo "${Green}start moving outfiles${Color_Off}"
 mv -f my-$outntana $outmytreedir/
+echo "${Green}end of moving outfiles${Color_Off}"
 
 #remove tmp dir
+echo "${Green}start removing tmp dir${Color_Off}"
 cd $HOME
 rm -fr $tmpdir
 echo "${Green}removed: $tmpdir${Color_Off}"
 
 endif
+
+echo "${Purple}===============================================${Color_Off}"
+echo "${Purple}================== THE END ====================${Color_Off}"
+echo "${Purple}===============================================${Color_Off}"
 ##########################################
 ###################END####################
 ################EMBEDDING#################
