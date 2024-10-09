@@ -90,7 +90,7 @@ endif
 set RUNNUMBERS_RG0 = (409471 409471 409471)
 #set RUNNUMBERS_RG0 = (409149 409150 409147 409151 409086 409087 409088 409089 409092 409115 409116 409118 409120 409121 409123 409124 409125 409152 409153 409154 409200 409222 409223 409224 409225 409226 409227 409228 409229 409230 409231 409232 409233 409235 409236 409237 409239 409241 409242 409243 409244 409295 409297 409298 409299 409300 409301 409302 409303 409304 409311 409312 409313 409305 409306 409307 409308 409310 409436 409437 409438 409428 409429 409430 409431 409432 409433 409435 409439 409440 409442 409443 409454 409455 409456 409457 409458 409459 409465 409467 409469 409471)
 set RANDOM=$$
-set rnd = `expr $RANDOM % ${#RUNNUMBERS_RG0} + 1` ### for bash use like this and numerign from 0 ${#RUNNUMBERS_RG0[@]}
+set rnd = `expr $RANDOM % ${#RUNNUMBERS_RG0} + 1` ### for bash use like this and numering is from 0 ${#RUNNUMBERS_RG0[@]}
 set run_number = $RUNNUMBERS_RG0[$rnd]
 
 set input_real_dir = $DATADIR/real/work/outputfull
@@ -120,7 +120,7 @@ echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}============= START SIMULATION  ===============${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
 
-set inputvtx = $DATADIR/real/work/output/vertexes.txt
+set inputvtx = $vertex_txt_dir
 set oscarname = $DIR.oscar.particles.dat
 
 if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 0 ) then
