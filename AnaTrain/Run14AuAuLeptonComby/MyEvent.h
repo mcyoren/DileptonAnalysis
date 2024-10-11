@@ -691,6 +691,7 @@ namespace MyDileptonAnalysis
             float GetPx() const { return px; }
             float GetPy() const { return py; }
             float GetPz() const { return pz; }
+            float GetPt() const { return sqrt(SQR(px)+SQR(py));}
             float GetVx() const { return vx; }
             float GetVy() const { return vy; }
             float GetVz() const { return vz; }
