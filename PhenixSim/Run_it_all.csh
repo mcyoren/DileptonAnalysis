@@ -134,7 +134,7 @@ set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
 set ptmin = 0.4
 set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
-set id    = $selected_paticle #0,1,2,3,4-pi0,pi+,pi-,e-,e+################helios jpsi and phi####pythia ccbar bbar
+set id    = $selected_paticle #0,1,2,3,4-pi0,pi+,pi-,e-,e+,p,antip################helios jpsi and phi####pythia ccbar bbar
 
 echo "${Green}jobno          $jobno            ${Color_Off}"
 echo "${Green}run_number     $run_number       ${Color_Off}"
