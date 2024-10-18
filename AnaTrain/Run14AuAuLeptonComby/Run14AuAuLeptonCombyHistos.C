@@ -140,6 +140,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 100 || ghost2 < 100 ) return -999;
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 1 || match2 < 1 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
@@ -169,11 +179,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-
-  if ( match1 == 0 || match2 == 0 ) return -999;
+  if ( ghost1 % 10 == 0 || ghost2 % 10 == 0 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
@@ -204,10 +214,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( match1 < 11 || match2 < 11 ) return -999;
+  if ( ghost1 % 10 < 5 || ghost2 % 10 < 5 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
@@ -241,7 +251,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 111 || ghost2 < 111 ) return -999;
+  if ( ghost1 < 10 || ghost2 < 10 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
@@ -271,16 +281,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-
+  
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 110 || ghost2 < 110 ) return -999;
-
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-
-  if ( match1 == 0 || match2 == 0 ) return -999;
+  if ( ghost1 < 100 || ghost2 < 100 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
@@ -310,16 +315,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-
+  
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  if ( ghost1 < 111 || ghost2 < 111 ) return -999;
-
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-
-  if ( match1 == 0 || match2 == 0 ) return -999;
+  if ( ghost1 < 1000 || ghost2 < 1000 ) return -999;
 
   const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
   const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 

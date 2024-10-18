@@ -342,38 +342,18 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
       
-      if( event->GetCentrality()<60)
-      {
-        bool skip = false; 
-        if (mytrk.GetPtPrime()>MAX_PT)
+      bool skip = false; 
+        if (mytrk.GetPtPrime()>MAX_PT || mytrk.GetPhi0Prime() < E_PT)
           skip = true;
         if (mytrk.GetCrkphi()<-99)
           skip = true;
-        if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
+        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.6)
+          skip = true;
+        if (mytrk.GetN0() < 0 )
           skip = true;
         if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
           skip = true;
-        if (mytrk.GetPtPrime()<1.0 && mytrk.GetChi2()/(mytrk.GetNpe0()+0.1)>10)
-          skip = true;
-        if (mytrk.GetPtPrime()<0.3 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && mytrk.GetN0()>=6 + mytrk.GetDisp()*mytrk.GetDisp() / 2. && mytrk.GetProb()>0.03 && mytrk.GetDisp() < 2) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.3&&mytrk.GetPtPrime()<0.4 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5 && mytrk.GetN0()>=4 + mytrk.GetDisp()*mytrk.GetDisp() / 3. && mytrk.GetProb()>0.03 && mytrk.GetDisp() < 3) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.4&&mytrk.GetPtPrime()<0.5 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetN0()>=3 + mytrk.GetDisp()*mytrk.GetDisp() / 3. && mytrk.GetProb()>0.02) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.5&&mytrk.GetPtPrime()<0.7 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetN0()>=2 + mytrk.GetDisp()*mytrk.GetDisp() / 8. && mytrk.GetProb()>0.01 && mytrk.GetDisp() < 4) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.7&&mytrk.GetPtPrime()<0.9 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetN0()>=2 + mytrk.GetDisp()*mytrk.GetDisp() / 8. && mytrk.GetProb()>0.01 && mytrk.GetDisp() < 5) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.9&&mytrk.GetPtPrime()<1.1 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetProb()>0.01 && mytrk.GetN0()>=3 && mytrk.GetDisp() < 5) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>1.1&&mytrk.GetPtPrime()<1.5 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.7 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetProb()>0.01 && mytrk.GetN0()>=2 && mytrk.GetDisp() < 5) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>1.5&&mytrk.GetPtPrime()<2.0 && !(mytrk.GetProb()>0.01 && mytrk.GetN0()>=2 && mytrk.GetDisp() < 5) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>2.0 && !(mytrk.GetProb()>0.01 && ( mytrk.GetEcore()/mytrk.GetPtot() > 0.9 || (mytrk.GetN0()>=2 && mytrk.GetDisp() < 5)) ) )
-          skip = true;
-                    
+
         if( skip ){
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -381,40 +361,49 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           itrk--;
           continue;
         }
-      }
-      if(event->GetCentrality()>=60)
+    }
+    
+    n_electrons = event->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+      
+        mytrk->SetMcId(0);
+        if (True) 
+        {
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && 
+                 mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10)  mytrk->SetMcId(mytrk->GetMcId()+1);
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
+                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 && fabs(mytrk->GetEmcTOF())<5)  mytrk->SetMcId(mytrk->GetMcId()+6);
+
+            const double treshlods[3] = {0.017808128514646658,  0.0229414147041921, 0.04501756860704552};
+            const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
+            {
+                event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
+                (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()*mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
+                event->GetCentrality()/20.+mytrk->GetPtPrime()*2, mytrk->GetN0()+4*mytrk->GetPtPrime(), 
+                1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
+            };
+
+            mytrk->SetMcId(mytrk->GetMcId()+GeteID(input_x, treshlods));
+            if (mytrk->GetMcId()>200 && fabs(mytrk->GetEmcTOF())>5 )  mytrk->SetMcId(mytrk->GetMcId()-900);
+        }    
+        //std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
+        //  <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
+    }
+
+    n_electrons = event->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
+     
+      if (mytrk.GetMcId()<1)
       {
-        bool skip = false; 
-        if (mytrk.GetPtPrime()>MAX_PT)
-          skip = true;
-        if (mytrk.GetCrkphi()<-99)
-          skip = true;
-        if (mytrk.GetDep()<-2 || mytrk.GetDep()>5 )
-          skip = true;
-        if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
-          skip = true;
-        if (mytrk.GetPtPrime()<0.8 && mytrk.GetChi2()/(mytrk.GetNpe0()+0.1)>10)
-          skip = true;
-        if (mytrk.GetPtPrime()>0.2&&mytrk.GetPtPrime()<0.3 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && mytrk.GetN0()>=3 + mytrk.GetDisp()*mytrk.GetDisp() / 3. && mytrk.GetProb()>0.02) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.3&&mytrk.GetPtPrime()<0.4 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetN0()>=2 + mytrk.GetDisp()*mytrk.GetDisp() / 8. && mytrk.GetProb()>0.01 && mytrk.GetDisp() < 4) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.4&&mytrk.GetPtPrime()<0.5 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetProb()>0.01 && mytrk.GetN0()>=3 && mytrk.GetDisp() < 5 ) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.5&&mytrk.GetPtPrime()<0.7 && !(mytrk.GetEcore()/mytrk.GetPtot() > 0.8 && fabs(mytrk.GetEmcTOF())<5  && mytrk.GetProb()>0.01 && mytrk.GetN0()>=2 && mytrk.GetDisp() < 5 ) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.7&&mytrk.GetPtPrime()<0.9 && !(mytrk.GetProb()>0.01 && mytrk.GetN0()>=1 && mytrk.GetDisp() < 5 ) )
-          skip = true;
-        else if (mytrk.GetPtPrime()>0.9 && !( mytrk.GetProb()>0.01 && ( ( mytrk.GetDep()>-1  && fabs(mytrk.GetEmcTOF())<5 ) || (mytrk.GetN0()>=2 && mytrk.GetDisp() < 5)) ) )
-          skip = true;
-                    
-        if( skip ){
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
           n_electrons--;
           itrk--;
           continue;
-        }
       }
     }
 
@@ -493,22 +482,18 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquin cut
+        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
+        if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue;
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
-        if (  mytrk->GetMinsDphi(0)>0 ) addit_reject = 1;
-        if ( mytrk->GetGhost()<15 && mytrk->GetIsConv()<1)
-             addit_reject += 10;
         
-        int hadron_reject = 0;
-        if ( mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 && fabs(mytrk->GetEmcTOF())<5)  hadron_reject=+110;
-        if ( (TMath::Abs(mytrk->GetMinsDphi(3))<2 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
-             (TMath::Abs(mytrk->GetMinsDthe(3))<2 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
-             (TMath::Abs(mytrk->GetMinsDthe(1))<2 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-             (TMath::Abs(mytrk->GetMinsDthe(0))<2 && mytrk->GetMinsDphi(0)>-2)  ) hadron_reject+=1;
-        //if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. && mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 ) hadron_reject+=1;
+        int hadron_reject = mytrk->GetMcId();
         
+        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
+               (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
+               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && mytrk->GetMinsDphi(0)>-1.5) ) || (mytrk->GetPtPrime()>1.2 && mytrk->GetMinsDphi(0)>-1.5) ) addit_reject=1;
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
         //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
 

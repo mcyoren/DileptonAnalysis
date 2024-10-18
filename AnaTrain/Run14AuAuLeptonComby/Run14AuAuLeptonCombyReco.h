@@ -104,6 +104,10 @@ private:
     void StopWalking();
     int Solution(MyDileptonAnalysis::MyTrack* mytrk1, MyDileptonAnalysis::MyTrack* mytrk2, 
                   MyDileptonAnalysis::Reconstruction* reco, float zVtx);
+    double GetTreeValue(const double x[13], const int iestim = 0, const double LearingRate=0.2);   
+    double GetProb(const double x[13], const double LearingRate=0.2, const int n_estim = 20);
+    int GeteID(const double x[13], const double y[3], const double LearingRate=0.2, const int n_estim = 20);//double mytree['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
+ 
 
 
 protected:
