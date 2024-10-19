@@ -380,7 +380,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
             {
                 event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
-                (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()*mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
+                (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
                 event->GetCentrality()/20.+mytrk->GetPtPrime()*2, mytrk->GetN0()+4*mytrk->GetPtPrime(), 
                 1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
