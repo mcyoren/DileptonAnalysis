@@ -878,7 +878,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(ielectron);
             const int charge_bin = (1 - electron->GetChargePrime()) / 2;
             const float pt = electron->GetPtPrime();
-            if (pt < 0.2)
+            if (pt < 0.4)
                 continue;
             if(is_check_veto)
             {
@@ -912,12 +912,6 @@ namespace MyDileptonAnalysis
             if (electron->GetHitCounter(0) < 1 || electron->GetHitCounter(1) < 1 ||
                 (electron->GetHitCounter(2) < 1 && electron->GetHitCounter(3) < 1))
                 continue;
-
-            if(is_check_veto) 
-            {
-                temc->Fill(electron->GetEmcTOF(),pt,centr_bin);
-                ttof->Fill(electron->GetTOFE(),pt,centr_bin);
-            }
 
             std::vector<double> prevphis, prevthes;
             std::vector<double> dphivec0, dthevec0, dphivec1, dthevec1;
@@ -1518,12 +1512,13 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < Nelectrons; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            if (TMath::Abs(electron->GetMcId()-mc_id)>1 && mc_id>-1) continue;
+            temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),event->GetCentrality());
+            if ( (TMath::Abs(electron->GetMcId()-mc_id)>1 && mc_id>-1 && mc_id<100) || (electron->GetMcId()<1000 && mc_id == 1000)) continue;
             el_pt_hist->Fill(electron->GetPtPrime(),1.5,event->GetCentrality());
             el_had_dphi->Fill(electron->GetEmcdphi_e(),electron->GetPtPrime(),event->GetCentrality());
             el_had_dz  ->Fill(electron->GetEmcdz_e()  ,electron->GetPtPrime(),event->GetCentrality());
-            if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
-               electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>10||electron->GetChi2()/electron->GetNpe0()>20) continue;
+            //if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
+            //   electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>10||electron->GetChi2()/electron->GetNpe0()>20) continue;
             el_pt_hist->Fill(electron->GetPtPrime(),2.5,event->GetCentrality());
             ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),event->GetCentrality());
             n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(),event->GetCentrality());
@@ -1532,6 +1527,7 @@ namespace MyDileptonAnalysis
             chi2npe0_hist->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetPtPrime(),event->GetCentrality());
             const float Rghost = sqrt(SQR(electron->GetEmcdphi_e())+SQR(electron->GetEmcdz_e()));
             el_had_dr->Fill(Rghost,electron->GetPtPrime(),event->GetCentrality());
+
 
 
             if(electron->GetEcore()/electron->GetPtot()>0.8 &&electron->GetEcore()/electron->GetPtot()<1.2 )
@@ -1577,7 +1573,7 @@ namespace MyDileptonAnalysis
             rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality());
 
 
-            if(electron->GetMcId()>7 && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetEcore()/electron->GetPtot()<1.2 &&
+            if(electron->GetMcId()>7 && electron->GetMcId()<10 && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetEcore()/electron->GetPtot()<1.2 &&
                electron->GetProb()>0.01 && electron->GetN0() >= 2 + SQR(electron->GetDisp())/8.&& false) 
                std::cout<<electron->GetPtPrime()<<" "<<electron->GetN0()<<" "<<electron->GetEcore()/electron->GetPtot()<<" "<<electron->GetNpe0()
                <<" "<<electron->GetDisp()<<" "<<electron->GetChi2()/electron->GetNpe0()<<" "<<electron->GetProb()
@@ -1702,6 +1698,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dz, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
             INIT_HIST(3, el_pt_hist, 50, 0, 5, 15, 0, 15, 100, 0, 100);
+            INIT_HIST(3, temc, 150, -50, 150, 200, 0., 10, 5, 0, 100);
 
             is_fill_track_QA = 1;
         }
@@ -1741,7 +1738,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, counter_assoc_eff_hist,   30,0,30, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, counter_assoc_ghost_hist, 30,0,30, 50, 0, 5, 10, 0, 100);
             INIT_HIST(3, veto_type_hist,           30,0,30, 50, 0, 5, 10, 0, 100);
-            INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
+            //INIT_HIST(3, temc, 150, -50, 150, 50, 0., 2.5, 5, 0, 5);
             INIT_HIST(3, ttof, 1500, -50, 150, 50, 0., 1.25, 5, 0, 5);
             is_check_veto = 1;
         }

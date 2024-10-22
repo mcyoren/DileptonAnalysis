@@ -23,6 +23,7 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     fill_DCA_hists = 0;
     use_iden = 0;
     do_track_QA = 0;
+    do_electron_QA = 0;
     do_reveal_hadron = 0;
     fill_flow_hists = 0;
     fill_true_DCA = 0;
@@ -58,6 +59,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     fill_DCA_hists = rc->get_IntFlag("Fill_DCA_hists", 0);
     use_iden = rc->get_IntFlag("Use_ident", 0);
     do_track_QA = rc->get_IntFlag("Do_track_QA", 0);
+    do_electron_QA = rc->get_IntFlag("Do_electron_QA", 0);
     do_reveal_hadron = rc->get_IntFlag("Do_reveal_hadron", 0);
     fill_flow_hists = rc->get_IntFlag("Fill_flow", 0);
     fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
@@ -74,6 +76,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     std::cout<<"fill_DCA_hists:       "<<fill_DCA_hists<<std::endl;
     std::cout<<"use_iden:             "<<use_iden<<std::endl;
     std::cout<<"Do_track_QA:          "<<do_track_QA<<std::endl;
+    std::cout<<"Do_electron_QA:       "<<do_electron_QA<<std::endl;
     std::cout<<"do_reveal_hadron:     "<<do_reveal_hadron<<std::endl;
     std::cout<<"fill_flow_hists:      "<<fill_flow_hists<<std::endl;
     std::cout<<"fill_true_DCA:        "<<fill_true_DCA<<std::endl;
@@ -84,7 +87,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, fill_flow_hists, fill_true_DCA, check_veto,
+                                               fill_DCA_hists, do_track_QA+do_electron_QA, fill_flow_hists, fill_true_DCA, check_veto,
                                                fill_QA_lepton_hists>0?0:fill_QA_lepton_hists);
 
     return 0;
@@ -397,7 +400,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      if (mytrk.GetMcId()<1)
+      if (mytrk.GetMcId()<10)
       {
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -473,8 +476,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
+    if(do_electron_QA) event_container->FillQAHist(1000);
     if(fill_TTree) event_container->FillTree();
-    if(fill_inv_mass&&!fill_QA_lepton_hists)event_container->fill_inv_mass();
+    if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists)event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
@@ -482,18 +486,22 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
-        if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue;
+        if ( mytrk->GetGhost()>=250 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
+        if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
+        if (mytrk->GetGhost()<25) addit_reject = 1;
+        if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
-        
-        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
-               (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && mytrk->GetMinsDphi(0)>-1.5) ) || (mytrk->GetPtPrime()>1.2 && mytrk->GetMinsDphi(0)>-1.5) ) addit_reject=1;
+        if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
+        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<mytrk->GetIsConv()<<" "<<addit_reject<<" "<<hadron_reject<<" "<<mytrk->GetGhost()<<std::endl;
+        if ( hadron_reject<100 ) continue;
+        //if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
+        //       (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
+        //       (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
+        //       (TMath::Abs(mytrk->GetMinsDthe(0))<3 && mytrk->GetMinsDphi(0)>-1.5) ) || (mytrk->GetPtPrime()>1.2 && mytrk->GetMinsDphi(0)>-1.5) ) addit_reject=1;
         //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
         //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
 

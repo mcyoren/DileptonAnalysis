@@ -116,7 +116,7 @@ protected:
     MyDileptonAnalysis::Reconstruction reco;
 
     int remove_hadron_hits, fill_QA_hadron_hists, fill_QA_lepton_hists, fill_ddphi_hadron, fill_TTree, fill_d_dphi_hists, 
-        fill_DCA_hists, use_iden, do_track_QA, do_reveal_hadron, fill_flow_hists, fill_true_DCA, check_veto, fill_inv_mass;
+        fill_DCA_hists, use_iden, do_track_QA, do_electron_QA, do_reveal_hadron, fill_flow_hists, fill_true_DCA, check_veto, fill_inv_mass;
     int dcmap_runs[N_RUN_GRP][MAX_RUN];
     float dcmap_xx1[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
     float dcmap_yy1[N_RUN_GRP][N_SIDE][N_ARM][MAX_DEAD_AREA];
