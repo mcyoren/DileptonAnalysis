@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation with Dynamic Theme</title>
+  <style>
+    /* Default dark theme styles */
+    :root {
+      --background-color: #1e1e1e;
+      --text-color: #fff;
+      --panel-background: #333;
+      --button-background: #444;
+      --button-hover: #666;
+      --border-color: #444;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      height: 100vh;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .content-container {
+      display: flex;
+      width: 100%;
+      height: 100%; /* Maximized height for content */
+    }
+    li{
+    margin-left: 200px;
+    }
+    .slide-container {
+      flex-grow: 1; /* Allow plot frame to take as much space as possible */
+      background-color: var(--panel-background);
+      border-right: 1px solid var(--border-color); /* Small separator between plot and text */
+      overflow-y: auto;
+      transition: all 0.3s;
+    }
+
+    .slide-container.hidden {
+      display: none; /* Hide the iframe container */
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .text-frame {
+      display: inline-block;
+      background-color: var(--panel-background);
+      padding: 10px;
+      white-space: nowrap;
+      overflow-wrap: break-word;
+      height: auto;
+      transition: all 0.3s;
+      font-size: 28px; /* Change this to your preferred default size */
+      max-width: 30%; /* Limit width when plot is present */
+    }
+
+    .text-frame.expanded {
+      white-space: normal; /* Allow text to wrap when no plot is present */
+      max-width: none; /* Remove width limit */
+      flex-grow: 1; /* Make it take full width when no plot */
+    }
+
+    .info-panel {
+      width: 100%;
+      background-color: var(--panel-background);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .info-panel h2, .info-panel p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .controls button, .controls select {
+      padding: 5px 10px;
+      font-size: 14px;
+      background-color: var(--button-background);
+      color: var(--text-color);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .controls button:hover {
+      background-color: var(--button-hover);
+    }
+
+    .slide-counter {
+      font-size: 14px;
+    }
+
+    .light-theme {
+      --background-color: #fff;
+      --text-color: #000;
+      --panel-background: #f5f5f5;
+      --button-background: #ddd;
+      --button-hover: #bbb;
+      --border-color: #ccc;
+    }
+  </style>
+  <script>
+    let currentSlide = 0;
+    const slides = [
+      '', // Title
+      '', // Outline
+      '', // Motivation
+      '', // Basic cuts
+      'association.html', 
+      'sim_ddhit_assoc_html.html', 
+      'sim_ddhit_assoc_html1.html', 
+      'association_zoom.html', 
+      'hit_assoc_qa_html.html', 
+      'hit_assoc_qa_html1.html',
+      '', // Conversion
+      'secondhit.html', 
+      '', // ML
+      'meeting_sim.html', 
+      '', // Results
+      'noassoc.html', 
+      'noml_inv_mass.html',
+      'ml_inv_mass3.html',
+      'ml_inv_mass5.html',
+      'ml_inv_massFG.html',
+      'DCA2.html',
+      '', // Empty slide for text only
+    ]; // HTML file paths here
+    const slideText = [
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Measurment of e<sup>+</sup>e<sup>-</sup> pairs in Run14AuAu200 </h1></center><p></p>", // Text for the empty slide
+      "<h1><center>Outline</center></h1><h2> <ul>\
+        &emsp;<li>Motivation</li>\
+        &emsp;<li>Analysis Cuts</li>\
+        &emsp;<li>Hit Assocation</li>\
+        &emsp;<li>Conversion rejection</li>\
+        &emsp;<li>Hadron rejection using ML</li>\
+        &emsp;<li>First Look at the results</li>\
+        &emsp;<li>To DO list</li>\
+        </ul> </h2>",
+      "<h2>Title for Slide 3</h2><p>This is the description for Slide 1.</p><p>It contains detailed information about the plot.</p>",
+      "<h2>Title for Slide 4</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 5</h2><p>Details for Slide 3. This text explains the context of the plot shown on the slide.</p>",
+      "<h2>Title for Slide 6</h2><p>Details for Slide 4. This text explains the context of the plot shown on the slide.</p>",
+      "<h2>Title for Slide 7</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 8</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 9</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 10</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 11</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 12</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 13</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 14</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 15</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 16</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 17</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 18</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 19</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 20</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 21</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 22</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+    ];
+
+    function loadSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        currentSlide = index;
+        const slideContainer = document.querySelector('.slide-container');
+        const textFrame = document.querySelector('.text-frame');
+        if (slides[currentSlide]) {
+          document.getElementById('slide-frame').src = slides[currentSlide];
+          slideContainer.classList.remove('hidden'); // Show the iframe
+          textFrame.classList.remove('expanded'); // Shrink text frame width when plot is visible
+        } else {
+          document.getElementById('slide-frame').src = ''; // Clear iframe for text-only slide
+          slideContainer.classList.add('hidden'); // Hide the iframe
+          textFrame.classList.add('expanded'); // Expand text frame width when no plot
+        }
+        document.getElementById('slide-number').innerText = `Slide ${currentSlide + 1} of ${slides.length}`;
+        document.getElementById('slide-text').innerHTML = slideText[currentSlide]; // Use innerHTML for titles and formatting
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        loadSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        loadSlide(currentSlide - 1);
+      }
+    }
+
+    function changeTextSize(size) {
+      document.getElementById('slide-text').style.fontSize = size + 'px';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    window.onload = function() {
+      loadSlide(currentSlide);
+    }
+  </script>
+</head>
+<body>
+  <div class="content-container">
+    <div class="slide-container">
+      <iframe id="slide-frame" src="slide1.html"></iframe>
+    </div>
+    <div class="text-frame">
+      <p id="slide-text">Welcome to the presentation!</p>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div>
+      <h2>Yuri Mitrankov</h2>
+      <p>Stony Brook University, HI PWG</p>
+    </div>
+
+    <div class="slide-counter">
+      <p id="slide-number">Slide 1 of 4</p>
+    </div>
+
+    <div class="controls">
+      <button onclick="toggleTheme()">Toggle Theme</button>
+      <select onchange="changeTextSize(this.value)">
+        <option value="28">Large</option>
+        <option value="24">Medium</option>
+        <option value="18">Small</option>
+      </select>
+      <button onclick="nextSlide()">Next</button>
+      <button onclick="prevSlide()">Previous</button>
+    </div>
+  </div>
+</body>
+</html>
