@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plots Display</title>
+</head>
+<body>
+    <h1>Electron/Hadron separation</h1>
+    
+    <div>
+        <h2> |emctof| < 5; |emcdz| < 25; |emcdphi| < 0.05 - always </h2>
+        <h2>Defaul cuts</h2>
+        <h2>n0 > 1; disp < 5; chi2/npe0 < 10; E/p >0.8 </h2>
+        <h2>Tight cuts</h2>
+        <h2>n0 > 2 + disp <sup>2</sup>/8; disp < 4; chi2/npe0 < 10; E/p > 0.8; prob > 0.01 </h2>
+
+    </div>
+    <h1>Electron/Hadron separation using ML</h1>
+    <div>
+        <h2> Boosted decision tree</h2>
+        <h2> 1B pi sim and 100M electron sim </h2>
+        <h2> Using all meantioned vars + pT and centrality </h2>
+        <img src="roc.png" alt="Plot 1" style="width:100%; max-width:600px;">
+    </div>
+
+    <h1>BDT Results</h1>
+    <div>
+        <h2> Loose cut: +15% electron efficiency, -15% hadron contamination to Defaul cut above </h2>
+        <h2> Default cut: same electron efficiency, -40% hadron contamination to Defaul cut above   </h2>
+        <h2> Tight cut: -20% electron efficiency, -95% hadron contamination to Defaul cut above </h2>
+    </div>
+
+
+</body>
+</html>
