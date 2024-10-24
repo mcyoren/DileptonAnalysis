@@ -7,12 +7,12 @@
   <style>
     /* Default dark theme styles */
     :root {
-      --background-color: #1e1e1e;
-      --text-color: #fff;
-      --panel-background: #333;
-      --button-background: #444;
-      --button-hover: #666;
-      --border-color: #444;
+      --background-color: #fff;
+      --text-color: #000;
+      --panel-background: #f5f5f5;
+      --button-background: #ddd;
+      --button-hover: #bbb;
+      --border-color: #ccc;
     }
 
     body {
@@ -113,12 +113,12 @@
     }
 
     .light-theme {
-      --background-color: #fff;
-      --text-color: #000;
-      --panel-background: #f5f5f5;
-      --button-background: #ddd;
-      --button-hover: #bbb;
-      --border-color: #ccc;
+      --background-color: #1e1e1e;
+      --text-color: #fff;
+      --panel-background: #333;
+      --button-background: #444;
+      --button-hover: #666;
+      --border-color: #444;
     }
   </style>
   <script>
@@ -137,6 +137,7 @@
       '', // Conversion
       'secondhit.html', 
       '', // ML
+      'ml.html', // roc
       'meeting_sim.html', 
       '', // Results
       'noassoc.html', 
@@ -160,9 +161,11 @@
         &emsp;<li>First Look at the results</li>\
         &emsp;<li>To DO list</li>\
         </ul> </h2>",
+
       "<h2><center>Motivation</center></h2>\
       <p>Separate promt and heavy flavor.</p>\
       <p>Thermal component?</p>",
+
       "<h2><center>Basic Analysis Cuts</center></h2><h2> <ul>\
         &emsp;<li>Run-14 200 GeV Au+Au pro109 (MinBias) 	18,521,121,185</li>\
         &emsp;<li>BBCLL1(>1 tubes) narrowvtx (Scale Down: 0)</li>\
@@ -170,28 +173,52 @@
         &emsp;<li>|z| <10 cm</li>\
         &emsp;<li>VTX vs. DC misalignment corrections using high-pT hadron tracks</li>\
         &emsp;<li>Beam offset and momscale</li>\
-        &emsp;<li>QA: Dead maps; Quality: 63, 51, 31; 0.4 < pT [GeV] < 5.0; ZDC < 75 cm </li>\
+        &emsp;<li>QA: Dead maps; Quality: 63, 51, 31; 0.4 < p<sub>T</sub> [GeV] < 5.0; ZDC < 75 cm </li>\
         </ul> </h2>",
+
       "<h2><center>Cartoon of hit to </center></h2><h2><center>track association </center></h2>\
-      <p>Details for Slide 3. This text explains the context of the plot shown on the slide.</p>",
-      "<h2>Title for Slide 6</h2><p>Details for Slide 4. This text explains the context of the plot shown on the slide.</p>",
-      "<h2>Title for Slide 7</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 8</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 9</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 10</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 11</h2><p>Description </p>",
-      "<h2>Title for Slide 12</h2><p>Description </p>",
-      "<h2>Title for Slide 13</h2><p>Description </p>",
-      "<h2>Title for Slide 14</h2><p>Description </p>",
-      "<h2>Title for Slide 15</h2><p>Description </p>",
-      "<h2>Title for Slide 16</h2><p>Description </p>",
-      "<h2>Title for Slide 17</h2><p>Description </p>",
-      "<h2>Title for Slide 18</h2><p>Description </p>",
-      "<h2>Title for Slide 19</h2><p>Description </p>",
-      "<h2>Title for Slide 20</h2><p>Description </p>",
-      "<h2>Title for Slide 21</h2><p>Description </p>",
-      "<h2>Title for Slide 22</h2><p>Description </p>",
-      "<h2>Title for Slide 23</h2><p>Description </p>"
+      <p>Very sketchy </p><p>Search range increased by ~10÷100</p><p>Real data - next slide</p>",
+
+      "<h2>Data example</h2>\
+      <p> Negatively charged hadrons </p><p>p<sub>T</sub> = 2 GeV </p>\
+      <p> &phi;= &phi;<sub>VTXHIT</sub> - &phi;<sub>DC</sub><sup>Layer</sup></p>\
+      <p> &phi;<sub>DC</sub><sup>Layer</sup> - DC track position </p><p> in a particular layer</p>",
+
+      "<h2>Data example</h2>\
+      <p> Negatively charged hadrons </p><p>p<sub>T</sub> = 2 GeV </p>\
+      <p> &phi;= &phi;<sub>VTXHIT</sub> - &phi;<sub>DC</sub><sup>Layer</sup></p>\
+      <p> &phi;<sub>DC</sub><sup>Layer</sup> - DC track position </p><p> in a particular layer</p>\
+      <p> &phi;<sub>L1</sub> &asymp; -4.5 mrad </p>",
+
+      "<h2><center>Cartoon of hit to </center></h2><h2><center>track association </center></h2>\
+      <p> Search range in 1 sigma</p>",
+
+      "<h2>Recall</h2><p>Negatively charged hadrons sim</p>\
+      <p> Parametrization of prev. distr.</p>",//TP/(TP+FN)
+
+      "<h2>Precision</h2><p>Precision of hit association </p><p> in full embedding sim.</p>",//TP/(TP+FP)
+
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Conversion rejection </h1></center><p></p>", 
+
+      "<h2><center>Conversion rejection</center></h2><p>In search for hits from second </p><p>  track  </p>\
+      <p> Mostly affected by conversion </p><p> in the first layer </p>\
+      <p> Effective against Dalitz </p>",
+      
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Electron/Hadron separation using ML</h1></center><p></p>", 
+      
+      "<h2><center> Electron/Hadron separation </center></h2><p>Description </p>",
+      "<h2><center> Electron/Hadron separation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>",//<p> &phi;<sub>Corr</sub> = &phi;<sub>VTXHIT</sub> - &phi;<sub>Corr</sub><sup>Layer</sup></p>\
+      "<h2><center> Motivation </center></h2><p>Description </p>",// <p> &phi; = &phi;<sub>DC</sub> - &phi;<sub>Corr</sub> </p>\<p> &phi;<sub>Corr</sub><sup>Layer</sup> - track postion in a particular </p><p> layer corrected for hit postion </p><p> in previuos layer   </p>
+      "<h2><center> Motivation </center></h2><p>Description </p>",
+      "<h2><center> Motivation </center></h2><p>Description </p>"
     ];
 
     function loadSlide(index) {
