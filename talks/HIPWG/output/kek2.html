@@ -126,7 +126,7 @@
     const slides = [
       '', // Title
       '', // Outline
-      '', // Motivation
+      'motiv.html', // Motivation
       '', // Basic cuts
       'association.html', 
       'sim_ddhit_assoc_html.html', 
@@ -144,13 +144,14 @@
       'ml_inv_mass3.html',
       'ml_inv_mass5.html',
       'ml_inv_massFG.html',
-      'DCA2.html',
+      'DCA.html',
+      'sim_pair_dca_html.html',
       '', // Empty slide for text only
     ]; // HTML file paths here
     const slideText = [
       "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
       <center><h1>Measurment of e<sup>+</sup>e<sup>-</sup> pairs in Run14AuAu200 </h1></center><p></p>", // Text for the empty slide
-      "<h1><center>Outline</center></h1><h2> <ul>\
+      "<h2><center>Outline</center></h2><h2> <ul>\
         &emsp;<li>Motivation</li>\
         &emsp;<li>Analysis Cuts</li>\
         &emsp;<li>Hit Assocation</li>\
@@ -159,26 +160,38 @@
         &emsp;<li>First Look at the results</li>\
         &emsp;<li>To DO list</li>\
         </ul> </h2>",
-      "<h2>Title for Slide 3</h2><p>This is the description for Slide 1.</p><p>It contains detailed information about the plot.</p>",
-      "<h2>Title for Slide 4</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 5</h2><p>Details for Slide 3. This text explains the context of the plot shown on the slide.</p>",
+      "<h2><center>Motivation</center></h2>\
+      <p>Separate promt and heavy flavor.</p>\
+      <p>Thermal component?</p>",
+      "<h2><center>Basic Analysis Cuts</center></h2><h2> <ul>\
+        &emsp;<li>Run-14 200 GeV Au+Au pro109 (MinBias) 	18,521,121,185</li>\
+        &emsp;<li>BBCLL1(>1 tubes) narrowvtx (Scale Down: 0)</li>\
+        &emsp;<li>ZDC coinsidence</li>\
+        &emsp;<li>|z| <10 cm</li>\
+        &emsp;<li>VTX vs. DC misalignment corrections using high-pT hadron tracks</li>\
+        &emsp;<li>Beam offset and momscale</li>\
+        &emsp;<li>QA: Dead maps; Quality: 63, 51, 31; 0.4 < pT [GeV] < 5.0; ZDC < 75 cm </li>\
+        </ul> </h2>",
+      "<h2><center>Cartoon of hit to </center></h2><h2><center>track association </center></h2>\
+      <p>Details for Slide 3. This text explains the context of the plot shown on the slide.</p>",
       "<h2>Title for Slide 6</h2><p>Details for Slide 4. This text explains the context of the plot shown on the slide.</p>",
       "<h2>Title for Slide 7</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
       "<h2>Title for Slide 8</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
       "<h2>Title for Slide 9</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
       "<h2>Title for Slide 10</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 11</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 12</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 13</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 14</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 15</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 16</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 17</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 18</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 19</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 20</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 21</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
-      "<h2>Title for Slide 22</h2><p>Description for Slide 2. The content is dynamically changing with each slide.</p>",
+      "<h2>Title for Slide 11</h2><p>Description </p>",
+      "<h2>Title for Slide 12</h2><p>Description </p>",
+      "<h2>Title for Slide 13</h2><p>Description </p>",
+      "<h2>Title for Slide 14</h2><p>Description </p>",
+      "<h2>Title for Slide 15</h2><p>Description </p>",
+      "<h2>Title for Slide 16</h2><p>Description </p>",
+      "<h2>Title for Slide 17</h2><p>Description </p>",
+      "<h2>Title for Slide 18</h2><p>Description </p>",
+      "<h2>Title for Slide 19</h2><p>Description </p>",
+      "<h2>Title for Slide 20</h2><p>Description </p>",
+      "<h2>Title for Slide 21</h2><p>Description </p>",
+      "<h2>Title for Slide 22</h2><p>Description </p>",
+      "<h2>Title for Slide 23</h2><p>Description </p>"
     ];
 
     function loadSlide(index) {
