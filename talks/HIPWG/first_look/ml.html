@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plots Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            margin: 10px 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .text {
+            flex: 1;
+            margin-right: 20px; /* Space between text and image */
+        }
+
+        .image {
+            flex: 0 0 40%; /* Image takes 40% of the available width */
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .image {
+                margin-top: 20px;
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Electron/Hadron Separation</h1>
+
+    <div class="text">
+        <h2>|emctof| < 5 ns; |emcdz| < 25 cm; |emcdphi| < 0.05 rad - always</h2>
+        <br>
+        <h2>Default cuts</h2>
+        <h2>n0 > 1; disp < 5; chi2/npe0 < 10; E/p > 0.8</h2>
+    </div>
+    <br>
+
+    <div class="container">
+        <div class="text">
+
+            <h2>Tight cuts</h2>
+            <h2>n0 > 2 + disp <sup>2</sup>/8; disp < 4; chi2/npe0 < 10; E/p > 0.8; prob > 0.01</h2>
+            <br>
+    <h1>Electron/Hadron Separation Using ML & BDT Results</h1>
+            <h2>Boosted Decision Tree</h2>
+            <h2>1B pi simulation and 100M electron simulation</h2>
+            <h2>Using all mentioned variables + p<sub>T</sub> and centrality</h2>
+
+            <br>
+            <h2>BDT Results:</h2>
+            <h2>Loose cut: +15% electron efficiency, -15% hadron contamination compared to the default cut</h2>
+            <h2>Default cut: same electron efficiency, -40% hadron contamination compared to the default cut</h2>
+            <h2>Tight cut: -20% electron efficiency, -95% hadron contamination compared to the default cut</h2>
+        </div>
+        <div class="image">
+            <img src="roc.png" alt="ROC Curve">
+        </div>
+    </div>
+
+</body>
+</html>
