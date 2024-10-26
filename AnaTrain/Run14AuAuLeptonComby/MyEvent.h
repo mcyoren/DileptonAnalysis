@@ -902,7 +902,7 @@ namespace MyDileptonAnalysis
             TH1D *event_hist, *centr_hist;
             TH3D *el_pt_hist;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
-            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist;
+            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist, *ilayerhitshist[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
@@ -979,6 +979,7 @@ namespace MyDileptonAnalysis
                         sdphi_hist_el[i] = nullptr;
                         sdthe_hist_el[i] = nullptr;
                         chi2_ndf[i] = nullptr;
+                        ilayerhitshist[i] = nullptr;
                         d_dphi_hist[i] = nullptr;
                         d_dthe_hist[i] = nullptr;
                         DCA_hist[i] = nullptr;

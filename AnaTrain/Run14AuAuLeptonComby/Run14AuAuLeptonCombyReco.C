@@ -415,7 +415,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        event_container->Associate_Hits_to_Leptons(3.,2.,4);
+        event_container->Associate_Hits_to_Leptons(5.,2.,5);
     }
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     const int n_good_el = event_container->GetNGoodElectrons();
@@ -486,13 +486,22 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=250 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
+        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
            
         int addit_reject = 0;
-        if (mytrk->GetGhost()<25) addit_reject = 1;
-        if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
+        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<4 || TMath::Abs(mytrk->GetMinsDphi(2))<4) &&
+               (TMath::Abs(mytrk->GetMinsDthe(3))<4 || TMath::Abs(mytrk->GetMinsDthe(2))<4) && 
+               (TMath::Abs(mytrk->GetMinsDthe(1))<4 && TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+               (TMath::Abs(mytrk->GetMinsDthe(0))<4 && TMath::Abs(mytrk->GetMinsDphi(0))<4) ) ) addit_reject=1;
+        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<3) &&
+               (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<3) && 
+               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) )) addit_reject=10;
+        
+        //if (mytrk->GetGhost()<25) addit_reject = 1;
+        //if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
         if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
