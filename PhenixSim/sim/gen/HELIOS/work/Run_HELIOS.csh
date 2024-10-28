@@ -5,6 +5,9 @@ echo "hello"
 source /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/etc/eic_cshrc.csh -n
 setenv PYTHIA8DATA /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/env/EIC2022a/share/Pythia8/xmldoc
 
+# kek.root 500 phi phi-\>ee 0.2 10.
+echo "name:kek.root Nev:500 part:phi decay:phi-\>ee pt_min:0.2 pt_max:10."
+
 
 root -l -b << EOF
     .L ../source/HELIOSLibrary/WriteEvent.C+
