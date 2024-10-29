@@ -258,7 +258,7 @@ namespace MyDileptonAnalysis
             const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
 
             float min[nvtx_layers] = {100, 100, 100, 100};
-            std::vector<double> hit_counter_jlayer[total_vtx_layers+2];
+            std::vector<std::vector<double> > hit_counter_jlayer[total_vtx_layers+2];
 
             std::vector<long long> numbers[4];
             long long iter_nums[4] = {0,0,0,0};
@@ -374,9 +374,11 @@ namespace MyDileptonAnalysis
                             if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
                             if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[3][iassociatedhit-mytrk->GetHitCounter(2)]);
                             if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*10000000+numbers[1][iassociatedhit]);
-                            hit_counter_jlayer[ilayer].push_back(diff);
-                            if(layer==2) hit_counter_jlayer[8].push_back(diff);
-                            if(layer==3) hit_counter_jlayer[9].push_back(diff);
+                            std::vector<double> var_counter_jlayer;  
+                            var_counter_jlayer.push_back(sdphi);var_counter_jlayer.push_back(sdthe);var_counter_jlayer.push_back(phi_hit);var_counter_jlayer.push_back(theta_hit);
+                            hit_counter_jlayer[ilayer].push_back(var_counter_jlayer);
+                            if(layer==2) hit_counter_jlayer[8].push_back(var_counter_jlayer);
+                            if(layer==3) hit_counter_jlayer[9].push_back(var_counter_jlayer);
                         } // end of association
                         else
                         {
@@ -450,39 +452,53 @@ namespace MyDileptonAnalysis
                 {
                     float hit_counter_jlayer_inside[total_vtx_layers*5] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
                     int passed_association_in_sigma[3][nvtx_layers] = {{0, 0, 0, 0},{0, 0, 0, 0},{0, 0, 0, 0}};
-                    for (int jlayer = 0; jlayer < nvtx_layers; jlayer++)
-                    {
-                        int iarraylayer = jlayer;
-                        if(jlayer>1) iarraylayer = jlayer+6;
-                        for (unsigned int jentry = 0; jentry < hit_counter_jlayer[iarraylayer].size(); jentry++)
-                        {
-                            if ( hit_counter_jlayer[iarraylayer][jentry]<sqrt(32) ) passed_association_in_sigma[0][jlayer]++;
-                            if ( hit_counter_jlayer[iarraylayer][jentry]<sqrt(18) ) passed_association_in_sigma[1][jlayer]++;
-                            if ( hit_counter_jlayer[iarraylayer][jentry]<sqrt(8)  ) passed_association_in_sigma[2][jlayer]++;
-                        }                        
-                    }
                     for (int jlayer = 0; jlayer < total_vtx_layers+2; jlayer++)
                     {
                         for (unsigned int jentry = 0; jentry < hit_counter_jlayer[jlayer].size(); jentry++)
                         {
                             for (unsigned int kentry = jentry+1; kentry < hit_counter_jlayer[jlayer].size(); kentry++)
                             {
-                                if ( TMath::Abs( hit_counter_jlayer[jlayer][jentry] - hit_counter_jlayer[jlayer][kentry] ) < 0.1 )
-                                    hit_counter_jlayer[jlayer][kentry] = 100;
+                                if ( TMath::Abs( hit_counter_jlayer[jlayer][jentry][2] - hit_counter_jlayer[jlayer][kentry][2] ) < 0.001
+                                  && TMath::Abs( hit_counter_jlayer[jlayer][jentry][3] - hit_counter_jlayer[jlayer][kentry][3] ) < 0.001 )
+                                    hit_counter_jlayer[jlayer][kentry][0] = 100;
                             } 
+                        }                        
+                    }
+                    for (int jlayer = 0; jlayer < nvtx_layers; jlayer++)
+                    {
+                        int iarraylayer = jlayer;
+                        if(jlayer>1) iarraylayer = jlayer+6;
+                        for (unsigned int jentry = 0; jentry < hit_counter_jlayer[iarraylayer].size(); jentry++)
+                        {
+                            if ( TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][0])<4 && TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][1])<4 ) 
+                                passed_association_in_sigma[0][jlayer]++;
+                            if ( TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][0])<3 && TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][1])<3 ) 
+                                passed_association_in_sigma[1][jlayer]++;
+                            if ( TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][0])<2 && TMath::Abs(hit_counter_jlayer[iarraylayer][jentry][1])<2 ) 
+                                passed_association_in_sigma[2][jlayer]++;
                         }                        
                     }
                     for (int jlayer = 0; jlayer < total_vtx_layers+2; jlayer++)
                     {
                         for (unsigned int jentry = 0; jentry < hit_counter_jlayer[jlayer].size(); jentry++)
                         {
-                            if ( hit_counter_jlayer[jlayer][jentry]<sqrt(50)) hit_counter_jlayer_inside[jlayer]++;
-                            if ( hit_counter_jlayer[jlayer][jentry]<sqrt(32) && passed_association_in_sigma[0][0] && passed_association_in_sigma[0][1] && 
+                            if ( TMath::Abs(hit_counter_jlayer[jlayer][jentry][0])<5 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][1])<5) 
+                                hit_counter_jlayer_inside[jlayer]++;
+                            if ( TMath::Abs(hit_counter_jlayer[jlayer][jentry][0])<4 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][1])<4 
+                            && passed_association_in_sigma[0][0] && passed_association_in_sigma[0][1] && 
                             (passed_association_in_sigma[0][2] || passed_association_in_sigma[0][3] ) ) hit_counter_jlayer_inside[10+jlayer]++;
-                            if ( hit_counter_jlayer[jlayer][jentry]<sqrt(18) && passed_association_in_sigma[1][0] && passed_association_in_sigma[1][1] && 
+                            if ( TMath::Abs(hit_counter_jlayer[jlayer][jentry][0])<3 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][1])<3 
+                            && passed_association_in_sigma[1][0] && passed_association_in_sigma[1][1] && 
                             (passed_association_in_sigma[1][2] || passed_association_in_sigma[1][3] ) ) hit_counter_jlayer_inside[20+jlayer]++;
-                            if ( hit_counter_jlayer[jlayer][jentry]<sqrt(8)  && passed_association_in_sigma[2][0] && passed_association_in_sigma[2][1] && 
+                            if ( TMath::Abs(hit_counter_jlayer[jlayer][jentry][0])<2 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][1])<2 
+                            && passed_association_in_sigma[2][0] && passed_association_in_sigma[2][1] && 
                             (passed_association_in_sigma[2][2] || passed_association_in_sigma[2][3] ) )  hit_counter_jlayer_inside[30+jlayer]++;
+                            //if ( jlayer == 0 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][0])<2 && TMath::Abs(hit_counter_jlayer[jlayer][jentry][1])<2 
+                            //&& passed_association_in_sigma[2][0]>1 && passed_association_in_sigma[2][1] && 
+                            //(passed_association_in_sigma[2][2] || passed_association_in_sigma[2][3] ) ) 
+                            //    std::cout<<mytrk->GetPtPrime()<<" "<<hit_counter_jlayer[jlayer][jentry][0]<<" "<<hit_counter_jlayer[jlayer][jentry][1]<<" "
+                            //    <<hit_counter_jlayer[jlayer][jentry][2]<<" "<<hit_counter_jlayer[jlayer][jentry][3]<<std::endl;
+
                         }                        
                     }
                     for (int jlayer = 0; jlayer < total_vtx_layers*5; jlayer++)

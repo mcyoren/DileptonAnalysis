@@ -20,7 +20,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
   const int fill_true_DCA = 0;
-  const int check_veto = 0;
+  const int check_veto = 1;
   const int fill_inv_mass = 0;
   const int istruehitsigmacounter = 0;
 
@@ -50,7 +50,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
       cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
-    if (ievent - beggin > 3500000)
+    if (ievent - beggin > 1000000)
       break;
 
 
@@ -120,7 +120,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(5);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(2,2,2);
     if(istruehitsigmacounter) 
     {
       event_container->Associate_Hits_to_Leptons(2,5);
