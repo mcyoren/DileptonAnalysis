@@ -7,7 +7,7 @@ start=`date +%s`
 root -l -b << EOF
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyEvent_C.so")
     gSystem->Load("Calib_C.so")
-    Calib("$1",$2,$3)
+    Calib("$1",$2,$3,$4)
 EOF
 
 end=`date +%s`

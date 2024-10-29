@@ -663,7 +663,7 @@ namespace MyDileptonAnalysis
       };
 
 
-      class MyGenTrack
+      class MyGenTrack : public TObject
       {
       private:
             float px;
@@ -708,7 +708,79 @@ namespace MyDileptonAnalysis
             ClassDef(MyGenTrack, 1)
       };
 
-      class MyPair
+      class MyBDTrack : public TObject
+      {
+      private:
+            float sdphi[4];
+            float sdthe[4];
+            float secondhitphileft[4][2];
+            float secondhitphiright[4][2];
+            float secondhittheleft[4][2];
+            float secondhittheright[4][2];
+            int layer[2];
+            int layersecondhitphileft[2][2];
+            int layersecondhitphiright[2][2];
+            int layersecondhittheleft[2][2];
+            int layersecondhittheright[2][2];
+
+      public:
+            MyBDTrack()
+            {
+                  for (int iteri = 0; iteri < 4; iteri++)
+                  {
+                        sdphi[iteri] = -10;
+                        sdthe[iteri] = -10;
+                        for (int jteri = 0; jteri < 2; jteri++) 
+                        {
+                              secondhitphileft[iteri][jteri]  = -99;
+                              secondhitphiright[iteri][jteri] = -99;
+                              secondhittheleft[iteri][jteri]  = -99;
+                              secondhittheright[iteri][jteri] = -99;
+                        }
+                  }
+                  for (int iteri = 0; iteri < 2; iteri++)
+                  {
+                        layer[iteri] = -10;
+                        layer[iteri] = -10;
+                        for (int jteri = 0; jteri < 2; jteri++) 
+                        {
+                              layersecondhitphileft[iteri][jteri]  = -99;
+                              layersecondhitphiright[iteri][jteri] = -99;
+                              layersecondhittheleft[iteri][jteri]  = -99;
+                              layersecondhittheright[iteri][jteri] = -99;
+                        }
+                  }
+            };
+            virtual ~MyBDTrack(){};
+
+            float Getsdphi(int ilayer = 0) const { return sdphi[ilayer]; }
+            float Getsdthe(int ilayer = 0) const { return sdthe[ilayer]; }
+            float GetSecondHitPhiR(int ilayer = 0, int ihit = 0) const { return secondhitphileft[ilayer][ihit]; }
+            float GetSecondHitPhiL(int ilayer = 0, int ihit = 0) const { return secondhitphiright[ilayer][ihit]; }
+            float GetSecondHitTheR(int ilayer = 0, int ihit = 0) const { return secondhittheleft[ilayer][ihit]; }
+            float GetSecondHitTheL(int ilayer = 0, int ihit = 0) const { return secondhittheright[ilayer][ihit]; }
+            int GetLayerSecondHitPhiR(int ilayer = 0, int ihit = 0) const { return layersecondhitphileft[ilayer][ihit]; }
+            int GetLayerSecondHitPhiL(int ilayer = 0, int ihit = 0) const { return layersecondhitphiright[ilayer][ihit]; }
+            int GetLayerSecondHitTheR(int ilayer = 0, int ihit = 0) const { return layersecondhittheleft[ilayer][ihit]; }
+            int GetLayerSecondHitTheL(int ilayer = 0, int ihit = 0) const { return layersecondhittheright[ilayer][ihit]; }
+            int GetOutiLayer(int ilayer = 2) const { return layer[ilayer-2];}
+            
+            void Setsdphi(int ilayer = 0, float val = 0) { sdphi[ilayer] = val; }
+            void Setsdthe(int ilayer = 0, float val = 0) { sdthe[ilayer] = val; }
+            void SetOutiLayer(int ilayer = 2, int val = 0) { layer[ilayer-2] = val;}
+            void SetSecondHitPhiR(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphileft[ilayer][ihit] = val; }
+            void SetSecondHitPhiL(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphiright[ilayer][ihit] = val; }
+            void SetSecondHitTheR(int ilayer = 0, int ihit = 0, float val = 0) { secondhittheleft[ilayer][ihit] = val; }
+            void SetSecondHitTheL(int ilayer = 0, int ihit = 0, float val = 0) { secondhittheright[ilayer][ihit] = val; }
+            void SetLayerSecondHitPhiR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphileft[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitPhiL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphiright[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitTheR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheleft[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitTheL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheright[ilayer-2][ihit] = val; }
+
+            ClassDef(MyBDTrack, 1)
+      };
+
+      class MyPair : public TObject
       {
       private:
             float phi_e;
@@ -896,6 +968,7 @@ namespace MyDileptonAnalysis
             MyEvent *event;
             std::vector<MyDileptonAnalysis::MyEvent> EventList;
             std::deque<MyDileptonAnalysis::MyEvent> evtbuff_list[MIX_CENTBIN][MIX_ZVTXBIN][MIX_RP2BIN];
+            std::vector<MyDileptonAnalysis::MyBDTrack> BDTracklist;
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;

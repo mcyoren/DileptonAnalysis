@@ -12,6 +12,7 @@ ClassImp(MyDileptonAnalysis::MyHadron)
 ClassImp(MyDileptonAnalysis::MyVTXHit)
 ClassImp(MyDileptonAnalysis::MyPair)
 ClassImp(MyDileptonAnalysis::MyGenTrack)
+ClassImp(MyDileptonAnalysis::MyBDTrack)
 
 using namespace MyDileptonAnalysis;
 using namespace std;
@@ -379,6 +380,9 @@ namespace MyDileptonAnalysis
                             hit_counter_jlayer[ilayer].push_back(var_counter_jlayer);
                             if(layer==2) hit_counter_jlayer[8].push_back(var_counter_jlayer);
                             if(layer==3) hit_counter_jlayer[9].push_back(var_counter_jlayer);
+                            std::cout<<ilayer<<" "<<radii[ilayer]<<" "<<sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))<<" "<<dilep_phi_projection[ilayer]<<" "<<mytrk->GetPtPrime()<<" "<<
+                            (dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<7?ilayer+1:6])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer]-radii[ilayer<7?ilayer+1:6])*1000<<" "<<
+                            (dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<6?ilayer+2:5])/(radii[ilayer]-radii[ilayer<6?ilayer+2:5])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])*1000<<std::endl;
                         } // end of association
                         else
                         {
