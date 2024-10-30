@@ -416,6 +416,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
         event_container->Associate_Hits_to_Leptons(5.,2.,5);
+        for (int ibdtrack = 0; ibdtrack < event_container->GetNBDThit(); ibdtrack++)
+        {
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+        }
     }
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     const int n_good_el = event_container->GetNGoodElectrons();

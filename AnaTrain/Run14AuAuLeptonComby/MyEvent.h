@@ -708,11 +708,12 @@ namespace MyDileptonAnalysis
             ClassDef(MyGenTrack, 1)
       };
 
-      class MyBDTrack : public TObject
+      class MyBDTHit : public TObject
       {
       private:
             float sdphi[4];
             float sdthe[4];
+            int isTrue[4];
             float secondhitphileft[4][2];
             float secondhitphiright[4][2];
             float secondhittheleft[4][2];
@@ -724,12 +725,13 @@ namespace MyDileptonAnalysis
             int layersecondhittheright[2][2];
 
       public:
-            MyBDTrack()
+            MyBDTHit()
             {
                   for (int iteri = 0; iteri < 4; iteri++)
                   {
                         sdphi[iteri] = -10;
                         sdthe[iteri] = -10;
+                        isTrue[iteri] = 0;
                         for (int jteri = 0; jteri < 2; jteri++) 
                         {
                               secondhitphileft[iteri][jteri]  = -99;
@@ -751,10 +753,11 @@ namespace MyDileptonAnalysis
                         }
                   }
             };
-            virtual ~MyBDTrack(){};
+            virtual ~MyBDTHit(){};
 
             float Getsdphi(int ilayer = 0) const { return sdphi[ilayer]; }
             float Getsdthe(int ilayer = 0) const { return sdthe[ilayer]; }
+            float GetIsTrue(int ilayer = 0) const { return isTrue[ilayer]; }
             float GetSecondHitPhiR(int ilayer = 0, int ihit = 0) const { return secondhitphileft[ilayer][ihit]; }
             float GetSecondHitPhiL(int ilayer = 0, int ihit = 0) const { return secondhitphiright[ilayer][ihit]; }
             float GetSecondHitTheR(int ilayer = 0, int ihit = 0) const { return secondhittheleft[ilayer][ihit]; }
@@ -767,6 +770,7 @@ namespace MyDileptonAnalysis
             
             void Setsdphi(int ilayer = 0, float val = 0) { sdphi[ilayer] = val; }
             void Setsdthe(int ilayer = 0, float val = 0) { sdthe[ilayer] = val; }
+            void SetIsTrue(int ilayer = 0, float val = 0) { isTrue[ilayer] = val; }
             void SetOutiLayer(int ilayer = 2, int val = 0) { layer[ilayer-2] = val;}
             void SetSecondHitPhiR(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphileft[ilayer][ihit] = val; }
             void SetSecondHitPhiL(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphiright[ilayer][ihit] = val; }
@@ -776,6 +780,61 @@ namespace MyDileptonAnalysis
             void SetLayerSecondHitPhiL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphiright[ilayer-2][ihit] = val; }
             void SetLayerSecondHitTheR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheleft[ilayer-2][ihit] = val; }
             void SetLayerSecondHitTheL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheright[ilayer-2][ihit] = val; }
+
+            ClassDef(MyBDTHit, 1)
+      };
+
+      class MyBDTrack : public TObject
+      {
+      private:
+
+            std::vector<MyDileptonAnalysis::MyBDTHit> BDTHITlist;
+            float pt;
+            float phi0;
+            float the0;
+            float alpha;
+            float ecore;
+            int centrality;
+            int charge;
+            int arm;
+
+      public:
+            MyBDTrack()
+            {
+                  BDTHITlist.clear();
+                  pt = -999;
+                  phi0 = -999;
+                  the0 = -999;
+                  alpha = -999;
+                  ecore = -999;
+                  centrality = -999;
+                  charge = -999;
+                  arm = -999;
+            };
+            virtual ~MyBDTrack(){};
+
+            void AddBDTHit(const MyBDTHit *newBDTHit) { BDTHITlist.push_back(*newBDTHit); };
+            Long64_t GetNBDThit() { return BDTHITlist.size(); };
+            MyDileptonAnalysis::MyBDTHit *GetBDTHitEntry(unsigned int i) const { return const_cast<MyDileptonAnalysis::MyBDTHit *>(&(BDTHITlist[i])); };
+            void RemoveBDTHitEntry(const unsigned int i){ BDTHITlist.erase(BDTHITlist.begin() + i); };
+            
+            void SetPt(float val) { pt = val; };
+            void SetPhi0(float val) { phi0 = val; };
+            void SetThe0(float val) { the0 = val; };
+            void SetAlpha(float val) { alpha = val; };
+            void SetEcore(float val) { ecore = val; };
+            void SetCentrality(int val) { centrality = val; };
+            void SetCharge(int val) { charge = val; };
+            void SetArm(int val) { arm = val; };
+
+            float GetPt() const { return pt; };
+            float GetPhi0() const { return phi0; };
+            float GetThe0() const { return the0; };
+            float GetAlpha() const { return alpha; };
+            float GetEcore() const { return ecore; };
+            int GetCentrality() const { return centrality; };
+            int GetCharge() const { return charge; };
+            int GetArm() const { return arm; };
 
             ClassDef(MyBDTrack, 1)
       };
@@ -1114,6 +1173,7 @@ namespace MyDileptonAnalysis
             void FillTree() {tree->Fill();};
             void WriteOutFile();
             void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
+            void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
 
             void Reveal_Hadron();
@@ -1136,6 +1196,11 @@ namespace MyDileptonAnalysis
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -999);
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
+
+            void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
+            Long64_t GetNBDThit() { return BDTracklist.size(); };
+            MyDileptonAnalysis::MyBDTrack *GetBDTHitEntry(unsigned int i) const { return const_cast<MyDileptonAnalysis::MyBDTrack *>(&(BDTracklist[i])); };
+            void RemoveBDTHitEntry(const unsigned int i){ BDTracklist.erase(BDTracklist.begin() + i); };    
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };
