@@ -15,7 +15,7 @@
 # Yuri Mitrankov (mitrankovy@gmail.com)                                 #
 #########################################################################
 
-
+setenv HOME /phenix/u/$LOGNAME
 setenv prompt 1
 source /etc/csh.login
 foreach i (/etc/profile.d/*.csh)
@@ -180,7 +180,7 @@ set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_0_10_50M.root
  #set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
 endif
 if( $selected_paticle == 0) then
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_3_10_50M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_100M.root
 endif
 if( $selected_paticle == 3) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_05_2_10M.root
