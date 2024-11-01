@@ -453,7 +453,101 @@ namespace MyDileptonAnalysis
                             if(!vtxhits[jlayer]) std::cout<<"kek"<<std::endl;
                             if(!vtxhits[jlayer]) continue;
                             newBDTHit.SetIsTrue(jlayer, (int) vtxhits[jlayer]->GetSensor() == 0);
-                        }    
+                            if(jlayer>1) newBDTHit.SetOutiLayer(jlayer,vtxhits[jlayer]->GetiLayer());
+                        }
+                        newBDTHit.Setsdphi(0,mytrk->GetMinsDphi(0));
+                        newBDTHit.Setsdphi(1,mytrk->GetMinsDphi(1));
+                        newBDTHit.Setsdphi(2,mytrk->GetMinsDphi(2));
+                        newBDTHit.Setsdphi(3,mytrk->GetMinsDphi(3));
+                        newBDTHit.Setsdthe(0,mytrk->GetMinsDthe(0));
+                        newBDTHit.Setsdthe(1,mytrk->GetMinsDthe(1));
+                        newBDTHit.Setsdthe(2,mytrk->GetMinsDthe(2));
+                        newBDTHit.Setsdthe(3,mytrk->GetMinsDthe(3));
+
+                        const float phi_0layer = vtxhits[0]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        const float the_0layer = vtxhits[0]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+
+                        float r_first_min[4][2] = {{1e3,1e3},{1e3,1e3},{1e3,1e3},{1e3,1e3}};
+                        float r_second_min[4][2] = {{1e3,1e3},{1e3,1e3},{1e3,1e3},{1e3,1e3}};
+                        for (int isecondhit = 0; isecondhit < nvtxhits; isecondhit++)
+                        {   
+                            int skip_secondhit_search = 0;
+                            for (int jlayer = 0; jlayer < hit_in_graph; jlayer++)
+                            {
+                                if(isecondhit == vtxhits[jlayer]->GetClustId()) skip_secondhit_search = 1;
+                            }
+                            if (skip_secondhit_search) continue;
+
+                            MyDileptonAnalysis::MyVTXHit *secondvtxhit = event->GetVTXHitEntry(isecondhit);
+                            if(secondvtxhit->GetLadder()>49) continue;
+
+                            const int secondhit_layer = secondvtxhit->GetLayer(); 
+
+                            const float phi_second_hit = secondvtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                            const float the_second_hit = secondvtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+
+                            const float sigma_second_phi = mytrk->get_dynamic_sigma_phi_data  (0, secondhit_layer==0 ? 0 : secondhit_layer-1, 0) * mytrk->GetChargePrime();
+                            const float sigma_second_the = mytrk->get_dynamic_sigma_theta_data(0, secondhit_layer==0 ? 0 : secondhit_layer-1, 0);// * mytrk->GetChargePrime();
+
+                            const float sdphi_second_hit = (phi_0layer - phi_second_hit) / sigma_second_phi;
+                            const float sdthe_second_hit = (the_0layer - the_second_hit) / sigma_second_the;
+
+                            if(sdphi_second_hit>0)
+                            {
+                                if ( sqrt( SQR(sdphi_second_hit) + SQR(sdthe_second_hit) ) < r_second_min[secondhit_layer][1])
+                                {
+                                    if ( sqrt( SQR(sdphi_second_hit) + SQR(sdthe_second_hit) ) < r_second_min[secondhit_layer][0])
+                                    {
+                                        r_second_min[secondhit_layer][0] = sqrt( SQR(sdphi_second_hit) + SQR(sdthe_second_hit) );
+                                        newBDTHit.SetSecondHitPhiL(secondhit_layer,0,sdphi_second_hit);
+                                        newBDTHit.SetSecondHitTheL(secondhit_layer,0,sdthe_second_hit);
+                                    }else
+                                    {
+                                        r_second_min[secondhit_layer][1] = sqrt( SQR(sdphi_second_hit) + SQR(sdthe_second_hit) );
+                                        newBDTHit.SetSecondHitPhiL(secondhit_layer,1,sdphi_second_hit);
+                                        newBDTHit.SetSecondHitTheL(secondhit_layer,1,sdthe_second_hit);
+                                    }
+                                    
+                                }
+                            }
+
+                            for (int jlayer = 0; jlayer < hit_in_graph; jlayer++)
+                            {
+                                if(secondhit_layer == vtxhits[jlayer]->GetLayer()) 
+                                {
+                                    const int secondhit_ilayer = secondvtxhit->GetiLayer(); 
+                                    const float phi_loc_layer = vtxhits[jlayer]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                                    const float the_loc_layer = vtxhits[jlayer]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                                    const float sdphi_first_hit = ((phi_loc_layer - phi_second_hit) + 
+                                        (dilep_phi_projection[secondhit_ilayer<7?secondhit_ilayer+1:6] - dilep_phi_projection[secondhit_ilayer])
+                                        *(sqrt(SQR(vtxhits[jlayer]->GetXHit())+SQR(vtxhits[jlayer]->GetYHit()))-sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit())))
+                                        /(radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]))/
+                                        sigma_second_phi;
+                                    const float sdthe_first_hit = ((the_loc_layer - the_second_hit) + 
+                                        (dilep_the_projection[secondhit_ilayer<7?secondhit_ilayer+1:6] - dilep_the_projection[secondhit_ilayer])
+                                        *(sqrt(SQR(vtxhits[jlayer]->GetXHit())+SQR(vtxhits[jlayer]->GetYHit()))-sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit())))
+                                        /(radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]))/
+                                        sigma_second_the;
+                                
+                                    if ( sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) ) < r_first_min[secondhit_layer][1])
+                                    {
+                                        if ( sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) ) < r_first_min[secondhit_layer][0])
+                                        {
+                                            r_first_min[secondhit_layer][0] = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+                                            newBDTHit.SetSecondHitPhiR(secondhit_layer,0,sdphi_first_hit);
+                                            newBDTHit.SetSecondHitTheR(secondhit_layer,0,sdthe_first_hit);
+                                        }else
+                                        {
+                                            r_first_min[secondhit_layer][1] = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+                                            newBDTHit.SetSecondHitPhiR(secondhit_layer,1,sdphi_first_hit);
+                                            newBDTHit.SetSecondHitTheR(secondhit_layer,1,sdthe_first_hit);
+                                        }
+
+                                    }
+                                }
+                            }
+
+                        }
                         newBDTrack.AddBDTHit(&newBDTHit);
                     }
                 }
@@ -463,6 +557,15 @@ namespace MyDileptonAnalysis
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
+                newBDTrack.SetAlpha(mytrk->GetAlpha());
+                newBDTrack.SetArm(mytrk->GetArm());
+                newBDTrack.SetCentrality(event->GetCentrality());
+                newBDTrack.SetCharge(mytrk->GetChargePrime());
+                newBDTrack.SetEcore(mytrk->GetEcore());
+                newBDTrack.SetPhi0(mytrk->GetPhi0Prime());
+                newBDTrack.SetPt(mytrk->GetPtPrime());
+                newBDTrack.SetThe0(mytrk->GetThe0Prime());
+
                 BDTracklist.push_back(newBDTrack);
 
                 const int inum0 = final_number / 10000000-1;

@@ -418,7 +418,29 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,2.,5);
         for (int ibdtrack = 0; ibdtrack < event_container->GetNBDThit(); ibdtrack++)
         {
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+            if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+
+            std::cout<<"second"<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(0,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(0,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(0,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(0,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(1,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(1,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(1,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(1,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(2,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(2,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(2,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(2,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(3,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(3,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(3,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(3,1)<<std::endl;
+            
+            std::cout<<"first"<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(0,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(0,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(0,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(0,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(1,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(1,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(1,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(1,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(2,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(2,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(2,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(2,1)<<std::endl;
+            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(3,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(3,0)<<" "
+            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(3,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(3,1)<<std::endl;
+        
         }
     }
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
