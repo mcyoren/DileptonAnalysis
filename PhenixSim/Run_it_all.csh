@@ -183,7 +183,7 @@ if( $selected_paticle == 0) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_100M.root
 endif
 if( $selected_paticle == 3) then
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_05_2_10M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_50M.root
 endif
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
