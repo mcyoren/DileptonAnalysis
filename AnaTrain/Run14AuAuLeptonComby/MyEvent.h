@@ -792,6 +792,8 @@ namespace MyDileptonAnalysis
             float pt;
             float phi0;
             float the0;
+            float phiDC;
+            float zDC;
             float alpha;
             float ecore;
             int centrality;
@@ -805,6 +807,8 @@ namespace MyDileptonAnalysis
                   pt = -999;
                   phi0 = -999;
                   the0 = -999;
+                  phiDC = -999;
+                  zDC = -999;
                   alpha = -999;
                   ecore = -999;
                   centrality = -999;
@@ -821,6 +825,8 @@ namespace MyDileptonAnalysis
             void SetPt(float val) { pt = val; };
             void SetPhi0(float val) { phi0 = val; };
             void SetThe0(float val) { the0 = val; };
+            void SetPhiDC(float val) { phiDC = val; };
+            void SetZDC(float val) { zDC = val; };
             void SetAlpha(float val) { alpha = val; };
             void SetEcore(float val) { ecore = val; };
             void SetCentrality(int val) { centrality = val; };
@@ -830,6 +836,8 @@ namespace MyDileptonAnalysis
             float GetPt() const { return pt; };
             float GetPhi0() const { return phi0; };
             float GetThe0() const { return the0; };
+            float GetPhiDC() const { return phiDC; };
+            float GetZDC() const { return zDC; };
             float GetAlpha() const { return alpha; };
             float GetEcore() const { return ecore; };
             int GetCentrality() const { return centrality; };

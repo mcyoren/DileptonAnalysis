@@ -174,7 +174,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 1 ) then
 echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}============= HELIOS TO OSCAR =================${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
-set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_02_5_10M.root
+set inputhelios = $DATADIR/output_single/helios/helios_phi_ee_0_10_50M.root
 if( $selected_paticle == 2) then
 set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_0_10_50M.root
  #set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root

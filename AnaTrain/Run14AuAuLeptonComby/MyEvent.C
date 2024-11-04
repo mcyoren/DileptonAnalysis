@@ -563,8 +563,10 @@ namespace MyDileptonAnalysis
                 newBDTrack.SetCharge(mytrk->GetChargePrime());
                 newBDTrack.SetEcore(mytrk->GetEcore());
                 newBDTrack.SetPhi0(mytrk->GetPhi0Prime());
+                newBDTrack.SetPhiDC(mytrk->GetPhiDC());
                 newBDTrack.SetPt(mytrk->GetPtPrime());
                 newBDTrack.SetThe0(mytrk->GetThe0Prime());
+                newBDTrack.SetZDC(mytrk->GetZDC()-event->GetPreciseZ());
 
                 BDTracklist.push_back(newBDTrack);
 
