@@ -455,14 +455,14 @@ namespace MyDileptonAnalysis
                             newBDTHit.SetIsTrue(jlayer, (int) vtxhits[jlayer]->GetSensor() == 0);
                             if(jlayer>1) newBDTHit.SetOutiLayer(jlayer,vtxhits[jlayer]->GetiLayer());
                         }
-                        newBDTHit.Setsdphi(0,mytrk->GetMinsDphi(0));
-                        newBDTHit.Setsdphi(1,mytrk->GetMinsDphi(1));
-                        newBDTHit.Setsdphi(2,mytrk->GetMinsDphi(2));
-                        newBDTHit.Setsdphi(3,mytrk->GetMinsDphi(3));
-                        newBDTHit.Setsdthe(0,mytrk->GetMinsDthe(0));
-                        newBDTHit.Setsdthe(1,mytrk->GetMinsDthe(1));
-                        newBDTHit.Setsdthe(2,mytrk->GetMinsDthe(2));
-                        newBDTHit.Setsdthe(3,mytrk->GetMinsDthe(3));
+                        newBDTHit.Setsdphi(0,mytrk->GetsdPhi(0, inum0) * mytrk->GetChargePrime());
+                        newBDTHit.Setsdphi(1,mytrk->GetsdPhi(1, inum1) * mytrk->GetChargePrime());
+                        if(inum2>=0)newBDTHit.Setsdphi(2,mytrk->GetsdPhi(2, inum2) * mytrk->GetChargePrime());
+                        if(inum3>=0)newBDTHit.Setsdphi(3,mytrk->GetsdPhi(3, inum3) * mytrk->GetChargePrime());
+                        newBDTHit.Setsdthe(0,mytrk->GetsdThe(0, inum0) * mytrk->GetChargePrime());
+                        newBDTHit.Setsdthe(1,mytrk->GetsdThe(1, inum1) * mytrk->GetChargePrime());
+                        if(inum2>=0)newBDTHit.Setsdthe(2,mytrk->GetsdThe(2, inum2) * mytrk->GetChargePrime());
+                        if(inum3>=0)newBDTHit.Setsdthe(3,mytrk->GetsdThe(3, inum3) * mytrk->GetChargePrime());
 
                         const float phi_0layer = vtxhits[0]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float the_0layer = vtxhits[0]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
