@@ -147,10 +147,12 @@ int embedana::process_event(PHCompositeNode *topNode)
   VtxOut *vtxout   = getClass<VtxOut>(topNode, "VtxOut");
   VtxOut *vtxoutmc = getClass<VtxOut>( mcnode, "VtxOut");
 
+  int write_ttree = 1;
   if( TMath::Abs( (vtxout->get_Vertex()).getZ() - (vtxoutmc->get_Vertex()).getZ() ) > 1 )
   {
     std::cout<<"\n\nVTX missmatch: data : sim "<<(vtxout->get_Vertex()).getZ()<< " : " <<(vtxoutmc->get_Vertex()).getZ()<<"\n"<<std::endl;
-    return 0;
+    write_ttree = 0;
+    //return 0;
   }
 
   SvxClusterList *svx = getClass<SvxClusterList>(topNode, "SvxClusterList");
@@ -631,7 +633,7 @@ int embedana::process_event(PHCompositeNode *topNode)
     if(true)event_container->CleanUpHitList();
   }
 
-  if (fill_TTree)
+  if (fill_TTree && write_ttree )
     event_container->FillTree();
 
   EventNumber++;

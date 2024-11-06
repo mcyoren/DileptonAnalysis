@@ -272,28 +272,28 @@ namespace MyDileptonAnalysis
                   +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
             };
 
-            float get_dynamic_mean_phi_data(int rungroup, int ilay, float phi_prev) 
+            float get_dynamic_mean_phi_data(int ilay, float phi_prev, int rungroup = 0 ) 
             { 
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return phi_mean_phi_params[rungroup][arg0][0]+phi_mean_phi_params[rungroup][arg0][1]*phi_prev; 
+                  return phi_mean_phi_params[arg0][0]+phi_mean_phi_params[arg0][1]*phi_prev; 
             };
-            float get_dynamic_mean_theta_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_mean_theta_data(int ilay, float phi_prev, int rungroup = 0 )
             { 
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return the_mean_the_params[rungroup][arg0][0]+the_mean_the_params[rungroup][arg0][1]*phi_prev; 
+                  return (the_mean_the_params[arg0][0]+the_mean_the_params[arg0][1]*phi_prev)*(1+exp( (ilay<4?-0.4:-1) * pt_prime)); 
             };
-            float get_dynamic_sigma_phi_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_sigma_phi_data(int ilay, float phi_prev, int rungroup = 0 )
             {
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  const float sigma_pt = phi_sigma_pt_params[rungroup][arg0][0] + phi_sigma_pt_params[rungroup][arg0][1] * exp(phi_sigma_pt_params[rungroup][arg0][2] * pt_prime);
-                  return sigma_pt*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
+                  const float sigma_pt = phi_sigma_pt_params[arg0][0] + phi_sigma_pt_params[arg0][1] * exp(phi_sigma_pt_params[arg0][2] * pt_prime);
+                  return sigma_pt;//*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
-            float get_dynamic_sigma_theta_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_sigma_theta_data(int ilay, float phi_prev, int rungroup = 0 )
             {
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  return the_sigma_pt_params[rungroup][arg0][0] + the_sigma_pt_params[rungroup][arg0][1] * exp(the_sigma_pt_params[rungroup][arg0][2] * pt_prime);
+                  return the_sigma_pt_params[arg0][0] + the_sigma_pt_params[arg0][1] * exp(the_sigma_pt_params[arg0][2] * pt_prime);
             };
-            float get_dynamic_smean_phi_data(int rungroup, int ilay, float phi_prev)
+            float get_dynamic_smean_phi_data(int ilay, float phi_prev, int rungroup = 0 )
             { 
                   const int arg0 = 2*ilay + (1-q_prime)/2;
                   return phi_sMean_pt_params[rungroup][arg0][0] + phi_sMean_pt_params[rungroup][arg0][1] * exp(phi_sMean_pt_params[rungroup][arg0][2] * pt_prime); 
@@ -663,7 +663,7 @@ namespace MyDileptonAnalysis
       };
 
 
-      class MyGenTrack
+      class MyGenTrack : public TObject
       {
       private:
             float px;
@@ -691,6 +691,7 @@ namespace MyDileptonAnalysis
             float GetPx() const { return px; }
             float GetPy() const { return py; }
             float GetPz() const { return pz; }
+            float GetPt() const { return sqrt(SQR(px)+SQR(py));}
             float GetVx() const { return vx; }
             float GetVy() const { return vy; }
             float GetVz() const { return vz; }
@@ -707,7 +708,146 @@ namespace MyDileptonAnalysis
             ClassDef(MyGenTrack, 1)
       };
 
-      class MyPair
+      class MyBDTHit : public TObject
+      {
+      private:
+            float sdphi[4];
+            float sdthe[4];
+            int isTrue[4];
+            float secondhitphileft[4][2];
+            float secondhitphiright[4][2];
+            float secondhittheleft[4][2];
+            float secondhittheright[4][2];
+            int layer[2];
+            int layersecondhitphileft[2][2];
+            int layersecondhitphiright[2][2];
+            int layersecondhittheleft[2][2];
+            int layersecondhittheright[2][2];
+
+      public:
+            MyBDTHit()
+            {
+                  for (int iteri = 0; iteri < 4; iteri++)
+                  {
+                        sdphi[iteri] = -10;
+                        sdthe[iteri] = -10;
+                        isTrue[iteri] = 0;
+                        for (int jteri = 0; jteri < 2; jteri++) 
+                        {
+                              secondhitphileft[iteri][jteri]  = -99;
+                              secondhitphiright[iteri][jteri] = -99;
+                              secondhittheleft[iteri][jteri]  = -99;
+                              secondhittheright[iteri][jteri] = -99;
+                        }
+                  }
+                  for (int iteri = 0; iteri < 2; iteri++)
+                  {
+                        layer[iteri] = -10;
+                        layer[iteri] = -10;
+                        for (int jteri = 0; jteri < 2; jteri++) 
+                        {
+                              layersecondhitphileft[iteri][jteri]  = -99;
+                              layersecondhitphiright[iteri][jteri] = -99;
+                              layersecondhittheleft[iteri][jteri]  = -99;
+                              layersecondhittheright[iteri][jteri] = -99;
+                        }
+                  }
+            };
+            virtual ~MyBDTHit(){};
+
+            float Getsdphi(int ilayer = 0) const { return sdphi[ilayer]; }
+            float Getsdthe(int ilayer = 0) const { return sdthe[ilayer]; }
+            float GetIsTrue(int ilayer = 0) const { return isTrue[ilayer]; }
+            float GetSecondHitPhiR(int ilayer = 0, int ihit = 0) const { return secondhitphileft[ilayer][ihit]; }
+            float GetSecondHitPhiL(int ilayer = 0, int ihit = 0) const { return secondhitphiright[ilayer][ihit]; }
+            float GetSecondHitTheR(int ilayer = 0, int ihit = 0) const { return secondhittheleft[ilayer][ihit]; }
+            float GetSecondHitTheL(int ilayer = 0, int ihit = 0) const { return secondhittheright[ilayer][ihit]; }
+            int GetLayerSecondHitPhiR(int ilayer = 0, int ihit = 0) const { return layersecondhitphileft[ilayer][ihit]; }
+            int GetLayerSecondHitPhiL(int ilayer = 0, int ihit = 0) const { return layersecondhitphiright[ilayer][ihit]; }
+            int GetLayerSecondHitTheR(int ilayer = 0, int ihit = 0) const { return layersecondhittheleft[ilayer][ihit]; }
+            int GetLayerSecondHitTheL(int ilayer = 0, int ihit = 0) const { return layersecondhittheright[ilayer][ihit]; }
+            int GetOutiLayer(int ilayer = 2) const { return layer[ilayer-2];}
+            
+            void Setsdphi(int ilayer = 0, float val = 0) { sdphi[ilayer] = val; }
+            void Setsdthe(int ilayer = 0, float val = 0) { sdthe[ilayer] = val; }
+            void SetIsTrue(int ilayer = 0, float val = 0) { isTrue[ilayer] = val; }
+            void SetOutiLayer(int ilayer = 2, int val = 0) { layer[ilayer-2] = val;}
+            void SetSecondHitPhiR(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphileft[ilayer][ihit] = val; }
+            void SetSecondHitPhiL(int ilayer = 0, int ihit = 0, float val = 0) { secondhitphiright[ilayer][ihit] = val; }
+            void SetSecondHitTheR(int ilayer = 0, int ihit = 0, float val = 0) { secondhittheleft[ilayer][ihit] = val; }
+            void SetSecondHitTheL(int ilayer = 0, int ihit = 0, float val = 0) { secondhittheright[ilayer][ihit] = val; }
+            void SetLayerSecondHitPhiR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphileft[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitPhiL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphiright[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitTheR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheleft[ilayer-2][ihit] = val; }
+            void SetLayerSecondHitTheL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheright[ilayer-2][ihit] = val; }
+
+            ClassDef(MyBDTHit, 1)
+      };
+
+      class MyBDTrack : public TObject
+      {
+      private:
+
+            std::vector<MyDileptonAnalysis::MyBDTHit> BDTHITlist;
+            float pt;
+            float phi0;
+            float the0;
+            float phiDC;
+            float zDC;
+            float alpha;
+            float ecore;
+            int centrality;
+            int charge;
+            int arm;
+
+      public:
+            MyBDTrack()
+            {
+                  BDTHITlist.clear();
+                  pt = -999;
+                  phi0 = -999;
+                  the0 = -999;
+                  phiDC = -999;
+                  zDC = -999;
+                  alpha = -999;
+                  ecore = -999;
+                  centrality = -999;
+                  charge = -999;
+                  arm = -999;
+            };
+            virtual ~MyBDTrack(){};
+
+            void AddBDTHit(const MyBDTHit *newBDTHit) { BDTHITlist.push_back(*newBDTHit); };
+            Long64_t GetNBDThit() { return BDTHITlist.size(); };
+            MyDileptonAnalysis::MyBDTHit *GetBDTHitEntry(unsigned int i) const { return const_cast<MyDileptonAnalysis::MyBDTHit *>(&(BDTHITlist[i])); };
+            void RemoveBDTHitEntry(const unsigned int i){ BDTHITlist.erase(BDTHITlist.begin() + i); };
+            
+            void SetPt(float val) { pt = val; };
+            void SetPhi0(float val) { phi0 = val; };
+            void SetThe0(float val) { the0 = val; };
+            void SetPhiDC(float val) { phiDC = val; };
+            void SetZDC(float val) { zDC = val; };
+            void SetAlpha(float val) { alpha = val; };
+            void SetEcore(float val) { ecore = val; };
+            void SetCentrality(int val) { centrality = val; };
+            void SetCharge(int val) { charge = val; };
+            void SetArm(int val) { arm = val; };
+
+            float GetPt() const { return pt; };
+            float GetPhi0() const { return phi0; };
+            float GetThe0() const { return the0; };
+            float GetPhiDC() const { return phiDC; };
+            float GetZDC() const { return zDC; };
+            float GetAlpha() const { return alpha; };
+            float GetEcore() const { return ecore; };
+            int GetCentrality() const { return centrality; };
+            int GetCharge() const { return charge; };
+            int GetArm() const { return arm; };
+
+            ClassDef(MyBDTrack, 1)
+      };
+
+      class MyPair : public TObject
       {
       private:
             float phi_e;
@@ -895,13 +1035,14 @@ namespace MyDileptonAnalysis
             MyEvent *event;
             std::vector<MyDileptonAnalysis::MyEvent> EventList;
             std::deque<MyDileptonAnalysis::MyEvent> evtbuff_list[MIX_CENTBIN][MIX_ZVTXBIN][MIX_RP2BIN];
+            std::vector<MyDileptonAnalysis::MyBDTrack> BDTracklist;
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
             TH1D *event_hist, *centr_hist;
             TH3D *el_pt_hist;
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
-            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist;
+            TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist, *ilayerhitshist[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
             TH3D *dphi_hist_el_dynamic[N_dynamic], *dthe_hist_el_dynamic[N_dynamic], *sdphi_hist_el_dynamic[N_dynamic], *sdthe_hist_el_dynamic[N_dynamic];
             TH3D *dphi_phi0_init_hist[nvtx_layers], *dthe_the0_init_hist[nvtx_layers];
@@ -925,8 +1066,9 @@ namespace MyDileptonAnalysis
             TH3D *delt_phi_dca_bg0[N_centr*3],*delt_phi_dca_bg1[N_centr*3],*delt_phi_dca_bg2[N_centr*3],*delt_phi_dca_bg3[N_centr*3],*delt_phi_dca_bg4[N_centr*3];
             TH3D *inv_mass_dca_gen[N_centr*3];
             TH3D* myvtx_hist;
+            TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
-            is_fill_reveal, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
+            is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
            
       public:
             MyEventContainer()
@@ -946,6 +1088,8 @@ namespace MyDileptonAnalysis
                   couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
                   myvtx_hist = nullptr;
                   truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
+                  v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
+                  BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -975,6 +1119,7 @@ namespace MyDileptonAnalysis
                         sdphi_hist_el[i] = nullptr;
                         sdthe_hist_el[i] = nullptr;
                         chi2_ndf[i] = nullptr;
+                        ilayerhitshist[i] = nullptr;
                         d_dphi_hist[i] = nullptr;
                         d_dthe_hist[i] = nullptr;
                         DCA_hist[i] = nullptr;
@@ -1012,7 +1157,7 @@ namespace MyDileptonAnalysis
                   is_fill_dphi_hist = 0;
                   is_fill_DCA_hist = 0;
                   is_fill_track_QA = 0;
-                  is_fill_reveal = 0;
+                  is_fill_flow = 0;
                   is_fill_DCA2_hist = 0;
                   is_check_veto = 0;
                   is_fill_inv_mass = 0;
@@ -1022,7 +1167,7 @@ namespace MyDileptonAnalysis
             {
                   std::cout << "Starting to Delete Event in my Container" << std::endl;
                   if(is_fill_tree||is_fill_hadron_hsits||is_fill_hsits||is_fill_dphi_hist||is_fill_DCA_hist||is_fill_track_QA
-                  ||is_fill_reveal||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
+                  ||is_fill_flow||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
                   delete event;
                   std::cout << "Event in the container was deleted" << std::endl;
             };
@@ -1031,11 +1176,12 @@ namespace MyDileptonAnalysis
             void ClearEvent() { event->ClearEvent(); };
             void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
-            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_reveal = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
+            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_flow = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, bool not_fill = false);
+            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
+            void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
 
             void Reveal_Hadron();
@@ -1057,6 +1203,12 @@ namespace MyDileptonAnalysis
             void correct_beam_offset();
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -999);
+            void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
+
+            void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
+            Long64_t GetNBDThit() { return BDTracklist.size(); };
+            MyDileptonAnalysis::MyBDTrack *GetBDTHitEntry(unsigned int i) const { return const_cast<MyDileptonAnalysis::MyBDTrack *>(&(BDTracklist[i])); };
+            void RemoveBDTHitEntry(const unsigned int i){ BDTracklist.erase(BDTracklist.begin() + i); };    
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };
