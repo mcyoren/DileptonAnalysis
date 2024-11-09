@@ -415,32 +415,29 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        event_container->Associate_Hits_to_Leptons(5.,2.,5);
-        for (int ibdtrack = 0; ibdtrack < event_container->GetNBDThit(); ibdtrack++)
+        event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        if(false)
         {
-            if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
-
-            std::cout<<"second"<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(0,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(0,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(0,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(0,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(1,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(1,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(1,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(1,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(2,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(2,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(2,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(2,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(3,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(3,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiL(3,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheL(3,1)<<std::endl;
-            
-            std::cout<<"first"<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(0,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(0,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(0,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(0,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(1,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(1,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(1,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(1,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(2,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(2,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(2,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(2,1)<<std::endl;
-            std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(3,0)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(3,0)<<" "
-            <<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitPhiR(3,1)<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(0)->GetSecondHitTheR(3,1)<<std::endl;
-        
+            for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
+            {       
+                std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+                if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+                for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
+                {
+                    std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(3)<<" "<<std::endl;
+                }
+            }
         }
     }
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
@@ -495,7 +492,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       }
     }
 
-    if(check_veto || fill_inv_mass) event_container->CheckVeto();
+    if(check_veto) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();
     if(fill_TTree) event_container->CleanUpHitList();
@@ -512,26 +509,20 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
-        if ( mytrk->GetGhost()>=25 || mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
+        if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
-           
+        
         int addit_reject = 0;
-        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<4 || TMath::Abs(mytrk->GetMinsDphi(2))<4) &&
-               (TMath::Abs(mytrk->GetMinsDthe(3))<4 || TMath::Abs(mytrk->GetMinsDthe(2))<4) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<4 && TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<4 && TMath::Abs(mytrk->GetMinsDphi(0))<4) ) ) addit_reject=1;
-        if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<3) &&
-               (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) )) addit_reject=10;
+        if(mytrk->GetNHits()>90) addit_reject = 1;
+        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90 && mytrk->GetGhost()<10) addit_reject = 10;
         
         //if (mytrk->GetGhost()<25) addit_reject = 1;
         //if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
         if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
-        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<mytrk->GetIsConv()<<" "<<addit_reject<<" "<<hadron_reject<<" "<<mytrk->GetGhost()<<std::endl;
+        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<mytrk->GetIsConv()<<" "<<addit_reject<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
         if ( hadron_reject<100 ) continue;
         //if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
         //       (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 

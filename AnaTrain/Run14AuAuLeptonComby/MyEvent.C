@@ -405,16 +405,16 @@ namespace MyDileptonAnalysis
             }
             float min_chi2=1000000.;
             long long final_number = 0;
+            int is_bdt_set = 0;
             for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
             {
                 const int inum0 = numbers[0][inum] / 10000000-1;
                 const int inum1 = numbers[0][inum] / 10000 %1000-1;
                 const int inum2 = numbers[0][inum] / 100 %100-1;
                 const int inum3 = numbers[0][inum] %100-1;
-                    
                 if(inum0>=0 && inum1>=0)
                 {   
-                    float chi2 = 0;
+                    float chi2 = 800001;
                     float recon_pt = 0;
                     mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
                     mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
@@ -431,13 +431,24 @@ namespace MyDileptonAnalysis
                         recon_pt += mytrk->GetReconPT();
                         if (inum3>=0) recon_pt/=2;
                     }
-                    chi2 = TMath::Abs(recon_pt-pt)/pt*30/(2+(int)(inum2>=0)+(int)(inum3>=0));
-                    if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
-                    
-                    if (is_fill_hsits&&numbers[0].size()<10) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
 
                     if(true)
                     {
+                        if(!is_bdt_set)
+                        {
+                            newBDTrack.SetAlpha(mytrk->GetAlpha());
+                            newBDTrack.SetArm(mytrk->GetArm());
+                            newBDTrack.SetCentrality(event->GetCentrality());
+                            newBDTrack.SetCharge(mytrk->GetChargePrime());
+                            newBDTrack.SetEcore(mytrk->GetEcore());
+                            newBDTrack.SetPhi0(mytrk->GetPhi0Prime());
+                            newBDTrack.SetPhiDC(mytrk->GetPhiDC());
+                            newBDTrack.SetPt(mytrk->GetPtPrime());
+                            newBDTrack.SetThe0(mytrk->GetThe0Prime());
+                            newBDTrack.SetZDC(mytrk->GetZDC()-event->GetPreciseZ());
+                            is_bdt_set = 1;
+                        }
+                        
                         MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
                         MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
                         MyVTXHit *vtxhit2 = nullptr,*vtxhit3 = nullptr; 
@@ -548,8 +559,36 @@ namespace MyDileptonAnalysis
                             }
 
                         }
+                        const double BDTHitInput[35] = {
+                            (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), newBDTrack.GetPhi0(), newBDTrack.GetThe0(), newBDTrack.GetPhiDC(), newBDTrack.GetZDC(), 
+                            newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
+                            newBDTHit.Getsdphi(0), newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
+                            newBDTHit.Getsdphi(1), newBDTHit.Getsdthe(1), newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
+                            newBDTHit.Getsdphi(2), newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
+                            newBDTHit.Getsdphi(3), newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
+                        };
+                        const double probsHIT[3] = {0.024926483635905234,0.028926483635905234,0.032926483635905234};
+                        const double probsConv[3] = {0.018429009621297826,0.023429009621297826,0.033429009621297826};
+                        const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
+                        const double BDTConv_prob = GetConvBDTProb(BDTHitInput);
+                        newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
+                        newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
+                        newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
+                        newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
+
+                        chi2 = probsHIT[1]*3/BDTHIT_prob;
+                        if(chi2<min_chi2) 
+                        {
+                            mytrk->SetNHits(newBDTHit.GetIsTrue(0));
+                            mytrk->SetTOFDPHI(newBDTHit.GetIsTrue(1));
+                        }
+                        mytrk->SetGhost(mytrk->GetGhost()+(probsConv[1]>BDTConv_prob?30:0));
                     }
+                    //chi2 = TMath::Abs(recon_pt-pt)/pt*30/(2+(int)(inum2>=0)+(int)(inum3>=0));
+                    if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
+                    
+                    if (is_fill_hsits&&numbers[0].size()<10) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
                 }
             }
             if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
@@ -557,18 +596,9 @@ namespace MyDileptonAnalysis
             mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
-                newBDTrack.SetAlpha(mytrk->GetAlpha());
-                newBDTrack.SetArm(mytrk->GetArm());
-                newBDTrack.SetCentrality(event->GetCentrality());
-                newBDTrack.SetCharge(mytrk->GetChargePrime());
-                newBDTrack.SetEcore(mytrk->GetEcore());
-                newBDTrack.SetPhi0(mytrk->GetPhi0Prime());
-                newBDTrack.SetPhiDC(mytrk->GetPhiDC());
-                newBDTrack.SetPt(mytrk->GetPtPrime());
-                newBDTrack.SetThe0(mytrk->GetThe0Prime());
-                newBDTrack.SetZDC(mytrk->GetZDC()-event->GetPreciseZ());
 
                 BDTracklist.push_back(newBDTrack);
+                mytrk->SetGhost( (int) (mytrk->GetGhost()*1./newBDTrack.GetNBDThit()));
 
                 const int inum0 = final_number / 10000000-1;
                 const int inum1 = final_number / 10000 %1000-1;
