@@ -8,7 +8,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     cout << "no input file" << endl;
     return;
   }
-  const int associate_hits = 1;
+  const int associate_hits = 0;
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
   const int fill_QA_lepton_hists = 0;
@@ -19,7 +19,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int do_track_QA = 0;
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
-  const int fill_true_DCA = 1;
+  const int fill_true_DCA = 0;
   const int check_veto = 0;
   const int fill_inv_mass = 1;
   const int fill_inv_mass_sim = 1;
@@ -61,7 +61,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
       cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
-    if (ievent - beggin > 3500000)
+    if (ievent - beggin > 5000000)
       break;
 
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
@@ -93,19 +93,19 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if(do_track_QA) event_container->FillQAHist(in_id);
     if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
     int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
-    for (int itrk = 0; itrk < n_electrons; itrk++)
-    {
-        MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
-        if (mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
-           (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 ))
-        {
-            myevent->RemoveTrackEntry(itrk);
-            n_electrons--;
-            itrk--;
-            continue;
-        }
-        mytrk->ZeroHitCounters();
-    }
+    //for (int itrk = 0; itrk < n_electrons; itrk++)
+    //{
+    //    MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+    //    if (mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
+    //       (mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 ))
+    //    {
+    //        myevent->RemoveTrackEntry(itrk);
+    //        n_electrons--;
+    //        itrk--;
+    //        continue;
+    //    }
+    //    mytrk->ZeroHitCounters();
+    //}
 
     if(myevent->GetNtrack()<1  ) continue;
     
@@ -117,7 +117,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    event_container->CheckVeto();
+    //event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
     //myevent->ReshuffleElectrons();
