@@ -446,6 +446,9 @@ namespace MyDileptonAnalysis
                             newBDTrack.SetPt(mytrk->GetPtPrime());
                             newBDTrack.SetThe0(mytrk->GetThe0Prime());
                             newBDTrack.SetZDC(mytrk->GetZDC()-event->GetPreciseZ());
+                            newBDTrack.SetReconPt(mytrk->GetReconPT());
+                            newBDTrack.SetReconPhi0(mytrk->GetPhi0());
+                            newBDTrack.SetReconThe0(mytrk->GetThe0());
                             is_bdt_set = 1;
                         }
                         
@@ -567,8 +570,8 @@ namespace MyDileptonAnalysis
                             newBDTHit.Getsdphi(2), newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
                             newBDTHit.Getsdphi(3), newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
                         };
-                        const double probsHIT[3] = {0.024926483635905234,0.028926483635905234,0.032926483635905234};
-                        const double probsConv[3] = {0.018429009621297826,0.023429009621297826,0.033429009621297826};
+                        const double probsHIT[3] = {0.011410376800943792,0.025033406831860713,0.26601086542307295};
+                        const double probsConv[3] = {0.012857895177300821,0.10978304430237877,0.4041338528791745};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTHitInput);
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
@@ -1525,15 +1528,15 @@ namespace MyDileptonAnalysis
                 const float dphi = ee1.Angle(ee2);
                 inv_mass_dca_fg0[in_hist]->Fill(dca0, invm, pair_pt);
                 delt_phi_dca_fg0[in_hist]->Fill(dca0, dphi, pair_pt);
-                if (!(newTrack1->GetGhost()<25&&newTrack2->GetGhost()<25))
+                if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
                     continue;
                 inv_mass_dca_fg1[in_hist]->Fill(dca1, invm, pair_pt);    
                 delt_phi_dca_fg1[in_hist]->Fill(dca1, dphi, pair_pt);
-                if (!(newTrack1->GetGhost()<20&&newTrack2->GetGhost()<20))
+                if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
                     continue;
                 inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
                 delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                if (!(newTrack1->GetGhost()<15&&newTrack2->GetGhost()<15))
+                if (!(newTrack1->GetNHits()>900&&newTrack2->GetNHits()>900&&newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                     continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
                 delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);

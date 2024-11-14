@@ -512,17 +512,17 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
-        
         int addit_reject = 0;
-        if(mytrk->GetNHits()>90) addit_reject = 1;
-        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90) addit_reject = 10;
-        
+        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90) addit_reject = 1;
+        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
+        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<addit_reject<<" "<<mytrk->GetIsConv()<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
+        if(mytrk->GetNHits()<90) continue;
+
         //if (mytrk->GetGhost()<25) addit_reject = 1;
         //if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
         if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
-        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<mytrk->GetIsConv()<<" "<<addit_reject<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
         if ( hadron_reject<100 ) continue;
         //if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
         //       (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 

@@ -796,6 +796,9 @@ namespace MyDileptonAnalysis
             float zDC;
             float alpha;
             float ecore;
+            float reconpt;
+            float reconphi0;
+            float reconthe0;
             int centrality;
             int charge;
             int arm;
@@ -814,6 +817,9 @@ namespace MyDileptonAnalysis
                   centrality = -999;
                   charge = -999;
                   arm = -999;
+                  reconpt = -999;
+                  reconphi0 = -999;
+                  reconthe0 = -999;
             };
             virtual ~MyBDTrack(){};
 
@@ -832,6 +838,9 @@ namespace MyDileptonAnalysis
             void SetCentrality(int val) { centrality = val; };
             void SetCharge(int val) { charge = val; };
             void SetArm(int val) { arm = val; };
+            void SetReconPt(float val) { reconpt = val; }
+            void SetReconPhi0(float val) { reconphi0 = val; }
+            void SetReconThe0(float val) { reconthe0 = val; }
 
             float GetPt() const { return pt; };
             float GetPhi0() const { return phi0; };
@@ -843,6 +852,9 @@ namespace MyDileptonAnalysis
             int GetCentrality() const { return centrality; };
             int GetCharge() const { return charge; };
             int GetArm() const { return arm; };
+            float GetReconPt() const { return reconpt; }
+            float GetReconPhi0() const { return reconphi0; }
+            float GetReconThe0() const { return reconthe0; }
 
             ClassDef(MyBDTrack, 1)
       };

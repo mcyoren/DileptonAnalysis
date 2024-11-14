@@ -145,11 +145,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
   if ( ghost1 < 100 || ghost2 < 100 ) return -999;
-  
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1 < 1 || match2 < 1 ) return -999;
+  const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  if(id11==id21 || id12==id22 || id13==id23) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -174,11 +179,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
   if ( ghost1 < 1000 || ghost2 < 1000 ) return -999;
-  
-  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
-  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1 < 1 || match2 < 1 ) return -999;
+  const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  if(id11==id21 || id12==id22 || id13==id23) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -287,6 +297,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
 
   if ( match1 < 10 || match2 < 10 ) return -999;
 
+  const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  if(id11==id21 || id12==id22 || id13==id23) return -999;
+
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
@@ -315,6 +335,16 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
   if ( match1 < 10 || match2 < 10 ) return -999;
+
+  const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+  const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+  const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+  if(id11==id21 || id12==id22 || id13==id23) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
