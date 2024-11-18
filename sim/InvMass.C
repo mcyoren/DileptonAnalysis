@@ -61,7 +61,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
       cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
-    if (ievent - beggin > 500000)
+    if (ievent - beggin > 5000000)
       break;
 
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
@@ -117,7 +117,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
 
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    event_container->CheckVeto();
+    //event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
     //myevent->ReshuffleElectrons();
