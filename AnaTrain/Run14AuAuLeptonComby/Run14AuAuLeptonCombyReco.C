@@ -337,7 +337,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        event_container->Associate_Hits_to_Leptons(3.,2.,4,-fill_ddphi_hadron);
+        event_container->Associate_Hits_to_Leptons(4.,2.,4.,-fill_ddphi_hadron);
     }
 
     int n_electrons = event->GetNtrack();
@@ -501,7 +501,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(do_electron_QA) event_container->FillQAHist(1000);
     if(fill_TTree) event_container->FillTree();
-    if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists)event_container->fill_inv_mass();
+    if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {

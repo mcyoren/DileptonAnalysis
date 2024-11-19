@@ -1077,7 +1077,7 @@ namespace MyDileptonAnalysis
             TH3D *delt_phi_dca_fg0[N_centr*3],*delt_phi_dca_fg1[N_centr*3],*delt_phi_dca_fg2[N_centr*3],*delt_phi_dca_fg3[N_centr*3],*delt_phi_dca_fg4[N_centr*3];
             TH3D *delt_phi_dca_bg0[N_centr*3],*delt_phi_dca_bg1[N_centr*3],*delt_phi_dca_bg2[N_centr*3],*delt_phi_dca_bg3[N_centr*3],*delt_phi_dca_bg4[N_centr*3];
             TH3D *inv_mass_dca_gen[N_centr*3];
-            TH3D* myvtx_hist;
+            TH3D* myvtx_hist[N_centr];
             TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
@@ -1098,7 +1098,6 @@ namespace MyDileptonAnalysis
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr;
                   DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr, pt_corr = nullptr;
                   couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
-                  myvtx_hist = nullptr;
                   truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
                   v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
@@ -1134,6 +1133,7 @@ namespace MyDileptonAnalysis
                         ilayerhitshist[i] = nullptr;
                         d_dphi_hist[i] = nullptr;
                         d_dthe_hist[i] = nullptr;
+                        myvtx_hist[i] = nullptr;
                         DCA_hist[i] = nullptr;
                         sd_dphi_hist[i] = nullptr;
                         sd_dthe_hist[i] = nullptr;

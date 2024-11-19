@@ -875,11 +875,11 @@ namespace MyDileptonAnalysis
                     if(false)vtxhit->AddAssociatedTrack(itrk, diff);
                     if(is_fill_hadron_hsits)
                     {
-                        myvtx_hist->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                        myvtx_hist[central_bin]->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
                                         +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunGroup(),0.5);
-                        myvtx_hist->Fill(event->GetPreciseY()-vtxhit->GetYHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                        myvtx_hist[central_bin]->Fill(event->GetPreciseY()-vtxhit->GetYHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
                                         +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Sin(mytrk->GetPhi0Prime()),event->GetRunGroup(),1.5);
-                        myvtx_hist->Fill(event->GetPreciseZ()-vtxhit->GetZHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
+                        myvtx_hist[central_bin]->Fill(event->GetPreciseZ()-vtxhit->GetZHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
                                         +SQR(vtxhit->GetYHit()-event->GetPreciseY()))/TMath::Tan(mytrk->GetThe0Prime()),event->GetRunGroup(),2.5);
                     }
                 }
@@ -1536,7 +1536,7 @@ namespace MyDileptonAnalysis
                     continue;
                 inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
                 delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                if (!(newTrack1->GetNHits()>900&&newTrack2->GetNHits()>900&&newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90&&newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                     continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
                 delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
@@ -1729,8 +1729,8 @@ namespace MyDileptonAnalysis
             el_pt_hist->Fill(electron->GetPtPrime(),std::log10(electron->GetMcId()),event->GetCentrality());
             if ( (TMath::Abs(electron->GetMcId()-mc_id)>1 && mc_id>-1 && mc_id<100) || (electron->GetMcId()<1000 && mc_id == 1000)) continue;
             el_pt_hist->Fill(electron->GetPtPrime(),1.5,event->GetCentrality());
-            el_had_dphi->Fill(electron->GetEmcdphi_e(),electron->GetPtPrime(),event->GetCentrality());
-            el_had_dz  ->Fill(electron->GetEmcdz_e()  ,electron->GetPtPrime(),event->GetCentrality());
+            el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),event->GetCentrality());
+            el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),event->GetCentrality());
             //if(electron->GetEcore()<0 || electron->GetN0()<0|| electron->GetChi2()<0|| electron->GetNpe0()<0|| 
             //   electron->GetProb()<0|| electron->GetDisp()<0||electron->GetDisp()>10||electron->GetChi2()/electron->GetNpe0()>20) continue;
             el_pt_hist->Fill(electron->GetPtPrime(),2.5,event->GetCentrality());
@@ -1830,7 +1830,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
             INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 4, 0, 4);
             INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
-            INIT_HIST(3, myvtx_hist, 1000, -5, 5, 12, 0 ,12, 4, 0 ,4);
+            INIT_HISTOS(3, myvtx_hist, N_centr, 1000, -1, 1, 12, 0 ,12, 4, 0 ,4);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)
@@ -1877,8 +1877,8 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, rich_prob2, 30, 0, 30, 50, -10, 10, 10, 0., 100);
             INIT_HIST(3, rich_prob3, 100, -0.05, 0.05, 100, -25, 25, 10, 0., 100);
 
-            INIT_HIST(3, el_had_dphi, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
-            INIT_HIST(3, el_had_dz, 100, -10, 10, 50, 0.0, 5.0, 5, 0, 100);
+            INIT_HIST(3, el_had_dphi, 100, -0.1, 0.1, 50, 0.0, 5.0, 5, 0, 100);
+            INIT_HIST(3, el_had_dz, 100, -50, 50, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
             INIT_HIST(3, el_pt_hist, 50, 0, 5, 15, 0, 15, 100, 0, 100);
             INIT_HIST(3, temc, 150, -50, 150, 200, 0., 10, 5, 0, 100);
