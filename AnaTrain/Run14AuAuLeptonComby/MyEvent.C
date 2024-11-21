@@ -562,16 +562,17 @@ namespace MyDileptonAnalysis
                             }
 
                         }
-                        const double BDTHitInput[35] = {
+                        const double BDTHitInput[28] = {
                             (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), newBDTrack.GetPhi0(), newBDTrack.GetThe0(), newBDTrack.GetPhiDC(), newBDTrack.GetZDC(), 
                             newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
-                            newBDTHit.Getsdphi(0), newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
-                            newBDTHit.Getsdphi(1), newBDTHit.Getsdthe(1), newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
-                            newBDTHit.Getsdphi(2), newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
-                            newBDTHit.Getsdphi(3), newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
+                            newBDTrack.GetReconPt(),///need to transfer to bdthit
+                            newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
+                            newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
+                            newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
+                            newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
                         };
-                        const double probsHIT[3] = {0.011410376800943792,0.025033406831860713,0.26601086542307295};
-                        const double probsConv[3] = {0.012857895177300821,0.10978304430237877,0.4041338528791745};
+                        const double probsHIT[3] = {0.44985288227257497,0.9098449640666483,0.9693015323990473};
+                        const double probsConv[3] = {0.09718938151580156,0.15118069252499802,0.5547762846759848};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTHitInput);
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
@@ -580,7 +581,7 @@ namespace MyDileptonAnalysis
                         newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
 
-                        chi2 = probsHIT[1]*3/BDTHIT_prob;
+                        chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
                         {
                             mytrk->SetNHits(newBDTHit.GetIsTrue(0));

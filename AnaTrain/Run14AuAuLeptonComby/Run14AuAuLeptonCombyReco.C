@@ -514,7 +514,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
         int addit_reject = 0;
         if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90) addit_reject = 1;
-        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
+        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
         //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<addit_reject<<" "<<mytrk->GetIsConv()<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
         if(mytrk->GetNHits()<90) continue;
 
