@@ -446,9 +446,6 @@ namespace MyDileptonAnalysis
                             newBDTrack.SetPt(mytrk->GetPtPrime());
                             newBDTrack.SetThe0(mytrk->GetThe0Prime());
                             newBDTrack.SetZDC(mytrk->GetZDC()-event->GetPreciseZ());
-                            newBDTrack.SetReconPt(mytrk->GetReconPT());
-                            newBDTrack.SetReconPhi0(mytrk->GetPhi0());
-                            newBDTrack.SetReconThe0(mytrk->GetThe0());
                             is_bdt_set = 1;
                         }
                         
@@ -462,6 +459,9 @@ namespace MyDileptonAnalysis
                         const int hit_in_graph = (inum3>=0 && inum2>=0) ? 4 : 3; 
 
                         MyDileptonAnalysis::MyBDTHit newBDTHit;
+                        newBDTHit.SetReconPt(mytrk->GetReconPT());
+                        newBDTHit.SetReconPhi0(mytrk->GetPhi0());
+                        newBDTHit.SetReconThe0(mytrk->GetThe0());
                         for (int jlayer = 0; jlayer < hit_in_graph; jlayer++)
                         {
                             if(!vtxhits[jlayer]) std::cout<<"kek"<<std::endl;
@@ -565,7 +565,7 @@ namespace MyDileptonAnalysis
                         const double BDTHitInput[28] = {
                             (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), newBDTrack.GetPhi0(), newBDTrack.GetThe0(), newBDTrack.GetPhiDC(), newBDTrack.GetZDC(), 
                             newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
-                            newBDTrack.GetReconPt(),///need to transfer to bdthit
+                            newBDTHit.GetReconPt(),///need to transfer to bdthit
                             newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
                             newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
@@ -586,6 +586,9 @@ namespace MyDileptonAnalysis
                         {
                             mytrk->SetNHits(newBDTHit.GetIsTrue(0));
                             mytrk->SetTOFDPHI(newBDTHit.GetIsTrue(1));
+                            newBDTrack.SetReconPt(mytrk->GetReconPT());
+                            newBDTrack.SetReconPhi0(mytrk->GetPhi0());
+                            newBDTrack.SetReconThe0(mytrk->GetThe0());
                         }
                         mytrk->SetGhost(mytrk->GetGhost()+(probsConv[1]>BDTConv_prob?30:0));
                     }

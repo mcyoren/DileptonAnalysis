@@ -723,6 +723,9 @@ namespace MyDileptonAnalysis
             int layersecondhitphiright[2][2];
             int layersecondhittheleft[2][2];
             int layersecondhittheright[2][2];
+            float reconpt;
+            float reconphi0;
+            float reconthe0;
 
       public:
             MyBDTHit()
@@ -752,6 +755,9 @@ namespace MyDileptonAnalysis
                               layersecondhittheright[iteri][jteri] = -99;
                         }
                   }
+                  reconpt = -999;
+                  reconphi0 = -999;
+                  reconthe0 = -999;
             };
             virtual ~MyBDTHit(){};
 
@@ -767,6 +773,9 @@ namespace MyDileptonAnalysis
             int GetLayerSecondHitTheR(int ilayer = 0, int ihit = 0) const { return layersecondhittheleft[ilayer][ihit]; }
             int GetLayerSecondHitTheL(int ilayer = 0, int ihit = 0) const { return layersecondhittheright[ilayer][ihit]; }
             int GetOutiLayer(int ilayer = 2) const { return layer[ilayer-2];}
+            float GetReconPt() const { return reconpt; }
+            float GetReconPhi0() const { return reconphi0; }
+            float GetReconThe0() const { return reconthe0; }
             
             void Setsdphi(int ilayer = 0, float val = 0) { sdphi[ilayer] = val; }
             void Setsdthe(int ilayer = 0, float val = 0) { sdthe[ilayer] = val; }
@@ -780,6 +789,9 @@ namespace MyDileptonAnalysis
             void SetLayerSecondHitPhiL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhitphiright[ilayer-2][ihit] = val; }
             void SetLayerSecondHitTheR(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheleft[ilayer-2][ihit] = val; }
             void SetLayerSecondHitTheL(int ilayer = 2, int ihit = 0, int val = 0) { layersecondhittheright[ilayer-2][ihit] = val; }
+            void SetReconPt(float val) { reconpt = val; }
+            void SetReconPhi0(float val) { reconphi0 = val; }
+            void SetReconThe0(float val) { reconthe0 = val; }
 
             ClassDef(MyBDTHit, 1)
       };
