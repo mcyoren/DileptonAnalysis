@@ -542,17 +542,18 @@ namespace MyDileptonAnalysis
                                         *(sqrt(SQR(vtxhits[jlayer]->GetXHit())+SQR(vtxhits[jlayer]->GetYHit()))-sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit())))
                                         /(radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]))/
                                         sigma_second_the;
-                                
-                                    if ( sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) ) < r_first_min[secondhit_layer][1])
+                                    const float r_local = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+                                    if ( r_local < 1e-12 ) continue;
+                                    if ( r_local < r_first_min[secondhit_layer][1] )
                                     {
-                                        if ( sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) ) < r_first_min[secondhit_layer][0])
+                                        if ( r_local < r_first_min[secondhit_layer][0])
                                         {
-                                            r_first_min[secondhit_layer][0] = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+                                            r_first_min[secondhit_layer][0] = r_local;
                                             newBDTHit.SetSecondHitPhiR(secondhit_layer,0,sdphi_first_hit);
                                             newBDTHit.SetSecondHitTheR(secondhit_layer,0,sdthe_first_hit);
                                         }else
                                         {
-                                            r_first_min[secondhit_layer][1] = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+                                            r_first_min[secondhit_layer][1] = r_local;
                                             newBDTHit.SetSecondHitPhiR(secondhit_layer,1,sdphi_first_hit);
                                             newBDTHit.SetSecondHitTheR(secondhit_layer,1,sdthe_first_hit);
                                         }
@@ -562,17 +563,17 @@ namespace MyDileptonAnalysis
                             }
 
                         }
-                        const double BDTHitInput[28] = {
-                            (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), newBDTrack.GetPhi0(), newBDTrack.GetThe0(), newBDTrack.GetPhiDC(), newBDTrack.GetZDC(), 
+                        const double BDTHitInput[26] = {
+                            (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), 
                             newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
                             newBDTHit.GetReconPt(),///need to transfer to bdthit
                             newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
                             newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
-                            newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
-                            newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
+                            (double) ((int) newBDTHit.Getsdphi(2)>-9),newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
+                            (double) ((int) newBDTHit.Getsdphi(3)>-9),newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
                         };
-                        const double probsHIT[3] = {0.44985288227257497,0.9098449640666483,0.9693015323990473};
-                        const double probsConv[3] = {0.09718938151580156,0.15118069252499802,0.5547762846759848};
+                        const double probsHIT[3] = {0.020337412861669034,0.20247530966766503,0.659268224746079};
+                        const double probsConv[3] = {0.008981671861178077, 0.009105072483988324, 0.012586376906930808};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTHitInput);
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
