@@ -563,17 +563,17 @@ namespace MyDileptonAnalysis
                             }
 
                         }
-                        const double BDTHitInput[26] = {
+                        const double BDTHitInput[40] = {
                             (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), 
                             newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
                             newBDTHit.GetReconPt(),///need to transfer to bdthit
-                            newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),
-                            newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),
-                            (double) ((int) newBDTHit.Getsdphi(2)>-9),newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),
-                            (double) ((int) newBDTHit.Getsdphi(3)>-9),newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3)        
+                            newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitPhiL(0,1), newBDTHit.GetSecondHitTheR(0,1), newBDTHit.GetSecondHitTheL(0,1),
+                            newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitPhiL(1,1), newBDTHit.GetSecondHitTheR(1,1), newBDTHit.GetSecondHitTheL(1,1),
+                            newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
+                            newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)        
                         };
-                        const double probsHIT[3] = {0.020337412861669034,0.20247530966766503,0.659268224746079};
-                        const double probsConv[3] = {0.008981671861178077, 0.009105072483988324, 0.012586376906930808};
+                        const double probsHIT[4] = {0.6088003527849839,0.7529235922196016, 0.962171977869942, 0.9803095223219017};
+                        const double probsConv[4] = {0.021364176058289094,0.04458145622179994, 0.0927395541412711, 0.20156117596410197};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTHitInput);
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
