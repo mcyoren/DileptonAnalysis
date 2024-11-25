@@ -173,83 +173,13 @@ int main(int argc, char* argv[]){
       if (!( pythia.event[j].daughter1() == 0 &&  pythia.event[j].daughter2() == 0 ) ) continue;
       
       int pdg = pythia.event[j].id();
-      if (!(pdg == 11 ||  pdg == -11) ) continue;
-
-
-      int mother_index = pythia.event[j].mother1();
-      int pdg_mother = pythia.event[mother_index].id();
-
-      int isCharm = 0;
-      int isBottom = 0;
-
-      bool mother_D_meson = pdg_mother == 411 || pdg_mother == 421 || pdg_mother == 10411 || pdg_mother == 10421 ||
-                            pdg_mother == 413 || pdg_mother == 423 || pdg_mother == 10413 || pdg_mother == 10423 ||
-                            pdg_mother == 20413 || pdg_mother == 20423 || pdg_mother == 415 || pdg_mother == 425 ||
-                            pdg_mother == 431 || pdg_mother == 10431 || pdg_mother == 433 || pdg_mother == 10433 ||
-	                          pdg_mother == 20433 || pdg_mother == 435;
-
-      bool parentisB = false;
-
-      int mother_index1 = pythia.event[mother_index].mother1();
-      int mother_index2 = pythia.event[mother_index].mother2();
-
-      std::vector<int> motherIndices;
-      if(mother_index1 > 0 && mother_index1 < mother_index) motherIndices.push_back(mother_index1);
-      if(mother_index2 > 0 && mother_index2 < mother_index) motherIndices.push_back(mother_index2);
-      bool skip_track = false;
-
-      while( !motherIndices.empty() ) {
-
-        int motherIndex = motherIndices.front();
-        if(pythia.event[motherIndex].id()==111)
-        {
-          for (auto aready_used_mom_id : already_used_pi0)
-          {
-            if(motherIndex==aready_used_mom_id) skip_track = true;
-          }
-          already_used_pi0.push_back(motherIndex);
-        }
-        if(pythia.event[motherIndex].id()==221)
-        {
-          for (auto aready_used_mom_id : already_used_eta)
-          {
-            if(motherIndex==aready_used_mom_id) skip_track = true;
-          }
-          already_used_eta.push_back(motherIndex);
-        }
-        if(pythia.event[motherIndex].id()==331)
-        {
-          for (auto aready_used_mom_id : already_used_etap)
-          {
-            if(motherIndex==aready_used_mom_id) skip_track = true;
-          }
-          already_used_etap.push_back(motherIndex);
-        }
-        if(pythia.event[motherIndex].id()==3334)
-        {
-          for (auto aready_used_mom_id : already_used_omege)
-          {
-            if(motherIndex==aready_used_mom_id) skip_track = true;
-          }
-          already_used_omege.push_back(motherIndex);
-        }
-        motherIndices.erase(motherIndices.begin());
-
-        if (abs(pythia.event[motherIndex].id()) == 5) { parentisB = true; break; }
-
-        if (pythia.event[motherIndex].mother1() > 0 && pythia.event[motherIndex].mother1() < motherIndex) motherIndices.push_back(pythia.event[motherIndex].mother1());
-        if (pythia.event[motherIndex].mother2() > 0 && pythia.event[motherIndex].mother2() < motherIndex) motherIndices.push_back(pythia.event[motherIndex].mother2());
-
-      }
-
-      if(mother_D_meson && !parentisB) isCharm = 1;
-      if(parentisB) isBottom = 1;
+      if (!(pdg == 211 ||  pdg == -211) ) continue;
       
       double Px = pythia.event[j].px();
       double Py = pythia.event[j].py();
       double eta = TMath::Abs(pythia.event[j].eta());
       double Pt = sqrt(Px*Px + Py*Py);
-      if(Pt < 0.4||eta>0.5||skip_track) continue;
+      if(Pt < 0.4||eta>0.5) continue;
       //if(count>0)
       //  std::cout<<mother_index1<<" "<<mother_index2<<" "<<pythia.event[mother_index1].id()<<" "<<pythia.event[mother_index2].id()<<std::endl;
       double Pz = pythia.event[j].pz();
@@ -259,7 +189,7 @@ int main(int argc, char* argv[]){
       double Vz = pythia.event[j].zProd();
       double Mass = -999;
 
-      if(fabs(pdg) == 11) Mass = 0.000511;
+      if(fabs(pdg) == 211) Mass = 0.135;
 
       mass[count] = Mass; px[count] = Px; py[count] = Py; pz[count] = Pz;
       energy[count] = Energy; vx[count] = Vx; vy[count] = Vy; vz[count] = Vz;
@@ -271,7 +201,7 @@ int main(int argc, char* argv[]){
       count++;
 
     }
-    if(count<2||count>9) {nevt++; continue;}
+    if(count<2||count>4) {nevt++; continue;}
     for (int ipart = 0; ipart < count; ipart++)
     {
       for (int jpart = ipart+1; jpart < count; jpart++)
