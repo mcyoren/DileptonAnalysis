@@ -122,6 +122,7 @@ int embedana::ResetEvent(PHCompositeNode *topNode)
 int embedana::process_event(PHCompositeNode *topNode)
 {
 
+  event_container->ClearEvent();
   static int first_event = 0;
   if (first_event == 0)
   {
