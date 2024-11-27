@@ -98,6 +98,47 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 && TMath::Abs(psi_pip-psi_pim)<7*TMath::Pi()/8 )
         return false;
 
+    
+    const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+    const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+    const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+    const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+    const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+    const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+    const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+    const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+    const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+    const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+    const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+    const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+
+    const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+    const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+    const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+    const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
+    const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
+    const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
+
+    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+       std::cout<<id11<< " "<<id21<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
+
+    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+       std::cout<<id12<< " "<<id22<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
+
+    if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+       std::cout<<id13<< " "<<id23<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
+
+
+    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+        return false;
+
+    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+        return false;
+
+    if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+        return false;
     return true;
 }
 

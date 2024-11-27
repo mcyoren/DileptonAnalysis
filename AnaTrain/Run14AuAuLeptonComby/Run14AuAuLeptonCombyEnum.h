@@ -15,6 +15,12 @@ public:
       DCAY,
       PSI,
       ZVTX,
+      PHI1,
+      PHI2,
+      PHI3,
+      THE1,
+      THE2,
+      THE3,
       LAST_DOUBLE  // special...always use this
     };
 

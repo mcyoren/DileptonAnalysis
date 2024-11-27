@@ -390,6 +390,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
             mytrk->SetMcId(mytrk->GetMcId()+GeteID(input_x, treshlods));
             if (mytrk->GetMcId()>200 && fabs(mytrk->GetEmcTOF())>5 )  mytrk->SetMcId(mytrk->GetMcId()-900);
+            if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
         }    
         //std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
         //  <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
@@ -400,7 +401,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      if (mytrk.GetMcId()<10 || mytrk.GetPtPrime() < 0.4)
+      if (mytrk.GetMcId()<100 || mytrk.GetPtPrime() < 0.4)
       {
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -416,6 +417,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
         event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        if(event->GetNtrack()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
         if(false)
         {
             for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
@@ -517,13 +519,18 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
         //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<addit_reject<<" "<<mytrk->GetIsConv()<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
         if(mytrk->GetNHits()<90) continue;
+        MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
+        MyDileptonAnalysis::MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
+        MyDileptonAnalysis::MyVTXHit *vtxhit2 = nullptr; 
+        if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
+        else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
 
         //if (mytrk->GetGhost()<25) addit_reject = 1;
         //if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
-        if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
-        if ( hadron_reject<100 ) continue;
+        //if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
+        //if ( hadron_reject<100 ) continue;
         //if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
         //       (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
         //       (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
@@ -555,6 +562,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
         ult.set_double(Run14AuAuLeptonCombyEnum::PSI,  event->GetPsi2FVTXA0());
         ult.set_integer(Run14AuAuLeptonCombyEnum::CENTR, event->GetCentrality());
+
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI1, vtxhit0->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI2, vtxhit1->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI3, vtxhit2->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
+        ult.set_double(Run14AuAuLeptonCombyEnum::THE1, vtxhit0->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
+        ult.set_double(Run14AuAuLeptonCombyEnum::THE2, vtxhit1->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
+        ult.set_double(Run14AuAuLeptonCombyEnum::THE3, vtxhit2->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()));
 
         ult.set_integer(Run14AuAuLeptonCombyEnum::PTYPE, ptype);
         ult.set_integer(Run14AuAuLeptonCombyEnum::MATCH, addit_reject);

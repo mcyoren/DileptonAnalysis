@@ -493,7 +493,7 @@ namespace MyDileptonAnalysis
                             if (skip_secondhit_search) continue;
 
                             MyDileptonAnalysis::MyVTXHit *secondvtxhit = event->GetVTXHitEntry(isecondhit);
-                            if(secondvtxhit->GetLadder()>49) continue;
+                            if(secondvtxhit->GetLadder()>47) continue;
 
                             const int secondhit_layer = secondvtxhit->GetLayer(); 
 
@@ -543,6 +543,8 @@ namespace MyDileptonAnalysis
                                         /(radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]))/
                                         sigma_second_the;
                                     const float r_local = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
+
+                                    if ( r_local < 1e-12 ) secondvtxhit->SetLadder(48);
                                     if ( r_local < 1e-12 ) continue;
                                     if ( r_local < r_first_min[secondhit_layer][1] )
                                     {
@@ -651,6 +653,7 @@ namespace MyDileptonAnalysis
                 {
                     if(!vtxhits[i]) std::cout<<"kek"<<std::endl;
                     if(!vtxhits[i]) continue;
+                    vtxhits[i]->SetLadder(48);
                     if(vtxhits[i]->GetSensor() == 0) istruehitcounter++;
                 }        
                 if(is_fill_hsits) truehithist->Fill(istruehitcounter,mytrk->GetPtPrime(),event->GetCentrality());
