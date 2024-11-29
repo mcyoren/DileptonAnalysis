@@ -416,28 +416,48 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5);
-        if(event->GetNtrack()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
+        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        
         if(false)
         {
+            for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+                if(event_container->GetNGoodElectrons()>0&&mytrk->GetHitCounter(0)>0) std::cout<< "1: " <<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
+            }
             for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
             {       
+                if(event_container->GetNGoodElectrons()<1) continue;
+                for (int ihit = 0; ihit < event->GetNVTXhit(); ihit++)
+                {
+                  MyDileptonAnalysis::MyVTXHit myhit = *event->GetVTXHitEntry(ihit);
+                if(myhit.GetLadder()>24&&myhit.GetLadder()<50)std::cout<<myhit.GetLadder()<<" "<<myhit.GetClustId()<<std::endl;
+                }
                 std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
                 if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+                MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(ibdtrack);
+                std::cout<<mytrk->GetHitIndex(0)<<" "<<mytrk->GetHitIndex(1)<<" "<<mytrk->GetHitIndex(2)<<" "<<mytrk->GetHitIndex(3)<<std::endl;
                 for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
                 {
                     std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(0)<<" "<<
                     event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(1)<<" "<<
                     event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(2)<<" "<<
                     event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(3)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(0)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(2)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdphi(3)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(0)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(2)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->Getsdthe(3)<<" "<<std::endl;
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3,1)<<" "<<std::endl;
                 }
             }
         }

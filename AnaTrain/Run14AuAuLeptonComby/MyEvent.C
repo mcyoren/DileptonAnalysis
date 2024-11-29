@@ -166,7 +166,7 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
@@ -181,10 +181,11 @@ namespace MyDileptonAnalysis
         for (int itrk = 0; itrk < nleptons; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-            MyDileptonAnalysis::MyBDTrack newBDTrack;
+            MyDileptonAnalysis::MyBDTrack newBDTrack = MyDileptonAnalysis::MyBDTrack();
 
             mytrk->ZeroHitCounters();
             mytrk->ClearNumberVectors();
+            mytrk->SetGhost(0);
             const float pt = mytrk->GetPtPrime();
 
             const float thetaprime = mytrk->GetThe0Prime();
@@ -314,6 +315,7 @@ namespace MyDileptonAnalysis
                         if (abs(dphi) > 0.1 || abs(dthe) > 0.1) continue;
 
                         if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
+                        if(recover_fg==2) continue;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
@@ -458,7 +460,7 @@ namespace MyDileptonAnalysis
                         MyVTXHit *vtxhits[4] = {vtxhit0,vtxhit1,vtxhit2,vtxhit3};
                         const int hit_in_graph = (inum3>=0 && inum2>=0) ? 4 : 3; 
 
-                        MyDileptonAnalysis::MyBDTHit newBDTHit;
+                        MyDileptonAnalysis::MyBDTHit newBDTHit = MyDileptonAnalysis::MyBDTHit();
                         newBDTHit.SetReconPt(mytrk->GetReconPT());
                         newBDTHit.SetReconPhi0(mytrk->GetPhi0());
                         newBDTHit.SetReconThe0(mytrk->GetThe0());
@@ -481,7 +483,7 @@ namespace MyDileptonAnalysis
                         const float phi_0layer = vtxhits[0]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float the_0layer = vtxhits[0]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                        float r_first_min[4][2] = {{1e3,1e3},{1e3,1e3},{1e3,1e3},{1e3,1e3}};
+                        float r_first_min[4][2] = {{1e2,1e2},{1e2,1e2},{1e2,1e2},{1e2,1e2}};
                         float r_second_min[4][2] = {{1e3,1e3},{1e3,1e3},{1e3,1e3},{1e3,1e3}};
                         for (int isecondhit = 0; isecondhit < nvtxhits; isecondhit++)
                         {   
@@ -493,7 +495,8 @@ namespace MyDileptonAnalysis
                             if (skip_secondhit_search) continue;
 
                             MyDileptonAnalysis::MyVTXHit *secondvtxhit = event->GetVTXHitEntry(isecondhit);
-                            if(secondvtxhit->GetLadder()>47) continue;
+                            if(secondvtxhit->GetLadder()>49 ) continue;
+                            if(secondvtxhit->GetLadder()>24 && secondvtxhit->GetLadder() != itrk + 25 && !recover_fg ) continue;
 
                             const int secondhit_layer = secondvtxhit->GetLayer(); 
 
@@ -544,7 +547,7 @@ namespace MyDileptonAnalysis
                                         sigma_second_the;
                                     const float r_local = sqrt( SQR(sdphi_first_hit) + SQR(sdthe_first_hit) );
 
-                                    if ( r_local < 1e-12 ) secondvtxhit->SetLadder(48);
+                                    if ( r_local < 1e-12 ) secondvtxhit->SetLadder(25+itrk);
                                     if ( r_local < 1e-12 ) continue;
                                     if ( r_local < r_first_min[secondhit_layer][1] )
                                     {
@@ -607,8 +610,8 @@ namespace MyDileptonAnalysis
             if(min_chi2<800000)
             {
 
-                BDTracklist.push_back(newBDTrack);
                 mytrk->SetGhost( (int) (mytrk->GetGhost()*1./newBDTrack.GetNBDThit()));
+                BDTracklist.push_back(newBDTrack);
 
                 const int inum0 = final_number / 10000000-1;
                 const int inum1 = final_number / 10000 %1000-1;
@@ -653,7 +656,7 @@ namespace MyDileptonAnalysis
                 {
                     if(!vtxhits[i]) std::cout<<"kek"<<std::endl;
                     if(!vtxhits[i]) continue;
-                    vtxhits[i]->SetLadder(48);
+                    vtxhits[i]->SetLadder(25+itrk);
                     if(vtxhits[i]->GetSensor() == 0) istruehitcounter++;
                 }        
                 if(is_fill_hsits) truehithist->Fill(istruehitcounter,mytrk->GetPtPrime(),event->GetCentrality());
@@ -1544,12 +1547,39 @@ namespace MyDileptonAnalysis
                     continue;
                 inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
                 delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90&&newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
                     continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
                 delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
-                if(newTrack1->GetHitIndex(0)==newTrack2->GetHitIndex(0)||newTrack1->GetHitIndex(1)==newTrack2->GetHitIndex(1) || 
-                  (newTrack1->GetHitIndex(2)==newTrack2->GetHitIndex(2)&&newTrack1->GetHitIndex(3)==newTrack2->GetHitIndex(3))) continue;
+                  
+                MyDileptonAnalysis::MyVTXHit *vtxhit10 = event->GetVTXHitEntry(newTrack1->GetHitIndex(0));
+                MyDileptonAnalysis::MyVTXHit *vtxhit11 = event->GetVTXHitEntry(newTrack1->GetHitIndex(1));
+                MyDileptonAnalysis::MyVTXHit *vtxhit12 = nullptr; 
+                if (newTrack1->GetHitCounter(2)>0) vtxhit12 = event->GetVTXHitEntry(newTrack1->GetHitIndex(2));
+                else                               vtxhit12 = event->GetVTXHitEntry(newTrack1->GetHitIndex(3));
+                MyDileptonAnalysis::MyVTXHit *vtxhit20 = event->GetVTXHitEntry(newTrack2->GetHitIndex(0));
+                MyDileptonAnalysis::MyVTXHit *vtxhit21 = event->GetVTXHitEntry(newTrack2->GetHitIndex(1));
+                MyDileptonAnalysis::MyVTXHit *vtxhit22 = nullptr; 
+                if (newTrack2->GetHitCounter(2)>0) vtxhit22 = event->GetVTXHitEntry(newTrack2->GetHitIndex(2));
+                else                               vtxhit22 = event->GetVTXHitEntry(newTrack2->GetHitIndex(3));
+
+                const float phi11 = vtxhit10->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float phi12 = vtxhit11->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float phi13 = vtxhit12->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the11 = vtxhit10->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the12 = vtxhit11->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the13 = vtxhit12->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float phi21 = vtxhit20->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float phi22 = vtxhit21->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float phi23 = vtxhit22->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the21 = vtxhit20->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the22 = vtxhit21->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                const float the23 = vtxhit22->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+
+                if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
+                if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
+                if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+
                 inv_mass_dca_fg4[in_hist]->Fill(dca4, invm, pair_pt);
                 delt_phi_dca_fg4[in_hist]->Fill(dca4, dphi, pair_pt);
 
@@ -1613,20 +1643,54 @@ namespace MyDileptonAnalysis
                     const float dphi = ee1.Angle(ee2);
                     inv_mass_dca_bg0[in_hist]->Fill(dca0, invm, pair_pt);
                     delt_phi_dca_bg0[in_hist]->Fill(dca0, dphi, pair_pt);
-                    if (!(newTrack1->GetGhost()<25&&newTrack2->GetGhost()<25))
+                    if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
                         continue;
                     inv_mass_dca_bg1[in_hist]->Fill(dca1, invm, pair_pt);    
                     delt_phi_dca_bg1[in_hist]->Fill(dca1, dphi, pair_pt);
-                    if (!(newTrack1->GetGhost()<20&&newTrack2->GetGhost()<20))
+                    if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
                         continue;
                     inv_mass_dca_bg2[in_hist]->Fill(dca2, invm, pair_pt);
                     delt_phi_dca_bg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                    if (!(newTrack1->GetGhost()<15&&newTrack2->GetGhost()<15))
+                    if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
                         continue;
                     inv_mass_dca_bg3[in_hist]->Fill(dca3, invm, pair_pt);
                     delt_phi_dca_bg3[in_hist]->Fill(dca3, dphi, pair_pt);
-                    if(newTrack1->GetHitIndex(0)==newTrack2->GetHitIndex(0)||newTrack1->GetHitIndex(1)==newTrack2->GetHitIndex(1) || 
-                      (newTrack1->GetHitIndex(2)==newTrack2->GetHitIndex(2)&&newTrack1->GetHitIndex(3)==newTrack2->GetHitIndex(3))) continue;
+                    
+                    MyDileptonAnalysis::MyVTXHit *vtxhit10 = event->GetVTXHitEntry(newTrack1->GetHitIndex(0));
+                    MyDileptonAnalysis::MyVTXHit *vtxhit11 = event->GetVTXHitEntry(newTrack1->GetHitIndex(1));
+                    MyDileptonAnalysis::MyVTXHit *vtxhit12 = nullptr; 
+                    if (newTrack1->GetHitCounter(2)>0) vtxhit12 = event->GetVTXHitEntry(newTrack1->GetHitIndex(2));
+                    else                               vtxhit12 = event->GetVTXHitEntry(newTrack1->GetHitIndex(3));
+                    MyDileptonAnalysis::MyVTXHit *vtxhit20 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetVTXHitEntry(newTrack2->GetHitIndex(0));
+                    MyDileptonAnalysis::MyVTXHit *vtxhit21 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetVTXHitEntry(newTrack2->GetHitIndex(1));
+                    MyDileptonAnalysis::MyVTXHit *vtxhit22 = nullptr; 
+                    if (newTrack2->GetHitCounter(2)>0) vtxhit22 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetVTXHitEntry(newTrack2->GetHitIndex(2));
+                    else                               vtxhit22 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetVTXHitEntry(newTrack2->GetHitIndex(3));
+
+                    const float ex1 = event->GetPreciseX();
+                    const float ey1 = event->GetPreciseY();
+                    const float ez1 = event->GetPreciseZ(); 
+                    const float ex2 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetPreciseX();
+                    const float ey2 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetPreciseY();
+                    const float ez2 = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetPreciseZ(); 
+
+                    const float phi11 = vtxhit10->GetPhiHit(ex1,ey1,ez1);
+                    const float phi12 = vtxhit11->GetPhiHit(ex1,ey1,ez1);
+                    const float phi13 = vtxhit12->GetPhiHit(ex1,ey1,ez1);
+                    const float the11 = vtxhit10->GetTheHit(ex1,ey1,ez1);
+                    const float the12 = vtxhit11->GetTheHit(ex1,ey1,ez1);
+                    const float the13 = vtxhit12->GetTheHit(ex1,ey1,ez1);
+                    const float phi21 = vtxhit20->GetPhiHit(ex2,ey2,ez2);
+                    const float phi22 = vtxhit21->GetPhiHit(ex2,ey2,ez2);
+                    const float phi23 = vtxhit22->GetPhiHit(ex2,ey2,ez2);
+                    const float the21 = vtxhit20->GetTheHit(ex2,ey2,ez2);
+                    const float the22 = vtxhit21->GetTheHit(ex2,ey2,ez2);
+                    const float the23 = vtxhit22->GetTheHit(ex2,ey2,ez2);
+
+                    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
+                    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
+                    if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+
                     inv_mass_dca_bg4[in_hist]->Fill(dca4, invm, pair_pt);
                     delt_phi_dca_bg4[in_hist]->Fill(dca4, dphi, pair_pt);
                 }
