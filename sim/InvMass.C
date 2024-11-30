@@ -61,7 +61,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
       cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
-    if (ievent - beggin > 5000000)
+    if (ievent - beggin > 5e6)
       break;
 
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
@@ -76,7 +76,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     for (int ihit = 0; ihit < n_hits; ihit++)
     {
       MyDileptonAnalysis::MyVTXHit myhit = *myevent->GetVTXHitEntry(ihit);
-
+    if(myhit.GetLadder()>24)std::cout<<myhit.GetLadder()<<std::endl;
      if (myhit.GetSensor() == 1)
      {
          myevent->RemoveVTXHitEntry(ihit);
@@ -89,10 +89,17 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     event_container->SetEvent(myevent);
 
     event_container->correct_beam_offset();
+    for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
+    {
+        MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+        mytrk->ZeroHitCounters();
+    }
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
-    int n_electrons = myevent->GetNtrack()*remove_hadron_hits;
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+
+    int n_electrons = myevent->GetNtrack()*0;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
         MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
@@ -107,7 +114,83 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
         mytrk->ZeroHitCounters();
     }
 
-    if(myevent->GetNtrack()<1  ) continue;
+    if(event_container->GetNGoodElectrons()<2  ) continue;
+
+    if(false)
+        {
+
+            for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+                if(event_container->GetNGoodElectrons()>1) std::cout<< "000: " <<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<" "<<mytrk->GetHitCounter(0)<<std::endl;
+            }
+            for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
+            {       
+                if(event_container->GetNGoodElectrons()<1) continue;
+                std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+                if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+                MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(ibdtrack);
+                std::cout<<mytrk->GetHitIndex(0)<<" "<<mytrk->GetHitIndex(1)<<" "<<mytrk->GetHitIndex(2)<<" "<<mytrk->GetHitIndex(3)<<std::endl;
+                for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
+                {
+                    std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3,1)<<" "<<std::endl;
+                }
+            }
+        }
+
+        if(associate_hits && event_container->GetNGoodElectrons()>1)event_container->Associate_Hits_to_Leptons(5,5,5);
+    
+    if(false)
+        {
+
+            for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+                if(event_container->GetNGoodElectrons()>1) std::cout<< "1: " <<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<" "<<mytrk->GetHitCounter(0)<<std::endl;
+            }
+            for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
+            {       
+                if(event_container->GetNGoodElectrons()<1) continue;
+                std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
+                if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+                MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(ibdtrack);
+                std::cout<<mytrk->GetHitIndex(0)<<" "<<mytrk->GetHitIndex(1)<<" "<<mytrk->GetHitIndex(2)<<" "<<mytrk->GetHitIndex(3)<<std::endl;
+                for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
+                {
+                    std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2,1)<<" "<<
+                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3,1)<<" "<<std::endl;
+                }
+            }
+        }
     
     if(remove_hadron_hits) 
     {

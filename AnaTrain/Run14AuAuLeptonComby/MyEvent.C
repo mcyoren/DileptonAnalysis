@@ -575,26 +575,26 @@ namespace MyDileptonAnalysis
                             newBDTHit.GetReconPt(),///need to transfer to bdthit
                             -3.+hit_in_graph, ecore1, ecore1/ecore, reconpt1, reconpt1/newBDTrack.GetPt()       
                         };
-                        const double BDTConvInput[40] = {
-                            (double)newBDTrack.GetNBDThit(), newBDTrack.GetPt(), 
-                            newBDTrack.GetAlpha(), newBDTrack.GetEcore(), (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(), (double)newBDTrack.GetArm(),
-                            newBDTHit.GetReconPt(),///need to transfer to bdthit
+                        const double BDTConvInput[38] = {//['Pt', 'Ecore2', 'Centrality', 'Charge', 'reconpt2', 'sdphi0', 'SecondHitPhiR0', ...]
+                            newBDTrack.GetPt(), BDTHitInput[3], (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(),
+                            BDTHitInput[5],newBDTHit.Getsdphi(0)-newBDTHit.Getsdphi(1),
                             newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitPhiL(0,1), newBDTHit.GetSecondHitTheR(0,1), newBDTHit.GetSecondHitTheL(0,1),
                             newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitPhiL(1,1), newBDTHit.GetSecondHitTheR(1,1), newBDTHit.GetSecondHitTheL(1,1),
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
-                            newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)        
+                            newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)       
                         };
                         const double probsHIT[4] = {0.7243957895255603,0.7737115079566164, 0.825632469175882, 0.8555838293581055};
-                        const double probsConv[4] = {0.021364176058289094,0.04458145622179994, 0.0927395541412711, 0.20156117596410197};
+                        const double probsConv[4] = {0.01703147434437753,0.027224181193230206, 0.046523217842940785, 0.10788418432540978};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTConvInput);
-                        const double check_hit[6] = {0.5188361406326294,1.0,0.08420392070998228,0.1396323828345835,0.010481715202331543,0.019802307710051537}; 
-                        std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
-                        std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
-                        //newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
-                        //newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
-                        //newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
-                        //newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
+                        //const double check_conv[38] = {3.0234375, -0.009088878844269233, 25.0, 1.0, -0.10400390625, -0.69970703125, -9.21875, 33.59375, 3.904296875, 14.515625, 33.59375, -99.0, 14.515625, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -54.28125, -99.0, 13.6953125, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, 52.5625, -99.0, -10.34375, -99.0, 61.125, -99.0, 12.3359375};
+                        //const double check_hit[6] = {0.5188361406326294,1.0,0.08420392070998228,0.1396323828345835,0.010481715202331543,0.019802307710051537}; 
+                        //std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
+                        //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
+                        newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
+                        newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
+                        newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
+                        newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
@@ -1556,7 +1556,7 @@ namespace MyDileptonAnalysis
                     continue;
                 inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
                 delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
+                if (!(newTrack1->GetGhost()==0&&newTrack2->GetGhost()==0))
                     continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
                 delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
