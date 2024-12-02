@@ -503,6 +503,17 @@ namespace MyDileptonAnalysis
                             const float phi_second_hit = secondvtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                             const float the_second_hit = secondvtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
+                            const int secondhit_ilayer = secondvtxhit->GetiLayer(); 
+                            const float dphi0 = (dilep_phi_projection[secondhit_ilayer] - phi_second_hit) + 
+                                (dilep_phi_projection[secondhit_ilayer<7?secondhit_ilayer+1:6] - dilep_phi_projection[secondhit_ilayer])*
+                                (sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit()))-radii[secondhit_ilayer])/
+                                (radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]);
+                            const float dthe0 = (dilep_the_projection[secondhit_ilayer] - the_second_hit) + 
+                                (dilep_the_projection[secondhit_ilayer<7?secondhit_ilayer+1:6] - dilep_the_projection[secondhit_ilayer])*
+                                (sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit()))-radii[secondhit_ilayer])/
+                                (radii[secondhit_ilayer<7?secondhit_ilayer+1:6] - radii[secondhit_ilayer]);
+                            if (abs(dphi0) > 0.1 || abs(dthe0) > 0.1) continue;
+
                             const float sigma_second_phi = mytrk->get_dynamic_sigma_phi_data  (0, secondhit_layer==0 ? 0 : secondhit_layer-1, 0) * mytrk->GetChargePrime();
                             const float sigma_second_the = mytrk->get_dynamic_sigma_theta_data(0, secondhit_layer==0 ? 0 : secondhit_layer-1, 0);// * mytrk->GetChargePrime();
 
@@ -532,7 +543,6 @@ namespace MyDileptonAnalysis
                             {
                                 if(secondhit_layer == vtxhits[jlayer]->GetLayer()) 
                                 {
-                                    const int secondhit_ilayer = secondvtxhit->GetiLayer(); 
                                     const float phi_loc_layer = vtxhits[jlayer]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                                     const float the_loc_layer = vtxhits[jlayer]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                                     const float sdphi_first_hit = ((phi_loc_layer - phi_second_hit) + 
@@ -591,10 +601,10 @@ namespace MyDileptonAnalysis
                         //const double check_hit[6] = {0.5188361406326294,1.0,0.08420392070998228,0.1396323828345835,0.010481715202331543,0.019802307710051537}; 
                         //std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
                         //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
-                        newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
-                        newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
-                        newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
-                        newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
+                        //newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
+                        //newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
+                        //newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
+                        //newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
@@ -1558,6 +1568,8 @@ namespace MyDileptonAnalysis
                 delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
                 if (!(newTrack1->GetGhost()==0&&newTrack2->GetGhost()==0))
                     continue;
+                if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                    continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
                 delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
                   
@@ -1661,6 +1673,8 @@ namespace MyDileptonAnalysis
                     inv_mass_dca_bg2[in_hist]->Fill(dca2, invm, pair_pt);
                     delt_phi_dca_bg2[in_hist]->Fill(dca2, dphi, pair_pt);
                     if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
+                        continue;
+                    if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                         continue;
                     inv_mass_dca_bg3[in_hist]->Fill(dca3, invm, pair_pt);
                     delt_phi_dca_bg3[in_hist]->Fill(dca3, dphi, pair_pt);
