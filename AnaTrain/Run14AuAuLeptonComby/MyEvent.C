@@ -580,31 +580,33 @@ namespace MyDileptonAnalysis
                         }
                         const double ecore  = newBDTrack.GetEcore()*( 1.+1./TMath::Tan(the0_trk_proj)/TMath::Tan(the0_trk_proj));
                         const double ecore1 = ecore -newBDTHit.GetReconPt();
+                        const double ecore2 = ecore1/ecore;
                         const double reconpt1 = newBDTrack.GetPt() - newBDTHit.GetReconPt();
-                        const double BDTHitInput[6] = {//['reconpt', 'sdphi3', 'Ecore1', 'Ecore2', 'reconpt1', 'reconpt2']
-                            newBDTHit.GetReconPt(),///need to transfer to bdthit
-                            -3.+hit_in_graph, ecore1, ecore1/ecore, reconpt1, reconpt1/newBDTrack.GetPt()       
+                        const double reconpt2 = reconpt1/newBDTrack.GetPt();
+                        const double BDTHitInput[9] = {//['Pt', 'reconpt', 'sdphi3', 'Ecore1', 'Ecore2', 'Ecore3', 'reconpt1', 'reconpt2', 'reconpt3']
+                            newBDTrack.GetPt(), newBDTHit.GetReconPt(),///need to transfer to bdthit
+                            -3.+hit_in_graph, ecore1, ecore2, ecore2/ecore, reconpt1, reconpt2, reconpt2/newBDTrack.GetPt()       
                         };
                         const double BDTConvInput[38] = {//['Pt', 'Ecore2', 'Centrality', 'Charge', 'reconpt2', 'sdphi0', 'SecondHitPhiR0', ...]
-                            newBDTrack.GetPt(), BDTHitInput[3], (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(),
-                            BDTHitInput[5],newBDTHit.Getsdphi(0)-newBDTHit.Getsdphi(1),
+                            newBDTrack.GetPt(), BDTHitInput[4], (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(),
+                            BDTHitInput[7],newBDTHit.Getsdphi(0)-newBDTHit.Getsdphi(1),
                             newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitPhiL(0,1), newBDTHit.GetSecondHitTheR(0,1), newBDTHit.GetSecondHitTheL(0,1),
                             newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitPhiL(1,1), newBDTHit.GetSecondHitTheR(1,1), newBDTHit.GetSecondHitTheL(1,1),
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
                             newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)       
                         };
-                        const double probsHIT[4] = {0.7243957895255603,0.7737115079566164, 0.825632469175882, 0.8555838293581055};
-                        const double probsConv[4] = {0.01703147434437753,0.027224181193230206, 0.046523217842940785, 0.10788418432540978};
+                        const double probsHIT[4] = {0.8394353979427321,0.8578485748385936, 0.866470713520898, 0.8756346660596539};
+                        const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
                         const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = GetConvBDTProb(BDTConvInput);
-                        //const double check_conv[38] = {3.0234375, -0.009088878844269233, 25.0, 1.0, -0.10400390625, -0.69970703125, -9.21875, 33.59375, 3.904296875, 14.515625, 33.59375, -99.0, 14.515625, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -54.28125, -99.0, 13.6953125, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, 52.5625, -99.0, -10.34375, -99.0, 61.125, -99.0, 12.3359375};
-                        //const double check_hit[6] = {0.5188361406326294,1.0,0.08420392070998228,0.1396323828345835,0.010481715202331543,0.019802307710051537}; 
+                        //const double check_conv[38] = {0.90283203125, 0.13050486912801018, 90.0, 1.0, 0.08544921875, 0.552734375, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0};
+                        //const double check_hit[9] = {0.43579328060150146, 0.5844237804412842, 1.0, -0.18703605256881906, -0.4706638868043885, -1.1843946196432118, -0.14863049983978271, -0.34105736017227173, -0.782612681388855}; 
                         //std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
                         //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
-                        //newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
-                        //newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
-                        //newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
-                        //newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
+                        newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
+                        newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
+                        newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
+                        newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
