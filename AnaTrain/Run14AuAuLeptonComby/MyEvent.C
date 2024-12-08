@@ -1620,6 +1620,11 @@ namespace MyDileptonAnalysis
                     if (newTrack2->GetHitCounter(0) < 1 || newTrack2->GetHitCounter(1) < 1 ||
                         (newTrack2->GetHitCounter(2) < 1 && newTrack2->GetHitCounter(3) < 1))
                         continue;
+                    if( TMath::Abs ( event->GetPreciseZ() - evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetPreciseZ() ) > 4 ) continue;
+                    const float psi_pip = event->GetPsi2BBC();
+                    const float psi_pim = evtbuff_list[icent_mix][izvtx_mix][ipsi2_mix][ievent].GetPsi2BBC();
+                    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 && TMath::Abs(psi_pip-psi_pim)<7*TMath::Pi()/8 )
+                        continue;
                     //if (!(((newTrack2->GetMinsDphi(2)>0||newTrack2->GetHitCounter(2)<1)&&(newTrack2->GetMinsDphi(3)>0||newTrack2->GetHitCounter(3)<1)&&newTrack2->GetMinsDphi(0)>0)||newTrack2->GetGhost()<10))
                     //    continue;
                     // const float a2 = newTrack2->GetMinDist(0);
