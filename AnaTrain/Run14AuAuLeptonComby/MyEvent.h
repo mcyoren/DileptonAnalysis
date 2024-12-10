@@ -1064,7 +1064,7 @@ namespace MyDileptonAnalysis
             TH2D *hist_br, *hist_bz;
             TTree *tree;
             TH1D *event_hist, *centr_hist;
-            TH3D *el_pt_hist;
+            TH3D *el_pt_hist[N_centr];
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
             TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist, *ilayerhitshist[N_centr];
             TH3D *dphi_hist_el[N_centr], *dthe_hist_el[N_centr], *sdphi_hist_el[N_centr], *sdthe_hist_el[N_centr];
@@ -1103,7 +1103,7 @@ namespace MyDileptonAnalysis
                   hist_br = nullptr;
                   hist_bz = nullptr;
                   tree = nullptr;
-                  event_hist = nullptr; centr_hist = nullptr; el_pt_hist = nullptr;
+                  event_hist = nullptr; centr_hist = nullptr;
                   temc = nullptr; ttof = nullptr; n0_hist = nullptr; ep_hist=nullptr; prob_hist=nullptr; disp_hist=nullptr; chi2npe0_hist=nullptr;
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   rich_prob1 = nullptr; rich_prob2 = nullptr; rich_prob3 = nullptr;
@@ -1137,6 +1137,7 @@ namespace MyDileptonAnalysis
                         dthe_hist[i] = nullptr;
                         sdphi_hist[i] = nullptr;
                         sdthe_hist[i] = nullptr;
+                        el_pt_hist[i] = nullptr;
                         dphi_hist_el[i] = nullptr;
                         dthe_hist_el[i] = nullptr;
                         sdphi_hist_el[i] = nullptr;
