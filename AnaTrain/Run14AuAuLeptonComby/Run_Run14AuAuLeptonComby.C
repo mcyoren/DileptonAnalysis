@@ -14,16 +14,17 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
 
     recoConsts *reco_consts =  recoConsts::instance();
     reco_consts->set_IntFlag("Remove_hadron_hits", 0);
-    reco_consts->set_IntFlag("Fill_QA_hadron_hists", 1);
-    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
+    reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
+    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 0);
     reco_consts->set_IntFlag("Fill_ddphi_hadron", 0);
     reco_consts->set_IntFlag("Fill_TTree", 0);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
     reco_consts->set_IntFlag("Fill_DCA_hists", 0);
     reco_consts->set_IntFlag("Use_ident", 1);
     reco_consts->set_IntFlag("Do_track_QA", 0);
+    reco_consts->set_IntFlag("Do_electron_QA", 1);
     reco_consts->set_IntFlag("Do_reveal_hadron", 0);
-    reco_consts->set_IntFlag("Fill_flow", 1);
+    reco_consts->set_IntFlag("Fill_flow", 0);
     reco_consts->set_IntFlag("Fill_true_DCA", 0);
     reco_consts->set_IntFlag("Check_Veto", 0);
     reco_consts->set_IntFlag("fill_inv_mass", 1);
@@ -70,6 +71,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     //mr->RemoveRecalibrator("EmcGenericDeadRecalReco");
 
     se->registerSubsystem(mr);
+
 
     RPReadCalibTree *readT = new RPReadCalibTree();
     readT->setTreeFileRecent("RP_recent_run14pro106_newcent_merge.root");

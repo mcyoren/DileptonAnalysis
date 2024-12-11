@@ -31,6 +31,7 @@ include_HEADERS = \
   Run14AuAuLeptonCombyCutter.h 
 
 libRun14AuAuLeptonEvent_la_SOURCES = \
+  MyML.C \
   MyEvent.C \
   MyEvent_Dict.C
 

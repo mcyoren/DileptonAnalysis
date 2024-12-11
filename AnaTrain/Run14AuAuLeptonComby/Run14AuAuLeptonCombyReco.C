@@ -366,35 +366,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
     
-    n_electrons = event->GetNtrack();
-    for (int itrk = 0; itrk < n_electrons; itrk++)
-    {
-      MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-      
-        mytrk->SetMcId(0);
-        if (True) 
-        {
-            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && 
-                 mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10)  mytrk->SetMcId(mytrk->GetMcId()+1);
-            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
-                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 && fabs(mytrk->GetEmcTOF())<5)  mytrk->SetMcId(mytrk->GetMcId()+6);
-
-            const double treshlods[3] = {0.017808128514646658,  0.0229414147041921, 0.04501756860704552};
-            const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
-            {
-                event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
-                (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
-                event->GetCentrality()/20.+mytrk->GetPtPrime()*2, mytrk->GetN0()+4*mytrk->GetPtPrime(), 
-                1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
-            };
-
-            mytrk->SetMcId(mytrk->GetMcId()+GeteID(input_x, treshlods));
-            if (mytrk->GetMcId()>200 && fabs(mytrk->GetEmcTOF())>5 )  mytrk->SetMcId(mytrk->GetMcId()-900);
-            //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
-        }    
-        //std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
-        //  <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
-    }
+    event_container->IdenElectrons();
 
     n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -521,23 +493,24 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    if(do_electron_QA) event_container->FillQAHist(1000);
+    if(do_electron_QA) event_container->FillQAHist();
     if(fill_TTree) event_container->FillTree();
     if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
         MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+        
         if ((mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
-        if (  mytrk->GetPtPrime() < 0.7 &&  fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
+        if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
         int addit_reject = 0;
-        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>900) addit_reject = 1;
-        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>9000 && mytrk->GetGhost()<1) addit_reject = 10;
-        if(mytrk->GetNHits()<900 || mytrk->GetTOFDPHI()<90) continue;
+        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90) addit_reject = 1;
+        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
+        if(mytrk->GetNHits()<90) continue;
         //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<addit_reject<<" "<<mytrk->GetIsConv()<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
         MyDileptonAnalysis::MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));

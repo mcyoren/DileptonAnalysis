@@ -166,6 +166,34 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
+    void MyEventContainer::IdenElectrons()
+    {
+        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+
+            mytrk->SetMcId(0);
+        
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && 
+                 mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10)  mytrk->SetMcId(mytrk->GetMcId()+1);
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
+                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 && fabs(mytrk->GetEmcTOF())<5)  mytrk->SetMcId(mytrk->GetMcId()+6);
+                 
+            const double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
+            const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
+            {
+                event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
+                (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
+                event->GetCentrality()/20.+mytrk->GetPtPrime()*2, mytrk->GetN0()+4*mytrk->GetPtPrime(), 
+                1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
+            };
+            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));
+            //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
+            if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
+                        <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
+        }    
+    }
+
     void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg)
     {
         const int nleptons = event->GetNtrack();
@@ -601,16 +629,16 @@ namespace MyDileptonAnalysis
                         const double probsHIT[4] = {0.5848303237292644, 0.8419021991243022, 0.9126287556697584, 0.9764619218724009};
                         //const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
                         const double probsConv[4] = {0.01223423759692792,0.02339307777498656, 0.036379530303515574, 0.05655034044617745};
-                        const double BDTHIT_prob = GetHitBDTProb(BDTHitInput);
-                        const double BDTConv_prob = GetConvBDTProb(BDTConvInput);
+                        const double BDTHIT_prob = MyML::GetHitBDTProb(BDTHitInput);
+                        const double BDTConv_prob = MyML::GetConvBDTProb(BDTConvInput);
                         //const double check_conv[38] = {0.7333984375, -0.15691993778033456, 30.0, 1.0, -0.2763671875, 0.61865234375, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -13.90625, 29.515625, -14.796875, 12.7109375, -99.0, -99.0, -99.0, -99.0, 11.6328125, 2.4453125, -8.484375, -8.3515625, -16.4375, -99.0, -15.421875, -99.0};
                         //const double check_hit[24] = {0.9032109379768372, -0.03350786052498526, 9.0, -0.043118540197610855, 0.3650345504283905, -99.0, -99.0, -99.0, -99.0, -3.513319492340088, -5.427070617675781, 10.489153861999512, -27.00037956237793, 0.3903948962688446, 0.8820940256118774, 1.6283620595932007, -6.10830545425415, -9.838641166687012, -1.9269108772277832, -10.0, -99.0, -99.0, -99.0, -99.0}; 
                         //std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
                         //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
                         newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
-                        newBDTHit.SetIsTrue(0, GetHitBDT(BDTHIT_prob,probsHIT));
-                        newBDTHit.SetIsTrue(1, GetConvBDT(BDTConv_prob,probsConv));
+                        newBDTHit.SetIsTrue(0, MyML::GetHitBDT(BDTHIT_prob,probsHIT));
+                        newBDTHit.SetIsTrue(1, MyML::GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
@@ -1564,20 +1592,6 @@ namespace MyDileptonAnalysis
                 const float dphi = ee1.Angle(ee2);
                 inv_mass_dca_fg0[in_hist]->Fill(dca0, invm, pair_pt);
                 delt_phi_dca_fg0[in_hist]->Fill(dca0, dphi, pair_pt);
-                if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
-                    continue;
-                inv_mass_dca_fg1[in_hist]->Fill(dca1, invm, pair_pt);    
-                delt_phi_dca_fg1[in_hist]->Fill(dca1, dphi, pair_pt);
-                if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
-                    continue;
-                inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
-                delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                if (!(newTrack1->GetGhost()==0&&newTrack2->GetGhost()==0))
-                    continue;
-                if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
-                    continue;
-                inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
-                delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
                   
                 MyDileptonAnalysis::MyVTXHit *vtxhit10 = event->GetVTXHitEntry(newTrack1->GetHitIndex(0));
                 MyDileptonAnalysis::MyVTXHit *vtxhit11 = event->GetVTXHitEntry(newTrack1->GetHitIndex(1));
@@ -1607,6 +1621,20 @@ namespace MyDileptonAnalysis
                 if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
                 if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
 
+                inv_mass_dca_fg1[in_hist]->Fill(dca1, invm, pair_pt);    
+                delt_phi_dca_fg1[in_hist]->Fill(dca1, dphi, pair_pt);
+                if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
+                    continue;
+                inv_mass_dca_fg2[in_hist]->Fill(dca2, invm, pair_pt);
+                delt_phi_dca_fg2[in_hist]->Fill(dca2, dphi, pair_pt);
+                if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
+                    continue;
+                inv_mass_dca_fg3[in_hist]->Fill(dca3, invm, pair_pt);
+                delt_phi_dca_fg3[in_hist]->Fill(dca3, dphi, pair_pt);
+                if (!(newTrack1->GetGhost()==0&&newTrack2->GetGhost()==0))
+                    continue;
+                if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                    continue;
                 inv_mass_dca_fg4[in_hist]->Fill(dca4, invm, pair_pt);
                 delt_phi_dca_fg4[in_hist]->Fill(dca4, dphi, pair_pt);
 
@@ -1675,20 +1703,6 @@ namespace MyDileptonAnalysis
                     const float dphi = ee1.Angle(ee2);
                     inv_mass_dca_bg0[in_hist]->Fill(dca0, invm, pair_pt);
                     delt_phi_dca_bg0[in_hist]->Fill(dca0, dphi, pair_pt);
-                    if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
-                        continue;
-                    inv_mass_dca_bg1[in_hist]->Fill(dca1, invm, pair_pt);    
-                    delt_phi_dca_bg1[in_hist]->Fill(dca1, dphi, pair_pt);
-                    if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
-                        continue;
-                    inv_mass_dca_bg2[in_hist]->Fill(dca2, invm, pair_pt);
-                    delt_phi_dca_bg2[in_hist]->Fill(dca2, dphi, pair_pt);
-                    if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
-                        continue;
-                    if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
-                        continue;
-                    inv_mass_dca_bg3[in_hist]->Fill(dca3, invm, pair_pt);
-                    delt_phi_dca_bg3[in_hist]->Fill(dca3, dphi, pair_pt);
                     
                     MyDileptonAnalysis::MyVTXHit *vtxhit10 = event->GetVTXHitEntry(newTrack1->GetHitIndex(0));
                     MyDileptonAnalysis::MyVTXHit *vtxhit11 = event->GetVTXHitEntry(newTrack1->GetHitIndex(1));
@@ -1724,6 +1738,21 @@ namespace MyDileptonAnalysis
                     if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
                     if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
                     if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+                    
+                    inv_mass_dca_bg1[in_hist]->Fill(dca1, invm, pair_pt);    
+                    delt_phi_dca_bg1[in_hist]->Fill(dca1, dphi, pair_pt);
+                    if (!(newTrack1->GetNHits()>90&&newTrack2->GetNHits()>90))
+                        continue;
+                    inv_mass_dca_bg2[in_hist]->Fill(dca2, invm, pair_pt);
+                    delt_phi_dca_bg2[in_hist]->Fill(dca2, dphi, pair_pt);
+                    if (!(newTrack1->GetTOFDPHI()>90&&newTrack2->GetTOFDPHI()>90))
+                        continue;
+                    inv_mass_dca_bg3[in_hist]->Fill(dca3, invm, pair_pt);
+                    delt_phi_dca_bg3[in_hist]->Fill(dca3, dphi, pair_pt);
+                    if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
+                        continue;
+                    if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                        continue;
 
                     inv_mass_dca_bg4[in_hist]->Fill(dca4, invm, pair_pt);
                     delt_phi_dca_bg4[in_hist]->Fill(dca4, dphi, pair_pt);
@@ -1828,12 +1857,12 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),event->GetCentrality());
 
-            if (fabs(electron->GetEmcTOF())>5 ) continue; 
+            if (fabs(electron->GetEmcTOF())>5 && mc_id != -99) continue; 
 
-            const float eConv = std::log10(electron->GetNHits()+1) + std::log10(electron->GetTOFDPHI()+1)*5;
+            const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
             el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),0.,eConv);
 
-            if (fabs(electron->GetEmcTOF())<5 && electron->GetN0()>1 && electron->GetEcore()/electron->GetPtot()>0.8 &&
+            if (electron->GetN0()>1 && electron->GetEcore()/electron->GetPtot()>0.8 &&
             electron->GetDisp()<4 && electron->GetChi2()/electron->GetNpe0()<10 && electron->GetProb()>0.01) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),1.,eConv);
             if (electron->GetMcId()>90) 
@@ -2020,10 +2049,6 @@ namespace MyDileptonAnalysis
         }
         if(fill_inv_mas)
         {
-            INIT_HIST(3, el_had_dphi, 200, -25, 25, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, el_had_dz, 200, -25, 25, 24, 0.2, 5.0, 10, 0, 10);
-            INIT_HIST(3, el_had_dr, 200, 0, 40, 24, 0.2, 5.0, 10, 0, 10);
-
             INIT_HISTOS( 3, inv_mass_dca_fg0, 3*N_centr, 50, 0, 2000, 90, 0, 4.50, 25, 0, 10);
             INIT_HISTOS( 3, inv_mass_dca_fg1, 3*N_centr, 50, 0, 2000, 90, 0, 4.50, 25, 0, 10);
             INIT_HISTOS( 3, inv_mass_dca_fg2, 3*N_centr, 50, 0, 2000, 90, 0, 4.50, 25, 0, 10);
