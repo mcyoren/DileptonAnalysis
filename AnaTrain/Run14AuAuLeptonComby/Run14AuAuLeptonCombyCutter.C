@@ -68,8 +68,11 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float alpha_pip = p1->get_double(Run14AuAuLeptonCombyEnum::ALPHA);
     const float alpha_pim = p2->get_double(Run14AuAuLeptonCombyEnum::ALPHA);
 
-    const float zed_pip = p1->get_double(Run14AuAuLeptonCombyEnum::ZED);
-    const float zed_pim = p2->get_double(Run14AuAuLeptonCombyEnum::ZED);
+    const float zvtx_pip = p1->get_double(Run14AuAuLeptonCombyEnum::ZVTX);
+    const float zvtx_pim = p2->get_double(Run14AuAuLeptonCombyEnum::ZVTX);
+
+    const float zed_pip = p1->get_double(Run14AuAuLeptonCombyEnum::ZED) - zvtx_pip;
+    const float zed_pim = p2->get_double(Run14AuAuLeptonCombyEnum::ZED) - zvtx_pim;
 
     const float dalpha = alpha_pip - alpha_pim;
     const float dphi = phi_pip - phi_pim;
@@ -78,24 +81,24 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
                      p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 5. )
         return false;
-    if (GetRichGhost(p1->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p1->get_double(Run14AuAuLeptonCombyEnum::CRKZED),
-                     p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 10.0 )
+
+    if( TMath::Abs(zvtx_pip - zvtx_pim) > 1.0 )
         return false;
 
     // pc1
-    if (fabs(dzed) < 6.0 && fabs(dphi - (0.13 * dalpha)) < 0.015)
+    if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphi - (0.13 * dalpha)) < 0.015)
         return false;
     // x1x2_1
-    if (fabs(dphi - (0.04 * dalpha)) < 0.015)
+    if (TMath::Abs(dphi - (0.04 * dalpha)) < 0.015)
         return false;
     // x1x2_2
-    if (fabs(dphi - (-0.065 * dalpha)) < 0.015)
+    if (TMath::Abs(dphi - (-0.065 * dalpha)) < 0.015)
         return false;
 
     const float psi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
     const float psi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
 
-    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8 && TMath::Abs(psi_pip-psi_pim)<7*TMath::Pi()/8 )
+    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/16. && TMath::Abs(psi_pip-psi_pim)<15.*TMath::Pi()/16. )
         return false;
 
     
