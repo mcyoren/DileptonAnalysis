@@ -346,7 +346,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
       
       bool skip = false; 
-        if (mytrk.GetPtPrime()>MAX_PT || mytrk.GetPhi0Prime() < E_PT)
+        if (mytrk.GetPtPrime()>MAX_PT || mytrk.GetPtPrime() < E_PT)
           skip = true;
         if (mytrk.GetCrkphi()<-99)
           skip = true;
@@ -630,13 +630,13 @@ int Run14AuAuLeptonCombyReco::applySingleTrackCut(const PHCentralTrack *d_trk, c
     if (!pass_quality0 && !pass_quality1 && !pass_quality2 && rich_phi<-99)
         return 0;
     
-    if (E_PT > -99 && pT <= E_PT*0.9 &&  rich_phi<-99)
+    if (E_PT > -99 && pT <= E_PT*0.5 &&  rich_phi<-99)
         return 0;
 
-    if (MAX_PT > -99 && pT >= MAX_PT*1.05 &&  rich_phi<-99)
+    if (MAX_PT > -99 && pT >= MAX_PT*2 &&  rich_phi<-99)
         return 0;
         
-    if (dep < -2 && ecore < 0.3 && d_trk->get_n0(itrk)<0 /*&& rich_phi<-99*/)
+    if (ecore < 0.2 && ecore/p < 0.5 && d_trk->get_n0(itrk)<0 /*&& rich_phi<-99*/)
         return 1;
 
     if(rich_phi>-99 && ((E_PT > -99 && pT <= E_PT*0.8) || (!pass_quality0 && !pass_quality1 && !pass_quality2) ||
