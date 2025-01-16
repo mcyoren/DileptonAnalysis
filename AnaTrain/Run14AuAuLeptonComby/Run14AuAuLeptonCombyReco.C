@@ -505,33 +505,22 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
+        if ( mytrk->GetPtPrime() > 4.4) continue;///temporary
         if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
-        //if ( mytrk->GetMinsDphi(0) < 0 && mytrk ->GetGhost() > 10 ) continue; 
+        
         int addit_reject = 0;
-        if(mytrk->GetNHits()>90 && mytrk->GetTOFDPHI()>90) addit_reject = 1;
+        if(mytrk->GetNHits()>900) addit_reject = 1;
         if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
-        if(mytrk->GetNHits()<90) continue;
-        //std::cout<<event->GetCentrality()<<" "<< mytrk->GetPtPrime()<<" "<<mytrk->GetMcId()<<" "<<addit_reject<<" "<<mytrk->GetIsConv()<<" "<<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
+
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
         MyDileptonAnalysis::MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
         MyDileptonAnalysis::MyVTXHit *vtxhit2 = nullptr; 
         if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
         else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
-
-        //if (mytrk->GetGhost()<25) addit_reject = 1;
-        //if (mytrk->GetGhost()<20 && mytrk->GetMinsDphi(0)>-1 && mytrk->GetIsConv()<4) addit_reject = 10;
         
         int hadron_reject = mytrk->GetMcId();
-        //if (hadron_reject<100 && event->GetCentrality()>20) hadron_reject += 90;
-        //if ( hadron_reject<100 ) continue;
-        //if ( ( (TMath::Abs(mytrk->GetMinsDphi(3))<3 || TMath::Abs(mytrk->GetMinsDphi(2))<2) &&
-        //       (TMath::Abs(mytrk->GetMinsDthe(3))<3 || TMath::Abs(mytrk->GetMinsDthe(2))<2) && 
-        //       (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-        //       (TMath::Abs(mytrk->GetMinsDthe(0))<3 && mytrk->GetMinsDphi(0)>-1.5) ) || (mytrk->GetPtPrime()>1.2 && mytrk->GetMinsDphi(0)>-1.5) ) addit_reject=1;
-        //if(mytrk->GetIsConv()>0) std::cout<<"opa, hee is our conversion "<<mytrk->GetIsConv()<<" "<<mytrk->GetChargePrime()<<" "<<mytrk ->GetGhost()<<" "<<mytrk->GetMinsDphi(0)
-        //<<" "<<mytrk->GetMinsDphi(1)<<" "<<mytrk->GetMinsDphi(2)<<" "<<mytrk->GetMinsDphi(3)<<" "<<npassed<<std::endl;
-
-        const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2; //temporary changed to GetGharge cuase in fact its prime
+        
+        const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
         UltraLightTrack ult("Run14AuAuLeptonComby Track",
                             Run14AuAuLeptonCombyEnum::LAST_DOUBLE,
@@ -546,8 +535,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::ZED, mytrk->GetZDC());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
-        //ult.set_double(Run14AuAuLeptonCombyEnum::DCA,  mytrk->GetDCA());
-        //ult.set_double(Run14AuAuLeptonCombyEnum::SDCA, mytrk->GetsDCA());
         
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2());
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());

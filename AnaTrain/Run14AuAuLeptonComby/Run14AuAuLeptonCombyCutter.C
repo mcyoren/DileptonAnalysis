@@ -82,7 +82,7 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
                      p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 5. )
         return false;
 
-    if( TMath::Abs(zvtx_pip - zvtx_pim) > 1.0 )
+    if( TMath::Abs(zvtx_pip - zvtx_pim) > 2.0 )
         return false;
 
     // pc1
@@ -98,7 +98,7 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float psi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
     const float psi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
 
-    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/16. && TMath::Abs(psi_pip-psi_pim)<15.*TMath::Pi()/16. )
+    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/8. && TMath::Abs(psi_pip-psi_pim)<7.*TMath::Pi()/8. )
         return false;
 
     
