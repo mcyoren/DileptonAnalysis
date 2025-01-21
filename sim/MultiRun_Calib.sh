@@ -1,6 +1,10 @@
 #!/bin/sh
+if [ "$#" -ne 4 ]; then
+    echo "You need to run the script with the following 4 parameters: input file, number of threads, number of events, output file name"
+    exit 1
+fi
 
-echo "$1 $2 $3 $4"
+echo "input file: $1, number of threads: $2, number of events: $3 output file name: $4"
 
 root -l -b << EOF
     .L ../AnaTrain/Run14AuAuLeptonComby/MyEvent.C+

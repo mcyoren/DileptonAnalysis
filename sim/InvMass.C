@@ -1,5 +1,5 @@
 #include "InvMass.h"
-void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
+void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, int N_max = 1000000)
 {
   std::cout<<"start"<<std::endl;
   TFile *input = new TFile(inname, "READ");
@@ -17,6 +17,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 0;
   const int do_track_QA = 0;
+  const int do_electron_QA = 1;
+  const int do_ident_electrons = 1;
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
   const int fill_true_DCA = 1;
@@ -32,7 +34,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
   event_container->InitEvent();
   event_container->GetHistsFromFile("../../ee_QA/AnaTrain/Run14AuAuLeptonComby/field_map.root");
   event_container->CreateOutFileAndInitHists(outname,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass);
+                                               fill_DCA_hists, do_track_QA+do_electron_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass);
   MyDileptonAnalysis::MyEvent *myevent = 0;                                            
   //event = 0;
   br->SetAddress(&myevent);
@@ -61,7 +63,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
       cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
-    if (ievent - beggin > 5e6)
+    if (ievent - beggin > N_max)
       break;
 
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
@@ -98,6 +100,9 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     if(do_track_QA) event_container->FillQAHist(in_id);
     if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
     if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+
+    if(event_container->GetNGoodElectrons()<1  ) continue;
 
     int n_electrons = myevent->GetNtrack()*0;
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -113,8 +118,6 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
         }
         mytrk->ZeroHitCounters();
     }
-
-    if(event_container->GetNGoodElectrons()<2  ) continue;
 
     if(false)
         {
@@ -153,7 +156,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
             }
         }
 
-        if(associate_hits && event_container->GetNGoodElectrons()>1)event_container->Associate_Hits_to_Leptons(5,5,5);
+        if(associate_hits && event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5,5,5);
     
     if(false)
         {
@@ -203,7 +206,10 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1)
     //event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
+    if(do_ident_electrons) event_container->IdenElectrons();
+    if(do_electron_QA)event_container->FillQAHist(-99);
     //myevent->ReshuffleElectrons();
+    if(fill_inv_mass && event_container->GetNGoodElectrons()<2  ) continue;
     if(fill_inv_mass) event_container->fill_inv_mass();
     myevent->ClearEvent();
     //event->ClearEvent();
