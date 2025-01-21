@@ -1755,11 +1755,10 @@ namespace MyDileptonAnalysis
                         continue;
                     inv_mass_dca_bg3[in_hist]->Fill(dca3, invm, pair_pt);
                     delt_phi_dca_bg3[in_hist]->Fill(dca3, dphi, pair_pt);
-                    if (!(newTrack1->GetGhost()>0&&newTrack2->GetGhost()>0))
+                    if (!(newTrack1->GetGhost()==0&&newTrack2->GetGhost()==0))
                         continue;
                     if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                         continue;
-
                     inv_mass_dca_bg4[in_hist]->Fill(dca4, invm, pair_pt);
                     delt_phi_dca_bg4[in_hist]->Fill(dca4, dphi, pair_pt);
                 }
