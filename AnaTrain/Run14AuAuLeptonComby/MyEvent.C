@@ -173,6 +173,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
 
             mytrk->SetMcId(0);
+            if (mytrk->GetEcore()/mytrk->GetPtot()<0.6 && mytrk->GetN0()<0 ) continue;
         
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 && 
                  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10)  mytrk->SetMcId(mytrk->GetMcId()+1);
@@ -191,6 +192,10 @@ namespace MyDileptonAnalysis
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
+            
+            if(false) if (mytrk->GetMcId()>10 && mytrk->GetCrkphi()<-99 && mytrk->GetPtPrime()>0.4 ) std::cout<<MyML::GetProb(input_x)<<" "<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
+                        <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<" "<<mytrk->GetCrkphi()<<" "<<mytrk->GetEmcdz()<<std::endl;
+            
         }    
     }
 
@@ -371,6 +376,7 @@ namespace MyDileptonAnalysis
                         if(layer == 0) {sigma_veto0=sigma_veto;sigma_inner0=sigma_inner;}
                         if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner0 && TMath::Abs(sdthe) < sigma)
                         {
+                            if(true && vtxhit->GetLadder()<25) vtxhit->SetLadder(25+itrk);
                             if (diff < min[layer])
                             {
                                 min[layer] = diff;
@@ -1849,15 +1855,19 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::FillQAHist(const int mc_id)
     {
-
-        const int central_bin = (int) event->GetCentrality() / 20;
         const int Nelectrons = event->GetNtrack();
         for (int i = 0; i < Nelectrons; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),event->GetCentrality());
 
+            if (electron->GetEcore()/electron->GetPtot()<0.6 && electron->GetN0()<0) continue;
+            //if ( electron->GetEcore()/electron->GetPtot() < 0.5 || electron->GetN0() < 0 )
+            //    continue;
             if (fabs(electron->GetEmcTOF())>5 && mc_id != -99) continue; 
+
+            int central_bin = (int) event->GetCentrality() / 20;
+            central_bin += N_centr * ( 1 - electron->GetChargePrime() ) / 2;
 
             const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
             el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),0.,eConv);
@@ -1961,7 +1971,7 @@ namespace MyDileptonAnalysis
             tree->Branch("MyEvent", event);
             INIT_HIST(1, event_hist, 10, 0, 10);
             INIT_HIST(1, centr_hist, 100, 0, 100);
-            INIT_HISTOS(3, el_pt_hist, N_centr, 50, 0, 5, 2, 0, 2, 100, 0, 100);
+            INIT_HISTOS(3, el_pt_hist, N_centr*2, 50, 0, 5, 2, 0, 2, 100, 0, 100);
             is_fill_tree = 1;
         }
         if (fill_dphi)
@@ -2002,7 +2012,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dphi, 100, -0.1, 0.1, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dz, 100, -50, 50, 50, 0.0, 5.0, 5, 0, 100);
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 5, 0, 100);
-            INIT_HISTOS(3, el_pt_hist, N_centr, 100, 0, 10, 5, 0, 5, 25, 0, 25);
+            INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
             INIT_HIST(3, temc, 150, -50, 150, 200, 0., 10, 5, 0, 100);
 
             is_fill_track_QA = 1;

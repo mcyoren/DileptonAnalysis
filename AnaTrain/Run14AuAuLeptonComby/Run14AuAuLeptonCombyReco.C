@@ -389,10 +389,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2);
-        event_container->Associate_Hits_to_Leptons(10.,10.,10.);
-        //event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
-        //event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
-        //if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
+        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
         
         if(false)
         {
@@ -509,16 +508,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary
         if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
         int addit_reject = 0;
-        if ( ( ( TMath::Abs(mytrk->GetMinsDthe(3))<5 && TMath::Abs(mytrk->GetMinsDphi(3))<5 ) ||
-               ( TMath::Abs(mytrk->GetMinsDthe(2))<5 && TMath::Abs(mytrk->GetMinsDphi(2))<5 ) ) &&
-               ( TMath::Abs(mytrk->GetMinsDthe(1))<5 && TMath::Abs(mytrk->GetMinsDphi(1))<5 )   && 
-               ( TMath::Abs(mytrk->GetMinsDthe(0))<5 && TMath::Abs(mytrk->GetMinsDphi(0))<5 )     ) addit_reject=1;
-        if ( ( ( TMath::Abs(mytrk->GetMinsDthe(3))<3 && TMath::Abs(mytrk->GetMinsDphi(3))<3 ) ||
-               ( TMath::Abs(mytrk->GetMinsDthe(2))<3 && TMath::Abs(mytrk->GetMinsDphi(2))<3 ) ) &&
-               ( TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3 )   && 
-               ( TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3 )     ) addit_reject=10;
-        //if(mytrk->GetNHits()>900) addit_reject = 1;
-        //if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10;
+        if(mytrk->GetNHits()>900) addit_reject = 1;
+        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;
+        //if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10; 
 
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
         MyDileptonAnalysis::MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
