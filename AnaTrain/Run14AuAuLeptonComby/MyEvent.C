@@ -1836,19 +1836,23 @@ namespace MyDileptonAnalysis
         const int n_elec = event->GetNtrack();
         for (int i = 0; i < n_elec; i++)
         {
-            MyDileptonAnalysis::MyElectron *hadron = event->GetEntry(i);
-            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(hadron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(hadron->GetPhiDC());
+            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
+            const float alpha_offset = - (event->GetPreciseX() / 220) * TMath::Sin(electron->GetPhiDC()) - (event->GetPreciseY() / 220) * TMath::Cos(electron->GetPhiDC());
      
-            hadron->SetAlphaPrime(hadron->GetAlpha() - alpha_offset);
+            electron->SetAlphaPrime(electron->GetAlpha() - alpha_offset);
             // set Phi0 to right value
-            hadron->SetPhi0Prime(hadron->GetPhi0Prime() - 2.0195 * alpha_offset);
+            electron->SetPhi0Prime(electron->GetPhi0Prime() - 2.0195 * alpha_offset);
 
-            hadron->SetPtPrime(hadron->GetPtPrime() * TMath::Abs(hadron->GetAlpha() / hadron->GetAlphaPrime()) );
+            electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs(electron->GetAlpha() / electron->GetAlphaPrime()) );
 
-            if (hadron->GetAlpha() * hadron->GetAlphaPrime() < 0)
-                hadron->SetQPrime(-hadron->GetChargePrime());
+            if (electron->GetAlpha() * electron->GetAlphaPrime() < 0)
+                electron->SetQPrime(-electron->GetChargePrime());
             else
-                hadron->SetQPrime(hadron->GetChargePrime());
+                electron->SetQPrime(electron->GetChargePrime());
+
+            if(true && electron->GetMcId()==2 && electron->GetChargePrime()==-1 && electron->GetPtPrime()>0.4) std::cout << "Positron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            if(true && electron->GetMcId()==3 && electron->GetChargePrime()==+1 && electron->GetPtPrime()>0.4) std::cout << "Electron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            
         }
     }
 
