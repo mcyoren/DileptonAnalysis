@@ -1850,8 +1850,8 @@ namespace MyDileptonAnalysis
             else
                 electron->SetQPrime(electron->GetChargePrime());
 
-            if(true && electron->GetMcId()==2 && electron->GetChargePrime()==-1 && electron->GetPtPrime()>0.4) std::cout << "Positron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
-            if(true && electron->GetMcId()==3 && electron->GetChargePrime()==+1 && electron->GetPtPrime()>0.4) std::cout << "Electron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            if(false && electron->GetMcId()==2 && electron->GetChargePrime()==-1 && electron->GetPtPrime()>0.4) std::cout << "Positron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            if(false && electron->GetMcId()==3 && electron->GetChargePrime()==+1 && electron->GetPtPrime()>0.4) std::cout << "Electron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
             
         }
     }
@@ -2497,9 +2497,9 @@ namespace MyDileptonAnalysis
                             hit_counter_jlayer[ilayer].push_back(var_counter_jlayer);
                             if(layer==2) hit_counter_jlayer[8].push_back(var_counter_jlayer);
                             if(layer==3) hit_counter_jlayer[9].push_back(var_counter_jlayer);
-                            std::cout<<ilayer<<" "<<radii[ilayer]<<" "<<sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))<<" "<<dilep_phi_projection[ilayer]<<" "<<mytrk->GetPtPrime()<<" "<<
-                            (dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<7?ilayer+1:6])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer]-radii[ilayer<7?ilayer+1:6])*1000<<" "<<
-                            (dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<6?ilayer+2:5])/(radii[ilayer]-radii[ilayer<6?ilayer+2:5])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])*1000<<std::endl;
+                            //std::cout<<ilayer<<" "<<radii[ilayer]<<" "<<sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))<<" "<<dilep_phi_projection[ilayer]<<" "<<mytrk->GetPtPrime()<<" "<<
+                            //(dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<7?ilayer+1:6])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer]-radii[ilayer<7?ilayer+1:6])*1000<<" "<<
+                            //(dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<6?ilayer+2:5])/(radii[ilayer]-radii[ilayer<6?ilayer+2:5])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])*1000<<std::endl;
                         } // end of association
                         else
                         {
