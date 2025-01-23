@@ -11,7 +11,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int associate_hits = 1;
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 0;
+  const int fill_QA_lepton_hists = 1;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
@@ -23,8 +23,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int Use_ident = 0;
   const int fill_true_DCA = 1;
   const int check_veto = 0;
-  const int fill_inv_mass = 1;
-  const int fill_inv_mass_sim = 1;
+  const int fill_inv_mass = 0;
+  const int fill_inv_mass_sim = 0;
 
   char outname[200];
   sprintf(outname,"kek_%d.root",itread);
@@ -98,9 +98,10 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     }
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+    if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
+    if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+    if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
+    if(false) event_container->Associate_Hits_to_Leptons_OLD(20,20,20);
 
     if(event_container->GetNGoodElectrons()<1  ) continue;
 
