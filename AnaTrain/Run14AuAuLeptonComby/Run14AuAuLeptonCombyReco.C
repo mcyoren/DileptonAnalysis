@@ -373,7 +373,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      if (mytrk.GetMcId()<100 || mytrk.GetPtPrime() < 0.4)
+      if (mytrk.GetMcId()<1 || mytrk.GetPtPrime() < 0.4) //adding regualr electron cuts
       {
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -384,6 +384,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
 
     if(event->GetNtrack()<1) return 0;
+    if(do_electron_QA) event_container->FillQAHistPreAssoc();
 
     if(!fill_ddphi_hadron)
     {
@@ -506,7 +507,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary
-        if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// Should try 10 
+        if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// not sure it works after pt=0.7
+        if (mytrk->GetMcId() < 100) continue;
+        //if ( event->GetCentrality() < 20 && mytrk->GetN0() < 2 + SQR(mytrk->GetDisp()) / 8. ) continue;
+        if (event->GetCentrality() < 20  && !(mytrk->GetN0()>1 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
+            mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
+
         int addit_reject = 0;
         if(mytrk->GetNHits()>900) addit_reject = 1;
         if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;

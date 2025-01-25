@@ -262,14 +262,16 @@ namespace MyDileptonAnalysis
             float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
             {
                   layer = arm + (1-q_prime) + 4 * layer;
-                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * pt_prime)
-                  +sigma_phi_pars[rungroup][centr_bin][layer][3] * pt_prime;
+                  const float local_pt = pt_prime>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
+                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * local_pt)
+                  +sigma_phi_pars[rungroup][centr_bin][layer][3] * local_pt;
             };
             float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
             {
                   layer = arm + (1-q_prime) + 4 * layer;
-                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * pt_prime)
-                  +sigma_theta_pars[rungroup][centr_bin][layer][3] * pt_prime;
+                  const float local_pt = pt_prime>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
+                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * local_pt)
+                  +sigma_theta_pars[rungroup][centr_bin][layer][3] * local_pt;
             };
 
             float get_dynamic_mean_phi_data(int ilay, float phi_prev, int rungroup = 0 ) 
@@ -1230,6 +1232,7 @@ namespace MyDileptonAnalysis
             void correct_beam_offset();
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -999);
+            void FillQAHistPreAssoc();
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
