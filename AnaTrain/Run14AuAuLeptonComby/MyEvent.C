@@ -177,7 +177,7 @@ namespace MyDileptonAnalysis
         
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 )  mytrk->SetMcId(mytrk->GetMcId()+1);
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
-                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4 && fabs(mytrk->GetEmcTOF())<5)  mytrk->SetMcId(mytrk->GetMcId()+6);
+                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
             const double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
@@ -1861,12 +1861,12 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < Nelectrons; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            const int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime());
+            int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime());
 
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
             //if ( electron->GetEcore()/electron->GetPtot() < 0.5 || electron->GetN0() < 0 )
             //    continue;
-            if (fabs(electron->GetEmcTOF())>5 && mc_id != -99) continue; 
+            //if (fabs(electron->GetEmcTOF())>5 && mc_id != -99) continue; 
 
             int central_bin = (int) event->GetCentrality() / 20;
             central_bin += N_centr * ( 1 - electron->GetChargePrime() ) / 2;
@@ -1885,30 +1885,59 @@ namespace MyDileptonAnalysis
             if (electron->GetMcId()>9000) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),4.,eConv);
 
-            if (electron->GetMcId()<100) continue;///figuring out how bdt actually works
+            //if (electron->GetMcId()<100) continue;///figuring out how bdt actually works
 
-            temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin);
-            ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetChi2()>0) 
+                prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
 
-            ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
-            n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
-            prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
-            disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
-            chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetMcId()>99 && electron->GetMcId()%10>5)///figuring out how bdt actually works
+            {
 
-            const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
-            el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
-            el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin);
-            el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
+                temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin);
+                ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin);
+    
+                ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime());
+                n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality());
+                prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality());
+                disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),event->GetCentrality());
+                chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),event->GetCentrality());
+                rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
+                rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
+                rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality());
 
-            ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime());
-            n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality());
-            prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality());
-            disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),event->GetCentrality());
-            chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),event->GetCentrality());
-            rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
-            rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality());
-            rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality());
+                const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
+                el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
+                el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin);
+                el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
+            }
+
+            if(electron->GetTOFE()>0.6 && electron->GetTOFE()<1.4) 
+            {
+                charge_centr_bin += 400;
+                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                    ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
+                if (electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                    n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
+                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetChi2()>0) 
+                    prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
+                if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                    disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
+                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                    chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
+
+                const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
+                el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
+                el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin);
+                el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
+            }
         }
     }
 
@@ -1924,37 +1953,27 @@ namespace MyDileptonAnalysis
 
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin+200);
             ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin+200);
+            
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetChi2()>0) 
+                prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
 
-            if (electron->GetMcId()<100) continue;///figuring out how bdt actually works
+            if (electron->GetMcId()<1000 || electron->GetMcId()%10<5 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin);
             ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin);
 
-            ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
-            n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
-            prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
-            disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
-            chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
-
             const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
             el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
-            el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin);
-            el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
-
-            if(electron->GetTOFE()>0.6 && electron->GetTOFE()<1.4) 
-            {
-                charge_centr_bin += 200;
-                ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
-                n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
-                prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
-                disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
-                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
-
-                const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
-                el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
-                el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin);
-                el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
-            }
+            el_had_dphi->Fill(electron->GetTOFDPHI(),electron->GetPtPrime(),charge_centr_bin);
+            el_had_dz  ->Fill(electron->GetTOFDZ()  ,electron->GetPtPrime(),charge_centr_bin);
         }
     }
 
@@ -2058,7 +2077,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dphi, 100, -0.1, 0.1, 50, 0.0, 5.0, 30, 0, 600);
             INIT_HIST(3, el_had_dz, 100, -50, 50, 50, 0.0, 5.0, 30, 0, 600);
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 30, 0, 600);
-            INIT_HIST(3, temc, 150, -50, 150, 200, 0., 10, 30, 0, 600);
+            INIT_HIST(3, temc, 1000, -0.5, 1.5, 200, 0., 10, 30, 0, 600);
             INIT_HIST(3, ttof, 1000, -0.5, 1.5, 50, 0., 5, 30, 0, 600);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);

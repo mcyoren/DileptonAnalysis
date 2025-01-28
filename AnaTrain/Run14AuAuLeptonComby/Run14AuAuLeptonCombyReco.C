@@ -308,6 +308,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
 
+    if(event->GetNtrack()<1) return 0;
+
     if(use_iden)
     {
         Walking(TopNode);
@@ -318,7 +320,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             {
                 emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
                 if(!emc) continue;
-	            mytrk->SetEmcTOF(emc->tofcorr());  
+                
+	            //mytrk->SetEmcTOF(emc->tofcorr());  
+                const int icnttrack = mytrk->GetTrkId();
+                mytrk->SetEmcTOF( particleCNT->get_mom(icnttrack)*particleCNT->get_mom(icnttrack)*(emc->tofcorr()*emc->tofcorr()*900./particleCNT->get_plemc(icnttrack)/particleCNT->get_plemc(icnttrack)-1));
             } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
         }
         int n_hadrons = event->GetNhadron();
@@ -506,12 +511,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) && fill_inv_mass) continue;
            
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
-        if ( mytrk->GetPtPrime() > 4.4) continue;///temporary
-        if (fabs(mytrk->GetEmcTOF())>5 ) continue; //// not sure it works after pt=0.7
-        if (mytrk->GetMcId() < 100) continue;
+        if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
+        if (mytrk->GetMcId() < 1000) continue;// mytrk->GetMcId()%10<5
         //if ( event->GetCentrality() < 20 && mytrk->GetN0() < 2 + SQR(mytrk->GetDisp()) / 8. ) continue;
-        if (event->GetCentrality() < 20  && !(mytrk->GetN0()>1 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
-            mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
+        //if (event->GetCentrality() < 20  && !(mytrk->GetN0()>1 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
+        //    mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
 
         int addit_reject = 0;
         if(mytrk->GetNHits()>900) addit_reject = 1;
@@ -524,7 +528,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
         else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
         
-        int hadron_reject = mytrk->GetMcId();
+        int hadron_reject = 0;//mytrk->GetMcId();
+        if (  ( mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 
+            || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6 ) hadron_reject = 100; //// not sure it works after pt=0.7
+        if (hadron_reject<100)continue;
+        if ( ( mytrk->GetEmcTOF() > - 1 &&  mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100 && mytrk->GetMcId()%10 > 5 && mytrk->GetProb()>0.1  )
+             || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.4 ) hadron_reject = 1000;
         
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
@@ -697,8 +706,8 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
     newTrack->SetEmcdphi(trk->get_emcdphi(itrk_reco));
     newTrack->SetEmcTower(trk->get_sect(itrk_reco), trk->get_ysect(itrk_reco), trk->get_zsect(itrk_reco));
     
-    newTrack->SetTOFDPHI(trk->get_n0(itrk_reco));
-    newTrack->SetTOFDZ(trk->get_plemc(itrk_reco));
+    newTrack->SetTOFDPHI(trk->get_tofdphi(itrk_reco));
+    newTrack->SetTOFDZ(trk->get_tofdz(itrk_reco));
     newTrack->SetPC3SDPHI(trk->get_pc3sdphi(itrk_reco));
     newTrack->SetPC3SDZ(trk->get_pc3sdz(itrk_reco));
 
@@ -706,8 +715,8 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
     newTrack->SetCrkz(trk->get_center_z(itrk_reco));
 
     newTrack->SetPrimes(bbcz, svxz, rg_beamoffset);
-    newTrack->ResetPrimes(bbcz, svxz, rg_beamoffset);
     newTrack->SetTOFE((trk->get_m2tof(itrk_reco))*100);
+    newTrack->ResetPrimes(bbcz, svxz, rg_beamoffset);
     newTrack->SetEmcTOF(trk->get_temc(itrk_reco));
 	if(trk->get_emcid(itrk_reco) >= 0)
     {

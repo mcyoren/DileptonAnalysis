@@ -757,7 +757,7 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
     {
         std::cout<<"bad-vad nodes"<<std::endl;
     }
-    float fVtx = _phglobal_ptr->getBbcZVertex();
+    //float fVtx = _phglobal_ptr->getBbcZVertex();
     float bbct0 = _phglobal_ptr->getBbcTimeZero();
     
     int nclusters = _emcClusterContainer_ptr->size();
@@ -789,9 +789,6 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
 
         const int TDC = tower->TDC();
         const int ADC = tower->ADC();
-        const float x = cluster->x();
-        const float y = cluster->y();
-        const float z = cluster->z() - fVtx;
         while(clustercent>24767) clustercent -=24768;
         if(clustercent<0) continue;
         if (clustercent < 15552)
@@ -814,22 +811,27 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
         else if(isec==7) sector_clockwise = 6;  // sector E1
         else continue;
         
-        const float d = sqrt(x * x + y * y + z * z);
-        const float c = 29.979245829979; //[cm/ns]
-        const float t_flash = d / c;
+
+        //const float x = cluster->x();
+        //const float y = cluster->y();
+        //const float z = cluster->z() - fVtx;
+        //const float d = sqrt(x * x + y * y + z * z);
+        //const float c = 29.979245829979; //[cm/ns]
+        //const float t_flash = d / c;
+
         //const float t0_offset = T0Offset[clustercent]; ///// i have no idea why??
         const float t0_offset = bbct0;
         const float sec_offset = SectorOffset[sector_clockwise];
         const float walk = Walk[clustercent]*(pow(ADC,Walk2[clustercent]))+Walk3[clustercent]*(pow(ADC,Walk4[clustercent]))+Walk5[clustercent]; //  new fitting function by balazs 5 parameters,  walk3 is tower offset in TDC
         //float fTime = -lc * (TDC - walk) - t0_offset - sec_offset - t_flash;
-        float fTime =  lc * (4095 -TDC)- walk - t0_offset -sec_offset - t_flash; // Edited by Attia
+        float fTime =  lc * (4095 -TDC)- walk - t0_offset -sec_offset;// - t_flash; // Edited by Attia
         if (TDC < 0)
             fTime = -9999;
         // Afterburner
         //fTime = fTime - fafter->Eval(cluster->ecent());
         // std::cout << fTime << std::endl;
         
-        cluster->set_tofcorr(fTime - 0*bbct0);
+        cluster->set_tofcorr(fTime);// - 0*bbct0);
         
     }
     
