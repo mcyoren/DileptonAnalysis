@@ -98,12 +98,16 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     }
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(400);
     if(do_track_QA) event_container->FillQAHist(in_id);
+
+    if(do_ident_electrons) event_container->IdenElectrons();
+    if(do_electron_QA)event_container->FillQAHistPreAssoc();
+
     if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
     if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
     if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
     if(false) event_container->Associate_Hits_to_Leptons_OLD(20,20,20);
 
-    if(event_container->GetNGoodElectrons()<1  ) continue;
+    if(associate_hits && event_container->GetNGoodElectrons()<1  ) continue;
 
     int n_electrons = myevent->GetNtrack()*0;
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -207,7 +211,6 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     //event_container->CheckVeto();
     if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_TTree) event_container->FillTree();
-    if(do_ident_electrons) event_container->IdenElectrons();
     if(do_electron_QA)event_container->FillQAHist(-99);
     //myevent->ReshuffleElectrons();
     if(fill_inv_mass && event_container->GetNGoodElectrons()<2  ) continue;
