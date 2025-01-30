@@ -34,18 +34,19 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
 
-    CabanaBoy *cb = new CabanaBoy(10,4,1, "Run14AuAuLeptonComby");
+    CabanaBoy *cb = new CabanaBoy(10,2,2, "Run14AuAuLeptonComby");
     //CabanaBoy *cb = new CabanaBoy(5,1,1, "Run14AuAuLeptonComby");
 	
 	cb->SetHistoFileName(outFile);
 	cb->setZVertexMax(10);
-	cb->setReactionPlaneSelectionType(CabanaBoy::ReactionPlaneNotUsed);//ReactionPlaneBBCSNPsi2
+	cb->setReactionPlaneSelectionType(CabanaBoy::ReactionPlaneBBCSNPsi2);//ReactionPlaneNotUsed
 	cb->setCentralitySelectionType(CabanaBoy::CentralityTypeRun12CuAu);
 	cb->setCuts(mc);
 	cb->setHistos(mh);
 	cb->setPoolType(CabanaBoy::MultiAkibaPools);
+	cb->setNSubPools(1, 4, 2);
 	cb->setFastMom(false);
-	cb->setPoolDepth(5000);
+	cb->setPoolDepth(10);
 	cb->setMixingType11(true);  
 	cb->setMixingType12(true);
 	cb->setMixingType22(true);

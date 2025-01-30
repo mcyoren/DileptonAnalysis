@@ -1873,30 +1873,24 @@ namespace MyDileptonAnalysis
 
             const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
 
-            if (electron->GetN0()>= 2 && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<5 ) 
+            if (electron->GetMcId()>900 ) 
             el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),0.,eConv);
-            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 &&
-            electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+            if (electron->GetMcId()%10>5 ) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),1.,eConv);
-            if (electron->GetMcId()>90) 
+            if (electron->GetProb()>0.1) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),2.,eConv);
-            if (electron->GetMcId()>900) 
+            if (electron->GetMcId()%10>5 && electron->GetProb()>0.1) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),3.,eConv);
             if (electron->GetMcId()>9000) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),4.,eConv);
 
             //if (electron->GetMcId()<100) continue;///figuring out how bdt actually works
 
-            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
-            if (electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
-            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetChi2()>0) 
-                prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
-            if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
-            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
+            ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
+            n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
+            prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
+            disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
+            chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
 
             if (electron->GetMcId()>99 && electron->GetMcId()%10>5)///figuring out how bdt actually works
             {
@@ -1919,19 +1913,15 @@ namespace MyDileptonAnalysis
                 el_had_dz  ->Fill(electron->GetEmcdz()  ,electron->GetPtPrime(),charge_centr_bin);
             }
 
-            if(electron->GetTOFE()>0.6 && electron->GetTOFE()<1.4) 
+            if(electron->GetEmcTOF()>0.4 && electron->GetEmcTOF()<1.4) 
             {
                 charge_centr_bin += 400;
-                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                    ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
-                if (electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                    n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
-                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetChi2()>0) 
-                    prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
-                if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                    disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
-                if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-                    chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
+                
+                ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin);
+                n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin);
+                prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin);
+                disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
+                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
 
                 const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
                 el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin);
@@ -1965,7 +1955,7 @@ namespace MyDileptonAnalysis
             if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
                 chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
 
-            if (electron->GetMcId()<1000 || electron->GetMcId()%10<5 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
+            if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin);
             ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin);
@@ -1975,6 +1965,46 @@ namespace MyDileptonAnalysis
             el_had_dphi->Fill(electron->GetTOFDPHI(),electron->GetPtPrime(),charge_centr_bin);
             el_had_dz  ->Fill(electron->GetTOFDZ()  ,electron->GetPtPrime(),charge_centr_bin);
         }
+    }
+
+    int MyEventContainer::isGhostEvent()
+    {
+        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
+            
+            for (int jtrk = itrk+1; jtrk < event->GetNtrack(); jtrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
+
+                const float dcenter_phi = ( mytrk1->GetCrkphi() - mytrk2->GetCrkphi()) / 0.013;
+                if ( TMath::Abs(dcenter_phi) < 5) return 1; 
+
+                const float phi_pip = mytrk1->GetPhiDC();
+                const float phi_pim = mytrk2->GetPhiDC();
+
+                const float alpha_pip = mytrk1->GetAlphaPrime();
+                const float alpha_pim = mytrk2->GetAlphaPrime();
+
+                const float zed_pip = mytrk1->GetZDC();
+                const float zed_pim = mytrk2->GetZDC();
+
+                const float dalpha = alpha_pip - alpha_pim;
+                const float dphi = phi_pip - phi_pim;
+                const float dzed = zed_pip - zed_pim;
+
+                 // pc1
+                if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphi - (0.13 * dalpha)) < 0.015)
+                    return 1;
+                // x1x2_1
+                if (TMath::Abs(dphi - (0.04 * dalpha)) < 0.015)
+                    return 1;
+                // x1x2_2
+                if (TMath::Abs(dphi - (-0.065 * dalpha)) < 0.015)
+                    return 1;
+            }
+        }
+        return 0;
     }
 
     void MyEventContainer::GetHistsFromFile(const std::string &loc)

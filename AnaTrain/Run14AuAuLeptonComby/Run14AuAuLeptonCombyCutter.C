@@ -15,6 +15,10 @@ bool Run14AuAuLeptonCombyCutter::isEventOK(PHCompositeNode *topNode)
         return false;
     }
 
+    const float bbc_vertex = global->getBbcZVertex();
+    if (TMath::Abs(bbc_vertex) > 10)
+        return false;
+
     return true;
 }
 
@@ -82,8 +86,8 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
                      p2->get_double(Run14AuAuLeptonCombyEnum::CRKPHI), p2->get_double(Run14AuAuLeptonCombyEnum::CRKZED)) < 5. )
         return false;
 
-    if( TMath::Abs(zvtx_pip - zvtx_pim) > 1.0 )
-        return false;
+    //if( TMath::Abs(zvtx_pip - zvtx_pim) > 1.0 )
+    //    return false;
 
     // pc1
     if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphi - (0.13 * dalpha)) < 0.015)
@@ -97,9 +101,8 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
 
     const float psi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
     const float psi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
-
-    if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/16. && TMath::Abs(psi_pip-psi_pim)<15.*TMath::Pi()/16. )
-        return false;
+    //if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/16. && TMath::Abs(psi_pip-psi_pim)<15.*TMath::Pi()/16. )
+    //    return false;
 
     
     const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);

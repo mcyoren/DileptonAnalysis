@@ -1234,6 +1234,7 @@ namespace MyDileptonAnalysis
             void FillQAHist(const int mc_id = -999);
             void FillQAHistPreAssoc();
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
+            int isGhostEvent();
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };
