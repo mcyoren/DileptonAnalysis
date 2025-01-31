@@ -1551,10 +1551,9 @@ namespace MyDileptonAnalysis
                 ////////pair cuts
                 //const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                 //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
-                const float dcenter_phi = (newTrack1->GetChargePrime() * newTrack1->GetCrkphi()+newTrack2->GetChargePrime() * newTrack2->GetCrkphi()) / 0.013;
-                const float dcenter_zed = (newTrack1->GetChargePrime() * newTrack1->GetCrkz()+newTrack2->GetChargePrime() * newTrack2->GetCrkz())/5.;
-                if ( (TMath::Abs(dcenter_phi)<3|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 6 ) &&
-                      newTrack1->GetChargePrime() != newTrack2->GetChargePrime() && newTrack1->GetArm()== newTrack2->GetArm()) continue;
+                const float dcenter_phi = (newTrack1->GetCrkphi() - newTrack2->GetCrkphi()) / 0.013;
+                const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
+                if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 ) ) continue;
                 const float dalpha = newTrack1->GetAlphaPrime() - newTrack2->GetAlphaPrime();
                 const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
                 const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
@@ -1666,10 +1665,9 @@ namespace MyDileptonAnalysis
                     ////////pair cuts
                     //const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                     //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
-                    const float dcenter_phi = (newTrack1->GetChargePrime() * newTrack1->GetCrkphi()+newTrack2->GetChargePrime() * newTrack2->GetCrkphi()) / 0.013;
-                    const float dcenter_zed = (newTrack1->GetChargePrime() * newTrack1->GetCrkz()+newTrack2->GetChargePrime() * newTrack2->GetCrkz())/5.;
-                    if ( (TMath::Abs(dcenter_phi)<3|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 6 ) &&
-                          newTrack1->GetChargePrime() != newTrack2->GetChargePrime() && newTrack1->GetArm()== newTrack2->GetArm()) continue;
+                    const float dcenter_phi = (newTrack1->GetCrkphi() - newTrack2->GetCrkphi()) / 0.013;
+                    const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
+                    if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 ) ) continue;
                     const float dalpha = newTrack1->GetAlpha() - newTrack2->GetAlpha();
                     const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
                     const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
@@ -1976,9 +1974,10 @@ namespace MyDileptonAnalysis
             for (int jtrk = itrk+1; jtrk < event->GetNtrack(); jtrk++)
             {
                 MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
-
+                bool isGhost = false;
                 const float dcenter_phi = ( mytrk1->GetCrkphi() - mytrk2->GetCrkphi()) / 0.013;
-                if ( TMath::Abs(dcenter_phi) < 5) return 1; 
+                if ( TMath::Abs(dcenter_phi) < 5) 
+                    isGhost = true;
 
                 const float phi_pip = mytrk1->GetPhiDC();
                 const float phi_pim = mytrk2->GetPhiDC();
@@ -1992,16 +1991,26 @@ namespace MyDileptonAnalysis
                 const float dalpha = alpha_pip - alpha_pim;
                 const float dphi = phi_pip - phi_pim;
                 const float dzed = zed_pip - zed_pim;
-
                  // pc1
-                if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphi - (0.13 * dalpha)) < 0.015)
-                    return 1;
+                if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphi - (0.13 * dalpha)) < 0.015) 
+                    isGhost = true;
                 // x1x2_1
-                if (TMath::Abs(dphi - (0.04 * dalpha)) < 0.015)
-                    return 1;
+                if (TMath::Abs(dphi - (0.04 * dalpha)) < 0.015) 
+                    isGhost = true;
                 // x1x2_2
                 if (TMath::Abs(dphi - (-0.065 * dalpha)) < 0.015)
-                    return 1;
+                    isGhost = true;
+
+                if (isGhost) {
+                    if (mytrk1->GetMcId() > mytrk2->GetMcId() ) mytrk2->SetGhost(-9);
+                    else if (mytrk1->GetMcId() < mytrk2->GetMcId() ) mytrk1->SetGhost(-9);
+                    else {
+                        if (mytrk1->GetPtPrime() > mytrk2->GetPtPrime() ) mytrk2->SetGhost(-9);
+                        else mytrk1->SetGhost(-9);
+                    }
+                if(isGhost) return 1;
+
+                }
             }
         }
         return 0;

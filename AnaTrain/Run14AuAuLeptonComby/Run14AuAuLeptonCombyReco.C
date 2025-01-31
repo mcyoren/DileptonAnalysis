@@ -198,6 +198,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const float precise_y = precisevtx.getY();
     const float precise_z = precisevtx.getZ();
 
+    if (fabs(precise_z) > BBC_VERTEX_CUT)
+        return 0;
+        
+    globalCNT->setBbcZVertex(precise_z);
+
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
 
     event->SetCentrality(centrality);
@@ -539,8 +544,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (hadron_reject<100) continue;
         if ( (  mytrk->GetMcId()%10 > 5 && mytrk->GetProb()>0.1  )
              || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.4 ) hadron_reject = 1000;
-        
-        globalCNT->setBbcZVertex(event->GetPreciseZ());
 
         const int local_charge = mytrk->GetPhiDC() -  vtxhit0->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()) > 0 ? 1 : -1;
         if( mytrk->GetChargePrime() != mytrk->GetCharge() || mytrk->GetChargePrime() != local_charge || mytrk->GetCharge() != local_charge )

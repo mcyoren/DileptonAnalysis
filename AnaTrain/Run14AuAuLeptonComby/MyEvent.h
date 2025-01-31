@@ -67,7 +67,7 @@ namespace MyDileptonAnalysis
             float alpha_prime;
 
             // EMCal variables
-            short emcid;     // EMC cluster
+            int emcid;     // EMC cluster
             int emctower;  // emctower = 1000*iy + 10*iz + sector
                            // EMC sector 0-4 from bottom of arm
                            // iy tower coordinates in rphi
