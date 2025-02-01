@@ -1966,7 +1966,8 @@ namespace MyDileptonAnalysis
     }
 
     int MyEventContainer::isGhostEvent()
-    {
+    {   
+        int n_ghosts = 0;
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
@@ -2002,18 +2003,20 @@ namespace MyDileptonAnalysis
                     isGhost = true;
 
                 if (isGhost) {
-                    if (mytrk1->GetMcId() > mytrk2->GetMcId() ) mytrk2->SetGhost(-9);
-                    else if (mytrk1->GetMcId() < mytrk2->GetMcId() ) mytrk1->SetGhost(-9);
-                    else {
-                        if (mytrk1->GetPtPrime() > mytrk2->GetPtPrime() ) mytrk2->SetGhost(-9);
-                        else mytrk1->SetGhost(-9);
-                    }
-                if(isGhost) return 1;
-
+                    mytrk1->SetGhost(-9);
+                    mytrk2->SetGhost(-9);
+                    //if (mytrk1->GetMcId() > mytrk2->GetMcId() ) mytrk2->SetGhost(-9);
+                    //else if (mytrk1->GetMcId() < mytrk2->GetMcId() ) mytrk1->SetGhost(-9);
+                    //else {
+                    //    if (mytrk1->GetPtPrime() > mytrk2->GetPtPrime() ) mytrk2->SetGhost(-9);
+                    //    else mytrk1->SetGhost(-9);
+                    //}
                 }
+                if(isGhost) n_ghosts++;
+                //if(isGhost) return 1;
             }
         }
-        return 0;
+        return n_ghosts;
     }
 
     void MyEventContainer::GetHistsFromFile(const std::string &loc)

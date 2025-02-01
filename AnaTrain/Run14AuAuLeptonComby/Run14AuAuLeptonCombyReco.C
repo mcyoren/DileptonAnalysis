@@ -478,6 +478,27 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           continue;
       }
     }
+    
+    if(do_electron_QA) event_container->FillQAHist();
+    
+    n_electrons = event->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
+      bool do_reshuf = false;
+
+      if (mytrk.GetNHits()<900 )
+          do_reshuf = true;
+
+      if (do_reshuf&&fill_inv_mass)
+      {
+          event->RemoveTrackEntry(itrk);
+          //event->AddElecCand(&mytrk);
+          n_electrons--;
+          itrk--;
+          continue;
+      }
+    }
 
     if(use_iden)
     {
@@ -500,16 +521,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
 
-    if(event_container->isGhostEvent()) return 0;  //removing ghost
+    const int n_ghosts = event_container->isGhostEvent();
+    if(n_ghosts>0) std::cout<<"GHOST EVENT with centrality and n_ghosts: " <<event->GetCentrality()<<" "<<n_ghosts<<std::endl;  //removing ghost
 
     if(check_veto) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();
     if(fill_TTree) event_container->CleanUpHitList();
-    if(fill_true_DCA) event_container->FillTrueDCA();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
+    if(fill_true_DCA) event_container->FillTrueDCA();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
-    if(do_electron_QA) event_container->FillQAHist();
     if(fill_TTree) event_container->FillTree();
     if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
 
@@ -523,13 +544,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
         if (mytrk->GetMcId() < 1000) continue;// mytrk->GetMcId()%10<5
+        if (mytrk->GetNHits() < 900) continue; 
         //if ( event->GetCentrality() < 20 && mytrk->GetN0() < 2 + SQR(mytrk->GetDisp()) / 8. ) continue;
         //if (event->GetCentrality() < 20  && !(mytrk->GetN0()>1 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
         //    mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
 
         int addit_reject = 0;
-        if(mytrk->GetNHits()>900) addit_reject = 1;
-        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;
+        if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 1;
+        //if(mytrk->GetNHits()>900) addit_reject = 1;
+        if(mytrk->GetGhost()!=-9 && mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;
         //if(mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 10; 
 
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
@@ -547,7 +570,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         const int local_charge = mytrk->GetPhiDC() -  vtxhit0->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()) > 0 ? 1 : -1;
         if( mytrk->GetChargePrime() != mytrk->GetCharge() || mytrk->GetChargePrime() != local_charge || mytrk->GetCharge() != local_charge )
-            hadron_reject = 100;
+            hadron_reject = 100;///to be removed
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
