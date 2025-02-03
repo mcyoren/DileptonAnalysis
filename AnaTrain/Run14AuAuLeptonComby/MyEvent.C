@@ -631,14 +631,14 @@ namespace MyDileptonAnalysis
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
                             newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)       
                         };
-                        const double probsHIT[4] = {0.5848303237292644, 0.8419021991243022, 0.9126287556697584, 0.9764619218724009};
+                        const double probsHIT[4] = {0.20257391183083123, 0.2957282015875412, 0.7048700405814634, 0.8971706093225199};
                         //const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
                         const double probsConv[4] = {0.01223423759692792,0.02339307777498656, 0.036379530303515574, 0.05655034044617745};
                         const double BDTHIT_prob = MyML::GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = MyML::GetConvBDTProb(BDTConvInput);
                         //const double check_conv[38] = {0.7333984375, -0.15691993778033456, 30.0, 1.0, -0.2763671875, 0.61865234375, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -13.90625, 29.515625, -14.796875, 12.7109375, -99.0, -99.0, -99.0, -99.0, 11.6328125, 2.4453125, -8.484375, -8.3515625, -16.4375, -99.0, -15.421875, -99.0};
-                        //const double check_hit[24] = {0.9032109379768372, -0.03350786052498526, 9.0, -0.043118540197610855, 0.3650345504283905, -99.0, -99.0, -99.0, -99.0, -3.513319492340088, -5.427070617675781, 10.489153861999512, -27.00037956237793, 0.3903948962688446, 0.8820940256118774, 1.6283620595932007, -6.10830545425415, -9.838641166687012, -1.9269108772277832, -10.0, -99.0, -99.0, -99.0, -99.0}; 
-                        //std::cout<<GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
+                        //const double check_hit[24] = {0.6347407102584839, -0.06209205680455947, 81.0, -0.11198512464761734, 0.869284451007843, -99.0, -99.0, -99.0, -99.0, 0.5129899382591248, -99.0, -99.0, -99.0, -99.0, 1.3870052099227905, -99.0, -99.0, -99.0, -99.0, -10.0, -99.0, -99.0, -99.0, -99.0}; 
+                        //std::cout<<MyML::GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<MyML::GetConvBDTProb(BDTConvInput)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
                         //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
                         newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
@@ -893,10 +893,10 @@ namespace MyDileptonAnalysis
                 
                 if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
-                const float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin*0+2, layer);
-                const float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin*0+2, layer);
-                const float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin*0+2, layer);
-                const float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin*0+2, layer);
+                const float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
+                const float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
+                const float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin, layer);
+                const float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin, layer);
 
                 const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;
                 const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
@@ -1871,15 +1871,15 @@ namespace MyDileptonAnalysis
 
             const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
 
-            if (electron->GetMcId()>900 ) 
-            el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),0.,eConv);
+            if (electron->GetMcId()%10>0 ) 
+                el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),0.,eConv);
             if (electron->GetMcId()%10>5 ) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),1.,eConv);
-            if (electron->GetProb()>0.1) 
+            if (electron->GetMcId()>90) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),2.,eConv);
-            if (electron->GetMcId()%10>5 && electron->GetProb()>0.1) 
+            if (electron->GetMcId()>900) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),3.,eConv);
-            if (electron->GetMcId()>9000) 
+            if (electron->GetMcId()>9000 && electron->GetMcId()%10>5) 
                 el_pt_hist[central_bin]->Fill(electron->GetPtPrime(),4.,eConv);
 
             //if (electron->GetMcId()<100) continue;///figuring out how bdt actually works
