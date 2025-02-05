@@ -375,7 +375,7 @@ namespace MyDileptonAnalysis
                         if(layer == 0) {sigma_veto0=sigma_veto;sigma_inner0=sigma_inner;}
                         if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner0 && TMath::Abs(sdthe) < sigma)
                         {
-                            if(true && vtxhit->GetLadder()<25) vtxhit->SetLadder(25+itrk);
+                            if(false && vtxhit->GetLadder()<25) vtxhit->SetLadder(25+itrk);/// do no taking all hits in cone
                             if (diff < min[layer])
                             {
                                 min[layer] = diff;
@@ -529,8 +529,17 @@ namespace MyDileptonAnalysis
 
                             MyDileptonAnalysis::MyVTXHit *secondvtxhit = event->GetVTXHitEntry(isecondhit);
                             if(secondvtxhit->GetLadder()>49 ) continue;
-                            if(secondvtxhit->GetLadder()>24 && secondvtxhit->GetLadder() != itrk + 25 && !recover_fg ) continue;
-
+                            if(secondvtxhit->GetLadder()>24 && secondvtxhit->GetLadder() != itrk + 25 && !recover_fg ) 
+                            {   //check on same track cuts is needed
+                                MyDileptonAnalysis::MyElectron *second_trk = event->GetEntry(secondvtxhit->GetLadder() - 25);
+                                if (!second_trk) {std::cout<<"no second thrack: smt went wrong"<<std::endl;continue;}
+                                if (mytrk->GetChargePrime() != second_trk->GetChargePrime()) 
+                                {
+                                    const float dcenter_phi = ( mytrk->GetCrkphi() - second_trk->GetCrkphi()) / 0.013;
+                                    if ( TMath::Abs(dcenter_phi) > 5) 
+                                    continue;
+                                }
+                            }
                             const int secondhit_layer = secondvtxhit->GetLayer(); 
 
                             const float phi_second_hit = secondvtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
@@ -633,12 +642,12 @@ namespace MyDileptonAnalysis
                         };
                         const double probsHIT[4] = {0.20257391183083123, 0.2957282015875412, 0.7048700405814634, 0.8971706093225199};
                         //const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
-                        const double probsConv[4] = {0.01223423759692792,0.02339307777498656, 0.036379530303515574, 0.05655034044617745};
+                        const double probsConv[4] = {0.059511564980906206,0.0672349245703329, 0.07958121918163912, 0.10254988100220457};
                         const double BDTHIT_prob = MyML::GetHitBDTProb(BDTHitInput);
                         const double BDTConv_prob = MyML::GetConvBDTProb(BDTConvInput);
-                        //const double check_conv[38] = {0.7333984375, -0.15691993778033456, 30.0, 1.0, -0.2763671875, 0.61865234375, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -13.90625, 29.515625, -14.796875, 12.7109375, -99.0, -99.0, -99.0, -99.0, 11.6328125, 2.4453125, -8.484375, -8.3515625, -16.4375, -99.0, -15.421875, -99.0};
+                        //const double check_conv[38] = {1.1865234375, 0.03924144270263441, 8.0, -1.0, 0.00905609130859375, -0.30126953125, -43.8125, -99.0, 18.1875, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -21.0625, 45.40625, 7.8828125, 14.8203125, -21.0625, 61.25, 19.09375, 18.296875, -25.203125, -99.0, 20.765625, -99.0, -48.875, -99.0, -8.578125, -99.0};
                         //const double check_hit[24] = {0.6347407102584839, -0.06209205680455947, 81.0, -0.11198512464761734, 0.869284451007843, -99.0, -99.0, -99.0, -99.0, 0.5129899382591248, -99.0, -99.0, -99.0, -99.0, 1.3870052099227905, -99.0, -99.0, -99.0, -99.0, -10.0, -99.0, -99.0, -99.0, -99.0}; 
-                        //std::cout<<MyML::GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<MyML::GetConvBDTProb(BDTConvInput)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
+                        //std::cout<<MyML::GetHitBDTProb(check_hit)<<" "<<BDTHIT_prob<<" "<<MyML::GetConvBDTProb(check_conv)<<" "<<BDTConv_prob<<" "<<newBDTHit.GetIsTrue(0)<<" "<<newBDTHit.GetIsTrue(1)<<" "<<newBDTHit.GetIsTrue(2)<<" "<<newBDTHit.GetIsTrue(3)<<std::endl;
                         //std::cout<<BDTHitInput[0]<<" "<<BDTHitInput[1]<<" "<<BDTHitInput[2]<<" "<<BDTHitInput[3]<<" "<<BDTHitInput[4]<<" "<<BDTHitInput[5]<<" "<<std::endl;
                         newBDTHit.SetIsTrue(2, (int) 1000*BDTHIT_prob);
                         newBDTHit.SetIsTrue(3, (int) 1000*BDTConv_prob);
@@ -648,8 +657,10 @@ namespace MyDileptonAnalysis
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
                         if(chi2<min_chi2) 
                         {
-                            mytrk->SetNHits(newBDTHit.GetIsTrue(0));
-                            mytrk->SetTOFDPHI(newBDTHit.GetIsTrue(1));
+                            if (recover_fg) mytrk->SetNHits(newBDTHit.GetIsTrue(0));
+                            if (recover_fg) mytrk->SetTOFDPHI(newBDTHit.GetIsTrue(1) );
+                            if (!recover_fg) mytrk->SetPC3SDZ(newBDTHit.GetIsTrue(0));
+                            if (!recover_fg) mytrk->SetPC3SDPHI(newBDTHit.GetIsTrue(1));
                             newBDTrack.SetReconPt(mytrk->GetReconPT());
                             newBDTrack.SetReconPhi0(mytrk->GetPhi0());
                             newBDTrack.SetReconThe0(mytrk->GetThe0());
@@ -2017,6 +2028,32 @@ namespace MyDileptonAnalysis
             }
         }
         return n_ghosts;
+    }
+
+    void MyEventContainer::ResetRecoverFGVars()
+    {   
+        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
+            if(mytrk1->GetChargePrime() != -1 ) continue;
+            
+            for (int jtrk = 0; jtrk < event->GetNtrack(); jtrk++)
+            {
+                MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
+                if(mytrk2->GetChargePrime() != 1 ) continue;
+                //std::cout<<"before: "<<mytrk1->GetNHits()<<" "<<mytrk2->GetNHits()<<" "<<mytrk1->GetTOFDPHI()<<" "<<mytrk2->GetTOFDPHI()<<std::endl;
+                //std::cout<<"before: "<<(int)mytrk1->GetPC3SDZ()<<" "<<(int)mytrk2->GetPC3SDZ()<<" "<<mytrk1->GetPC3SDPHI()<<" "<<mytrk2->GetPC3SDPHI()<<std::endl;
+                const float min_nhits_reco = mytrk1->GetPC3SDZ() < mytrk2->GetPC3SDZ() ? mytrk1->GetPC3SDZ() : mytrk2->GetPC3SDZ();
+                if(min_nhits_reco > mytrk1->GetNHits()) mytrk1->SetNHits(min_nhits_reco);
+                if(min_nhits_reco > mytrk2->GetNHits()) mytrk2->SetNHits(min_nhits_reco);
+
+
+                const float min_ghost_reco = mytrk1->GetPC3SDPHI() < mytrk2->GetPC3SDPHI() ? mytrk1->GetPC3SDPHI() : mytrk2->GetPC3SDPHI();
+                if(min_ghost_reco > mytrk1->GetTOFDPHI()) mytrk1->SetTOFDPHI(min_ghost_reco);
+                if(min_ghost_reco > mytrk2->GetTOFDPHI()) mytrk2->SetTOFDPHI(min_ghost_reco);
+                //std::cout<<"after:  "<<mytrk1->GetNHits()<<" "<<mytrk2->GetNHits()<<" "<<mytrk1->GetTOFDPHI()<<" "<<mytrk2->GetTOFDPHI()<<std::endl;
+            }
+        }
     }
 
     void MyEventContainer::GetHistsFromFile(const std::string &loc)

@@ -86,7 +86,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container = new MyDileptonAnalysis::MyEventContainer();
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
-    event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
+    event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists*0,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,///temporary to be removed
                                                fill_DCA_hists, do_track_QA+do_electron_QA, fill_flow_hists, fill_true_DCA, check_veto,
                                                fill_QA_lepton_hists>0?0:fill_inv_mass);
 
@@ -525,7 +525,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     //const int n_ghosts = event_container->isGhostEvent();
     //if(n_ghosts>0) std::cout<<"GHOST EVENT with centrality and n_ghosts: " <<event->GetCentrality()<<" "<<n_ghosts<<std::endl;  //removing ghost
-
+    
+    if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();
     if(check_veto) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();
@@ -552,10 +553,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //    mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
 
         int addit_reject = mytrk->GetNHits();
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<4 && TMath::Abs(mytrk->GetMinsDthe(3))<4) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<4 && TMath::Abs(mytrk->GetMinsDthe(2))<4) ) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<4 && TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<4 && TMath::Abs(mytrk->GetMinsDphi(0))<4) ) ) addit_reject+=1;
+        //if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<4 && TMath::Abs(mytrk->GetMinsDthe(3))<4) ||
+        //       (TMath::Abs(mytrk->GetMinsDphi(2))<4 && TMath::Abs(mytrk->GetMinsDthe(2))<4) ) && 
+        //       (TMath::Abs(mytrk->GetMinsDthe(1))<4 && TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+        //       (TMath::Abs(mytrk->GetMinsDthe(0))<4 && TMath::Abs(mytrk->GetMinsDphi(0))<4) ) ) addit_reject+=1;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
                (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
@@ -571,7 +572,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
         else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
         
-        int hadron_reject = 100;//mytrk->GetMcId();
+        int hadron_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
         //if ( mytrk->GetMcId() > 900  && ( ( mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 
         //    || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6) ) hadron_reject = 1000; //// not sure it works after pt=0.7
         //if (hadron_reject<100) continue;

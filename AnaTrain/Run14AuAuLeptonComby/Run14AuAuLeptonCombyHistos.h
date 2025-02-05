@@ -22,12 +22,18 @@ public:
 
     Run14AuAuLeptonCombyHistos();
 
-      static float get_DCA_V0(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V1(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V2(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V3(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V4(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V5(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V0 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V1 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V2 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V3 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V4 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V5 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V6 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V7 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V8 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V9 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V10(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V11(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 

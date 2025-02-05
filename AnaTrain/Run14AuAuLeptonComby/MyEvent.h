@@ -1235,6 +1235,7 @@ namespace MyDileptonAnalysis
             void FillQAHistPreAssoc();
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
             int isGhostEvent();
+            void ResetRecoverFGVars();
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };
@@ -1254,7 +1255,7 @@ namespace MyML
       double GetConvBDTValue(const double x[38], const int iestim);
       double GetHitBDTProb(const double x[24], const double LearingRate = 0.2, const int n_estim = 24);
       int GetHitBDT(const double x, const double y[4]);
-      double GetConvBDTProb(const double x[38], const double LearingRate = 0.2, const int n_estim = 24);
+      double GetConvBDTProb(const double x[38], const double LearingRate = 0.2, const int n_estim = 12);
       int GetConvBDT(const double x, const double y[4]);
 }
 

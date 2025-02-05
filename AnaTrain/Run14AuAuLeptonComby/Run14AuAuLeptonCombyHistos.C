@@ -16,20 +16,44 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   // 3D hists // DCA, sigma DCA, 2*with 3 hits, 2*phi_v and pc3
   Master3D.clear();
 
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V0", "inv_mass_ee_DCA_V0", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V0", "delt_phi_ee_DCA_V0", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V1", "inv_mass_ee_DCA_V1", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V1", "delt_phi_ee_DCA_V1", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V2", "inv_mass_ee_DCA_V2", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V2", "delt_phi_ee_DCA_V2", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V3", "inv_mass_ee_DCA_V3", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V3", "delt_phi_ee_DCA_V3", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V4", "inv_mass_ee_DCA_V4", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V4", "delt_phi_ee_DCA_V4", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V5", "inv_mass_ee_DCA_V5", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V5", "delt_phi_ee_DCA_V5", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V0",  "inv_mass_ee_DCA_V0",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V0",  "delt_phi_ee_DCA_V0",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V1",  "inv_mass_ee_DCA_V1",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V1",  "delt_phi_ee_DCA_V1",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V2",  "inv_mass_ee_DCA_V2",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V2",  "delt_phi_ee_DCA_V2",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V3",  "inv_mass_ee_DCA_V3",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V3",  "delt_phi_ee_DCA_V3",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V4",  "inv_mass_ee_DCA_V4",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V4",  "delt_phi_ee_DCA_V4",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V5",  "inv_mass_ee_DCA_V5",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V5",  "delt_phi_ee_DCA_V5",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V6",  "inv_mass_ee_DCA_V6",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V6",  "delt_phi_ee_DCA_V6",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V7",  "inv_mass_ee_DCA_V7",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V7",  "delt_phi_ee_DCA_V7",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V8",  "inv_mass_ee_DCA_V8",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V8",  "delt_phi_ee_DCA_V8",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V9",  "inv_mass_ee_DCA_V9",  N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V9",  "delt_phi_ee_DCA_V9",  N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V10", "inv_mass_ee_DCA_V10", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V10", "delt_phi_ee_DCA_V10", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V11", "inv_mass_ee_DCA_V11", N_inv_m,    inv_m_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V11", "delt_phi_ee_DCA_V11", N_phi_bins,   phi_bins, N_DCA,  DCA_bins,  N_pt, pt_bins));
 
   fcn_3Dx.clear();
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_mass_ee);
@@ -56,6 +80,18 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_DCA_V4);
   fcn_3Dy.push_back(get_DCA_V5);
   fcn_3Dy.push_back(get_DCA_V5);
+  fcn_3Dy.push_back(get_DCA_V6);
+  fcn_3Dy.push_back(get_DCA_V6);
+  fcn_3Dy.push_back(get_DCA_V7);
+  fcn_3Dy.push_back(get_DCA_V7);
+  fcn_3Dy.push_back(get_DCA_V8);
+  fcn_3Dy.push_back(get_DCA_V8);
+  fcn_3Dy.push_back(get_DCA_V9);
+  fcn_3Dy.push_back(get_DCA_V9);
+  fcn_3Dy.push_back(get_DCA_V10);
+  fcn_3Dy.push_back(get_DCA_V10);
+  fcn_3Dy.push_back(get_DCA_V11);
+  fcn_3Dy.push_back(get_DCA_V11);
 
   fcn_3Dz.clear();
   fcn_3Dz.push_back(get_pt);
@@ -70,8 +106,32 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_pt);
   fcn_3Dz.push_back(get_pt);
   fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
+  fcn_3Dz.push_back(get_pt);
 
   fcn_3D_weight.clear();
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
+  fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
@@ -140,6 +200,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1%10 < 5 || match2%10 < 5 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -163,7 +228,12 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1%10 < 1 || match2%10 < 1 ) return -999;
+  if ( match1%10 < 5 || match2%10 < 5 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 1000 || ghost2 < 1000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -187,7 +257,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V2(PHParticle *Type1, const unsigned i
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1%10 < 5 || match2%10 < 5 ) return -999;
+  if ( match1 < 10000 || match2 < 10000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -211,7 +281,12 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V3(PHParticle *Type1, const unsigned i
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1 < 100 || match2 < 100 ) return -999;
+  if ( match1 < 10000 || match2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 10 || ghost2 < 10 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -235,7 +310,12 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V4(PHParticle *Type1, const unsigned i
   const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
-  if ( match1 < 1000 || match2 < 1000 ) return -999;
+  if ( match1 < 10000 || match2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 100 || ghost2 < 100 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -260,6 +340,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
 
   if ( match1 < 10000 || match2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 1000 || ghost2 < 1000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -272,6 +357,173 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V5(PHParticle *Type1, const unsigned i
   return fabs(DCA);
 }
 
+float Run14AuAuLeptonCombyHistos::get_DCA_V6(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 10000 || match2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 10000 || ghost2 < 10000 ) return -999;
+
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_V7(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 100 || match2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 1000 || ghost2 < 1000 ) return -999;
+
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_V8(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 100 || match2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 10000 || ghost2 < 10000 ) return -999;
+
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_V9(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 1000 || match2 < 1000 ) return -999;
+
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_V10(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 1000 || match2 < 1000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 100 || ghost2 < 100 ) return -999;
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_V11(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int match1 = p1->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+  const int match2 = p2->get_integer(Run14AuAuLeptonCombyEnum::MATCH);
+
+  if ( match1 < 1000 || match2 < 1000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 < 10000 || ghost2 < 10000 ) return -999;
+
+  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  const double DCA = sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
+  
+  return fabs(DCA);
+}
 float Run14AuAuLeptonCombyHistos::get_phi_ee(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
