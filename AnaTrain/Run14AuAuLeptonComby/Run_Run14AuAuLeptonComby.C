@@ -15,7 +15,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     recoConsts *reco_consts =  recoConsts::instance();
     reco_consts->set_IntFlag("Remove_hadron_hits", 0);
     reco_consts->set_IntFlag("Fill_QA_hadron_hists", 0);
-    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 0);
+    reco_consts->set_IntFlag("Fill_QA_lepton_hists", 1);
     reco_consts->set_IntFlag("Fill_ddphi_hadron", 0);
     reco_consts->set_IntFlag("Fill_TTree", 0);
     reco_consts->set_IntFlag("Fill_d_dphi_hists", 0);
@@ -34,7 +34,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
 
-    CabanaBoy *cb = new CabanaBoy(10,2,2, "Run14AuAuLeptonComby");
+    CabanaBoy *cb = new CabanaBoy(10,1,2, "Run14AuAuLeptonComby");
     //CabanaBoy *cb = new CabanaBoy(5,1,1, "Run14AuAuLeptonComby");
 	
 	cb->SetHistoFileName(outFile);
@@ -44,7 +44,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
 	cb->setCuts(mc);
 	cb->setHistos(mh);
 	cb->setPoolType(CabanaBoy::MultiAkibaPools);
-	cb->setNSubPools(1, 4, 2);
+	cb->setNSubPools(1, 8, 4);
 	cb->setFastMom(false);
 	cb->setPoolDepth(500);
 	cb->setMixingType11(true);  
