@@ -2036,21 +2036,26 @@ namespace MyDileptonAnalysis
         {
             MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
             if(mytrk1->GetChargePrime() != -1 ) continue;
+            if(mytrk1->GetMcId() < 100 ) continue;
             
             for (int jtrk = 0; jtrk < event->GetNtrack(); jtrk++)
             {
                 MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
                 if(mytrk2->GetChargePrime() != 1 ) continue;
+                if(mytrk2->GetMcId() < 100 ) continue;
+
+                const float min_hadorn_reject = mytrk1->GetMcId() < mytrk2->GetMcId() ? mytrk1->GetMcId() : mytrk2->GetMcId();
                 //std::cout<<"before: "<<mytrk1->GetNHits()<<" "<<mytrk2->GetNHits()<<" "<<mytrk1->GetTOFDPHI()<<" "<<mytrk2->GetTOFDPHI()<<std::endl;
                 //std::cout<<"before: "<<(int)mytrk1->GetPC3SDZ()<<" "<<(int)mytrk2->GetPC3SDZ()<<" "<<mytrk1->GetPC3SDPHI()<<" "<<mytrk2->GetPC3SDPHI()<<std::endl;
                 const float min_nhits_reco = mytrk1->GetPC3SDZ() < mytrk2->GetPC3SDZ() ? mytrk1->GetPC3SDZ() : mytrk2->GetPC3SDZ();
-                if(min_nhits_reco > mytrk1->GetNHits()) mytrk1->SetNHits(min_nhits_reco);
-                if(min_nhits_reco > mytrk2->GetNHits()) mytrk2->SetNHits(min_nhits_reco);
+                if(min_nhits_reco > mytrk1->GetNHits()) { mytrk1->SetNHits(min_nhits_reco); mytrk1->SetMcId(min_hadorn_reject);}
+                if(min_nhits_reco > mytrk2->GetNHits()) { mytrk2->SetNHits(min_nhits_reco); mytrk2->SetMcId(min_hadorn_reject);}
 
 
                 const float min_ghost_reco = mytrk1->GetPC3SDPHI() < mytrk2->GetPC3SDPHI() ? mytrk1->GetPC3SDPHI() : mytrk2->GetPC3SDPHI();
-                if(min_ghost_reco > mytrk1->GetTOFDPHI()) mytrk1->SetTOFDPHI(min_ghost_reco);
-                if(min_ghost_reco > mytrk2->GetTOFDPHI()) mytrk2->SetTOFDPHI(min_ghost_reco);
+                if(min_ghost_reco > mytrk1->GetTOFDPHI()) { mytrk1->SetTOFDPHI(min_ghost_reco); mytrk1->SetMcId(min_hadorn_reject);}
+                if(min_ghost_reco > mytrk2->GetTOFDPHI()) { mytrk2->SetTOFDPHI(min_ghost_reco); mytrk2->SetMcId(min_hadorn_reject);}
+                
                 //std::cout<<"after:  "<<mytrk1->GetNHits()<<" "<<mytrk2->GetNHits()<<" "<<mytrk1->GetTOFDPHI()<<" "<<mytrk2->GetTOFDPHI()<<std::endl;
             }
         }

@@ -26,13 +26,13 @@ public:
 
   enum Run14AuAuLeptonCombyEnumIntegerFields
     {
-      MATCH,
-      GHOST,
       PTYPE,
+      HADRON_REJECT,
+      HIT_ASSOC,
+      CONV_REJECT,
       ID1,
       ID2,
       ID3,
-      CENTR,
       LAST_INTEGER  // special...always use this
     };
 };

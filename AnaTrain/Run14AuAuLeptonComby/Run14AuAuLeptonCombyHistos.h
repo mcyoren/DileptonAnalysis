@@ -34,6 +34,18 @@ public:
       static float get_DCA_V9 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V10(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V11(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V12(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V13(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V14(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V15(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V16(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V17(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V18(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V19(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V20(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V21(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V22(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V23(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 

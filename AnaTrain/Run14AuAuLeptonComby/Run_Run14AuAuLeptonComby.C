@@ -34,7 +34,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
     cbMasterCutter *mc = new Run14AuAuLeptonCombyCutter();
     cbMasterHistos *mh = new Run14AuAuLeptonCombyHistos();
 
-    CabanaBoy *cb = new CabanaBoy(10,1,2, "Run14AuAuLeptonComby");
+    CabanaBoy *cb = new CabanaBoy(10,1,1, "Run14AuAuLeptonComby");
     //CabanaBoy *cb = new CabanaBoy(5,1,1, "Run14AuAuLeptonComby");
 	
 	cb->SetHistoFileName(outFile);
@@ -44,7 +44,7 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
 	cb->setCuts(mc);
 	cb->setHistos(mh);
 	cb->setPoolType(CabanaBoy::MultiAkibaPools);
-	cb->setNSubPools(1, 8, 4);
+	cb->setNSubPools(2, 4, 8);
 	cb->setFastMom(false);
 	cb->setPoolDepth(500);
 	cb->setMixingType11(true);  
