@@ -103,6 +103,8 @@ void Testm2(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, 
       hist_m2->Fill(mytrk->GetTOFE(),mytrk->GetPt(),myevent->GetCentrality());
       if (mytrk->GetTOFE()>0.4 && mytrk->GetTOFE()<1.2)
         hist_pt_calc->Fill(mytrk->GetPt(),myevent->GetCentrality());
+      if (mytrk->GetTOFE()>0.4 && mytrk->GetTOFE()<1.2 && mytrk->GetEmcId()>=0)
+        hist_pt_embed->Fill(mytrk->GetPt(),myevent->GetCentrality());
     }
     event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
     event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
@@ -110,8 +112,8 @@ void Testm2(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, 
     {
       MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
       hist_m2_emb->Fill(mytrk->GetTOFE(),mytrk->GetPtPrime(),myevent->GetCentrality());
-      if (mytrk->GetTOFE()>0.4 && mytrk->GetTOFE()<1.2)
-        hist_pt_embed->Fill(mytrk->GetPtPrime(),myevent->GetCentrality());
+      //if (mytrk->GetTOFE()>0.4 && mytrk->GetTOFE()<1.2)
+      //  hist_pt_embed->Fill(mytrk->GetPtPrime(),myevent->GetCentrality());
       if (mytrk->GetNHits()>1)
       {
         hist_m2_ass->Fill(mytrk->GetTOFE(),mytrk->GetPt(),myevent->GetCentrality());
