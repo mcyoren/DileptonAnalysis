@@ -39,7 +39,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   //event = 0;
   br->SetAddress(&myevent);
 
-  TH2D *hist_pt_orig = new TH2D("hist_pt_orig","hist_pt_orig",50,0,5,5,0,100);
+  TH3D *hist_pt_orig = new TH3D("hist_pt_orig","hist_pt_orig",50,0,5,5,0,100,2,0,2);
 
   cout << "Trees read!" << endl;
 
@@ -70,7 +70,11 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     for (int itrk = 0; itrk < myevent->GetNgentrack(); itrk++)
     {
       MyDileptonAnalysis::MyGenTrack *mygentrk = myevent->GetGenTrack(itrk);
-      hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality());
+      if (mygentrk->GetID()==22) continue;
+      if (mygentrk->GetID()>0)
+        hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),0);
+      else
+        hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),1);
     }
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
     myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*0);
