@@ -44,9 +44,9 @@ void Run_Run14AuAuLeptonComby(char *outFile = "Phi_om.root") {
 	cb->setCuts(mc);
 	cb->setHistos(mh);
 	cb->setPoolType(CabanaBoy::MultiAkibaPools);
-	cb->setNSubPools(2, 4, 8);
+	cb->setNSubPools(5, 4, 8);
 	cb->setFastMom(false);
-	cb->setPoolDepth(500);
+	cb->setPoolDepth(200);
 	cb->setMixingType11(true);  
 	cb->setMixingType12(true);
 	cb->setMixingType22(true);

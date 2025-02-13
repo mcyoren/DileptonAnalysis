@@ -697,7 +697,7 @@ namespace MyDileptonAnalysis
             float GetVx() const { return vx; }
             float GetVy() const { return vy; }
             float GetVz() const { return vz; }
-            float GetID() const { return id; }
+            int GetID() const { return id; }
 
             void SetPx(float val) { px = val; }
             void SetPy(float val) { py = val; }
@@ -1224,6 +1224,7 @@ namespace MyDileptonAnalysis
             void CheckVeto();
             void FillEventHist(const float varX){ event_hist->Fill(varX); };
             void FillCentrHist(const float centr){ centr_hist->Fill(centr); };
+            void FillMyVTXHist(const int centr_bin, const float varX, const float varY, const float varZ){ myvtx_hist[centr_bin]->Fill(varX,varY,varZ); };
             int GetNGoodElectrons();
 
             void fill_evtbuff_list(const unsigned int pool_depth = 10);
