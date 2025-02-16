@@ -116,6 +116,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(0);
+    bool do_event_selection = false;
     
     PHGlobal *globalCNT =
         findNode::getClass<PHGlobal>(TopNode, "PHGlobal");
@@ -163,7 +164,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             event_container->FillEventHist(8);
 
     const int trigscaled_on = Trig->get_lvl1_trigscaled_bit(TRIGGERBIT);
-    if (!trigscaled_on)
+    if (!trigscaled_on && do_event_selection)
         return false;
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(2);
@@ -173,20 +174,20 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const float zdc2 = globalCNT->getZdcEnergyS();
     const float zdcz = globalCNT->getZdcZVertex();
     const bool isZDCOK = (zdc1 > 0 && zdc2 > 0 && zdcz > -9000);
-    if (!isZDCOK)
+    if (!isZDCOK&&do_event_selection)
         return false;
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(3);
 
     if (run_number < 0)
         return 0;
-    if (fabs(bbc_vertex) > BBC_VERTEX_CUT)
+    if (fabs(bbc_vertex) > BBC_VERTEX_CUT && do_event_selection)
         return 0;
-
-    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(4);
 
     if (centrality < 0 || centrality > 93)
         return 0;
+
+    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(4);
 
     if(fill_TTree||fill_true_DCA) event_container->FillCentrHist(centrality);
 
@@ -201,7 +202,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const float precise_y = precisevtx.getY();
     const float precise_z = precisevtx.getZ();
 
-    if (fabs(precise_z) > BBC_VERTEX_CUT)
+    if (TMath::Abs(precise_z) > BBC_VERTEX_CUT)
         return 0;
         
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(5);
