@@ -176,9 +176,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const bool isZDCOK = (zdc1 > 0 && zdc2 > 0 && zdcz > -9000);
     if (!isZDCOK&&do_event_selection)
         return false;
-
-    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(3);
-
     if (run_number < 0)
         return 0;
     if (fabs(bbc_vertex) > BBC_VERTEX_CUT && do_event_selection)
@@ -187,7 +184,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if (centrality < 0 || centrality > 93)
         return 0;
 
-    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(4);
+    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(3);
 
     if(fill_TTree||fill_true_DCA) event_container->FillCentrHist(centrality);
 
@@ -204,8 +201,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if (TMath::Abs(precise_z) > BBC_VERTEX_CUT)
         return 0;
+
+    if(fill_TTree||fill_true_DCA) event_container->FillEventHist(4);
+
+    if (precise_x < 0.27 || precise_x > 0.40 || precise_y < -0.02 || precise_y > 0.10)
+        return 0;   
         
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(5);
+    
     globalCNT->setBbcZVertex(precise_z);
 
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
