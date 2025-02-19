@@ -83,6 +83,32 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if(fill_inv_mass_sim) event_container->fill_inv_mass_sim();
 
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
+
+    int n_electrons = myevent->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron mytrk = *myevent->GetEntry(itrk);
+      
+      bool skip = false; 
+        if (mytrk.GetPtPrime()>4.4 || mytrk.GetPtPrime() < 0.4)
+          skip = true;
+        if (mytrk.GetCrkphi()<-99)
+          skip = true;
+        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.6)
+          skip = true;
+        if (mytrk.GetN0() < 0 )
+          skip = true;
+        if (fabs(mytrk.GetEmcdphi())>0.05 || fabs(mytrk.GetEmcdz())>25 )
+          skip = true;
+
+        if( skip ){
+          myevent->RemoveTrackEntry(itrk);
+          //event->AddElecCand(&mytrk);
+          n_electrons--;
+          itrk--;
+          continue;
+        }
+    }
     
     int n_hits = myevent->GetNVTXhit();
     for (int ihit = 0; ihit < n_hits; ihit++)
@@ -216,7 +242,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
         event_container->Associate_Hits_to_Leptons();
     }
 
-    int n_electrons = myevent->GetNtrack();
+    n_electrons = myevent->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
         MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
