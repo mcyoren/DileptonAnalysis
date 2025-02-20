@@ -123,12 +123,13 @@ echo "${Purple}===============================================${Color_Off}"
 set inputvtx = $vertex_txt_dir
 set oscarname = $DIR.oscar.particles.dat
 
-if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 0 ) then
+if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && ( $3 == 0 || $3 == 3 )) then
 echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}============= SINGLE SIM STARTS ===============${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
 set scriptdir   = $DATADIR/sim/gen/single
 set macroname   = make_single.C
+set thermalmacroname   = make_thermal.C
 set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
 set ptmin = 0.4
@@ -136,18 +137,19 @@ set ptmax = 10.0
 set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = $selected_paticle #0,1,2,3,4,5,6-pi0,pi+,pi-,e-,e+,p,antip################helios jpsi and phi####pythia ccbar bbar
 
-echo "${Green}jobno          $jobno            ${Color_Off}"
-echo "${Green}run_number     $run_number       ${Color_Off}"
-echo "${Green}ptmin          $ptmin            ${Color_Off}"
-echo "${Green}ptmax          $ptmax            ${Color_Off}"
-echo "${Green}n              $n                ${Color_Off}"
-echo "${Green}id             $id               ${Color_Off}"
-echo "${Green}inputvtx       $inputvtx         ${Color_Off}"
-echo "${Green}oscarname      $oscarname        ${Color_Off}"
-echo "${Green}scriptdir      $scriptdir        ${Color_Off}"
-echo "${Green}macroname      $macroname        ${Color_Off}"
-echo "${Green}outsingle      $outsingle        ${Color_Off}"
-echo "${Green}tmpdir         $tmpdir           ${Color_Off}"
+echo "${Green}jobno            $jobno            ${Color_Off}"
+echo "${Green}run_number       $run_number       ${Color_Off}"
+echo "${Green}ptmin            $ptmin            ${Color_Off}"
+echo "${Green}ptmax            $ptmax            ${Color_Off}"
+echo "${Green}n                $n                ${Color_Off}"
+echo "${Green}id               $id               ${Color_Off}"
+echo "${Green}inputvtx         $inputvtx         ${Color_Off}"
+echo "${Green}oscarname        $oscarname        ${Color_Off}"
+echo "${Green}scriptdir        $scriptdir        ${Color_Off}"
+echo "${Green}macroname        $macroname        ${Color_Off}"
+echo "${Green}thermalmacroname $thermalmacroname ${Color_Off}"
+echo "${Green}outsingle        $outsingle        ${Color_Off}"
+echo "${Green}tmpdir           $tmpdir           ${Color_Off}"
 
 #move to wrk directory
 if( ! -d $tmpdir ) then
@@ -156,9 +158,16 @@ endif
 echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
-cp $scriptdir/$macroname .
-echo "${Green}start running root -l -b -q" 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'"${Color_Off}"
-root -l -b -q 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'10000','$ptmin','$ptmax','$n','$id')'
+if ( $3 == 0 ) then
+  cp $scriptdir/$macroname .
+  echo "${Green}start running root -l -b -q" 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'"${Color_Off}"
+  root -l -b -q 'make_single.C("'$vertex_txt_dir'","'$oscarname'",'10000','$ptmin','$ptmax','$n','$id')'
+else
+  cp $scriptdir/$thermalmacroname .
+  echo "${Green}start running root -l -b -q" 'make_thermal.C("'$vertex_txt_dir'","'$oscarname'",'$NEVT','$ptmin','$ptmax','$n','$id')'"${Color_Off}"
+  root -l -b -q 'make_thermal.C("'$vertex_txt_dir'","'$oscarname'",'10000','$ptmin','$ptmax','$n','$id')'
+endif
+
 echo "${Green}finished running${Color_Off}"
 echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
@@ -184,6 +193,27 @@ if( $selected_paticle == 0) then
 endif
 if( $selected_paticle == 3) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_50M.root
+endif
+if( $selected_paticle == 4) then
+ set inputhelios = $DATADIR/output_single/helios/helios_omega_ee_0_10_10M.root
+endif
+if( $selected_paticle == 5) then
+ set inputhelios = $DATADIR/output_single/helios/helios_rho_ee_0_10_10M.root
+endif
+if( $selected_paticle == 6) then
+ set inputhelios = $DATADIR/output_single/helios/helios_psip_ee_0_10_10M.root
+endif
+if( $selected_paticle == 7) then
+ set inputhelios = $DATADIR/output_single/helios/helios_eta_gee_0_10_10M.root
+endif
+if( $selected_paticle == 8) then
+ set inputhelios = $DATADIR/output_single/helios/helios_etap_gee_0_10_10M.root
+endif
+if( $selected_paticle == 9) then
+ set inputhelios = $DATADIR/output_single/helios/helios_phi_etaee_0_10_10M.root
+endif
+if( $selected_paticle == 10) then
+ set inputhelios = $DATADIR/output_single/helios/helios_omega_pi0ee_0_10_10M.root
 endif
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
