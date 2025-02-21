@@ -22,14 +22,14 @@ PHENIXDetector MyPHENIX;
 
 void setTrack(WriteTrack& newTrack, int isFinal, int num, int id, int ist, float px, float py, float pz, float en, float mass, float xpos, float ypos, float zpos, double br, int parent_index, long double weight);
 
-TF1 *pi0Hagedorn     = HagedornYield("pi0Hagedorn",   pi0Mass,  0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *etaHagedorn     = HagedornYield("etaHagedorn",   etaMass,  0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *rho0Hagedorn    = HagedornYield("rhoHagedorn",   rho0Mass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *omegaHagedorn   = HagedornYield("omegaHagedorn", omegaMass,0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *etapHagedorn    = HagedornYield("etapHagedorn",  etapMass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *phiHagedorn     = HagedornYield("phiHagedorn",   phiMass,  0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *jpsiHagedorn    = HagedornYield("jpsiHagedorn",  jpsiMass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
-TF1 *psipHagedorn    = HagedornYield("psipHagedorn",  psipMass, 0.2, 25, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *pi0Hagedorn     = HagedornYield("pi0Hagedorn",   pi0Mass,   25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *etaHagedorn     = HagedornYield("etaHagedorn",   etaMass,   25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *rho0Hagedorn    = HagedornYield("rhoHagedorn",   rho0Mass,  25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *omegaHagedorn   = HagedornYield("omegaHagedorn", omegaMass, 25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *etapHagedorn    = HagedornYield("etapHagedorn",  etapMass,  25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *phiHagedorn     = HagedornYield("phiHagedorn",   phiMass,   25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *jpsiHagedorn    = HagedornYield("jpsiHagedorn",  jpsiMass,  25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
+TF1 *psipHagedorn    = HagedornYield("psipHagedorn",  psipMass,  25, 0.0, 377., 0.356, 0.068, 0.7, -8.25);
 
 TF1 *InHagedorn[8] = {pi0Hagedorn, etaHagedorn, rho0Hagedorn, omegaHagedorn, etapHagedorn, phiHagedorn, jpsiHagedorn, psipHagedorn};
 TString allpartnames[8]={"pi0","eta","rho0","omega","etap","phi","jpsi","psip"};
@@ -83,12 +83,13 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 
 	  	MyEvent.ClearEvent();
 	  	
+		const double pt_local = (InHagedorn[ipart]->GetRandom(pt_min, pt_max)); //in GeV/c
 	  	pi0.ResetP();                                                 	// reset
-	 	pi0.GenerateP(pt_min,pt_max);                                 	// generate
+	 	pi0.GenerateP(pt_local,pt_local);                                 	// generate
 	 	double trk_wt = 1;
 
 		pi0.DecaySingleBranch(decay_name);
-		pi0.SetWeight((InHagedorn[ipart]->Eval(pi0.Pt())));
+		pi0.SetWeight(trk_wt);
 		ndecay = pi0.GetNumberOfDaughters();                          	// 2 for pi0->gg and 3 for pi0-e+e-g
 
 		DecayNumber = pi0.GetDecayNumber();								// 0 for pi0->gg and 1 for pi0-e+e-g
