@@ -192,7 +192,7 @@ if( $selected_paticle == 0) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_50M.root
 endif
 if( $selected_paticle == 3) then
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_50M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_25M.root
 endif
 if( $selected_paticle == 4) then
  set inputhelios = $DATADIR/output_single/helios/helios_omega_ee_0_10_10M.root

@@ -1228,8 +1228,8 @@ namespace MyDileptonAnalysis
             int GetNGoodElectrons();
 
             void fill_evtbuff_list(const unsigned int pool_depth = 10);
-            void fill_inv_mass(const unsigned int pool_depth = 10);
-            void fill_inv_mass_sim();
+            void fill_inv_mass(const float weight = 1.0, const unsigned int pool_depth = 10);
+            void fill_inv_mass_sim(const float weight = 1.0);
             void correct_beam_offset();
             void CleanUpHitList();
             void FillQAHist(const int mc_id = -999);

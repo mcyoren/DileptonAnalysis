@@ -1,7 +1,59 @@
 #include "InvMass.h"
-void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, int N_max = 1000000)
+#include "TMath.h"
+#include "TF1.h"
+
+double Tsallis(const double pt, const double mass = 0.135, const double n = 8, const double T = 0.15, const double dNdy = 1)
+{
+  if (n < 1) return 1;
+  const double mT = sqrt(pt*pt+mass*mass);
+  return  dNdy * pt * (n - 1) * (n - 2) / (n*T + mass*(n - 1)) / (n*T + mass) * pow ( (n*T + mT) / (n*T + mass) , -n) ; //1./(2*TMath::Pi())
+}
+
+double Hagedorn(const double pt, const double dNdy = 95.7, const double mass = 0.135, const double A = 504.5, const double a = 0.5169, const double b = 0.1626, const double p0 = 0.7366, const double n = 8.274)
+{
+  if (mass < 0) return 1;
+  const double mT = sqrt(pt*pt + mass*mass - 0.018218683); ///mpi0^2
+  return  dNdy / dNdy_pp[0] * pt * A * pow( exp(-a * mT - b *mT * mT ) + mT / p0, -n) ;///2 * TMath::Pi() *
+}
+Double_t Hagedorn_Yield_Func(Double_t *x, Double_t *p) {
+  //
+  // Hagedorn function in 1/pt dN/pt from ppg088 
+  //
+    Double_t pt   = x[0];
+    Double_t mass = p[0];
+    Double_t mt   = TMath::Sqrt(pt * pt + mass * mass - 0.13498*0.13498);
+    Double_t A    = p[1];
+    Double_t a    = p[2];
+    Double_t b    = p[3];
+    Double_t p0   = p[4];
+    Double_t n    = p[5];
+   
+    Double_t value = pt*A* pow( exp(-a*mt-b*mt*mt)+mt/p0 , -n);
+    return value;
+  }
+  
+TF1 *fHagedorn(const Char_t *name, Double_t lowerlim,  Double_t upperlim,  const double dNdy = 95.7, const double mass = 0.135, const double A = 504.5, const double a = 0.5169, const double b = 0.1626, const double p0 = 0.7366, const double n = 8.274)
+{
+  TF1 *fHagedorn = new TF1(name, Hagedorn_Yield_Func, lowerlim, upperlim, 6);
+  fHagedorn->SetParameters(mass, A, a, b, p0, n); 
+  fHagedorn->SetParNames("mass", "A", "a", "b", "p0", "n");
+  return fHagedorn;
+}
+
+void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, int N_max = 1000000, const int part = 0)
 {
   std::cout<<"start"<<std::endl;
+
+  TF1* hadron_yield[5];
+  for (int i = 0; i < 5; i++)
+  {
+    TString name = Form("hagedorr_yield_%d", i);
+    hadron_yield[i] = fHagedorn(name, 0.01, 20, dNdy_pp[i], m_pp[i]);
+    hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.4,10) * dNdy_pp[part]/42.2*Ncolls[i] * Br_to_ee[part] );
+    std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20)/Br_to_ee[part] << " " << dNdy_pp[part]/42.2*Ncolls[i] <<std::endl;
+  }
+
+  std::cout<<"following particle was chosen: "<< part_names[part] <<std::endl;
   TFile *input = new TFile(inname, "READ");
   if (!(input))
   {
@@ -40,21 +92,15 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   br->SetAddress(&myevent);
 
   TH3D *hist_pt_orig = new TH3D("hist_pt_orig","hist_pt_orig",50,0,5,5,0,100,2,0,2);
+  TH2D *hist_pt_mother = new TH2D("hist_pt_mother","hist_pt_mother",500,0,10,5,0,100);
+  TH2D *hist_pt_mother_weight = new TH2D("hist_pt_mother_weight","hist_pt_mother_weight",500,0,10,5,0,100);
 
   cout << "Trees read!" << endl;
 
   const int nevt = T->GetEntries();
   const int beggin = nevt * (itread - 1) / ntreads;
   const int endish = nevt * itread / ntreads;
-
-  TH3D *myhist0 = new TH3D("myhist0","myhist0",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist1 = new TH3D("myhist1","myhist1",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist2 = new TH3D("myhist2","myhist2",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist3 = new TH3D("myhist3","myhist3",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist4 = new TH3D("myhist4","myhist4",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist5 = new TH3D("myhist5","myhist5",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist6 = new TH3D("myhist6","myhist6",500,-2000,2000,500,0,5,10,0,10);
-  TH3D *myhist7 = new TH3D("myhist7","myhist7",500,-2000,2000,500,0,5,10,0,10);
+  
   TF1 f("f","gaus",-5.*250./10000,5.*250./10000);
   f.SetParameter(0,1);
   f.SetParameter(1,0);
@@ -76,11 +122,40 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       else
         hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),1);
     }
+    double weight = 1;
+    if (myevent->GetNgentrack()==2)
+    {
+      MyDileptonAnalysis::MyGenTrack *mygentrk1 = myevent->GetGenTrack(0);
+      MyDileptonAnalysis::MyGenTrack *mygentrk2 = myevent->GetGenTrack(1);
+      const double px = mygentrk1->GetPx()+mygentrk2->GetPx();
+      const double py = mygentrk1->GetPy()+mygentrk2->GetPy();
+      const double pt = sqrt(px*px+py*py);
+      //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
+      //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
+      weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      hist_pt_mother->Fill(pt,myevent->GetCentrality());
+      hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
+    }
+    if (myevent->GetNgentrack()==3)
+    {
+      MyDileptonAnalysis::MyGenTrack *mygentrk1 = myevent->GetGenTrack(0);
+      MyDileptonAnalysis::MyGenTrack *mygentrk2 = myevent->GetGenTrack(1);
+      MyDileptonAnalysis::MyGenTrack *mygentrk3 = myevent->GetGenTrack(2);
+      const double px = mygentrk1->GetPx()+mygentrk2->GetPx()+mygentrk3->GetPx();
+      const double py = mygentrk1->GetPy()+mygentrk2->GetPy()+mygentrk3->GetPy();
+      const double pt = sqrt(px*px+py*py);
+      //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
+      //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
+      weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      hist_pt_mother->Fill(pt,myevent->GetCentrality());
+      hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
+    }
+
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
     myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*0);
     myevent->SetVtxZ(myevent->GetPreciseZ());
 
-    if(fill_inv_mass_sim) event_container->fill_inv_mass_sim();
+    if(fill_inv_mass_sim) event_container->fill_inv_mass_sim(weight);
 
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
 
@@ -265,10 +340,12 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if(do_electron_QA)event_container->FillQAHist(-99);
     //myevent->ReshuffleElectrons();
     if(fill_inv_mass && event_container->GetNGoodElectrons()<2  ) continue;
-    if(fill_inv_mass) event_container->fill_inv_mass();
+    if(fill_inv_mass) event_container->fill_inv_mass(weight);
     myevent->ClearEvent();
     //event->ClearEvent();
   }
   hist_pt_orig->Write();
+  hist_pt_mother->Write();
+  hist_pt_mother_weight->Write();
   event_container->WriteOutFile();
 }

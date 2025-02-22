@@ -3,8 +3,8 @@
 Purple='\033[0;35m'
 NC='\033[0m' # No Color
 
-if [ "$#" -ne 4 ]; then
-    echo -e "${Purple}You need to run the script with the following 4 parameters: input file, number of threads, output file name, number of events${NC}"
+if [ "$#" -ne 5 ]; then
+    echo -e "${Purple}You need to run the script with the following 4 parameters: input file, number of threads, output file name, number of events${NC}, particle type : pi0, phi, jpsi, ccbar, bbbar, omega, qgp, psi2s"
     exit 1
 fi
 
@@ -21,7 +21,7 @@ echo -e "${Purple}compiling is done, starting running${NC}"
 
 for i in `seq 1 $2`
 do
-    ./run_InvMass.sh $1 $i $2 $4 &
+    ./run_InvMass.sh $1 $i $2 $4 $5 &
 done
 wait
 

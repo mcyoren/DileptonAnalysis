@@ -12,7 +12,7 @@ root -l -b << EOF
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyML_C.so")
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyEvent_C.so")
     gSystem->Load("InvMass_C.so")
-    InvMass("$1",$2,$3,$4)
+    InvMass("$1",$2,$3,$4, $5)
 EOF
 
 end=`date +%s`
