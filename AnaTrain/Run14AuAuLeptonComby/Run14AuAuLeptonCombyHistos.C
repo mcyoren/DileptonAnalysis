@@ -209,7 +209,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V0(PHParticle *Type1, const unsigned i
   const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( hit_assoc1%10 < 1 || hit_assoc2%10 < 1 ) return -999;
+  if ( hit_assoc1%10 < 5 || hit_assoc2%10 < 5 ) return -999;
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
@@ -243,7 +243,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V1(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  if ( conv_reject1 < 10000 || conv_reject2 < 10000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -728,20 +728,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V18(PHParticle *Type1, const unsigned 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 1000 || hit_assoc2 < 1000 ) return -999;
-  
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 1 || hadron_reject2/10%10 < 1 ) return -999;
+  if ( conv_reject1 < 10 || conv_reject2 < 10 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -762,20 +752,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V19(PHParticle *Type1, const unsigned 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 1000 || hit_assoc2 < 1000 ) return -999;
-  
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
   if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 5 || hadron_reject2/10%10 < 5 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -795,21 +775,11 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V20(PHParticle *Type1, const unsigned 
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( hit_assoc1 < 1000 || hit_assoc2 < 1000 ) return -999;
-  
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
   if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 1 || hadron_reject2/10%10 < 1 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -830,20 +800,10 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V21(PHParticle *Type1, const unsigned 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 1000 || hit_assoc2 < 1000 ) return -999;
-  
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 5 || hadron_reject2/10%10 < 5 ) return -999;
+  if ( conv_reject1 < 10000 || conv_reject2 < 10000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -867,17 +827,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V22(PHParticle *Type1, const unsigned 
   const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( hit_assoc1 < 10000 || hit_assoc2 < 10000 ) return -999;
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 1 || hadron_reject2/10%10 < 1 ) return -999;
+  if ( hit_assoc1 < 1000 || hit_assoc2 < 1000 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
@@ -902,16 +852,6 @@ float Run14AuAuLeptonCombyHistos::get_DCA_V23(PHParticle *Type1, const unsigned 
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
   if ( hit_assoc1 < 10000 || hit_assoc2 < 10000 ) return -999;
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-
-  if ( hadron_reject1/10%10 < 5 || hadron_reject2/10%10 < 5 ) return -999;
 
   const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
