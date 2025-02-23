@@ -28,7 +28,7 @@ Double_t Hagedorn_Yield_Func(Double_t *x, Double_t *p) {
     Double_t p0   = p[4];
     Double_t n    = p[5];
    
-    Double_t value = pt*A* pow( exp(-a*mt-b*mt*mt)+mt/p0 , -n);
+    Double_t value = 2 * TMath::Pi() * pt*A* pow( exp(-a*mt-b*mt*mt)+mt/p0 , -n);
     return value;
   }
   
@@ -48,9 +48,14 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   for (int i = 0; i < 5; i++)
   {
     TString name = Form("hagedorr_yield_%d", i);
-    hadron_yield[i] = fHagedorn(name, 0.01, 20, dNdy_pp[i], m_pp[i]);
-    hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.4,10) * dNdy_pp[part]/42.2*Ncolls[i] * Br_to_ee[part] );
-    std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20)/Br_to_ee[part] << " " << dNdy_pp[part]/42.2*Ncolls[i] <<std::endl;
+    hadron_yield[i] = fHagedorn(name, 0.01, 20, dNdy_pp[part], m_pp[part]);
+    std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20) <<std::endl;
+    //hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.4,10) * dNdy_pp[part]/42.2*Ncolls[i] * Br_to_ee[part] );
+    hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * Ncolls[i] / 257. * Br_to_ee[part] );
+    if (part == 2 ) hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * dNdy_pp[part] / dNdy_pp[0]);
+    if (part == 1 || part == 5)
+      hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * hith_pt_ratio[part] / (hadron_yield[i]->Eval(5.0) / Br_to_ee[part] / pi0_high_pt_ratio[i] ) );
+    std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20)/Br_to_ee[part] << " " << dNdy_pp[part]/42.2*Ncolls[i] <<" "<<Br_to_ee[part] << " " << hadron_yield[i]->Eval(5.0)/Br_to_ee[part]<<std::endl;
   }
 
   std::cout<<"following particle was chosen: "<< part_names[part] <<std::endl;
