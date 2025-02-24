@@ -52,8 +52,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20) <<std::endl;
     //hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.4,10) * dNdy_pp[part]/42.2*Ncolls[i] * Br_to_ee[part] );
     hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * Ncolls[i] / 257. * Br_to_ee[part] );
-    if (part == 2 ) hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * dNdy_pp[part] / dNdy_pp[0]);
-    if (part == 1 || part == 5)
+    if (part == 8 || part == 9 ) hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.01,20) * dNdy_pp[part] / 42.2 * (Ncolls[i] / 257. * Br_to_ee[part]));
+    if (part < 8 && part >0)
       hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * hith_pt_ratio[part] / (hadron_yield[i]->Eval(5.0) / Br_to_ee[part] / pi0_high_pt_ratio[i] ) );
     std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20)/Br_to_ee[part] << " " << dNdy_pp[part]/42.2*Ncolls[i] <<" "<<Br_to_ee[part] << " " << hadron_yield[i]->Eval(5.0)/Br_to_ee[part]<<std::endl;
   }
@@ -62,7 +62,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   TFile *input = new TFile(inname, "READ");
   if (!(input))
   {
-    cout << "no input file" << endl;
+    std::cout << "no input file" << std::endl;
     return;
   }
   const int associate_hits = 1;
@@ -100,7 +100,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   TH2D *hist_pt_mother = new TH2D("hist_pt_mother","hist_pt_mother",500,0,10,5,0,100);
   TH2D *hist_pt_mother_weight = new TH2D("hist_pt_mother_weight","hist_pt_mother_weight",500,0,10,5,0,100);
 
-  cout << "Trees read!" << endl;
+  std::cout << "Trees read!" << std::endl;
 
   const int nevt = T->GetEntries();
   const int beggin = nevt * (itread - 1) / ntreads;
@@ -113,7 +113,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   for (int ievent = beggin; ievent < endish; ievent++)
   {
     if ((ievent -beggin) % 50000 == 0)
-      cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << endl;
+    std::cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << std::endl;
     myevent->ClearEvent();
     br->GetEntry(ievent);
     if (ievent - beggin > N_max)
@@ -127,7 +127,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       else
         hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),1);
     }
-    double weight = 1;
+    double weight = Ncolls[(int)myevent->GetCentrality()/20];
     if (myevent->GetNgentrack()==2)
     {
       MyDileptonAnalysis::MyGenTrack *mygentrk1 = myevent->GetGenTrack(0);
@@ -137,7 +137,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       const double pt = sqrt(px*px+py*py);
       //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
       //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
-      weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      if ( part < 10) weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
       hist_pt_mother->Fill(pt,myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
@@ -151,7 +151,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       const double pt = sqrt(px*px+py*py);
       //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
       //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
-      weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      if ( part < 10) weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
       hist_pt_mother->Fill(pt,myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
