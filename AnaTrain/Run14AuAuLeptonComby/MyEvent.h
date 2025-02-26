@@ -1208,7 +1208,7 @@ namespace MyDileptonAnalysis
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0);
+            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0, float sigma_theta = 5.0);
             void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
             void IdenElectrons();
@@ -1252,11 +1252,11 @@ namespace MyML
       double GetTreeValue(const double x[13], const int iestim = 0);   
       double GetProb(const double x[13], const double LearingRate=0.2, const int n_estim = 20);
       int GeteID(const double x[13], const double y[3], const double LearingRate=0.2, const int n_estim = 20);//double mytree['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
-      double GetHitBDTValue(const double x[24], const int iestim);
-      double GetConvBDTValue(const double x[38], const int iestim);
-      double GetHitBDTProb(const double x[24], const double LearingRate = 0.2, const int n_estim = 24);
+      double GetHitBDTValue(const double x[21], const int iestim);
+      double GetConvBDTValue(const double x[34], const int iestim);
+      double GetHitBDTProb(const double x[21], const double LearingRate = 0.2, const int n_estim = 12);
       int GetHitBDT(const double x, const double y[4]);
-      double GetConvBDTProb(const double x[38], const double LearingRate = 0.2, const int n_estim = 12);
+      double GetConvBDTProb(const double x[34], const double LearingRate = 0.2, const int n_estim = 12);
       int GetConvBDT(const double x, const double y[4]);
 }
 

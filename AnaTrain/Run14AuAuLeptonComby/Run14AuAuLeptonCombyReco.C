@@ -411,10 +411,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1);
-        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
+        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
         
         if(false)
         {
@@ -554,7 +554,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
         //if (mytrk->GetMcId() < 1000) continue;// mytrk->GetMcId()%10<5
-        if (mytrk->GetNHits() < 10 || mytrk->GetTOFDPHI()<10) continue; 
+        //if (mytrk->GetNHits() < 10 || mytrk->GetTOFDPHI()<10) continue; 
         //if ( event->GetCentrality() < 20 && mytrk->GetN0() < 2 + SQR(mytrk->GetDisp()) / 8. ) continue;
         //if (event->GetCentrality() < 20  && !(mytrk->GetN0()>1 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
         //    mytrk->GetDisp()<4 && mytrk->GetChi2()/mytrk->GetNpe0()<10 && mytrk->GetProb()>0.01 )) continue;
@@ -564,14 +564,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6 ) hadron_reject+=10;
         if ( mytrk->GetProb()>0.1  ) hadron_reject+=50;
         int hit_assocaition = mytrk->GetNHits();
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<4 && TMath::Abs(mytrk->GetMinsDthe(3))<4) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<4 && TMath::Abs(mytrk->GetMinsDthe(2))<4) ) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<4 && TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<4 && TMath::Abs(mytrk->GetMinsDphi(0))<4) ) ) hit_assocaition+=1;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
                (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) )) hit_assocaition+=5;
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) && mytrk->GetMinsDphi(0)>-2) ) hit_assocaition+=1;
+        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
+               (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
+               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> 0 )) hit_assocaition+=5;
         //if(mytrk->GetNHits()>90) addit_reject = 1;
         //if(mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 1;
         ////if(mytrk->GetGhost()!=-9 && mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;
@@ -589,10 +589,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if (hadron_reject<100) continue;
         //if ( (  mytrk->GetMcId()%10 > 5 && mytrk->GetProb()>0.1  )
         //     || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.4 ) hadron_reject = 1000;
-        //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<<" "<<hadron_reject<<" "<<hit_assocaition<<" "<<conv_reject<<std::endl;
+        //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<<" "<<mytrk->GetIsConv()<<" "<<hadron_reject<<" "<<hit_assocaition<<" "<<conv_reject<<std::endl;
         //const int local_charge = mytrk->GetPhiDC() -  vtxhit0->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ()) > 0 ? 1 : -1;
         //if( mytrk->GetChargePrime() != mytrk->GetCharge() || mytrk->GetChargePrime() != local_charge || mytrk->GetCharge() != local_charge )
         //    hadron_reject = 100;///to be removed
+        //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<<" "<<mytrk->GetPhi0()<<" "<<mytrk->GetPhi0Prime()<< " " << mytrk->GetThe0()<< " " << mytrk->GetThe0Prime()<<std::endl;
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 

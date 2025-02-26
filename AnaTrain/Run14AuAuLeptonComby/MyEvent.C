@@ -198,7 +198,7 @@ namespace MyDileptonAnalysis
         }    
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg, float sigma_theta)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
@@ -373,7 +373,7 @@ namespace MyDileptonAnalysis
                         bool SignTrack = true;
                         float sigma_veto0 = sigma, sigma_inner0=sigma;
                         if(layer == 0) {sigma_veto0=sigma_veto;sigma_inner0=sigma_inner;}
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner0 && TMath::Abs(sdthe) < sigma)
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner0 && TMath::Abs(sdthe) < sigma_theta)
                         {
                             if(false && vtxhit->GetLadder()<25) vtxhit->SetLadder(25+itrk);/// do no taking all hits in cone
                             if (diff < min[layer])
@@ -620,30 +620,29 @@ namespace MyDileptonAnalysis
                             }
 
                         }
-                        const double ecore  = newBDTrack.GetEcore()*( 1.+1./TMath::Tan(the0_trk_proj)/TMath::Tan(the0_trk_proj));
-                        const double ecore1 = ecore - newBDTHit.GetReconPt();
-                        const double ecore2 = ecore1/newBDTrack.GetEcore();////need to be replased with ecore
                         const double reconpt1 = newBDTrack.GetPt() - newBDTHit.GetReconPt();
                         const double reconpt2 = reconpt1/newBDTrack.GetPt();
-                        const double BDTHitInput[24] = {//['Pt', 'Ecore', 'Centrality', 'reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']
-                            newBDTrack.GetPt(), ecore2, (double) newBDTrack.GetCentrality(),  reconpt2,
-                            newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitTheR(0,1),
-                            newBDTHit.Getsdthe(1), newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitTheR(1,1),
-                            newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitTheR(2,1),
-                            newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitTheR(3,1)   
-                        };
-                        const double BDTConvInput[38] = {//['Pt', 'Ecore', 'Centrality', 'Charge', 'reconpt', 'sdphi0', 'SecondHitPhiR0', 'SecondHitPhiL0', 'SecondHitTheR0', 'SecondHitTheL0', 'SecondHitPhiR01', 'SecondHitPhiL01', 'SecondHitTheR01', 'SecondHitTheL01', 'SecondHitPhiR1', 'SecondHitPhiL1', 'SecondHitTheR1', 'SecondHitTheL1', 'SecondHitPhiR11', 'SecondHitPhiL11', 'SecondHitTheR11', 'SecondHitTheL11', 'SecondHitPhiR2', 'SecondHitPhiL2', 'SecondHitTheR2', 'SecondHitTheL2', 'SecondHitPhiR21', 'SecondHitPhiL21', 'SecondHitTheR21', 'SecondHitTheL21', 'SecondHitPhiR3', 'SecondHitPhiL3', 'SecondHitTheR3', 'SecondHitTheL3', 'SecondHitPhiR31', 'SecondHitPhiL31', 'SecondHitTheR31', 'SecondHitTheL31']
-                            newBDTrack.GetPt(), ecore2, (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(),
+                        //const double BDTHitInput[21] = {//['reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']['Pt', 'Ecore', 'Centrality', 'reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']
+                        //    reconpt2,
+                        //    newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitTheR(0,1),
+                        //    newBDTHit.Getsdthe(1), newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitTheR(1,1),
+                        //    newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitTheR(2,1),
+                        //    newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitTheR(3,1)   
+                        //};
+                        const double BDTConvInput[34] = {//-first 4['Pt', 'Ecore', 'Centrality', 'Charge', 'reconpt', 'sdphi0', 'SecondHitPhiR0', 'SecondHitPhiL0', 'SecondHitTheR0', 'SecondHitTheL0', 'SecondHitPhiR01', 'SecondHitPhiL01', 'SecondHitTheR01', 'SecondHitTheL01', 'SecondHitPhiR1', 'SecondHitPhiL1', 'SecondHitTheR1', 'SecondHitTheL1', 'SecondHitPhiR11', 'SecondHitPhiL11', 'SecondHitTheR11', 'SecondHitTheL11', 'SecondHitPhiR2', 'SecondHitPhiL2', 'SecondHitTheR2', 'SecondHitTheL2', 'SecondHitPhiR21', 'SecondHitPhiL21', 'SecondHitTheR21', 'SecondHitTheL21', 'SecondHitPhiR3', 'SecondHitPhiL3', 'SecondHitTheR3', 'SecondHitTheL3', 'SecondHitPhiR31', 'SecondHitPhiL31', 'SecondHitTheR31', 'SecondHitTheL31']
                             reconpt2, newBDTHit.Getsdphi(0)-newBDTHit.Getsdphi(1),
                             newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitPhiL(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitTheL(0),newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitPhiL(0,1), newBDTHit.GetSecondHitTheR(0,1), newBDTHit.GetSecondHitTheL(0,1),
                             newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitPhiL(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitTheL(1),newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitPhiL(1,1), newBDTHit.GetSecondHitTheR(1,1), newBDTHit.GetSecondHitTheL(1,1),
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
                             newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)       
                         };
-                        const double probsHIT[4] = {0.7048700405814634, 0.80, 0.8971706093225199, 0.95};
+                        //const double probsHIT[4] = {0.7048700405814634, 0.80, 0.8971706093225199, 0.95};
+                        const double probsHIT[4] = {0.12792213598477123, 0.2763465555714619, 0.43226794005248786, 0.5219252186109354};
                         //const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
-                        const double probsConv[4] = {0.059511564980906206,0.0672349245703329, 0.07958121918163912, 0.10254988100220457};
-                        const double BDTHIT_prob = MyML::GetHitBDTProb(BDTHitInput);
+                        //const double probsConv[4] = {0.16655781590812105,0.20684925395539883, 0.2773192065090052, 0.3935912730094734};
+                        //const double probsConv[4] = {0.059511564980906206,0.0672349245703329, 0.07958121918163912, 0.10254988100220457};
+                        const double probsConv[4] = {0.05828988920181548,0.08158829578044034, 0.10567898396266151, 0.1608652914660417};
+                        const double BDTHIT_prob = MyML::GetHitBDTProb(BDTConvInput);
                         const double BDTConv_prob = MyML::GetConvBDTProb(BDTConvInput);
                         //const double check_conv[38] = {1.1865234375, 0.03924144270263441, 8.0, -1.0, 0.00905609130859375, -0.30126953125, -43.8125, -99.0, 18.1875, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -21.0625, 45.40625, 7.8828125, 14.8203125, -21.0625, 61.25, 19.09375, 18.296875, -25.203125, -99.0, 20.765625, -99.0, -48.875, -99.0, -8.578125, -99.0};
                         //const double check_hit[24] = {0.6347407102584839, -0.06209205680455947, 81.0, -0.11198512464761734, 0.869284451007843, -99.0, -99.0, -99.0, -99.0, 0.5129899382591248, -99.0, -99.0, -99.0, -99.0, 1.3870052099227905, -99.0, -99.0, -99.0, -99.0, -10.0, -99.0, -99.0, -99.0, -99.0}; 
@@ -1513,8 +1512,8 @@ namespace MyDileptonAnalysis
                 //const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                 //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                 const float dcenter_phi = (newTrack1->GetCrkphi() - newTrack2->GetCrkphi()) / 0.013;
-                const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
-                if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 ) ) continue;
+                //const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
+                if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 ) ) continue;//|| sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 
                 const float dalpha = newTrack1->GetAlphaPrime() - newTrack2->GetAlphaPrime();
                 const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
                 const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
@@ -1587,6 +1586,8 @@ namespace MyDileptonAnalysis
                     continue;
                 if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                     continue;
+                if (event->GetCentrality()<20 && !(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
+                    continue;
                 inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
                 delt_phi_dca_fg1[in_hist]->Fill(dca, dphi, pair_pt, weight);
                 if (!(newTrack1->GetNHits()>900&&newTrack2->GetNHits()>900))
@@ -1626,8 +1627,8 @@ namespace MyDileptonAnalysis
                     //const float phi_pip = newTrack1->GetChargePrime() >  newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                     //const float phi_pim = newTrack1->GetChargePrime() <= newTrack2->GetChargePrime() ? newTrack1->GetPhiDC() : newTrack2->GetPhiDC();
                     const float dcenter_phi = (newTrack1->GetCrkphi() - newTrack2->GetCrkphi()) / 0.013;
-                    const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
-                    if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 || sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 ) ) continue;
+                    //const float dcenter_zed = (newTrack1->GetCrkz() - newTrack2->GetCrkz())/5.;
+                    if ( (TMath::Abs(dcenter_phi)<5|| newTrack1->GetCrkphi()<-99 || newTrack2->GetCrkphi()<-99 ) ) continue;//|| sqrt(SQR(dcenter_zed)+SQR(dcenter_phi)) < 10 
                     const float dalpha = newTrack1->GetAlpha() - newTrack2->GetAlpha();
                     const float dphiDC = newTrack1->GetPhiDC() - newTrack2->GetPhiDC();
                     const float dzed = newTrack1->GetZDC() - newTrack2->GetZDC();
@@ -1702,6 +1703,8 @@ namespace MyDileptonAnalysis
                     if (!(newTrack1->GetNHits()>9&&newTrack2->GetNHits()>9))
                         continue;
                     if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
+                        continue;
+                    if (event->GetCentrality()<20 && !(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
                         continue;
                     inv_mass_dca_bg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
                     delt_phi_dca_bg1[in_hist]->Fill(dca, dphi, pair_pt, weight);

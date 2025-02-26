@@ -46,6 +46,13 @@ public:
       static float get_DCA_V21(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V22(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V23(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V24(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V25(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V26(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V27(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V28(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V29(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      
 
       static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
