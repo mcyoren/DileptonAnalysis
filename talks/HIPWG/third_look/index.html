@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presentation with Dynamic Theme</title>
+  <style>
+    /* Default dark theme styles */
+    :root {
+      --background-color: #fff;
+      --text-color: #000;
+      --panel-background: #f5f5f5;
+      --button-background: #ddd;
+      --button-hover: #bbb;
+      --border-color: #ccc;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      height: 100vh;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .content-container {
+      display: flex;
+      width: 100%;
+      height: 100%; /* Maximized height for content */
+    }
+    li{
+    margin-left: 200px;
+    }
+    .slide-container {
+      flex-grow: 1; /* Allow plot frame to take as much space as possible */
+      background-color: var(--panel-background);
+      border-right: 1px solid var(--border-color); /* Small separator between plot and text */
+      overflow-y: auto;
+      transition: all 0.3s;
+    }
+
+    .slide-container.hidden {
+      display: none; /* Hide the iframe container */
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    .text-frame {
+      display: inline-block;
+      background-color: var(--panel-background);
+      padding: 10px;
+      white-space: nowrap;
+      overflow-wrap: break-word;
+      height: auto;
+      transition: all 0.3s;
+      font-size: 28px; /* Change this to your preferred default size */
+      max-width: 30%; /* Limit width when plot is present */
+    }
+
+    .text-frame.expanded {
+      white-space: normal; /* Allow text to wrap when no plot is present */
+      max-width: none; /* Remove width limit */
+      flex-grow: 1; /* Make it take full width when no plot */
+    }
+
+    .info-panel {
+      width: 100%;
+      background-color: var(--panel-background);
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .info-panel h2, .info-panel p {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .controls button, .controls select {
+      padding: 5px 10px;
+      font-size: 18px;
+      background-color: var(--button-background);
+      color: var(--text-color);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .controls button:hover {
+      background-color: var(--button-hover);
+    }
+
+    .slide-counter {
+      font-size: 18px;
+    }
+
+    .light-theme {
+      --background-color: #1e1e1e;
+      --text-color: #fff;
+      --panel-background: #333;
+      --button-background: #444;
+      --button-hover: #666;
+      --border-color: #444;
+    }
+  </style>
+  <script>
+    let currentSlide = 0;
+    const slides = [
+      '', // Title
+      '', // Outline
+      '', // Basic cuts
+      'association.html', 
+      'sim_ddhit_assoc_html.html', 
+      'sim_ddhit_assoc_html1.html', 
+      'association_zoom.html', 
+      'hit_assoc_qa_html.html', 
+      'hit_assoc_qa_html1.html',
+      '', // Conversion
+      'secondhit.html', 
+      '', // ML
+      'ml.html', // roc
+      'sngl_qa_loose.html', 
+      'sngl_qa_bdt.html', 
+      'sngl_qa_pt.html', 
+      'm2_nocut.html', 
+      'm2_cut.html', 
+      'DCA_sngl_sim.html', 
+      'v2.html', 
+      '', // inv mass
+      'noml_inv_mass.html',
+      'ml_inv_mass.html',
+      'DCA.html',
+      '', // Empty slide for text only
+      'noml_result.html',
+      'ml_result.html',
+      'sim_pair_dca_html.html',
+    ]; // HTML file paths here
+    const slideText = [
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Update on measurement of e<sup>+</sup>e<sup>-</sup> pairs in Run14AuAu200</h1></center><p></p>", // Text for the empty slide
+
+      "<h2><center>Outline</center></h2><h2> <ul>\
+        &emsp;<li>Analysis Cuts</li>\
+        &emsp;<li>Hit Association</li>\
+        &emsp;<li>Conversion Rejection</li>\
+        &emsp;<li>Hadron Rejection Using ML in details</li>\
+        &emsp;<li>Single track analysis</li>\
+        &emsp;<li>Invariant mass spectrum</li>\
+        &emsp;<li>DCA<sub>T</sub> distribution</li>\
+        &emsp;<li>To-Do List</li>\
+        </ul> </h2>",
+
+      "<h2><center>Basic Analysis Cuts</center></h2><h2> <ul>\
+        &emsp;<li>Run-14 200 GeV Au+Au pro109 (MinBias): 18,521,121,185</li>\
+        &emsp;<li>BBCLL1 (>1 tubes) (Scale Down: 0)</li>\
+        &emsp;<li><s>ZDC coincidence</s> &Rightarrow; x and y event vertex cut</li>\
+        &emsp;<li>|z<sub>vtx</sub>| < 10 cm</li>\
+        &emsp;<li>10B &Rightarrow; 12B accepted events </li>\
+        &emsp;<li>VTX vs. DC misalignment corrections using high-p<sub>T</sub> hadron tracks</li>\
+        &emsp;<li>Beam offset and momentum scale corrections</li>\
+        &emsp;<li>QA: Dead maps; Quality: 63, 51, 31; 0.4 < p<sub>T</sub> [GeV] < 4.4; ZDC < 75 cm</li>\
+        </ul> </h2>",
+
+      "<h2><center>Cartoon of hit-to-track <p></p> association</center></h2>\
+      <p>Very sketchy</p><p>Search area is reduced by ~10÷100</p><p>Using a 5&sigma range; </p>",
+
+      "<h2>Data Example</h2>\
+      <p>Negatively charged hadrons</p><p>p<sub>T</sub> = 2 GeV</p>\
+      <p>&phi; = &phi;<sub>VTXHIT</sub> - &phi;<sub>DC</sub><sup>Layer</sup></p>\
+      <p>&phi;<sub>DC</sub><sup>Layer</sup> - DC track position</p><p>in a particular layer</p>",
+
+      "<h2>Data Example</h2>\
+      <p>Negatively charged hadrons</p><p>p<sub>T</sub> = 2 GeV</p>\
+      <p>&phi; = &phi;<sub>VTXHIT</sub> - &phi;<sub>DC</sub><sup>Layer</sup></p>\
+      <p>&phi;<sub>DC</sub><sup>Layer</sup> - DC track position</p><p>in a particular layer</p>\
+      <p>&phi;<sub>L1</sub> &asymp; -4.5 mrad</p>",
+
+      "<h2><center>Cartoon of hit-to-track </h2><h2> association</center></h2>\
+      <p>Search ranges within 1&sigma are shown</p>",
+
+      "<h2>Recall</h2><p>Negatively charged hadron simulation</p>\
+      <p>Using parametrization of dphi </p><p> and dthe distrs vs. p<sub>T</sub>, and dphi </p><p> and dthe in previous layer  </p>",//TP/(TP+FN)
+
+      "<h2>Precision</h2><p>Precision of hit association</p><p>in full embedding simulation</p>",//TP/(TP+FP)
+
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Conversion Rejection</h1></center><p></p>", 
+
+      "<h2><center>Conversion Rejection</center></h2><p>In search of hits from a second track</p>\
+      <p>Mostly affected by conversions in the first layer</p>\
+      <p>Also effective against Dalitz decays</p>",
+
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Electron/Hadron Separation Using ML and sngl track analysis </h1></center><p></p>", 
+
+      "<h2><center></center></h2><p></p>",
+
+      "<h2><center>Electron/Hadron </h2><h2>Separation</center></h2><p>Hadron contamination</p>",
+      "<h2><center>Electron/Hadron </h2><h2>Separation</center></h2><p>Hadron contamination</p>",
+      "<h2><center>Electron/Hadron </h2><h2>Separation</center></h2><p>Reco spectrum</p>",
+      "<h2><center>Electron/Hadron </h2><h2>Separation</center></h2><p>What about (anti)protons?</p>",
+      "<h2><center>Electron/Hadron </h2><h2>Separation</center></h2><p>Shower shape!</p>",
+
+      "<h2><center>SNGL DCA<sub>T</sub> </center></h2><p>No conversions</p>",
+      "<h2><center>Elliptic Flow</center></h2><p>Checking flow</p>",
+
+      "<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>\
+      <center><h1>Invariant Mass and DCA<sub>T</sub> Spectrum</h1></center><p></p>", 
+      "<h2><center>Invariant Mass</center></h2><p>Standard cuts</p><p>New hit-to-track association </p><p> Conversion Rejection</p>BG - CB 20X8X8<p></p>1% BG norm error<p></p>",
+      "<h2><center>Invariant Mass</center></h2><p>Foreground</p><p>BDT vs. Standard cuts</p><p>New hit-to-track association </p><p> Conversion Rejection</p>BG - CB 20X8X8<p></p>1% BG norm error<p></p>",
+      "<h2><center>DCA<sub>T</sub></center></h2><p></p> Average DCA <p>ML hits and conv</p>hit-to-track association and </p><p> conversion rejection using<p></p>new ML results</p><p> ",
+      "<h2><center>To-Do List Before QM</center></h2><h2> <ul>\
+        &emsp;<li>Write an analysis note</li>\
+        &emsp;<li>Preliminary rehearsal</li>\
+        </ul> </h2> <br><br><br><br>\
+        <h2><center>To-Do List After QM</center></h2><h2> <ul>\
+        &emsp;<li>Hadron cocktail</li>\
+        &emsp;<li>Heavy flavour component (eloss)</li>\
+        &emsp;<li>Thermal component!?</li>\
+        </ul> </h2>",
+      "<h2><center>DCA<sub>T</sub></center></h2><p></p> FG, BG <p>ML hits and conv</p>hit-to-track association and </p><p> conversion rejection using<p></p>new ML results</p><p> ",
+      "<h2><center>DCA<sub>T</sub></center></h2><p>BG subtracted</p>mid: 1.05 < m<sub>ee</sub> [GeV] < 2.7 <p></p>JPsi: 2.7 < m<sub>ee</sub> [GeV] < 3.5 <p></p>",
+      "<h2><center>DCA<sub>T</sub></center></h2><p>Simulation</p>Right: mid: 1.05 < m<sub>ee</sub> [GeV] < 2.7 <p></p>Left: JPsi: 2.7 < m<sub>ee</sub> [GeV] < 3.5 <p></p>",
+    ];
+
+
+    function loadSlide(index) {
+      if (index >= 0 && index < slides.length) {
+        currentSlide = index;
+        const slideContainer = document.querySelector('.slide-container');
+        const textFrame = document.querySelector('.text-frame');
+        if (slides[currentSlide]) {
+          document.getElementById('slide-frame').src = slides[currentSlide];
+          slideContainer.classList.remove('hidden'); // Show the iframe
+          textFrame.classList.remove('expanded'); // Shrink text frame width when plot is visible
+        } else {
+          document.getElementById('slide-frame').src = ''; // Clear iframe for text-only slide
+          slideContainer.classList.add('hidden'); // Hide the iframe
+          textFrame.classList.add('expanded'); // Expand text frame width when no plot
+        }
+        document.getElementById('slide-number').innerText = `Slide ${currentSlide + 1} of ${slides.length}`;
+        document.getElementById('slide-text').innerHTML = slideText[currentSlide]; // Use innerHTML for titles and formatting
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        loadSlide(currentSlide + 1);
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        loadSlide(currentSlide - 1);
+      }
+    }
+
+    function changeTextSize(size) {
+      document.getElementById('slide-text').style.fontSize = size + 'px';
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-theme');
+    }
+
+    window.onload = function() {
+      loadSlide(currentSlide);
+    }
+  </script>
+</head>
+<body>
+  <div class="content-container">
+    <div class="slide-container">
+      <iframe id="slide-frame" src="slide1.html"></iframe>
+    </div>
+    <div class="text-frame">
+      <p id="slide-text">Welcome to the presentation!</p>
+    </div>
+  </div>
+
+  <div class="info-panel">
+    <div>
+      <h2>Yuri Mitrankov</h2>
+      <p>Stony Brook University, HI PWG</p>
+    </div>
+
+    <div class="slide-counter">
+      <p id="slide-number">Slide 1 of 4</p>
+    </div>
+
+    <div class="controls">
+      <button onclick="toggleTheme()">Toggle Theme</button>
+      <select onchange="changeTextSize(this.value)">
+        <option value="28">Large</option>
+        <option value="24">Medium</option>
+        <option value="18">Small</option>
+      </select>
+      <button onclick="nextSlide()">Next</button>
+      <button onclick="prevSlide()">Previous</button>
+    </div>
+  </div>
+</body>
+</html>
