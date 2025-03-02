@@ -99,6 +99,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   TH3D *hist_pt_orig = new TH3D("hist_pt_orig","hist_pt_orig",50,0,5,5,0,100,2,0,2);
   TH2D *hist_pt_mother = new TH2D("hist_pt_mother","hist_pt_mother",500,0,10,5,0,100);
   TH2D *hist_pt_mother_weight = new TH2D("hist_pt_mother_weight","hist_pt_mother_weight",500,0,10,5,0,100);
+  TH2D *n_hits_hist = new TH2D("n_hits_hist","n_hits_hist",1000,0,1000,100,0,100); 
 
   std::cout << "Trees read!" << std::endl;
 
@@ -106,15 +107,18 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int beggin = nevt * (itread - 1) / ntreads;
   const int endish = nevt * itread / ntreads;
   
-  TF1 f("f","gaus",-5.*250./10000,5.*250./10000);
+  TF1 f("f","gaus",-5,5);
   f.SetParameter(0,1);
   f.SetParameter(1,0);
-  f.SetParameter(2,250./10000);
+  f.SetParameter(2,1);
+  const float event_vertex_sigma[3] = {89./10000,76./10000,100./10000};
+
   for (int ievent = beggin; ievent < endish; ievent++)
   {
     if ((ievent -beggin) % 50000 == 0)
     std::cout << "ithread, iEvent, N_events: " << itread<< ",  " << ievent -beggin<< " / " << nevt/ntreads << std::endl;
     myevent->ClearEvent();
+    event_container->ClearEvent();
     br->GetEntry(ievent);
     if (ievent - beggin > N_max)
       break;
@@ -156,19 +160,26 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
 
-    myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*0);
-    myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*0);
+    myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*event_vertex_sigma[0]);
+    myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*event_vertex_sigma[1]);
+    myevent->SetPreciseZ(myevent->GetPreciseZ()+f.GetRandom()*event_vertex_sigma[2]);
     myevent->SetVtxZ(myevent->GetPreciseZ());
+    //if(myevent->GetCentrality()>20) continue;
 
     if(fill_inv_mass_sim) event_container->fill_inv_mass_sim(weight);
 
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
+    
+    //for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
+    //{
+    //  MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+    //  mytrk->SetPtPrime(mytrk->GetPt());
+    //}
 
     int n_electrons = myevent->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *myevent->GetEntry(itrk);
-      
       bool skip = false; 
         if (mytrk.GetPtPrime()>4.4 || mytrk.GetPtPrime() < 0.4)
           skip = true;
@@ -188,6 +199,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
           itrk--;
           continue;
         }
+        //std::cout<<mytrk.GetPt()<<" "<<mytrk.GetPtPrime()<<" "<<mytrk.GetReconPT()<<std::endl;
     }
     
     int n_hits = myevent->GetNVTXhit();
@@ -203,6 +215,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
          continue;
      }
     }
+    n_hits_hist->Fill(n_hits,myevent->GetCentrality());
     
     event_container->SetEvent(myevent);
 
@@ -340,17 +353,19 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if(use_d_dphi_DCA)  event_container->FillDphiHists();
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     //event_container->CheckVeto();
-    if(fill_true_DCA) event_container->FillTrueDCA();
+    if(fill_true_DCA) event_container->FillTrueDCA(weight);
     if(fill_TTree) event_container->FillTree();
     if(do_electron_QA)event_container->FillQAHist(-99);
     //myevent->ReshuffleElectrons();
     if(fill_inv_mass && event_container->GetNGoodElectrons()<2  ) continue;
     if(fill_inv_mass) event_container->fill_inv_mass(weight);
     myevent->ClearEvent();
+    event_container->ClearEvent();
     //event->ClearEvent();
   }
   hist_pt_orig->Write();
   hist_pt_mother->Write();
   hist_pt_mother_weight->Write();
+  n_hits_hist->Write();
   event_container->WriteOutFile();
 }
