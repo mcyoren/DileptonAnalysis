@@ -29,6 +29,8 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     fill_true_DCA = 0;
     check_veto = 0;
     fill_inv_mass = 0;
+    vtx_mean_x = 0;
+    vtx_mean_y = 0;
 
     ul = nullptr;
     event_container = nullptr;
@@ -95,6 +97,21 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
 
 int Run14AuAuLeptonCombyReco::InitRun(PHCompositeNode *TopNode)
 {
+    
+    const RunHeader *runHDR =
+        findNode::getClass<RunHeader>(TopNode, "RunHeader");
+    if (!runHDR)
+    {
+        std::cout << PHWHERE << "Failed to find RunHeader Node" << std::endl;
+    }   
+    const int run_number = runHDR->get_RunNumber();
+    if (is_bad_run(run_number))
+    {
+        std::cout << "Bad run: " << run_number << std::endl;
+        return -1;
+    }
+    get_vtx_mean_values(run_number, vtx_mean_x, vtx_mean_y);
+    std::cout << "Run number: " << run_number << " VTX Mean x: " << vtx_mean_x << " VTX Mean y: " << vtx_mean_y << std::endl;
     if(fill_TTree) event_container->ResetTree();
     InitWalk(TopNode);
     return 0;
@@ -204,7 +221,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(4);
 
-    if (precise_x < 0.27 || precise_x > 0.40 || precise_y < -0.02 || precise_y > 0.10)
+    if ( TMath::Abs(precise_x - vtx_mean_x) > 0.05 || TMath::Abs(precise_y - vtx_mean_y) > 0.05)
         return 0;   
         
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(5);
@@ -214,8 +231,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
 
     event->SetCentrality(centrality);
-    event->SetPreciseX(precise_x);
-    event->SetPreciseY(precise_y);
+    event->SetPreciseX(precise_x*0 + vtx_mean_x);
+    event->SetPreciseY(precise_y*0 + vtx_mean_y);
     event->SetPreciseZ(precise_z);
     event->SetEvtNo(ncalls);
     event->SetRunNumber(run_number);/////neeeds a doctor
@@ -567,11 +584,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
                (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) && mytrk->GetMinsDphi(0)>-2) ) hit_assocaition+=1;
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) ) ) hit_assocaition+=1;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
                (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> 0 )) hit_assocaition+=5;
+               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> 0-2 )) hit_assocaition+=5;
         //if(mytrk->GetNHits()>90) addit_reject = 1;
         //if(mytrk->GetTOFDPHI()>900 && mytrk->GetGhost()<1) addit_reject = 1;
         ////if(mytrk->GetGhost()!=-9 && mytrk->GetNHits()>900 && mytrk->GetTOFDPHI()>90) addit_reject = 10;

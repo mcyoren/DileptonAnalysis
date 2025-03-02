@@ -1216,7 +1216,7 @@ namespace MyDileptonAnalysis
             void Reveal_Hadron();
 
             void FillDphiHists();
-            void FillTrueDCA();
+            void FillTrueDCA(const float weight = 1);
 
             MyEvent *GetEvent() { return event; };
             void SetEvent(MyDileptonAnalysis::MyEvent *ev) { event = ev; };
@@ -1252,11 +1252,11 @@ namespace MyML
       double GetTreeValue(const double x[13], const int iestim = 0);   
       double GetProb(const double x[13], const double LearingRate=0.2, const int n_estim = 20);
       int GeteID(const double x[13], const double y[3], const double LearingRate=0.2, const int n_estim = 20);//double mytree['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
-      double GetHitBDTValue(const double x[21], const int iestim);
-      double GetConvBDTValue(const double x[34], const int iestim);
-      double GetHitBDTProb(const double x[21], const double LearingRate = 0.2, const int n_estim = 12);
+      double GetHitBDTValue(const double x[24], const int iestim);
+      double GetConvBDTValue(const double x[38], const int iestim);
+      double GetHitBDTProb(const double x[24], const double LearingRate = 0.2, const int n_estim = 24);
       int GetHitBDT(const double x, const double y[4]);
-      double GetConvBDTProb(const double x[34], const double LearingRate = 0.2, const int n_estim = 12);
+      double GetConvBDTProb(const double x[38], const double LearingRate = 0.2, const int n_estim = 12);
       int GetConvBDT(const double x, const double y[4]);
 }
 

@@ -843,3 +843,23 @@ void Run14AuAuLeptonCombyReco::StopWalking()
     delete fCDH;
 }
 
+bool Run14AuAuLeptonCombyReco::is_bad_run(int run_number) {
+    for (unsigned int i = 0; i < sizeof(bad_run_list) / sizeof(bad_run_list[0]); ++i) {
+        if (bad_run_list[i] == run_number) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Run14AuAuLeptonCombyReco::get_vtx_mean_values(int run_number, float &mean_x, float &mean_y) {
+    for (unsigned int i = 0; i < sizeof(run_numbers) / sizeof(run_numbers[0]); ++i) {
+        if (run_numbers[i] == run_number) {
+            mean_x = meanX[i];
+            mean_y = meanY[i];
+            return;
+        }
+    }
+    mean_x = -1;  // Indicate not found
+    mean_y = -1;  // Indicate not found
+}

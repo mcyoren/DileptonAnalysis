@@ -104,6 +104,8 @@ private:
     void StopWalking();
     int Solution(MyDileptonAnalysis::MyTrack* mytrk1, MyDileptonAnalysis::MyTrack* mytrk2, 
                   MyDileptonAnalysis::Reconstruction* reco, float zVtx);
+    bool is_bad_run(int run_number);
+    void get_vtx_mean_values(int run_number, float &mean_x, float &mean_y);
 
 
 protected:
@@ -163,6 +165,8 @@ protected:
 
     int ncalls, npassed;
     std::string outfilename;
+
+    float vtx_mean_x, vtx_mean_y;
 };
 
 #endif /* __DATAANALYZER3DRECO_H__ */
