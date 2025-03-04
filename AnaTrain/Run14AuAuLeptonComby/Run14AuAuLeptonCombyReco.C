@@ -231,8 +231,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
 
     event->SetCentrality(centrality);
-    event->SetPreciseX(precise_x*0 + vtx_mean_x);
-    event->SetPreciseY(precise_y*0 + vtx_mean_y);
+    event->SetPreciseX(precise_x + 0*vtx_mean_x);
+    event->SetPreciseY(precise_y + 0*vtx_mean_y);
     event->SetPreciseZ(precise_z);
     event->SetEvtNo(ncalls);
     event->SetRunNumber(run_number);/////neeeds a doctor
