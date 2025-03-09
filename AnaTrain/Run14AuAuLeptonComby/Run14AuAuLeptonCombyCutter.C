@@ -49,8 +49,96 @@ bool Run14AuAuLeptonCombyCutter::isParticleType2(
 bool Run14AuAuLeptonCombyCutter::isCollectionOK(
     PHParticle *type1, PHParticle *type2)
 {
+    /*UltraLight *php1 = dynamic_cast<UltraLight*>(type1);
+    UltraLight *php2 = dynamic_cast<UltraLight*>(type2);
+  
+    unsigned int nT1     = php1->get_npart();
+    unsigned int nT2     = php2->get_npart();
+  
+    // Loop over ALL the possible pairs in an event and check to see that EACH
+    // pair is OK.  Even if only one pair isn't, then the whole collection fails.
+    //_______________________Check the Type1-Type2 Combinations_________________
+    if(nT1>0 && nT2>0)
+      {
+          for(unsigned int it1=0; it1<nT1; it1++) 
+      {
+        for(unsigned int it2=0; it2<nT2; it2++) 
+          {
+            //Ring sharing cut
+            double dcenter = getDcenter(php1,it1,php2,it2);
+            double EMCdistance = getEMCdistance(php1,it1,php2,it2);
+            double dPC1 = getDpc1(php1,it1,php2,it2);
+            if (dcenter < dcenter_cut)
+          {
+            return false;
+          }
+            if (EMCdistance < emcD_cut )
+          {
+            return false;
+          }
+            if (dPC1 > 0)
+          {
+            return false;
+          }
+          }
+      }
+      }
+    
+    //_______________________Check the Type1-Type1 Combinations_________________
+    if(nT1>0)
+      {
+        for(unsigned int it1=0; it1<nT1-1; it1++)
+      {
+        for(unsigned int it2=it1+1; it2<nT1; it2++)
+          {
+            //Ring sharing cut
+            double dcenter = getDcenter(php1,it1,php1,it2);
+            double EMCdistance = getEMCdistance(php1,it1,php1,it2);
+            double dPC1 = getDpc1(php1,it1,php1,it2);
+            if (dcenter < dcenter_cut)
+          {
+            return false;
+          }
+            if (EMCdistance < emcD_cut )
+          {
+            return false;
+          }
+            if (dPC1 > 0)
+          {
+            return false;
+          }
+          }
+      }
+      }
+    //_______________________Check the Type2-Type2 Combinations_________________
+    if(nT2>0) 
+      {
+        for(unsigned int it1=0; it1<nT2-1; it1++)
+      {      
+        for(unsigned int it2=it1+1; it2<nT2; it2++)  
+          {
+  
+            //Ring sharing cut
+            double dcenter = getDcenter(php2,it1,php2,it2);
+            double EMCdistance = getEMCdistance(php2,it1,php2,it2);
+            double dPC1 = getDpc1(php2,it1,php2,it2);
+            if (dcenter < dcenter_cut)
+          {
+            return false;
+          }
+            if (EMCdistance < emcD_cut )
+          {
+            return false;
+          }
+            if (dPC1 > 0)
+          {
+            return false;
+          }
+          }
+      }
+      }*/
     return true;
-}
+  }
 
 bool Run14AuAuLeptonCombyCutter::isPairOK(
     PHParticle *type1, const unsigned int iTrack1,
@@ -99,12 +187,6 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     if (TMath::Abs(dphi - (-0.065 * dalpha)) < 0.015)
         return false;
 
-    const float psi_pip = p1->get_double(Run14AuAuLeptonCombyEnum::PSI);
-    const float psi_pim = p2->get_double(Run14AuAuLeptonCombyEnum::PSI);
-    //if ( TMath::Abs(psi_pip-psi_pim)>TMath::Pi()/16. && TMath::Abs(psi_pip-psi_pim)<15.*TMath::Pi()/16. )
-    //    return false;
-
-    
     const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
     const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
     const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
@@ -119,23 +201,15 @@ bool Run14AuAuLeptonCombyCutter::isPairOK(
     const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
     const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
 
+    const int Nsect1 = p1->get_integer(Run14AuAuLeptonCombyEnum::SECTOR); 
+    const int Ysect1 = p1->get_integer(Run14AuAuLeptonCombyEnum::YSECT); 
+    const int Zsect1 = p1->get_integer(Run14AuAuLeptonCombyEnum::ZSECT); 
+    const int Nsect2 = p2->get_integer(Run14AuAuLeptonCombyEnum::SECTOR); 
+    const int Ysect2 = p2->get_integer(Run14AuAuLeptonCombyEnum::YSECT); 
+    const int Zsect2 = p2->get_integer(Run14AuAuLeptonCombyEnum::ZSECT);
 
-    const int id11 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
-    const int id12 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
-    const int id13 = p1->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
-    const int id21 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID1); 
-    const int id22 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID2); 
-    const int id23 = p2->get_integer(Run14AuAuLeptonCombyEnum::ID3); 
-
-    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-       std::cout<<id11<< " "<<id21<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
-
-    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-       std::cout<<id12<< " "<<id22<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
-
-    if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-       std::cout<<id13<< " "<<id23<<" "<<psi_pip<<" "<<psi_pim<<std::endl;
-
+    if ( Nsect1 == Nsect2 && TMath::Abs( Ysect1 - Ysect2 ) < 3 && TMath::Abs( Zsect1 - Zsect2) <3 )
+        return false;
 
     if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
         return false;

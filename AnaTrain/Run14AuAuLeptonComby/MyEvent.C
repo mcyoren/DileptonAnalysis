@@ -626,9 +626,12 @@ namespace MyDileptonAnalysis
                         const double ecore2 = ecore1/newBDTrack.GetEcore();////need to be replased with ecore
                         const double reconpt1 = newBDTrack.GetPt() - newBDTHit.GetReconPt();
                         const double reconpt2 = reconpt1/newBDTrack.GetPt();
-                        const double BDTHitInput[10] = {//['Pt', 'Ecore', 'Centrality', 'reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']
-                            reconpt2, newBDTHit.Getsdphi(0), newBDTHit.Getsdphi(1), newBDTHit.Getsdphi(2), newBDTHit.Getsdphi(3),
-                            newBDTHit.Getsdthe(0), newBDTHit.Getsdthe(1), newBDTHit.Getsdthe(2), newBDTHit.Getsdthe(3) , newBDTHit.Getsdphi(0)-newBDTHit.Getsdphi(1)
+                        const double BDTHitInput[24] = {//['Pt', 'Ecore', 'Centrality', 'reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']
+                            newBDTrack.GetPt(), ecore2, (double) newBDTrack.GetCentrality(),  reconpt2,
+                            newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitTheR(0,1),
+                            newBDTHit.Getsdthe(1), newBDTHit.GetSecondHitPhiR(1), newBDTHit.GetSecondHitTheR(1), newBDTHit.GetSecondHitPhiR(1,1), newBDTHit.GetSecondHitTheR(1,1),
+                            newBDTHit.Getsdthe(2), newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitTheR(2,1),
+                            newBDTHit.Getsdthe(3), newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitTheR(3,1)   
                         };
                         const double BDTConvInput[38] = {//['Pt', 'Ecore', 'Centrality', 'Charge', 'reconpt', 'sdphi0', 'SecondHitPhiR0', 'SecondHitPhiL0', 'SecondHitTheR0', 'SecondHitTheL0', 'SecondHitPhiR01', 'SecondHitPhiL01', 'SecondHitTheR01', 'SecondHitTheL01', 'SecondHitPhiR1', 'SecondHitPhiL1', 'SecondHitTheR1', 'SecondHitTheL1', 'SecondHitPhiR11', 'SecondHitPhiL11', 'SecondHitTheR11', 'SecondHitTheL11', 'SecondHitPhiR2', 'SecondHitPhiL2', 'SecondHitTheR2', 'SecondHitTheL2', 'SecondHitPhiR21', 'SecondHitPhiL21', 'SecondHitTheR21', 'SecondHitTheL21', 'SecondHitPhiR3', 'SecondHitPhiL3', 'SecondHitTheR3', 'SecondHitTheL3', 'SecondHitPhiR31', 'SecondHitPhiL31', 'SecondHitTheR31', 'SecondHitTheL31']
                             newBDTrack.GetPt(), ecore2, (double) newBDTrack.GetCentrality(), (double)newBDTrack.GetCharge(),
@@ -638,7 +641,7 @@ namespace MyDileptonAnalysis
                             newBDTHit.GetSecondHitPhiR(2), newBDTHit.GetSecondHitPhiL(2), newBDTHit.GetSecondHitTheR(2), newBDTHit.GetSecondHitTheL(2),newBDTHit.GetSecondHitPhiR(2,1), newBDTHit.GetSecondHitPhiL(2,1), newBDTHit.GetSecondHitTheR(2,1), newBDTHit.GetSecondHitTheL(2,1),
                             newBDTHit.GetSecondHitPhiR(3), newBDTHit.GetSecondHitPhiL(3), newBDTHit.GetSecondHitTheR(3), newBDTHit.GetSecondHitTheL(3),newBDTHit.GetSecondHitPhiR(3,1), newBDTHit.GetSecondHitPhiL(3,1), newBDTHit.GetSecondHitTheR(3,1), newBDTHit.GetSecondHitTheL(3,1)       
                         };
-                        const double probsHIT[4] = {0.40, 0.50, 0.60, 0.70};
+                        const double probsHIT[4] = {0.7048700405814634, 0.80, 0.8971706093225199, 0.95};
                         //const double probsConv[4] = {0.0227005061149391,0.03696777185169043, 0.06905145040745402, 0.13901432529026608};
                         //const double probsConv[4] = {0.16655781590812105,0.20684925395539883, 0.2773192065090052, 0.3935912730094734};
                         const double probsConv[4] = {0.059511564980906206,0.0672349245703329, 0.07958121918163912, 0.10254988100220457};
@@ -674,10 +677,9 @@ namespace MyDileptonAnalysis
             }
             if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
 
-            mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
             if(min_chi2<800000)
             {
-
+                mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
                 mytrk->SetGhost( (int) (mytrk->GetGhost()*1./newBDTrack.GetNBDThit()));
                 BDTracklist.push_back(newBDTrack);
 
@@ -1940,6 +1942,7 @@ namespace MyDileptonAnalysis
             for (int jtrk = itrk+1; jtrk < event->GetNtrack(); jtrk++)
             {
                 MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
+                if (mytrk1->GetChargePrime() != mytrk2->GetChargePrime()) continue;
                 bool isGhost = false;
                 const float dcenter_phi = ( mytrk1->GetCrkphi() - mytrk2->GetCrkphi()) / 0.013;
                 if ( TMath::Abs(dcenter_phi) < 5) 
@@ -1967,6 +1970,16 @@ namespace MyDileptonAnalysis
                 if (TMath::Abs(dphi - (-0.065 * dalpha)) < 0.015)
                     isGhost = true;
 
+                const int Nsect1 = mytrk1->GetSect()+mytrk1->GetArm()*4; 
+                const int Ysect1 = mytrk1->GetYsect(); 
+                const int Zsect1 = mytrk1->GetZsect(); 
+                const int Nsect2 = mytrk2->GetSect()+mytrk2->GetArm()*4; 
+                const int Ysect2 = mytrk2->GetYsect(); 
+                const int Zsect2 = mytrk2->GetZsect();
+                
+                if ( Nsect1 == Nsect2 && TMath::Abs( Ysect1 - Ysect2 ) < 3 && TMath::Abs( Zsect1 - Zsect2) <3 )
+                    n_ghosts++;
+                
                 if (isGhost) {
                     mytrk1->SetGhost(-9);
                     mytrk2->SetGhost(-9);

@@ -13,7 +13,6 @@ public:
       CRKZED,
       DCAX,
       DCAY,
-      PSI,
       ZVTX,
       PHI1,
       PHI2,
@@ -30,9 +29,9 @@ public:
       HADRON_REJECT,
       HIT_ASSOC,
       CONV_REJECT,
-      ID1,
-      ID2,
-      ID3,
+      SECTOR,
+      YSECT,
+      ZSECT,
       LAST_INTEGER  // special...always use this
     };
 };

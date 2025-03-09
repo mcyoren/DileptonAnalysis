@@ -52,6 +52,9 @@ public:
       static float get_DCA_V27(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V28(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_DCA_V29(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V30(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V31(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA_V32(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       
 
       static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
@@ -65,7 +68,7 @@ public:
 };
 
 const int N_pt = 16;  
-const float pt_bins[N_pt+1] = {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.2,1.4,1.6,2.0,2.5,3.0};
+const float pt_bins[N_pt+1] = {0.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.2,1.4,1.6,2.0,2.5,3.0};
 const int N_inv_m = 35;  
 const float inv_m_bins[N_inv_m+1] = {0.,0.05,0.1,0.15,0.25,0.35,0.45,0.55,0.65,0.725,0.8,0.875,0.95,1.0,1.05,1.15,1.3,1.5,1.75,2.0,2.25,2.5,2.75,2.9,3.0,3.05,3.1,3.15,3.2,3.3,3.45,3.55,3.65,3.75,3.85,4.5};
 const int N_DCA = 42;  
