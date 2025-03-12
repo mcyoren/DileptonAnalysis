@@ -475,8 +475,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             }
         }
     }
+    
+    event_container->FillEventHist(10);
+    if(event->GetNtrack()>0) event_container->FillEventHist(11);
+    if(event_container->GetNGoodElectrons()>=0) event_container->FillEventHist(12);
+    if(event_container->GetNGoodElectrons()>0) event_container->FillEventHist(13);
+    if(event_container->isGhostEvent())
+    {
+        event_container->FillEventHist(15);
+        if(event->GetNtrack()>0) event_container->FillEventHist(16);
+        if(event_container->GetNGoodElectrons()>=0) event_container->FillEventHist(17);
+        if(event_container->GetNGoodElectrons()>0) event_container->FillEventHist(18);
+    }
 
-    if(event->GetNtrack()==2 && event_container->isGhostEvent()) return 0;  //removing ghost
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
@@ -492,7 +503,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_rejection == 0 && hit_association == -1 ) continue;   
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
-        if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
+        //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
@@ -584,7 +595,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
 
-    if(event_container->GetNGoodElectrons()==2 && event_container->isGhostEvent()) return 0;  //removing ghost
+    //if(event_container->isGhostEvent()) std::cout<<"yolo"<<std::endl;  //removing ghost
 
     if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();//needs check for hadrons
     if(check_veto) event_container->CheckVeto();

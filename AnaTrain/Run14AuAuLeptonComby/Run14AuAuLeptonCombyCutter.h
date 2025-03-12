@@ -37,7 +37,10 @@ public:
     //float Phi_V(const TVector3& p1, const TVector3& p2);
 
 private:
-
+  //  For pair cuts...
+  int getEMCdistance(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
+  int getDcenter_phi(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
+  int getDC_ghost(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
 };
 
 #endif

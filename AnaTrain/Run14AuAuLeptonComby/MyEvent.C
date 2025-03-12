@@ -1942,7 +1942,7 @@ namespace MyDileptonAnalysis
             for (int jtrk = itrk+1; jtrk < event->GetNtrack(); jtrk++)
             {
                 MyDileptonAnalysis::MyElectron *mytrk2 = event->GetEntry(jtrk);
-                if (mytrk1->GetChargePrime() != mytrk2->GetChargePrime()) continue;
+                //if (mytrk1->GetChargePrime() != mytrk2->GetChargePrime()) continue;
                 bool isGhost = false;
                 const float dcenter_phi = ( mytrk1->GetCrkphi() - mytrk2->GetCrkphi()) / 0.013;
                 if ( TMath::Abs(dcenter_phi) < 5) 
@@ -1978,7 +1978,7 @@ namespace MyDileptonAnalysis
                 const int Zsect2 = mytrk2->GetZsect();
                 
                 if ( Nsect1 == Nsect2 && TMath::Abs( Ysect1 - Ysect2 ) < 3 && TMath::Abs( Zsect1 - Zsect2) <3 )
-                    n_ghosts++;
+                    isGhost = true;
                 
                 if (isGhost) {
                     mytrk1->SetGhost(-9);
@@ -2154,7 +2154,7 @@ namespace MyDileptonAnalysis
         }
         if (fill_true_DCA)
         {
-            INIT_HIST(1, event_hist, 10, 0, 10);
+            INIT_HIST(1, event_hist, 20, 0, 20);
             INIT_HIST(1, centr_hist, 100, 0, 100);
             INIT_HISTOS(3, myvtx_hist, N_centr, 100, 0, 1, 100, -0.5 ,0.5, 20, -10 ,10);
 
