@@ -477,15 +477,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     
     event_container->FillEventHist(10);
-    if(event->GetNtrack()>0) event_container->FillEventHist(11);
-    if(event_container->GetNGoodElectrons()>=0) event_container->FillEventHist(12);
-    if(event_container->GetNGoodElectrons()>0) event_container->FillEventHist(13);
+    if(event->GetNtrack()>1) event_container->FillEventHist(11);
+    if(event_container->GetNGoodElectrons()>=1) event_container->FillEventHist(12);
+    if(event_container->GetNGoodElectrons()>1) event_container->FillEventHist(13);
     if(event_container->isGhostEvent())
     {
         event_container->FillEventHist(15);
-        if(event->GetNtrack()>0) event_container->FillEventHist(16);
-        if(event_container->GetNGoodElectrons()>=0) event_container->FillEventHist(17);
-        if(event_container->GetNGoodElectrons()>0) event_container->FillEventHist(18);
+        if(event->GetNtrack()>1) event_container->FillEventHist(16);
+        if(event_container->GetNGoodElectrons()>=1) event_container->FillEventHist(17);
+        if(event_container->GetNGoodElectrons()>1) event_container->FillEventHist(18);
     }
 
 

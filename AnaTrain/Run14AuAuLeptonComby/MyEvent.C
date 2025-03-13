@@ -1935,6 +1935,7 @@ namespace MyDileptonAnalysis
     int MyEventContainer::isGhostEvent()
     {   
         int n_ghosts = 0;
+        int pair_counter[3][33] = {{0},{0},{0}};
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
@@ -1991,7 +1992,61 @@ namespace MyDileptonAnalysis
                     //}
                 }
                 if(isGhost) n_ghosts++;
+                else{
+                    const int charge_bin = 1 + (mytrk1->GetChargePrime() + mytrk2->GetChargePrime())/2;
+                    if ( mytrk1->GetHitCounter(0)>0 && mytrk2->GetHitCounter(0)>0 ) pair_counter[charge_bin][0]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9    && mytrk1->GetGhost()!=-9  && mytrk2->GetGhost()!=-9  ) pair_counter[charge_bin][1]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99   && mytrk1->GetGhost()!=-9  && mytrk2->GetGhost()!=-9  ) pair_counter[charge_bin][2]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999  && mytrk1->GetGhost()!=-9  && mytrk2->GetGhost()!=-9  ) pair_counter[charge_bin][3]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999 && mytrk1->GetGhost()!=-9  && mytrk2->GetGhost()!=-9  ) pair_counter[charge_bin][4]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9    && mytrk1->GetNHits()>9    && mytrk2->GetNHits()>9    ) pair_counter[charge_bin][5]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9    && mytrk1->GetNHits()>99   && mytrk2->GetNHits()>99   ) pair_counter[charge_bin][6]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9    && mytrk1->GetNHits()>999  && mytrk2->GetNHits()>999  ) pair_counter[charge_bin][7]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9    && mytrk1->GetNHits()>9999 && mytrk2->GetNHits()>9999 ) pair_counter[charge_bin][8]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99   && mytrk1->GetNHits()>9    && mytrk2->GetNHits()>9    ) pair_counter[charge_bin][9]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99   && mytrk1->GetNHits()>99   && mytrk2->GetNHits()>99   ) pair_counter[charge_bin][10]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99   && mytrk1->GetNHits()>999  && mytrk2->GetNHits()>999  ) pair_counter[charge_bin][11]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99   && mytrk1->GetNHits()>9999 && mytrk2->GetNHits()>9999 ) pair_counter[charge_bin][12]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999  && mytrk1->GetNHits()>9    && mytrk2->GetNHits()>9    ) pair_counter[charge_bin][13]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999  && mytrk1->GetNHits()>99   && mytrk2->GetNHits()>99   ) pair_counter[charge_bin][14]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999  && mytrk1->GetNHits()>999  && mytrk2->GetNHits()>999  ) pair_counter[charge_bin][15]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999  && mytrk1->GetNHits()>9999 && mytrk2->GetNHits()>9999 ) pair_counter[charge_bin][16]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999 && mytrk1->GetNHits()>9    && mytrk2->GetNHits()>9    ) pair_counter[charge_bin][17]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999 && mytrk1->GetNHits()>99   && mytrk2->GetNHits()>99   ) pair_counter[charge_bin][18]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999 && mytrk1->GetNHits()>999  && mytrk2->GetNHits()>999  ) pair_counter[charge_bin][19]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999 && mytrk1->GetNHits()>9999 && mytrk2->GetNHits()>9999 ) pair_counter[charge_bin][20]++;
+                    if( mytrk1->GetTOFDPHI()>9      && mytrk2->GetTOFDPHI()>9      ) pair_counter[charge_bin][21]++;
+                    if( mytrk1->GetTOFDPHI()>99     && mytrk2->GetTOFDPHI()>99     ) pair_counter[charge_bin][22]++;
+                    if( mytrk1->GetTOFDPHI()>999    && mytrk2->GetTOFDPHI()>999    ) pair_counter[charge_bin][23]++;
+                    if( mytrk1->GetTOFDPHI()>9999   && mytrk2->GetTOFDPHI()>9999   ) pair_counter[charge_bin][24]++;
+                    if( mytrk1->GetNHits()>9        && mytrk2->GetNHits()>9        ) pair_counter[charge_bin][25]++;
+                    if( mytrk1->GetNHits()>99       && mytrk2->GetNHits()>99       ) pair_counter[charge_bin][26]++;
+                    if( mytrk1->GetNHits()>999      && mytrk2->GetNHits()>999      ) pair_counter[charge_bin][27]++;
+                    if( mytrk1->GetNHits()>9999     && mytrk2->GetNHits()>9999     ) pair_counter[charge_bin][28]++;
+                    if( mytrk1->GetHitCounter(0) == 0 && mytrk1->GetHitCounter(1) == 0  && mytrk2->GetTOFDPHI()>999 ) pair_counter[charge_bin][29]++;
+                    if( mytrk2->GetHitCounter(0) == 0 && mytrk2->GetHitCounter(1) == 0  && mytrk1->GetTOFDPHI()>999 ) pair_counter[charge_bin][30]++;
+                    if( mytrk1->GetHitCounter(0) == 0 && mytrk1->GetHitCounter(1) == 0 && mytrk2->GetHitCounter(0) == 0 && mytrk2->GetHitCounter(1) == 0 ) 
+                    {
+                        pair_counter[charge_bin][32]++;
+                        if( (mytrk1->GetHitCounter(2) > 0  || mytrk1->GetHitCounter(3) > 0) &&  (mytrk2->GetHitCounter(2) > 0  || mytrk2->GetHitCounter(3) > 0)  ) pair_counter[charge_bin][31]++;
+                    }
+                }
                 //if(isGhost) return 1;
+            }
+        }
+        if(event->GetNtrack()>1)
+        {
+            for (int i = 0; i < 33; i++)
+            {
+                counter_assoc_ghost_hist->Fill(pair_counter[0][i], i, event->GetCentrality());
+                counter_assoc_ghost_hist->Fill(pair_counter[1][i], i, event->GetCentrality()+100);
+                counter_assoc_ghost_hist->Fill(pair_counter[2][i], i, event->GetCentrality()+200);
+                if (n_ghosts)
+                {
+                    counter_assoc_ghost_hist->Fill(pair_counter[0][i], i, event->GetCentrality()+300);
+                    counter_assoc_ghost_hist->Fill(pair_counter[1][i], i, event->GetCentrality()+400);
+                    counter_assoc_ghost_hist->Fill(pair_counter[2][i], i, event->GetCentrality()+500);
+                }
             }
         }
         return n_ghosts;
@@ -2156,6 +2211,7 @@ namespace MyDileptonAnalysis
         {
             INIT_HIST(1, event_hist, 20, 0, 20);
             INIT_HIST(1, centr_hist, 100, 0, 100);
+            INIT_HIST(3, counter_assoc_ghost_hist, 50,0,50, 33, 0, 33, 60, 0, 600);
             INIT_HISTOS(3, myvtx_hist, N_centr, 100, 0, 1, 100, -0.5 ,0.5, 20, -10 ,10);
 
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 200);
