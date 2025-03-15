@@ -500,7 +500,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
         if ( (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) && conv_rejection < 0 ) conv_rejection = -10;
 
-        if ( conv_rejection == 0 && hit_association == -1 ) continue;   
+        if ( conv_rejection == 0 ) continue;   
         if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
         //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
@@ -534,9 +534,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::THE3, mytrk->GetThe0Prime());
 
         ult.set_integer(Run14AuAuLeptonCombyEnum::PTYPE, ptype);
-        ult.set_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT, -1);
+        ult.set_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT, mytrk->GetMcId() + (int) (mytrk->GetProb()*5) );
         ult.set_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC, hit_association);
         ult.set_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT, conv_rejection);
+        ult.set_integer(Run14AuAuLeptonCombyEnum::GHOST, 0);
         ult.set_integer(Run14AuAuLeptonCombyEnum::SECTOR, mytrk->GetSect()+mytrk->GetArm()*4);
         ult.set_integer(Run14AuAuLeptonCombyEnum::YSECT, mytrk->GetYsect());
         ult.set_integer(Run14AuAuLeptonCombyEnum::ZSECT, mytrk->GetZsect());
@@ -674,6 +675,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT, hadron_reject);
         ult.set_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC, hit_assocaition);
         ult.set_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT, conv_reject);
+        ult.set_integer(Run14AuAuLeptonCombyEnum::GHOST, 0);
         ult.set_integer(Run14AuAuLeptonCombyEnum::SECTOR, mytrk->GetSect()+mytrk->GetArm()*4);
         ult.set_integer(Run14AuAuLeptonCombyEnum::YSECT, mytrk->GetYsect());
         ult.set_integer(Run14AuAuLeptonCombyEnum::ZSECT, mytrk->GetZsect());

@@ -29,6 +29,7 @@ public:
       HADRON_REJECT,
       HIT_ASSOC,
       CONV_REJECT,
+      GHOST,
       SECTOR,
       YSECT,
       ZSECT,

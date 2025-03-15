@@ -29,7 +29,7 @@ public:
     bool isEventOK(PHCompositeNode *topNode);
     bool isParticleType1(PHParticle *part, const unsigned int iTrack);
     bool isParticleType2(PHParticle *part, const unsigned int iTrack);
-    bool isPairOK(PHParticle *Type1, const unsigned int TrackNumber1, PHParticle *Type2, const unsigned int TrackNumber2);
+    bool isPairOK(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
     bool isCollectionOK(PHParticle *Type1, PHParticle *Type2);
     int Cleaner(PHParticle *Part1);
     void CrossClean(PHParticle *Type1, PHParticle *Type2);
@@ -41,6 +41,9 @@ private:
   int getEMCdistance(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
   int getDcenter_phi(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
   int getDC_ghost(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
+  int ChooseBest(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2);
+  int NulifyGhost(PHParticle *Type1, const unsigned int i1);
+
 };
 
 #endif
