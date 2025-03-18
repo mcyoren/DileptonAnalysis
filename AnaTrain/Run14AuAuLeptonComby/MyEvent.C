@@ -1579,28 +1579,26 @@ namespace MyDileptonAnalysis
                 const float the22 = vtxhit21->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                 const float the23 = vtxhit22->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
-                if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
-                if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
                 if (!(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
-                    continue;
-                if (!(newTrack1->GetNHits()>9&&newTrack2->GetNHits()>9))
                     continue;
                 if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                     continue;
-                if (event->GetCentrality()<20 && !(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
+                if (event->GetCentrality()<20 && !(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
                     continue;
                 inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
                 delt_phi_dca_fg1[in_hist]->Fill(dca, dphi, pair_pt, weight);
-                if (!(newTrack1->GetNHits()>900&&newTrack2->GetNHits()>900))
-                    continue;
+
+                if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
+                if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
+                if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+
                 inv_mass_dca_fg2[in_hist]->Fill(dca, invm, pair_pt, weight);
                 delt_phi_dca_fg2[in_hist]->Fill(dca, dphi, pair_pt, weight);
                 if (!(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
                     continue;
                 inv_mass_dca_fg3[in_hist]->Fill(dca, invm, pair_pt, weight);
                 delt_phi_dca_fg3[in_hist]->Fill(dca, dphi, pair_pt, weight);
-                if (!(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
+                if (!(newTrack1->GetNHits()>9000&&newTrack2->GetNHits()>9000))
                     continue;
                 inv_mass_dca_fg4[in_hist]->Fill(dca, invm, pair_pt, weight);
                 delt_phi_dca_fg4[in_hist]->Fill(dca, dphi, pair_pt, weight);
@@ -1697,28 +1695,26 @@ namespace MyDileptonAnalysis
                     const float the22 = vtxhit21->GetTheHit(ex2,ey2,ez2);
                     const float the23 = vtxhit22->GetTheHit(ex2,ey2,ez2);
 
-                    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
-                    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
-                    if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
                     if (!(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
-                        continue;
-                    if (!(newTrack1->GetNHits()>9&&newTrack2->GetNHits()>9))
                         continue;
                     if (!(newTrack1->GetTOFDPHI()>900&&newTrack2->GetTOFDPHI()>900))
                         continue;
-                    if (event->GetCentrality()<20 && !(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
+                    if (event->GetCentrality()<20 && !(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
                         continue;
                     inv_mass_dca_bg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
                     delt_phi_dca_bg1[in_hist]->Fill(dca, dphi, pair_pt, weight);
-                    if (!(newTrack1->GetNHits()>900&&newTrack2->GetNHits()>900))
-                        continue;
+    
+                    if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
+                    if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
+                    if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+    
                     inv_mass_dca_bg2[in_hist]->Fill(dca, invm, pair_pt, weight);
                     delt_phi_dca_bg2[in_hist]->Fill(dca, dphi, pair_pt, weight);
                     if (!(newTrack1->GetTOFDPHI()>9000&&newTrack2->GetTOFDPHI()>9000))
                         continue;
                     inv_mass_dca_bg3[in_hist]->Fill(dca, invm, pair_pt, weight);
                     delt_phi_dca_bg3[in_hist]->Fill(dca, dphi, pair_pt, weight);
-                    if (!(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
+                    if (!(newTrack1->GetNHits()>9000&&newTrack2->GetNHits()>9000))
                         continue;
                     inv_mass_dca_bg4[in_hist]->Fill(dca, invm, pair_pt, weight);
                     delt_phi_dca_bg4[in_hist]->Fill(dca, dphi, pair_pt, weight);

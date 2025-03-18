@@ -7,6 +7,7 @@ fi
 echo "input file: $1, number of threads: $2, number of events: $3 output file name: $4"
 
 root -l -b << EOF
+    .L ../AnaTrain/Run14AuAuLeptonComby/MyML.C+
     .L ../AnaTrain/Run14AuAuLeptonComby/MyEvent.C+
     .L Calib.C+
 EOF

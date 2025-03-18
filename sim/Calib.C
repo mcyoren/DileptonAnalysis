@@ -20,7 +20,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, i
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
   const int fill_true_DCA = 1;
-  const int check_veto = 0;
+  const int check_veto = 1;
   const int fill_inv_mass = 0;
   const int istruehitsigmacounter = 0;
 
@@ -43,11 +43,11 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, i
   const int nevt = T->GetEntries();
   const int beggin = nevt * (itread - 1) / ntreads;
   const int endish = nevt * itread / ntreads;
-  TF1 f("f","gaus",-5.*200./10000,5.*200./10000);
+  TF1 f("f","gaus",-5,5);
   f.SetParameter(0,1);
   f.SetParameter(1,0);
-  f.SetParameter(2,1000./10000);
-  const float deltaR[3]={0.080*0,0.016*0,0.200};
+  f.SetParameter(2,1);
+  const float deltaR[3]={4./10000,4./10000,4./10000};
  
   for (int ievent = beggin; ievent < endish; ievent++)
   {
@@ -61,10 +61,10 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, i
 
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
 
-    myevent->SetVtxZ(myevent->GetPreciseZ());
     myevent->SetPreciseX(myevent->GetPreciseX()+f.GetRandom()*deltaR[0]);
     myevent->SetPreciseY(myevent->GetPreciseY()+f.GetRandom()*deltaR[1]);
     myevent->SetPreciseZ(myevent->GetPreciseZ()+f.GetRandom()*deltaR[2]);
+    myevent->SetVtxZ(myevent->GetPreciseZ());
     
     for (int i = 0; i < myevent->GetNtrack()*fill_QA_hadron_hists; i++)
     {
@@ -128,7 +128,7 @@ void Calib(const TString inname = inFile[0],  int itread = 0, int ntreads = 1, i
     if(fill_QA_hadron_hists) event_container->correct_beam_offset();
     if(fill_QA_hadron_hists) event_container->Associate_Hits_to_Hadrons(5);
     if(do_track_QA) event_container->FillQAHist(in_id);
-    if(associate_hits)event_container->Associate_Hits_to_Leptons(5,5,5);
+    if(associate_hits)event_container->Associate_Hits_to_Leptons_OLD();
     if(istruehitsigmacounter) 
     {
       event_container->Associate_Hits_to_Leptons(2,5);

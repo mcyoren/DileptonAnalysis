@@ -5,6 +5,7 @@ echo "$1"
 start=`date +%s`
 
 root -l -b << EOF
+    gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyML_C.so")
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyEvent_C.so")
     gSystem->Load("Calib_C.so")
     Calib("$1",$2,$3,$4)
