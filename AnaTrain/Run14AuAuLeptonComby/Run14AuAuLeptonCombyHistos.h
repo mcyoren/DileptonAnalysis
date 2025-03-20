@@ -22,42 +22,42 @@ public:
 
     Run14AuAuLeptonCombyHistos();
 
-      static float get_DCA_V0 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V1 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V2 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V3 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V4 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V5 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V6 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V7 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V8 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V9 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V10(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V11(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V12(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V13(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V14(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V15(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V16(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V17(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V18(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V19(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V20(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V21(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V22(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V23(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V24(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V25(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V26(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V27(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V28(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V29(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V30(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V31(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
-      static float get_DCA_V32(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V0 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V1 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V2 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V3 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V4 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V5 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V6 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V7 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V8 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V9 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V10(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V11(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V12(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V13(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V14(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V15(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V16(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V17(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V18(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V19(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V20(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V21(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V22(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V23(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V24(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V25(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V26(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V27(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V28(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V29(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V30(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V31(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_pt_V32(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       
 
-      static float get_pt(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_mass_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_phi_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
@@ -68,7 +68,7 @@ public:
 };
 
 const int N_pt = 16;  
-const float pt_bins[N_pt+1] = {0.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.2,1.4,1.6,2.0,2.5,3.0};
+const float pt_bins[N_pt+1] = {0.,0.2,0.3,0.4,0.5,0.6,0.8,1.0,1.2,1.4,1.6,2.0,2.5,3.0,4.0,6.0,9.0}; //4
 const int N_inv_m = 35;  
 const float inv_m_bins[N_inv_m+1] = {0.,0.05,0.1,0.15,0.25,0.35,0.45,0.55,0.65,0.725,0.8,0.875,0.95,1.0,1.05,1.15,1.3,1.5,1.75,2.0,2.25,2.5,2.75,2.9,3.0,3.05,3.1,3.15,3.2,3.3,3.45,3.55,3.65,3.75,3.85,4.5};
 const int N_DCA = 42;  

@@ -598,7 +598,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     //if(event_container->isGhostEvent()) std::cout<<"yolo"<<std::endl;  //removing ghost
 
-    //if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();//needs check for hadrons
+    if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();//needs check for hadrons
     if(check_veto) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();
