@@ -429,6 +429,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
+        if(True)
+        {
+            event_container->FillEventHist(19);
+            event_container->FillVTXAcceptance();
+        } 
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);

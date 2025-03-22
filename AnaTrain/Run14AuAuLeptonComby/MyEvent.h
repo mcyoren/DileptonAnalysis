@@ -1091,7 +1091,7 @@ namespace MyDileptonAnalysis
             TH3D *delt_phi_dca_fg0[N_centr*3],*delt_phi_dca_fg1[N_centr*3],*delt_phi_dca_fg2[N_centr*3],*delt_phi_dca_fg3[N_centr*3],*delt_phi_dca_fg4[N_centr*3];
             TH3D *delt_phi_dca_bg0[N_centr*3],*delt_phi_dca_bg1[N_centr*3],*delt_phi_dca_bg2[N_centr*3],*delt_phi_dca_bg3[N_centr*3],*delt_phi_dca_bg4[N_centr*3];
             TH3D *inv_mass_dca_gen[N_centr*3];
-            TH3D* myvtx_hist[N_centr];
+            TH3D* myvtx_hist[N_centr], *vtx_accaptance_hist, *vtx_deadmaps_hist;
             TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
@@ -1115,6 +1115,7 @@ namespace MyDileptonAnalysis
                   truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
                   v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
+                  vtx_accaptance_hist = nullptr, vtx_deadmaps_hist = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1237,6 +1238,7 @@ namespace MyDileptonAnalysis
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
             int isGhostEvent();
             void ResetRecoverFGVars();
+            void FillVTXAcceptance();
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

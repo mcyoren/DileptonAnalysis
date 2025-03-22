@@ -1417,6 +1417,21 @@ namespace MyDileptonAnalysis
         }
     }
 
+    void MyEventContainer::FillVTXAcceptance()
+    {
+        const int nvtx_hits = event->GetNVTXhit();
+        for (int ihit = 0; ihit < nvtx_hits; ihit++)
+        {
+            MyDileptonAnalysis::MyVTXHit *vtxhit = event->GetVTXHitEntry(ihit);
+            const float phi = vtxhit->GetPhiHit(0,0,0);
+            const float zhit = vtxhit->GetZHit();
+            const int layer = vtxhit->GetiLayer();
+
+            vtx_accaptance_hist->Fill(phi,zhit,layer);
+            if (vtxhit->GetSensor() > 1) vtx_deadmaps_hist->Fill(phi,zhit,layer);
+        }
+    }
+
     void MyEventContainer::FillFlow(const float psi_BBCS, const float psi_BBCN, const float psi_FVTXS, const float psi_FVTXN)
     {
         const int centrality = event->GetCentrality();
@@ -2215,6 +2230,9 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, DCA12_hist, N_centr, 100, -2000, 2000, 100, -2000, 2000, 50, 0, 5);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
             INIT_HISTOS(3, sDCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
+
+            INIT_HIST(3, vtx_accaptance_hist, 300, -1.5, 4.5, 240 , -12, 12, 8, 0 ,8 );
+            INIT_HIST(3, vtx_deadmaps_hist,   30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
 
             is_fill_DCA2_hist = 1;
         }
