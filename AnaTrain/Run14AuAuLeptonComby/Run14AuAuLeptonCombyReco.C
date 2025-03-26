@@ -413,7 +413,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      if ( mytrk.GetMcId()<1000 || mytrk.GetPtPrime() < 0.4 || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) ) //adding regualr electron cuts
+      if ( mytrk.GetMcId()<1000 || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) || 
+         ( mytrk.GetPtPrime() < 0.4 && (mytrk.GetProb() < 1 - mytrk.GetPtPrime() || fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
       {
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -455,7 +456,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(myhit.GetLadder()>24&&myhit.GetLadder()<50)std::cout<<myhit.GetLadder()<<" "<<myhit.GetClustId()<<std::endl;
                 }
                 std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
-                if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
+                //if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
                 MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(ibdtrack);
                 std::cout<<mytrk->GetHitIndex(0)<<" "<<mytrk->GetHitIndex(1)<<" "<<mytrk->GetHitIndex(2)<<" "<<mytrk->GetHitIndex(3)<<std::endl;
                 for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
@@ -506,7 +507,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;   
-        if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
         //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
@@ -565,8 +565,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       bool do_reshuf = false;
 
       if (mytrk.GetHitCounter(0) < 1 || mytrk.GetHitCounter(1) < 1 ||
-          (mytrk.GetHitCounter(2) < 1 && mytrk.GetHitCounter(3) < 1))
-          do_reshuf = true;
+         (mytrk.GetHitCounter(2) < 1 && mytrk.GetHitCounter(3) < 1))
+            do_reshuf = true;
+
+      if ( mytrk.GetPtPrime()<0.4 && 
+         ( mytrk.GetHitCounter(0) < 1 || mytrk.GetHitCounter(1) < 1 || 
+           mytrk.GetHitCounter(2) < 1 || mytrk.GetHitCounter(3) < 1 ) )
+            do_reshuf = true;
 
       if (do_reshuf&&fill_inv_mass)
       {
@@ -622,7 +627,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            
-        if ( mytrk->GetPtPrime() < 0.4) continue;///add wenquing cut
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
 
         int hadron_reject = mytrk->GetMcId();

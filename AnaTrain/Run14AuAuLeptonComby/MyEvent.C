@@ -179,12 +179,14 @@ namespace MyDileptonAnalysis
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
                  mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
-            const double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
+            const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
+            double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
+            if (mytrk->GetPtPrime()<0.4) for (int i = 0; i < 4; i++) treshlods[i] = treshlods[i] + (0.4 - pt) / 20;
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
             {
-                event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
+                event->GetCentrality(), pt, mytrk->GetEcore()/mytrk->GetPtot(), (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
                 (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
-                event->GetCentrality()/20.+mytrk->GetPtPrime()*2, mytrk->GetN0()+4*mytrk->GetPtPrime(), 
+                event->GetCentrality()/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
             mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));
@@ -626,6 +628,7 @@ namespace MyDileptonAnalysis
                         const double ecore2 = ecore1/newBDTrack.GetEcore();////need to be replased with ecore
                         const double reconpt1 = newBDTrack.GetPt() - newBDTHit.GetReconPt();
                         const double reconpt2 = reconpt1/newBDTrack.GetPt();
+                        if (newBDTrack.GetPt()<0.4) newBDTrack.SetPt(0.405);
                         const double BDTHitInput[24] = {//['Pt', 'Ecore', 'Centrality', 'reconpt', 'sdthe0', 'SecondHitPhiR0', 'SecondHitTheR0', 'SecondHitPhiR01', 'SecondHitTheR01', 'sdthe1', 'SecondHitPhiR1', 'SecondHitTheR1', 'SecondHitPhiR11', 'SecondHitTheR11', 'sdthe2', 'SecondHitPhiR2', 'SecondHitTheR2', 'SecondHitPhiR21', 'SecondHitTheR21', 'sdthe3', 'SecondHitPhiR3', 'SecondHitTheR3', 'SecondHitPhiR31', 'SecondHitTheR31']
                             newBDTrack.GetPt(), ecore2, (double) newBDTrack.GetCentrality(),  reconpt2,
                             newBDTHit.Getsdthe(0), newBDTHit.GetSecondHitPhiR(0), newBDTHit.GetSecondHitTheR(0), newBDTHit.GetSecondHitPhiR(0,1), newBDTHit.GetSecondHitTheR(0,1),
