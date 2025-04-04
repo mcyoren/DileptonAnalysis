@@ -1,0 +1,47 @@
+<head>
+    <link rel="stylesheet" href="../style/main.css" />
+    <style>
+        body {
+            margin: 0; /* Remove all margins */
+            padding: 0; /* Remove all paddings */
+            height: 100vh; /* Ensure the body takes up the full viewport height */
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin: 0; /* Remove margin from the heading */
+            padding: 0rem 0; /* Add some padding for spacing */
+            text-align: center;
+        }
+
+        .content-container {
+            display: flex; /* Use flexbox for layout */
+            align-items: flex-start; /* Align items at the top */
+            gap: 0; /* Remove space between the figure and text */
+            padding: 0; /* Remove padding around the container */
+            height: calc(100vh - 4rem); /* Full height minus space for the header */
+            width: 100%; /* Ensure the container takes up the full width */
+        }
+
+        .content-container iframe {
+            flex: 1; /* Allow the iframe to take up equal space */
+            height: 100%; /* Make the iframe take up the full height */
+            border: none; /* Remove the border for a cleaner look */
+        }
+    </style>
+</head>
+
+<html>
+
+<body>
+    <h2>Real Data</h2>
+    <div class="content-container">
+        <!-- Left: Figure -->
+        <iframe src="../plots/sim_ddhit_assoc_html.html"></iframe>
+
+        <!-- Right: Text -->
+        <iframe src="../plots/sim_ddhit_assoc_html1.html"></iframe>
+    </div>
+</body>
+
+</html>

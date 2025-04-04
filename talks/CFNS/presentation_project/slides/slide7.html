@@ -1,0 +1,99 @@
+<head>
+    <link rel="stylesheet" href="../style/main.css" />
+    <style>
+        body {
+            margin: 0;
+            /* Remove all margins */
+            padding: 0;
+            /* Remove all paddings */
+            height: 100vh;
+            /* Ensure the body takes up the full viewport height */
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin: 0;
+            /* Remove margin from the heading */
+            padding: 1rem 0;
+            /* Add some padding for spacing */
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 2rem;
+            margin: 0;
+            /* Remove margin from the heading */
+            padding: 0rem 0;
+            /* Add some padding for spacing */
+            text-align: center;
+        }
+
+        .content-container {
+            display: flex;
+            /* Use flexbox for layout */
+            align-items: flex-start;
+            /* Align items at the top */
+            gap: 2rem;
+            /* Add space between the figure and text */
+            padding: 0rem;
+            /* Reduce padding around the container */
+            height: calc(100vh - 4rem);
+            /* Full height minus space for the header */
+        }
+
+        .content-container iframe {
+            flex: 1;
+            /* Allow the iframe to take up available space */
+            max-width: 60%;
+            /* Limit the width of the iframe */
+            height: 100%;
+            /* Make the iframe take up the full height */
+        }
+
+        .content-container .text-container {
+            flex: 1;
+            /* Allow the text to take up available space */
+            max-width: 40%;
+            /* Limit the width of the text */
+            overflow-y: auto;
+            /* Add scrolling if the text overflows */
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            /* Remove default padding */
+            margin: 0;
+            /* Remove default margin */
+        }
+    </style>
+</head>
+
+<html>
+
+<body>
+    <h2>Cartoon of hit-to-track association</h2>
+    <div class="content-container">
+        <!-- Left: Figure -->
+        <iframe src="../plots/association_zoom.html" width="100%" frameborder="0"></iframe>
+
+        <!-- Right: Text -->
+        <div class="text-container">
+            <h3>
+                <p>Very sketchy...</p>
+                <ul>
+                    <li>Negatively charged hadrons</p>
+                        <p>p<sub>T</sub> = 2 GeV
+                    </li>
+                    <li>&phi; = &phi;<sub>VTXHIT</sub> - &phi;<sub>DC</sub><sup>Layer</sup></li>
+                    <li>&phi;<sub>DC</sub><sup>Layer</sup> - DC track position</p>
+                        <p>in a particular layer
+                    </li>
+                    <li>&phi;<sub>L1</sub> &asymp; -4.5 mrad </li>
+                </ul>
+            </h3>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,69 @@
+<head>
+    <link rel="stylesheet" href="../style/main.css" />
+    <style>
+        body {
+            margin: 0; /* Remove all margins */
+            padding: 0; /* Remove all paddings */
+            height: 100vh; /* Ensure the body takes up the full viewport height */
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin: 0; /* Remove margin from the heading */
+            padding: 1rem 0; /* Add some padding for spacing */
+            text-align: center;
+        }
+        h3 {
+            font-size: 2rem;
+            margin: 0; /* Remove margin from the heading */
+            padding: 1rem 0; /* Add some padding for spacing */
+            text-align: center;
+        }
+
+        .content-container {
+            display: flex; /* Use flexbox for layout */
+            align-items: flex-start; /* Align items at the top */
+            gap: 2rem; /* Add space between the figure and text */
+            padding: 0rem; /* Reduce padding around the container */
+            height: calc(100vh - 4rem); /* Full height minus space for the header */
+        }
+
+        .content-container iframe {
+            flex: 1; /* Allow the iframe to take up available space */
+            max-width: 60%; /* Limit the width of the iframe */
+            height: 100%; /* Make the iframe take up the full height */
+        }
+
+        .content-container .text-container {
+            flex: 1; /* Allow the text to take up available space */
+            max-width: 40%; /* Limit the width of the text */
+            overflow-y: auto; /* Add scrolling if the text overflows */
+        }
+    </style>
+</head>
+
+<html>
+
+<body>
+    <h2>Conversion Rejection</h2>
+    <div class="content-container">
+        <!-- Left: Figure -->
+        <iframe src="../plots/secondhit.html" width="100%" frameborder="0"></iframe>
+
+        <!-- Right: Text -->
+        <div class="text-container">
+            
+            <h2><p>In search of the partner track hits</p></h2>
+            <h3>
+            <ul>
+                <li>In search of hits from a second track</li>
+                <li>Mostly affected by conversions in the first layer</li>
+                <li>Also effective against Dalitz decays</li>
+                <li>Main source of the background</li>
+            </ul>
+        </h3>
+        </div>
+    </div>
+</body>
+
+</html>

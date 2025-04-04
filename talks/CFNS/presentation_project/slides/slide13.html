@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron/Hadron Separation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            font-size: 1.1rem; /* Increase base font size slightly */
+        }
+
+        h1 {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        h2 {
+            margin: 10px 0;
+        }
+
+        ul {
+            list-style-type: none;
+            /* Remove bullet points */
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 1.2rem; /* Make list items slightly larger */
+        }
+
+        .math {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            font-weight: bold; /* Make formulas bold */
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .text {
+            flex: 1;
+            margin-right: 20px;
+            /* Space between text and image */
+        }
+
+        .image {
+            flex: 1;
+            /* Image takes full width of the remaining space */
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .image {
+                margin-top: 20px;
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Electron/Hadron Separation Using ML & BDT Results</h1>
+
+    <div class="container">
+        <div class="text">
+            <h2>Variables</h2>
+            <ul>
+                <li><span class="math">n<sub>0</sub></span>: Number of hit PMTs in the RICH in the expected range of a Cherenkov ring.</li>
+                <li><span class="math">disp</span>: Distance between a track projection and its associated ring center in the RICH.</li>
+                <li><span class="math">χ<sup>2</sup>/npe<sub>0</sub></span>: A χ<sup>2</sup>-like shape variable of the RICH ring associated with the track per npe<sub>0</sub>, the number of photoelectrons measured in the ring.</li>
+                <li><span class="math">emcdz</span>: Distance between the track projection point onto the EMCal and the associated EMCal cluster in the z-direction, measured in cm.</li>
+                <li><span class="math">emcdphi</span>: Distance between the track projection point onto the EMCal and the associated EMCal cluster in the azimuthal direction, measured in radians.</li>
+                <li><span class="math">prob</span>: Probability that the EMCal cluster is of electromagnetic origin, based on the shower shape.</li>
+                <li><span class="math">E/p</span>: Variable quantifying the energy-momentum matching for electrons. It is defined as <span class="math">E/p</span>, where <span class="math">E</span> is the energy measured by the EMCal, <span class="math">p</span> is the track momentum, and <span class="math">E/p</span> is expected to be near 1 for electrons.</li>
+                <li><span class="math">m<sup>2</sup>(PbSc)</span> and <span class="math">m<sup>2</sup>(TOF-E)</span>: Mass squared calculated using TOF measurements from the TOF-E and PbSc detectors, initial time using BBC, and momentum and path length using DC. The mass squared is calculated as:
+                    <br>
+                    <span class="math">m<sup>2</sup> = (p<sup>2</sup>/c<sup>2</sup>) * ((c * t / L)<sup>2</sup> - 1)</span>,
+                    <br>
+                    where <span class="math">p</span> is the momentum, <span class="math">t</span> is the time of flight, <span class="math">L</span> is the path length, and <span class="math">c</span> is the speed of light.
+                </li>
+            </ul>
+            <h2>Boosted Decision Tree</h2>
+            1B π simulation and 100M electron simulation
+            Using all mentioned variables + <span class="math">p<sub>T</sub></span> and centrality
+        </div>
+        <div class="image">
+            <img src="../images/roc_auc_curve_new.png" alt="ROC Curve">
+        </div>
+    </div>
+
+</body>
+
+</html>

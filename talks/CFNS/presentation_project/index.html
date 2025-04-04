@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive Presentation</title>
+  <link rel="stylesheet" href="style/main.css" />
+  <style>
+    :root {
+      --bg-color: white;
+      --text-color: black;
+    }
+
+    [data-theme='dark'] {
+      --bg-color: #111;
+      --text-color: #eee;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Computer Modern', serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .slide-container {
+      flex: 1; /* Take up all available space except the bottom controls */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    iframe {
+      border: none;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height of the container */
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5em 1em;
+      background: var(--bg-color);
+      border-top: 1px solid #ccc;
+      font-size: 1.2rem;
+      height: 50px; /* Fixed height for the bottom bar */
+    }
+
+    .controls .info {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .controls .right-controls {
+      display: flex;
+      gap: 0.5em;
+      align-items: center;
+    }
+
+    button {
+      padding: 0.4em 1em;
+      font-size: 1rem;
+      cursor: pointer;
+      background: none;
+      border: 1px solid var(--text-color);
+      color: var(--text-color);
+    }
+
+    button:hover {
+      background: var(--text-color);
+      color: var(--bg-color);
+    }
+  </style>
+</head>
+
+<body data-theme="light">
+  <div class="slide-container">
+    <iframe id="slideFrame" src="slides/slide1.html"></iframe>
+  </div>
+  <div class="controls">
+    <div class="info">
+      <span id="slideCount">Slide 1 / 37</span> &mdash;
+      Yuri Mitrankov, April 2025, Stony Brook University / PHENIX Collaboration
+    </div>
+    <div class="right-controls">
+      <button onclick="prevSlide()">Previous</button>
+      <button onclick="nextSlide()">Next</button>
+    </div>
+  </div>
+  <script>
+    const totalSlides = 37;
+    let currentSlide = 1;
+
+    function updateSlide() {
+      document.getElementById("slideFrame").src = `slides/slide${currentSlide}.html`;
+      document.getElementById("slideCount").textContent = `Slide ${currentSlide} / ${totalSlides}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") nextSlide();
+      if (e.key === "ArrowLeft") prevSlide();
+    });
+  </script>
+</body>
+
+</html>
