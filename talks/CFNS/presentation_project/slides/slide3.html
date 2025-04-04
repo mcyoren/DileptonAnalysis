@@ -1,13 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <link rel="stylesheet" href="../style/main.css" />
     <style>
         body {
-            margin: 0; /* Remove all margins, including the top margin */
-            padding: 0; /* Optional: Remove padding if any */    
-            margin-right: 5rem; /* Add right margin */
+            margin: 0; /* Remove all margins */
+            padding: 0; /* Remove all padding */
         }
+
         h1 {
             font-size: 4rem;
+            text-align: center;
         }
 
         h2 {
@@ -18,21 +21,32 @@
         h3 {
             font-size: 2rem;
         }
+
+        .image-container {
+            display: flex;
+            justify-content: center; /* Center the images horizontally */
+            align-items: center;
+            gap: 2rem; /* Add space between the images */
+            padding: 2rem; /* Add padding around the container */
+        }
+
+        .image-container img {
+            max-width: 45%; /* Ensure images take up no more than 45% of the container width */
+            height: auto; /* Maintain aspect ratio */
+            border: 1px solid #ccc; /* Add a border for better visibility */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        }
     </style>
 </head>
 
-
 <html>
-
 <body>
-    <h1>
-        <center>Basic Analysis Cuts</center>
-    </h1>
+    <h1>Basic Analysis Cuts</h1>
     <h2>
         <ul>
-            <li> x, y, z event vertex cut</li>
-            <li>VTX vs. DC misalignment corrections</li>
-            <li>Tracking QA; 0.4 < p<sub>T</sub> [GeV] < 4.4</li>
+            <li>DC/PC1 - tracking</li>
+            <li>EMCal/RICH - electron ID</li>
+            <li>VTX - vertexing</li>
         </ul>
     </h2>
 
@@ -42,5 +56,4 @@
         <img src="../images/phenix.png" alt="PHENIX Image" />
     </div>
 </body>
-
 </html>

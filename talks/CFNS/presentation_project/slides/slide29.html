@@ -1,36 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <link rel="stylesheet" href="../style/main.css" />
-    <style>
-        h1 {
-            margin-top: 0rem;
-            font-size: 4rem;
-        }
+  <link rel="stylesheet" href="../style/main.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Computer Modern', serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        h2 {
-            font-size: 3rem;
-            padding-left: 6rem;
-            /* Add left indent */
-        }
+    .logo-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3em 1em;
+      height: 120px;
+      background: white; /* Background color for the logo bar */
+    }
 
-        h3 {
-            font-size: 2rem;
-        }
-    </style>
+    .logo-bar img:first-child {
+      height: 120px; /* Stony Brook logo */
+    }
+
+    .logo-bar img:last-child {
+      height: 80px; /* PHENIX logo */
+    }
+
+    .slide-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      padding: 2rem;
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 4rem;
+      text-align: center;
+    }
+
+    ul {
+      font-size: 1.6rem;
+      line-height: 1.8;
+      padding-left: 2rem;
+    }
+
+    li {
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 
-<html>
-
 <body>
-    <h1>
-        <center>To-Do List</center>
-    </h1>
-    <h2>
-        <li>Extend pT</li>
-        <li>Centrality</li>
-        <li>Heavy flavour</li>
-        <li>Thermal</li>
-        </ul>
-    </h2>
+  <!-- Logo Bar -->
+  <div class="logo-bar">
+    <img src="../images/stonybrook_logo.png" alt="Stony Brook Logo">
+    <img src="../images/phenix_logo.png" alt="PHENIX Logo">
+  </div>
+
+  <!-- Slide Content -->
+  <div class="slide-content">
+    <h1>To-Do List</h1>
+    <ul>
+      <li>Quantitatively understanding correlated background pairs from each source is crucial for the analysis and removing them.</li>
+      <li>The current analysis is based on the minimum bias Au+Au data. We need to extend the analysis to different centrality classes.</li>
+      <li>We might extend the pT reach of the analysis to lower values to better understand the thermal component using only tracks with all 4 hits in VTX.</li>
+      <li>We might extend the pT range to higher values to better understand the heavy flavor component using tracks with 2 hits in VTX and tight EMCal cuts.</li>
+      <li>Develop an algorithm to extract the thermal and heavy flavor components from the data without relying on models.</li>
+      <li>Remove any correlations between tracks used in the analysis and the event-by-event vertex determination.</li>
+      <li>Use flow and extracted heavy flavor components to understand the energy loss of heavy quarks.</li>
+    </ul>
+  </div>
 </body>
 
 </html>

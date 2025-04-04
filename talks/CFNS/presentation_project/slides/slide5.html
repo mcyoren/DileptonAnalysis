@@ -29,6 +29,24 @@
     <h1><center>Real Data</center></h1>
     <p></p><iframe src="../plots/dca_projection_with_log_toggle.html" width="130%" height="1000px"
         frameborder="0"></iframe>
-</body>
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <ul>
+        <li>3D histograms are created to analyze the relationship between:
+            <ul>
+                <li>The difference in azimuthal angle (<span class="math">Δφ</span>) between the track trajectory and hit position in the current layer.</li>
+                <li>The <span class="math">Δφ</span> in the previous layer.</li>
+                <li>The transverse momentum (<span class="math">p<sub>T</sub></span>) of the track.</li>
+            </ul>
+        </li>
+        <li>For each <span class="math">p<sub>T</sub></span> bin, the <span class="math">Δφ</span> distribution in the current layer is fitted with a Gaussian function to extract the mean and standard deviation.</li>
+        <li>The same procedure is applied for the polar angle difference (<span class="math">Δθ</span>).</li>
+        <li>The mean and standard deviation are parameterized as functions of <span class="math">p<sub>T</sub></span> and <span class="math">Δφ</span> in the previous layer, enabling precise determination of search windows.</li>
+        <li>This method improves the resolution in the innermost layer by a factor of 5 in <span class="math">Δφ</span>, leading to more accurate hit-to-track associations.</li>
+    </ul>
+    </body>
 
 </html>

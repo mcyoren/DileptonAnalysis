@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <link rel="stylesheet" href="../style/main.css" />
     <style>
@@ -18,7 +20,7 @@
             font-size: 2rem;
             margin: 0; /* Remove margin from the heading */
             padding: 1rem 0; /* Add some padding for spacing */
-            text-align: center;
+            text-align: left;
         }
 
         .content-container {
@@ -44,9 +46,8 @@
 </head>
 
 <html>
-
 <body>
-    <h2>Cartoon of hit-to-track association</h2>
+    <h2>Cartoon of Hit-to-Track Association</h2>
     <div class="content-container">
         <!-- Left: Figure -->
         <iframe src="../plots/association.html" width="100%" frameborder="0"></iframe>
@@ -54,15 +55,14 @@
         <!-- Right: Text -->
         <div class="text-container">
             <h3>   
-                <p>Very sketchy...</p>
+                <p>Improved Method for Hit-to-Track Association:</p>
                 <ul>
-                    <li>Hit-to-track association is crucial for accurate reconstruction.</li>
-                    <li>Tracks are matched to hits based on proximity and alignment.</li>
-                    <li>Outliers are rejected to improve the quality of the association.</li>
+                    <li>For each hit in the outer VTX layers, corrections are applied to the track trajectory to improve its accuracy as it approaches the vertex.</li>
+                    <li>These corrections allow for a more precise estimation of the expected hit positions in the inner VTX layers.</li>
+                    <li>Search windows for hits in the inner layers are determined based on the corrected trajectory, reducing uncertainty.</li>
                 </ul>
             </h3>
         </div>
     </div>
 </body>
-
 </html>
