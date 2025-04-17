@@ -189,6 +189,7 @@ namespace MyDileptonAnalysis
                 event->GetCentrality()/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
+            mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
             mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
@@ -420,7 +421,7 @@ namespace MyDileptonAnalysis
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=4;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=8;
 
-                        if (TMath::Abs(sdthe) < sigma && SignTrack && is_fill_hsits)
+                        if (TMath::Abs(sdthe) < sigma && SignTrack && is_fill_hsits && !not_fill)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
@@ -1836,6 +1837,171 @@ namespace MyDileptonAnalysis
         }
     }
 
+    void MyEventContainer::VertexReFinder()
+    {
+
+        const float m_dphi[2] = {0.005 / sqrt(12.), 0.008 / sqrt(12.)};
+        /// 0.005  : pixel size of pixel detector in phi-direction
+        /// 0.008  : pixel size of stripixel detector in phi-direction
+        const float m_dthe[2] = {0.0425 / sqrt(12.), 0.1 / sqrt(12.)};
+        /// 0.0425 : pixel size of pixel detector in z-direction
+        /// 0.1    : pixel size of stripixel detector in z-direction
+
+        const float sdphi = 0.01 + 0*m_dphi[0];
+        const float sdthe = 0.01 + 0*m_dthe[0];
+
+        std::vector<std::pair<float, float> > track_vertices; // (x at y_beam, y at x_beam)
+        std::vector<float> weights_x;
+        std::vector<float> weights_y;    
+
+        float beam_x = event->GetPreciseX();
+        float beam_y = event->GetPreciseY();
+        float beam_z = event->GetPreciseZ();
+
+        const int nvtx_hits = event->GetNVTXhit();
+
+        for (int ihit = 0; ihit < nvtx_hits; ihit++)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit1 = event->GetVTXHitEntry(ihit);
+            for (int jhit = ihit + 1; jhit < nvtx_hits; jhit++)
+            {
+                MyDileptonAnalysis::MyVTXHit *myhit2 = event->GetVTXHitEntry(jhit);
+                if (TMath::Abs(myhit1->GetPhi() - myhit2->GetPhi()) < 0.0005 && TMath::Abs(myhit1->GetTheHit() - myhit2->GetTheHit()) < 0.001)
+                    myhit2->SetZHit(-200);
+            }
+        }
+
+        for (int ihit = 0; ihit < nvtx_hits; ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(ihit);
+            if (hit0->GetLayer() != 0)
+                continue;
+            if (hit0->GetZHit() < -100)
+                continue;
+
+            for (int jhit = 0; jhit < nvtx_hits; ++jhit)
+            {
+                MyDileptonAnalysis::MyVTXHit *hit1 = event->GetVTXHitEntry(jhit);
+                if (hit1->GetLayer() != 1)
+                    continue;
+                if (hit1->GetZHit() < -100)
+                    continue;
+
+                float phi0 = hit0->GetPhiHit(beam_x, beam_y, beam_z);
+                float the0 = hit0->GetTheHit(beam_x, beam_y, beam_z);
+                float phi1 = hit1->GetPhiHit(beam_x, beam_y, beam_z);
+                float the1 = hit1->GetTheHit(beam_x, beam_y, beam_z);
+
+                float dphi = phi1 - phi0;
+                float dtheta = the1 - the0;
+
+                if (fabs(dphi) > sdphi || fabs(dtheta) > sdthe)
+                    continue;
+
+                for (int khit = 0; khit < nvtx_hits; ++khit)
+                {
+                    MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(khit);
+                    if (hit2->GetLayer() < 2)
+                        continue;
+                    if (hit1->GetZHit() < -100)
+                        continue;
+
+                    float phi2 = hit2->GetPhiHit(beam_x, beam_y, beam_z);
+                    float the2 = hit2->GetTheHit(beam_x, beam_y, beam_z);
+
+                    float x0 = hit0->GetXHit();
+                    float y0 = hit0->GetYHit();
+                    float x1 = hit1->GetXHit();
+                    float y1 = hit1->GetYHit();
+                    float x2 = hit2->GetXHit();
+                    float y2 = hit2->GetYHit();
+
+                    float r01 = sqrt( SQR(x1-x0) + SQR(y1-y0) );
+                    float r02 = sqrt( SQR(x2-x0) + SQR(y2-y0) );
+
+                    float dphi1 = phi2 - ( phi0 + dphi * r02 / r01 );
+                    float dthe1 = the2 - ( the0 + dtheta * r02 / r01 );
+
+                    if (fabs(dphi1) > sdphi || fabs(dthe1) > sdthe)
+                        continue;
+
+                    float x12 = x1 - x0;
+                    float y12 = y1 - y0;
+                    float x23 = x2 - x1;
+                    float y23 = y2 - y1;
+                    float det = x12 * y23 - y12 * x23;
+                    if (fabs(det) < 1e-6)
+                        continue; // collinear points
+
+                    float A = x0 * x0 + y0 * y0;
+                    float B = x1 * x1 + y1 * y1;
+                    float C = x2 * x2 + y2 * y2;
+
+                    float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
+                    float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
+                    float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+                    float pt = R * (0.003 * 0.9);
+                    // Evaluate at y = beam_y to find x
+                    float dy = beam_y - cy;
+                    if (fabs(dy) < R)
+                    {
+                        float dx = sqrt(R * R - dy * dy);
+                        float x_proj = fabs(cx + dx - beam_x) < fabs(cx - dx - beam_x) ? cx + dx : cx - dx;
+                        track_vertices.push_back(std::make_pair(x_proj, 0.0));
+                        float angle = atan2(dy, x_proj - cx);
+                        float w = fabs(cos(angle));// * pt / (2. + pt);
+                        weights_x.push_back(w);
+                        if (hist_dca_x)
+                            hist_dca_x->Fill(x_proj,pt,event->GetCentrality(),w);
+                    }
+
+                    // Evaluate at x = beam_x to find y
+                    float dx = beam_x - cx;
+                    if (fabs(dx) < R)
+                    {
+                        float dy_ = sqrt(R * R - dx * dx);
+                        float y_proj = fabs(cy + dy_ - beam_y) < fabs(cy - dy_ - beam_y) ? cy + dy_ : cy - dy_;
+                        float angle = atan2(y_proj - cy, dx);
+                        float w = fabs(sin(angle));// * pt / (2. + pt);
+                        weights_y.push_back(w);
+                        if (!track_vertices.empty())
+                            track_vertices.back().second = y_proj;
+                        if (hist_dca_y)
+                            hist_dca_y->Fill(y_proj,pt,event->GetCentrality(),w);   
+                    }
+                }
+            }
+        }
+
+        if (!track_vertices.empty())
+        {
+            float sumx = 0.0, sumy = 0.0;
+            float sumwx = 0.0, sumwy = 0.0;
+    
+            for (size_t i = 0; i < track_vertices.size(); ++i)
+            {
+                sumx += track_vertices[i].first * weights_x[i];
+                sumwx += weights_x[i];
+                sumy += track_vertices[i].second * weights_y[i];
+                sumwy += weights_y[i];
+            }
+    
+            float vx = (sumwx > 0) ? sumx / sumwx : beam_x;
+            float vy = (sumwy > 0) ? sumy / sumwy : beam_y;
+
+            std::cout << "prevous vertex: " << event->GetPreciseX() << " "  << event->GetPreciseY() 
+            << ";  \033[32mVTX: " << vx << " " << vy << "\033[0m" << std::endl;
+
+            if (hist_vtx_x)
+                hist_vtx_x->Fill(vx,event->GetPreciseX(),event->GetCentrality());
+            if (hist_vtx_y)
+                hist_vtx_y->Fill(vy,event->GetPreciseY(),event->GetCentrality());
+
+                //event->SetPreciseX(vx);
+                //event->SetPreciseY(vy);
+        }
+    }
+
     void MyEventContainer::FillQAHist(const int mc_id)
     {
         const int Nelectrons = event->GetNtrack();
@@ -1844,6 +2010,9 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime());
 
+            const float bdt = electron->GetEmcdphi_e();
+            if (bdt>0 && bdt <1) BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+300);
+            else BDT_eID_hist->Fill(0., electron->GetPtPrime(), event->GetCentrality()+300);
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
             //if ( electron->GetEcore()/electron->GetPtot() < 0.5 || electron->GetN0() < 0 )
             //    continue;
@@ -1851,6 +2020,7 @@ namespace MyDileptonAnalysis
 
             int central_bin = (int) event->GetCentrality() / 20;
             central_bin += N_centr * ( 1 - electron->GetChargePrime() ) / 2;
+            BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+200);
 
             const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
 
@@ -1920,6 +2090,10 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime())+200;
 
+            const float bdt = electron->GetEmcdphi_e();
+            if (bdt>0 && bdt <1) BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+100);
+            else BDT_eID_hist->Fill(0., electron->GetPtPrime(), event->GetCentrality()+100);
+
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
 
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin+200);
@@ -1935,6 +2109,8 @@ namespace MyDileptonAnalysis
                 disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
             if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
                 chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
+
+            BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality());
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
@@ -2111,11 +2287,11 @@ namespace MyDileptonAnalysis
     }
     void MyEventContainer::CreateOutFileAndInitHists(std::string outfilename, const int fill_ell, const int fill_had, const int fill_tree, const int fill_dphi,
                                                      const int fill_DCA, const int fill_track_QA, const int fill_flow, const int fill_true_DCA, 
-                                                     const int check_veto, const int fill_inv_mas)
+                                                     const int check_veto, const int fill_inv_mas, const int fill_vertex_reco)
     {
         outfilename = "my-" + outfilename;
         const int compress = 9;
-        if (fill_ell || fill_had || fill_tree || fill_dphi || fill_DCA || fill_track_QA || fill_flow || fill_true_DCA || check_veto || fill_inv_mas)
+        if (fill_ell || fill_had || fill_tree || fill_dphi || fill_DCA || fill_track_QA || fill_flow || fill_true_DCA || check_veto || fill_inv_mas || fill_vertex_reco)
             outfile = new TFile(outfilename.c_str(), "RECREATE", outfilename.c_str(), compress);
 
         if (fill_ell)
@@ -2203,6 +2379,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, ttof, 1000, -0.5, 1.5, 50, 0., 5, 30, 0, 600);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
+            INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
 
             INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
@@ -2286,6 +2463,15 @@ namespace MyDileptonAnalysis
             INIT_HISTOS( 3, inv_mass_dca_gen, 3*N_centr, 50, 0, 2000, 90, 0, 4.50, 25, 0, 10);
             is_fill_inv_mass = 1;
         }
+        if(fill_vertex_reco)
+        {
+            do_vertex_reco = 1;
+
+            INIT_HIST( 3, hist_dca_x, 100, -0.5, 1.5, 50,   0.0, 5.0, 10, 0, 100);
+            INIT_HIST( 3, hist_dca_y, 100, -0.5, 0.5, 50,   0.0, 5.0, 10, 0, 100);
+            INIT_HIST( 3, hist_vtx_x, 100, -0.5, 1.5, 100, -0.5, 1.5, 10, 0, 100);
+            INIT_HIST( 3, hist_vtx_y, 100, -0.5, 0.5, 100, -0.5, 0.5, 10, 0, 100);
+        }
     }
     
     void MyEventContainer::WriteOutFile()
@@ -2293,7 +2479,7 @@ namespace MyDileptonAnalysis
         std::cout << "Start writing hists to My outfile" << std::endl;
         infile->Close();
         if (is_fill_tree || is_fill_hadron_hsits || is_fill_hsits || is_fill_dphi_hist || is_fill_DCA_hist || is_fill_track_QA
-        || is_fill_flow || is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass)
+        || is_fill_flow || is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass||do_vertex_reco)
         {
             outfile->cd();
             outfile->Write();

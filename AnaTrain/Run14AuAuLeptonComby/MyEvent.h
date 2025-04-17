@@ -1093,8 +1093,10 @@ namespace MyDileptonAnalysis
             TH3D *inv_mass_dca_gen[N_centr*3];
             TH3D* myvtx_hist[N_centr], *vtx_accaptance_hist, *vtx_deadmaps_hist;
             TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
+            TH3D *BDT_eID_hist;
+            TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
-            is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass;
+            is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
            
       public:
             MyEventContainer()
@@ -1116,6 +1118,8 @@ namespace MyDileptonAnalysis
                   v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
                   vtx_accaptance_hist = nullptr, vtx_deadmaps_hist = nullptr;
+                  BDT_eID_hist = nullptr;
+                  hist_dca_x = nullptr, hist_dca_y = nullptr, hist_vtx_x = nullptr, hist_vtx_y = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1165,7 +1169,7 @@ namespace MyDileptonAnalysis
 
                   for (int i = 0; i < N_centr*2; i++)  el_pt_hist[i] = nullptr;
                   for (int i = 0; i < N_centr*3; i++)
-                  { 
+                  {
                         inv_mass_dca_fg0[i]=nullptr;inv_mass_dca_fg1[i]=nullptr;inv_mass_dca_fg2[i]=nullptr;inv_mass_dca_fg3[i]=nullptr;inv_mass_dca_fg4[i]=nullptr;
                         inv_mass_dca_bg0[i]=nullptr;inv_mass_dca_bg1[i]=nullptr;inv_mass_dca_bg2[i]=nullptr;inv_mass_dca_bg3[i]=nullptr;inv_mass_dca_bg4[i]=nullptr;
                         delt_phi_dca_fg0[i]=nullptr;delt_phi_dca_fg1[i]=nullptr;delt_phi_dca_fg2[i]=nullptr;delt_phi_dca_fg3[i]=nullptr;delt_phi_dca_fg4[i]=nullptr;
@@ -1190,13 +1194,14 @@ namespace MyDileptonAnalysis
                   is_fill_DCA2_hist = 0;
                   is_check_veto = 0;
                   is_fill_inv_mass = 0;
+                  do_vertex_reco = 0;
             };
 
             virtual ~MyEventContainer()
             {
                   std::cout << "Starting to Delete Event in my Container" << std::endl;
                   if(is_fill_tree||is_fill_hadron_hsits||is_fill_hsits||is_fill_dphi_hist||is_fill_DCA_hist||is_fill_track_QA
-                  ||is_fill_flow||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass) {delete outfile;}
+                  ||is_fill_flow||is_fill_DCA2_hist||is_check_veto||is_fill_inv_mass||do_vertex_reco) {delete outfile;}
                   delete event;
                   std::cout << "Event in the container was deleted" << std::endl;
             };
@@ -1205,7 +1210,8 @@ namespace MyDileptonAnalysis
             void ClearEvent() { event->ClearEvent(); };
             void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
-            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_flow = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0);
+            const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_flow = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0,
+            const int fill_vertex_reco = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
@@ -1239,6 +1245,7 @@ namespace MyDileptonAnalysis
             int isGhostEvent();
             void ResetRecoverFGVars();
             void FillVTXAcceptance();
+            void VertexReFinder();
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

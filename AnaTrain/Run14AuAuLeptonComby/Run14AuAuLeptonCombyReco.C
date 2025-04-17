@@ -90,7 +90,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,///temporary to be removed
                                                fill_DCA_hists, do_track_QA+do_electron_QA, fill_flow_hists, fill_true_DCA, check_veto,
-                                               fill_flow_hists>0?0:fill_inv_mass);
+                                               fill_flow_hists>0?0:fill_inv_mass, 1);
 
     return 0;
 }
@@ -408,7 +408,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     
     event_container->IdenElectrons();
 
-    n_electrons = event->GetNtrack();
+    n_electrons = event->GetNtrack()*0;
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
@@ -438,6 +438,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder();
         if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
         
         if(false)
@@ -508,6 +509,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         if ( conv_rejection == 0 ) continue;   
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
+        if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
         //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
@@ -626,6 +628,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         if ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
+           if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
            
         if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
 
