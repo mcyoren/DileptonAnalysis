@@ -1847,8 +1847,10 @@ namespace MyDileptonAnalysis
         /// 0.0425 : pixel size of pixel detector in z-direction
         /// 0.1    : pixel size of stripixel detector in z-direction
 
-        const float sdphi = 0.01 + 0*m_dphi[0];
-        const float sdthe = 0.01 + 0*m_dthe[0];
+        const float sdphi = 0.02 + 0*m_dphi[0];
+        const float sdthe = 0.02 + 0*m_dthe[0];
+        const float sddphi = 0.015;
+        const float sddthe = 0.015;
 
         std::vector<std::pair<float, float> > track_vertices; // (x at y_beam, y at x_beam)
         std::vector<float> weights_x;
@@ -1860,17 +1862,19 @@ namespace MyDileptonAnalysis
 
         const int nvtx_hits = event->GetNVTXhit();
 
+        std::vector<int> used_hits(nvtx_hits, 0);
+
         for (int ihit = 0; ihit < nvtx_hits; ihit++)
         {
             MyDileptonAnalysis::MyVTXHit *myhit1 = event->GetVTXHitEntry(ihit);
             for (int jhit = ihit + 1; jhit < nvtx_hits; jhit++)
             {
                 MyDileptonAnalysis::MyVTXHit *myhit2 = event->GetVTXHitEntry(jhit);
-                if (TMath::Abs(myhit1->GetPhi() - myhit2->GetPhi()) < 0.0005 && TMath::Abs(myhit1->GetTheHit() - myhit2->GetTheHit()) < 0.001)
+                if ( myhit1->GetLayer()==myhit2->GetLayer() && TMath::Abs(myhit1->GetPhi() - myhit2->GetPhi()) < 0.0005 && TMath::Abs(myhit1->GetTheHit() - myhit2->GetTheHit()) < 0.0005)
                     myhit2->SetZHit(-200);
             }
         }
-
+        
         for (int ihit = 0; ihit < nvtx_hits; ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(ihit);
@@ -1878,6 +1882,8 @@ namespace MyDileptonAnalysis
                 continue;
             if (hit0->GetZHit() < -100)
                 continue;
+            
+            std::vector<std::vector<float> > circle_params;  // stores (cx, cy, R)
 
             for (int jhit = 0; jhit < nvtx_hits; ++jhit)
             {
@@ -1901,7 +1907,7 @@ namespace MyDileptonAnalysis
                 for (int khit = 0; khit < nvtx_hits; ++khit)
                 {
                     MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(khit);
-                    if (hit2->GetLayer() < 2)
+                    if (hit2->GetLayer() !=2 )
                         continue;
                     if (hit1->GetZHit() < -100)
                         continue;
@@ -1918,11 +1924,19 @@ namespace MyDileptonAnalysis
 
                     float r01 = sqrt( SQR(x1-x0) + SQR(y1-y0) );
                     float r02 = sqrt( SQR(x2-x0) + SQR(y2-y0) );
+                    //float z01 = hit1->GetZHit()-hit0->GetZHit();
+                    //float z02 = hit2->GetZHit()-hit0->GetZHit();
 
                     float dphi1 = phi2 - ( phi0 + dphi * r02 / r01 );
-                    float dthe1 = the2 - ( the0 + dtheta * r02 / r01 );
+                    float dthe1 = the2 - the1;// - ( the0 + dtheta * z02 / z01 );
 
-                    if (fabs(dphi1) > sdphi || fabs(dthe1) > sdthe)
+                    if (fabs(dthe1) < sddthe && vtx_dphi_dphi_hist)
+                        vtx_dphi_dphi_hist->Fill(dphi1, dphi, event->GetCentrality());
+                    if (fabs(dphi1) < sddphi && vtx_dthe_dthe_hist)
+                        vtx_dthe_dthe_hist->Fill(dthe1, dtheta, event->GetCentrality());
+
+                    
+                    if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe)
                         continue;
 
                     float x12 = x1 - x0;
@@ -1940,39 +1954,82 @@ namespace MyDileptonAnalysis
                     float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
                     float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
                     float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
-                    float pt = R * (0.003 * 0.9);
-                    // Evaluate at y = beam_y to find x
-                    float dy = beam_y - cy;
-                    if (fabs(dy) < R)
-                    {
-                        float dx = sqrt(R * R - dy * dy);
-                        float x_proj = fabs(cx + dx - beam_x) < fabs(cx - dx - beam_x) ? cx + dx : cx - dx;
-                        track_vertices.push_back(std::make_pair(x_proj, 0.0));
-                        float angle = atan2(dy, x_proj - cx);
-                        float w = fabs(cos(angle));// * pt / (2. + pt);
-                        weights_x.push_back(w);
-                        if (hist_dca_x)
-                            hist_dca_x->Fill(x_proj,pt,event->GetCentrality(),w);
-                    }
 
-                    // Evaluate at x = beam_x to find y
-                    float dx = beam_x - cx;
-                    if (fabs(dx) < R)
+                    std::vector<float> best_circle(3);
+                    best_circle[0] = cx;
+                    best_circle[1] = cy;
+                    best_circle[2] = R;
+    
+                    circle_params.push_back(best_circle);
+                }
+            }
+            
+            if(vtx_nchainhist)
+                vtx_nchainhist->Fill(circle_params.size(), event->GetCentrality());
+            if (circle_params.size() > 1)
+            {
+                //std::cout << "\033[31mcircle_params.size() = " << circle_params.size() << "\033[0m" << std::endl;
+                float min_R = 999999;
+                int min_index = -1;
+                for (size_t i = 0; i < circle_params.size(); ++i)
+                {
+                    if (circle_params[i][2] < min_R)
                     {
-                        float dy_ = sqrt(R * R - dx * dx);
-                        float y_proj = fabs(cy + dy_ - beam_y) < fabs(cy - dy_ - beam_y) ? cy + dy_ : cy - dy_;
-                        float angle = atan2(y_proj - cy, dx);
-                        float w = fabs(sin(angle));// * pt / (2. + pt);
-                        weights_y.push_back(w);
-                        if (!track_vertices.empty())
-                            track_vertices.back().second = y_proj;
-                        if (hist_dca_y)
-                            hist_dca_y->Fill(y_proj,pt,event->GetCentrality(),w);   
+                        min_R = circle_params[i][2];
+                        min_index = i;
                     }
+                }
+
+                std::vector<std::vector<float> > keep_one;
+                if (min_index >= 0)
+                {
+                    keep_one.push_back(circle_params[min_index]);
+                }
+                circle_params = keep_one;
+                if(false) circle_params.pop_back();
+            }
+
+            for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
+            {
+                float cx = circle_params[icircle][0];
+                float cy = circle_params[icircle][1];
+                float R = circle_params[icircle][2];
+
+                float pt = R * (0.003 * 0.9);
+                // Evaluate at y = beam_y to find x
+                float dy = beam_y - cy;
+                if (fabs(dy) < R)
+                {
+                    float dx = sqrt(R * R - dy * dy);
+                    float x_proj = fabs(cx + dx - beam_x) < fabs(cx - dx - beam_x) ? cx + dx : cx - dx;
+                    track_vertices.push_back(std::make_pair(x_proj, 0.0));
+                    float angle = atan2(dy, x_proj - cx);
+                    float w = fabs(cos(angle)); // * pt / (2. + pt);
+                    weights_x.push_back(w);
+                    if (hist_dca_x)
+                        hist_dca_x->Fill(x_proj, pt, event->GetCentrality(), w);
+                }
+
+                // Evaluate at x = beam_x to find y
+                float dx = beam_x - cx;
+                if (fabs(dx) < R)
+                {
+                    float dy_ = sqrt(R * R - dx * dx);
+                    float y_proj = fabs(cy + dy_ - beam_y) < fabs(cy - dy_ - beam_y) ? cy + dy_ : cy - dy_;
+                    float angle = atan2(y_proj - cy, dx);
+                    float w = fabs(sin(angle)); // * pt / (2. + pt);
+                    weights_y.push_back(w);
+                    if (!track_vertices.empty())
+                        track_vertices.back().second = y_proj;
+                    if (hist_dca_y)
+                        hist_dca_y->Fill(y_proj, pt, event->GetCentrality(), w);
                 }
             }
         }
 
+        if (vtx_nhitshist)
+            vtx_nhitshist->Fill(track_vertices.size(), event->GetCentrality());
+        
         if (!track_vertices.empty())
         {
             float sumx = 0.0, sumy = 0.0;
@@ -1990,7 +2047,7 @@ namespace MyDileptonAnalysis
             float vy = (sumwy > 0) ? sumy / sumwy : beam_y;
 
             std::cout << "prevous vertex: " << event->GetPreciseX() << " "  << event->GetPreciseY() 
-            << ";  \033[32mVTX: " << vx << " " << vy << "\033[0m" << std::endl;
+            << ";  \033[32mnew VTX: " << vx << " " << vy << "\033[0m" << " using " <<track_vertices.size() << " tracks at "<< (int) event->GetCentrality() << std::endl;
 
             if (hist_vtx_x)
                 hist_vtx_x->Fill(vx,event->GetPreciseX(),event->GetCentrality());
@@ -1999,6 +2056,9 @@ namespace MyDileptonAnalysis
 
                 //event->SetPreciseX(vx);
                 //event->SetPreciseY(vy);
+        }else
+        {
+            std::cout << "\033[31mNo VTX found!\033[0m"<< " at "<< (int) event->GetCentrality() << " using " <<event->GetPreciseX()<<" "<<event->GetPreciseY() << std::endl;
         }
     }
 
@@ -2471,6 +2531,10 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_dca_y, 100, -0.5, 0.5, 50,   0.0, 5.0, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_x, 100, -0.5, 1.5, 100, -0.5, 1.5, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_y, 100, -0.5, 0.5, 100, -0.5, 0.5, 10, 0, 100);
+            INIT_HIST( 3, vtx_dphi_dphi_hist, 100, -0.05, 0.05, 100, -0.05, 0.05, 10, 0, 100);
+            INIT_HIST( 3, vtx_dthe_dthe_hist, 100, -0.05, 0.05, 100, -0.05, 0.05, 10, 0, 100);
+            INIT_HIST( 2, vtx_nchainhist,  10, 0,   10, 10, 0, 100);
+            INIT_HIST( 2, vtx_nhitshist, 1000, 0, 1000, 10, 0, 100);
         }
     }
     
