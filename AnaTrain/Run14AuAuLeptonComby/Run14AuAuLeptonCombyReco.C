@@ -430,6 +430,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(!fill_ddphi_hadron)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
+        ///std::cout<<n_tracks<<" "<<event->GetNVTXhit()<<" "<<bbcq<<std::endl;
         if(True)
         {
             event_container->FillEventHist(19);
