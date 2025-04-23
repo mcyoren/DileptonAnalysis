@@ -1837,18 +1837,44 @@ namespace MyDileptonAnalysis
         }
     }
 
-    void MyEventContainer::VertexReFinder()
+    int MyEventContainer::CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float> &p1, std::pair<float, float> &p2)
+    {
+        float dx = cx1 - cx0;
+        float dy = cy1 - cy0;
+        float d = sqrt(dx * dx + dy * dy);
+
+        if (d > r0 + r1 || d < fabs(r0 - r1) || d == 0)
+            return 0;
+
+        float a = (r0 * r0 - r1 * r1 + d * d) / (2 * d);
+        float h = sqrt(r0 * r0 - a * a);
+
+        float xm = cx0 + a * dx / d;
+        float ym = cy0 + a * dy / d;
+
+        float rx = -dy * (h / d);
+        float ry = dx * (h / d);
+
+        p1.first = xm + rx;
+        p1.second = ym + ry;
+        p2.first = xm - rx;
+        p2.second = ym - ry;
+
+        return 1;
+    }
+
+    void MyEventContainer::VertexReFinder(int fill_hist, int verbosity)
     {
 
-        const float m_dphi[2] = {0.005 / sqrt(12.), 0.008 / sqrt(12.)};
+        //const float m_dphi[2] = {0.005 / sqrt(12.), 0.008 / sqrt(12.)};
         /// 0.005  : pixel size of pixel detector in phi-direction
         /// 0.008  : pixel size of stripixel detector in phi-direction
-        const float m_dthe[2] = {0.0425 / sqrt(12.), 0.1 / sqrt(12.)};
+        //const float m_dthe[2] = {0.0425 / sqrt(12.), 0.1 / sqrt(12.)};
         /// 0.0425 : pixel size of pixel detector in z-direction
         /// 0.1    : pixel size of stripixel detector in z-direction
 
-        const float sdphi =  0.02 + 0*m_dphi[0];
-        const float sdthe =  0.02 + 0*m_dthe[0];
+        const float sdphi =  0.02;// + 0*m_dphi[0];
+        const float sdthe =  0.02;// + 0*m_dthe[0];
         const float sddphi = 0.01;
         const float sddthe = 0.01;
 
@@ -1856,15 +1882,14 @@ namespace MyDileptonAnalysis
         std::vector<float> weights_x;
         std::vector<float> weights_y;    
 
-        float beam_x = event->GetPreciseX();
-        float beam_y = event->GetPreciseY();
+        float beam_x = event->GetPreciseX();//0.322;
+        float beam_y = event->GetPreciseY();//0.038;
         float beam_z = event->GetPreciseZ();
 
         const int nvtx_hits = event->GetNVTXhit();
 
-        std::cout << "nvtx_hits: " << nvtx_hits << std::endl;
         int layer_hits[4]= {0, 0, 0, 0};
-
+    
         for (int ihit = 0; ihit < nvtx_hits; ihit++)
         {
             MyDileptonAnalysis::MyVTXHit *myhit1 = event->GetVTXHitEntry(ihit);
@@ -1874,14 +1899,16 @@ namespace MyDileptonAnalysis
                 MyDileptonAnalysis::MyVTXHit *myhit2 = event->GetVTXHitEntry(jhit);
                 if ( myhit1->GetLayer()==myhit2->GetLayer() && TMath::Abs(myhit1->GetPhi() - myhit2->GetPhi()) < 0.0005 && TMath::Abs(myhit1->GetTheHit() - myhit2->GetTheHit()) < 0.0005)     
                 {
-                    myhit2->SetZHit(-200);
-                    std::cout << "double hit at layer"<<myhit1->GetLayer() << std::endl;
+                    myhit2->SetZHit(-200);                    
+                    if (verbosity) std::cout << "\033[31mdouble hit at layer" << myhit1->GetLayer() << "\033[0m" << std::endl;
                 }
             }
         }
-        std::cout << "layer_hits: " << layer_hits[0] << " " << layer_hits[1] << " " << layer_hits[2] << " " << layer_hits[3] << std::endl;
+
+        if (verbosity>10) std::cout << "layer_hits:  " << layer_hits[0] << " " << layer_hits[1] << " " << layer_hits[2] << " " << layer_hits[3] << std::endl;
 
         std::vector<int> used_hits(nvtx_hits, 0);
+        std::vector<std::vector<float> > photons; 
         
         for (int ihit = 0; ihit < nvtx_hits; ++ihit)
         {
@@ -1892,7 +1919,6 @@ namespace MyDileptonAnalysis
                 continue;
             
             std::vector<std::vector<float> > circle_params;  // stores (cx, cy, R)
-
             for (int jhit = 0; jhit < nvtx_hits; ++jhit)
             {
                 MyDileptonAnalysis::MyVTXHit *hit1 = event->GetVTXHitEntry(jhit);
@@ -1911,6 +1937,27 @@ namespace MyDileptonAnalysis
 
                 if (fabs(dphi) > sdphi || fabs(dtheta) > sdthe )
                     continue;
+                
+                float x0 = hit0->GetXHit();
+                float y0 = hit0->GetYHit();
+                float x1 = hit1->GetXHit();
+                float y1 = hit1->GetYHit();
+                
+                float x12 = x1 - x0;
+                float y12 = y1 - y0;
+                float x2b = beam_x - x0;
+                float y2b = beam_y - y0;
+                float det = x12 * y2b - y12 * x2b;
+                if (fabs(det) < 1e-9) continue;
+
+                float A = beam_x * beam_x + beam_y * beam_y;
+                float B = x0 * x0 + y0 * y0;
+                float C = x1 * x1 + y1 * y1;
+
+                float cx0 = (A * (y0 - y1) + B * (y1 - beam_y) + C * (beam_y - y0)) / (2 * det);
+                float cy0 = (A * (x1 - x0) + B * (beam_x - x1) + C * (x0 - beam_x)) / (2 * det);
+                float R0 = sqrt((beam_x - cx0) * (beam_x - cx0) + (beam_y - cy0) * (beam_y - cy0));
+                float pt0 = R0 * (0.003 * 0.9); 
 
                 for (int khit = 0; khit < nvtx_hits; ++khit)
                 {
@@ -1922,11 +1969,6 @@ namespace MyDileptonAnalysis
 
                     float phi2 = hit2->GetPhiHit(beam_x, beam_y, beam_z);
                     float the2 = hit2->GetTheHit(beam_x, beam_y, beam_z);
-
-                    float x0 = hit0->GetXHit();
-                    float y0 = hit0->GetYHit();
-                    float x1 = hit1->GetXHit();
-                    float y1 = hit1->GetYHit();
                     float x2 = hit2->GetXHit();
                     float y2 = hit2->GetYHit();
 
@@ -1939,13 +1981,36 @@ namespace MyDileptonAnalysis
                     float dphi1 = phi2 - ( phi0 + dphi * r02 / r01 );
                     float dthe1 = the2 - the1;// - ( the0 + dtheta * z02 / z01 );
 
-                    if (fabs(dthe1) < sddthe && vtx_dphi_dphi_hist)
-                        vtx_dphi_dphi_hist->Fill(dphi1, dphi, event->GetCentrality());
-                    if (fabs(dphi1) < sddphi && vtx_dthe_dthe_hist)
-                        vtx_dthe_dthe_hist->Fill(dthe1, dtheta, event->GetCentrality());
-
+                    if (fabs(dthe1) < sddthe && fill_hist)
+                        vtx_dphi_dphi_hist->Fill(dphi1, dphi, pt0);
+                    if (fabs(dphi1) < sddphi && fill_hist)
+                        vtx_dthe_dthe_hist->Fill(dthe1, dtheta, pt0);
+                        
                     if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe )
                         continue;
+
+                    if(false)
+                    {
+                        float r_hit = sqrt(x2 * x2 + y2 * y2);
+                        std::pair<float, float> inter1, inter2;
+                        if (!CircleIntersection(cx0, cy0, R0, 0.0, 0.0, r_hit, inter1, inter2)) continue;
+                        
+                        // Pick intersection point closest to hit2
+                        float dist1 = (x2 - inter1.first)*(x2 - inter1.first) + (y2 - inter1.second)*(y2 - inter1.second);
+                        float dist2 = (x2 - inter2.first)*(x2 - inter2.first) + (y2 - inter2.second)*(y2 - inter2.second);
+                        float px = (dist1 < dist2) ? inter1.first : inter2.first;
+                        float py = (dist1 < dist2) ? inter1.second : inter2.second;
+                        
+                        // New projected angle on the track
+                        float phi_proj = atan2(py - beam_y, px - beam_x);
+
+                        float dphir = phi2 - phi_proj;       
+
+                        if (fabs(dthe1) < sddthe && vtx_dphi_dphi_hist)
+                            vtx_dphi_dphi_hist_new->Fill(dphir, dphi, pt0);
+
+                        //if (fabs(dphir) > sddphi) continue;
+                    }
 
                     float x12 = x1 - x0;
                     float y12 = y1 - y0;
@@ -1963,20 +2028,77 @@ namespace MyDileptonAnalysis
                     float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
                     float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
 
-                    std::vector<float> best_circle(3);
+                    std::vector<float> best_circle(5);
                     best_circle[0] = cx;
                     best_circle[1] = cy;
-                    best_circle[2] = ( (phi2-phi0) > 0 ? 1 : -1 ) * R;
+                    best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
+
+                    float phi_proj0 = atan2( y0 - cy, x0 - cx);
+                    float phi0_c = atan2(y0 - beam_y, x0 - beam_x);
+                    while ( phi_proj0 - phi0_c > 3*TMath::Pi()/8 )
+                        phi_proj0 -=  TMath::Pi()/2;
+
+                    while ( phi_proj0 - phi0_c < -3*TMath::Pi()/8 )
+                        phi_proj0 +=  TMath::Pi()/2;
+                    //std::cout << "phi_proj0 = " << phi_proj0 << " phi0_c = " << phi0_c << std::endl;
+
+                    best_circle[3] = phi_proj0;
+                    best_circle[4] = the0;
+
+                    if (fill_hist)
+                        phi_the_pt_hist->Fill(phi0, the0, best_circle[2] * (0.003 * 0.9));
     
                     circle_params.push_back(best_circle);
                 }
             }
             
-            if(vtx_nchainhist)
+            if(fill_hist)
                 vtx_nchainhist->Fill(circle_params.size(), event->GetCentrality());
             
             int charge_flip = 0;
             
+            if (true)
+            {
+                for (size_t i = 0; i < circle_params.size(); ++i)
+                {   
+                    int charge = (circle_params[i][2] > 0) ? 1 : -1;
+                    for (size_t j = i+1; j < circle_params.size(); ++j)
+                    {
+                        if (charge * circle_params[j][2] < 0)
+                        {
+                            const double pt1 = TMath::Abs(circle_params[i][2] * (0.003 * 0.9));
+                            const double pt2 = TMath::Abs(circle_params[j][2] * (0.003 * 0.9));
+                            if(pt1 > 1.5 || pt2 > 1.5) continue;
+
+                            const double px1 = pt1 * cos(circle_params[i][3]);
+                            const double py1 = pt1 * sin(circle_params[i][3]);
+                            const double pz1 = pt1 / tan(circle_params[i][4]);
+                            const double px2 = pt2 * cos(circle_params[j][3]);
+                            const double py2 = pt2 * sin(circle_params[j][3]);
+                            const double pz2 = pt2 / tan(circle_params[j][4]);
+
+                            const double pt_pair = sqrt(SQR(px1 + px2) + SQR(py1 + py2));
+                            const double p_pair = sqrt(SQR(pt_pair) + SQR(pz1 + pz2));
+                            const double es = sqrt(SQR(px1) + SQR(py1) + SQR(pz1) + SQR(0.000511)) + sqrt(SQR(px2) + SQR(py2) + SQR(pz2) + SQR(0.000511));
+                            double m2 = SQR(es) - SQR(p_pair);
+                            if (m2 < 0) m2 = 0;  // Avoid NaN due to numerical precision
+                            const double invm = sqrt(m2);
+
+                            if(fill_hist)
+                                conv_photon_mass_hist->Fill(invm, pt_pair, event->GetCentrality());
+
+                            if (verbosity>100) std::cout << "\033[31mcharge flip to Q = " << charge << "\033[0m with" << invm << " " << pt_pair << std::endl;
+
+                            std::vector<float> photon(3);
+                            photon[0] = px1 + px2;
+                            photon[1] = py1 + py2;
+                            photon[2] = pz1 + pz2;
+                            photons.push_back(photon);
+                        }
+                    }
+                }
+            }
+
             if (circle_params.size() > 1)
             {
                 //std::cout << "\033[31mcircle_params.size() = " << circle_params.size() << "\033[0m" << std::endl;
@@ -2007,8 +2129,8 @@ namespace MyDileptonAnalysis
                 circle_params = keep_one;
                 if(false) circle_params.pop_back();
             }
-            
-            if (charge_flip && true) continue;
+
+            if (charge_flip) continue;
 
             for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
             {
@@ -2034,16 +2156,46 @@ namespace MyDileptonAnalysis
                 weights_x.push_back(w_x);
                 weights_y.push_back(w_y);
 
-                if (hist_dca_x)
+                if (fill_hist)
                     hist_dca_x->Fill(x_proj-beam_x, pt, event->GetCentrality(), w_x);
-                if (hist_dca_y)
+                if (fill_hist)
                     hist_dca_y->Fill(y_proj-beam_y, pt, event->GetCentrality(), w_y);
             }
         }
 
-        if (vtx_nhitshist)
+        if (fill_hist)
             vtx_nhitshist->Fill(track_vertices.size(), event->GetCentrality());
-        
+
+        if (photons.size() > 1)
+        {
+            for (size_t i = 0; i < photons.size(); ++i)
+            {
+                for (size_t j = i + 1; i < photons.size(); i++)
+                {
+                    const double px1 = photons[i][0];
+                    const double py1 = photons[i][1];
+                    const double pz1 = photons[i][2];
+                    const double px2 = photons[j][0];
+                    const double py2 = photons[j][1];
+                    const double pz2 = photons[j][2];
+
+                    const double pt_pair = sqrt(SQR(px1 + px2) + SQR(py1 + py2));
+                    const double p_pair = sqrt(SQR(pt_pair) + SQR(pz1 + pz2));
+                    const double es = sqrt(SQR(px1) + SQR(py1) + SQR(pz1)) + sqrt(SQR(px2) + SQR(py2) + SQR(pz2));
+                    double m2 = SQR(es) - SQR(p_pair);
+                    if (m2 < 0)
+                        m2 = 0; // Avoid NaN due to numerical precision
+                    const double invm = sqrt(m2);
+
+                    if (fill_hist)
+                        pi0_mass_hist->Fill(invm, pt_pair, event->GetCentrality());
+
+                    if (invm > 0.09 && invm < 0.2 && verbosity>100)
+                        std::cout << "\033[32mpi0 with" << invm << " " << pt_pair << "\033[0m" << std::endl;
+                }
+            }
+        }
+
         if (!track_vertices.empty())
         {
             float sumx = 0.0, sumy = 0.0;
@@ -2060,21 +2212,23 @@ namespace MyDileptonAnalysis
             float vx = (sumwx > 0) ? sumx / sumwx : beam_x;
             float vy = (sumwy > 0) ? sumy / sumwy : beam_y;
 
-            std::cout << "prevous vertex: " << event->GetPreciseX() << " "  << event->GetPreciseY() 
+            if (verbosity) std::cout << "prevous vertex: " << event->GetPreciseX() << " "  << event->GetPreciseY() 
             << ";  \033[32mnew VTX: " << vx << " " << vy << "\033[0m" << " using " <<track_vertices.size() << " tracks at "<< (int) event->GetCentrality() << std::endl;
 
-            if (hist_vtx_x)
+            if (fill_hist)
                 hist_vtx_x->Fill(vx - event->GetPreciseX(), vx, event->GetCentrality());
-            if (hist_vtx_y)
+            if (fill_hist)
                 hist_vtx_y->Fill(vy - event->GetPreciseY(), vy, event->GetCentrality());
 
-                //event->SetPreciseX(vx);
-                //event->SetPreciseY(vy);
-        }else
-        {
-            std::cout << "\033[31mNo VTX found!\033[0m"<< " at "<< (int) event->GetCentrality() << " using " <<event->GetPreciseX()<<" "<<event->GetPreciseY() << std::endl;
+                event->SetPreciseX(vx);
+                event->SetPreciseY(vy);
         }
-        if (track_vertices.size() > 40)
+        else
+        {
+            if (verbosity) std::cout << "\033[31mNo VTX found!\033[0m"<< " at "<< (int) event->GetCentrality() << " using " <<event->GetPreciseX()<<" "<<event->GetPreciseY()
+            << " hits in layers: " << layer_hits[0] << " " << layer_hits[1] << " " << layer_hits[2] << " " << layer_hits[3]  << std::endl;
+        }
+        if (track_vertices.size() > 10)
         {
 
             float vx1 = 0, vy1 = 0, sumwx1 = 0, sumwy1 = 0;
@@ -2103,9 +2257,9 @@ namespace MyDileptonAnalysis
                 float diffx = vx1 / sumwx1 - vx2 / sumwx2;
                 float diffy = vy1 / sumwy1 - vy2 / sumwy2;
 
-                if (hist_vtx_delta_x)
+                if (fill_hist)
                     hist_vtx_delta_x->Fill(diffx,event->GetPreciseX(), event->GetCentrality());
-                if (hist_vtx_delta_y)
+                if (fill_hist)
                     hist_vtx_delta_y->Fill(diffy,event->GetPreciseY(), event->GetCentrality());
             }
         }
@@ -2580,8 +2734,12 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_dca_y, 200,  -0.05, 0.05, 50,   0.0, 5.0, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_x, 200,  -0.05, 0.05, 100,  0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_y, 200,  -0.05, 0.05, 100,  0.0, 0.2, 10, 0, 100);
-            INIT_HIST( 3, vtx_dphi_dphi_hist, 100, -0.05, 0.05, 100, -0.05, 0.05, 10, 0, 100);
-            INIT_HIST( 3, vtx_dthe_dthe_hist, 100, -0.05, 0.05, 100, -0.05, 0.05, 10, 0, 100);
+            INIT_HIST( 3, vtx_dphi_dphi_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HIST( 3, vtx_dthe_dthe_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HIST( 3, vtx_dphi_dphi_hist_new, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HIST( 3, phi_the_pt_hist, 100, -3.14/2, 3.14*3/2, 100, 0.6, 2.6, 50, -5, 5);
+            INIT_HIST( 3, conv_photon_mass_hist, 100, 0, 0.05, 50, 0.0, 5.0, 10, 0, 100);
+            INIT_HIST( 3, pi0_mass_hist,         100, 0, 0.50, 50, 0.0, 10., 10, 0, 100);
             INIT_HIST( 2, vtx_nchainhist,  10, 0,   10, 10, 0, 100);
             INIT_HIST( 2, vtx_nhitshist, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_x, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);

@@ -197,6 +197,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         return 0;
     if (fabs(bbc_vertex) > BBC_VERTEX_CUT && do_event_selection)
         return 0;
+    if (fabs(bbc_vertex) > 15)////cut used by vt group 
+        return false;
 
     if (centrality < 0 || centrality > 93)
         return 0;
@@ -439,7 +441,18 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
-        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder();
+        std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
+        event->SetPreciseX(0.322);
+        event->SetPreciseY(0.038);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
+        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(1,1);
         if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
         
         if(false)
