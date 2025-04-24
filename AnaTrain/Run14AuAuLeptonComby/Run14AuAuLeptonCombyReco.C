@@ -441,7 +441,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
-        std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
+        //std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
         event->SetPreciseX(0.322);
         event->SetPreciseY(0.038);
         if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
