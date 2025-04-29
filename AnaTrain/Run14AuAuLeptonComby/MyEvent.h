@@ -1096,6 +1096,7 @@ namespace MyDileptonAnalysis
             TH3D *BDT_eID_hist;
             TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dphi_dphi_hist_new;
             TH3D *hist_vtx_delta_x, *hist_vtx_delta_y, *phi_the_pt_hist, *conv_photon_mass_hist, *pi0_mass_hist;
+            TH3D *hist_vtx_z;
             TH2D *vtx_nchainhist, *vtx_nhitshist;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
@@ -1124,6 +1125,7 @@ namespace MyDileptonAnalysis
                   hist_dca_x = nullptr, hist_dca_y = nullptr, hist_vtx_x = nullptr, hist_vtx_y = nullptr, vtx_dphi_dphi_hist = nullptr, vtx_dthe_dthe_hist = nullptr, vtx_dphi_dphi_hist_new = nullptr; 
                   phi_the_pt_hist = nullptr, hist_vtx_delta_x = nullptr, hist_vtx_delta_y = nullptr, conv_photon_mass_hist = nullptr, pi0_mass_hist = nullptr;
                   vtx_nchainhist = nullptr,  vtx_nhitshist = nullptr;
+                  hist_vtx_z = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1252,6 +1254,7 @@ namespace MyDileptonAnalysis
             void VertexReFinder(int fill_hist = 0, int verbosity = 0 );
             int CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float>& p1, std::pair<float, float>& p2);
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
+            void VertexZScan(int fill_hist, int verbosity);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };
