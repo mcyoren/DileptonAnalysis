@@ -1893,9 +1893,9 @@ namespace MyDileptonAnalysis
         /// 0.0425 : pixel size of pixel detector in z-direction
         /// 0.1    : pixel size of stripixel detector in z-direction
 
-        const float sdphi =  0.02;// + 0*m_dphi[0];
-        const float sdthe =  0.02;// + 0*m_dthe[0];
-        const float sddphi = 0.01;
+        const float sdphi =  0.05;// + 0*m_dphi[0];
+        const float sdthe =  0.01;// + 0*m_dthe[0];
+        const float sddphi = 0.0025;
         const float sddthe = 0.01;
 
         std::vector<std::pair<float, float> > track_vertices; // (x at y_beam, y at x_beam)
@@ -1933,7 +1933,7 @@ namespace MyDileptonAnalysis
         for (int ihit = 0; ihit < nvtx_hits; ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(ihit);
-            if (hit0->GetLayer() != 0)
+            if (hit0->GetLayer() < 2)
                 continue;
             if (hit0->GetZHit() < -100)
                 continue;
@@ -1982,7 +1982,7 @@ namespace MyDileptonAnalysis
                 for (int khit = 0; khit < nvtx_hits; ++khit)
                 {
                     MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(khit);
-                    if (hit2->GetLayer() < 2 )
+                    if (hit2->GetLayer() != 0 )
                         continue;
                     if (hit1->GetZHit() < -100)
                         continue;
@@ -1992,13 +1992,14 @@ namespace MyDileptonAnalysis
                     float x2 = hit2->GetXHit();
                     float y2 = hit2->GetYHit();
 
-                    float r0  = sqrt( SQR(x0) + SQR(y0) );
-                    float r01 = sqrt( SQR(x1) + SQR(y1) ) - r0;
-                    float r02 = sqrt( SQR(x2) + SQR(y2) ) - r0;
+                    float r0  = sqrt( SQR(x2) + SQR(y2) );
+                    float r1  = sqrt( SQR(x1) + SQR(y1) );
+                    float r01 = r0 - r1;
+                    float r12 = r1 - sqrt( SQR(x0) + SQR(y0) );
                     //float z01 = hit1->GetZHit()-hit0->GetZHit();
                     //float z02 = hit2->GetZHit()-hit0->GetZHit();
 
-                    float dphi1 = phi2 - ( phi0 + dphi * r02 / r01 );
+                    float dphi1 = phi2 - ( phi1 + dphi * r01 / r12 );
                     float dthe1 = the2 - the1;// - ( the0 + dtheta * z02 / z01 );
 
                     if (fabs(dthe1) < sddthe && fill_hist)
@@ -2494,7 +2495,7 @@ namespace MyDileptonAnalysis
         {
             for (float yvtx = beam_y - y_range; yvtx <= beam_y + y_range; yvtx += step_size)
             {
-                int n_tracks = 0;
+                int n_tracks = 0, n_wtracks = 0;
 
                 for (unsigned int ihit = 0; ihit < good_hits[0].size(); ++ihit)
                 {
@@ -2546,9 +2547,27 @@ namespace MyDileptonAnalysis
                             if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe)
                                 continue;
 
-                            std::vector<float> best_circle(2);
-                            best_circle[0] = ((phi2 - phi0) > 0 ? 1 : -1);
-                            best_circle[1] = TMath::Abs(dphi1);
+                            float x12 = x1 - x0;
+                            float y12 = y1 - y0;
+                            float x23 = x2 - x1;
+                            float y23 = y2 - y1;
+                            float det = x12 * y23 - y12 * x23;
+                            if (fabs(det) < 1e-6)
+                                continue; // collinear points
+            
+                            float A = x0 * x0 + y0 * y0;
+                            float B = x1 * x1 + y1 * y1;
+                            float C = x2 * x2 + y2 * y2;
+            
+                            float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
+                            float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
+                            float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+            
+                            std::vector<float> best_circle(4);
+                            best_circle[0] = cx;
+                            best_circle[1] = cy;
+                            best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
+                            best_circle[3] = TMath::Abs(dphi1);
 
                             circle_params.push_back(best_circle);
                         }
@@ -2565,15 +2584,15 @@ namespace MyDileptonAnalysis
                         int charge = 0;
                         for (size_t i = 0; i < circle_params.size(); ++i)
                         {
-                            if (charge * circle_params[i][0] < 0)
+                            if (charge * circle_params[i][2] < 0)
                             {
                                 // std::cout << "\033[31mcharge flip to Q = " << charge << "\033[0m" << std::endl;
                                 charge_flip = 1;
                             }
-                            charge = (circle_params[i][0] > 0) ? 1 : -1;
-                            if (TMath::Abs(circle_params[i][1]) < min_R)
+                            charge = (circle_params[i][2] > 0) ? 1 : -1;
+                            if (TMath::Abs(circle_params[i][3]) < min_R)
                             {
-                                min_R = TMath::Abs(circle_params[i][1]);
+                                min_R = TMath::Abs(circle_params[i][3]);
                                 min_index = i;
                             }
                         }
@@ -2590,11 +2609,14 @@ namespace MyDileptonAnalysis
 
                     if (charge_flip)
                         continue;
-                    n_tracks += circle_params.size();
+                    if (circle_params.size())
+                    {
+                        double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]);
+                        n_wtracks += (int) (10./(SQR(dca)+SQR(0.005)));
+                        n_tracks++;
+                    }
                 }
-
-                if (verbosity>1)
-                    std::cout << "\033[34mIter X, Y vertex = " << xvtx << " " << yvtx << " with " << n_tracks << " tracks\033[0m" << " previous " << event->GetPreciseX() << " " << event->GetPreciseY()<< std::endl;
+                n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
                 if (n_tracks > max_tracks)
