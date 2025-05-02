@@ -2070,7 +2070,7 @@ namespace MyDileptonAnalysis
                     }
 
                     if (fill_hist)
-                        phi_the_pt_hist->Fill(hit0->GetPhi(), hit0->GetTheHit(), best_circle[2] * (0.003 * 0.9));
+                        phi_the_pt_hist->Fill(hit2->GetPhi()-dphi1*r0/r01, hit2->GetTheHit(), best_circle[2] * (0.003 * 0.9));
     
                     circle_params.push_back(best_circle);
                 }
@@ -2403,10 +2403,10 @@ namespace MyDileptonAnalysis
         int fill_hist = 0,
         int verbosity = 0)
     {
-        float sdphi = 0.05;       // +/- rad
-        float sdthe = 0.01;       // +/- rad
-        float sddphi = 0.005;      // +/- rad
-        float sddthe = 0.01;      // +/- rad
+        float sdphi = 0.05;      // +/- rad
+        float sdthe = 0.01;      // +/- rad
+        float sddphi = 0.005;    // +/- rad
+        float sddthe = 0.01;     // +/- rad
         float x_range = 0.05;    // +/- cm
         float y_range = 0.05;    // +/- cm
         float step_size = 0.005; // cm = 25 microns
@@ -2420,7 +2420,7 @@ namespace MyDileptonAnalysis
 
         const int nvtx_hits = event->GetNVTXhit();
 
-        std::vector<int> good_hits[3]; // stores (cx, cy, R)
+        std::vector<std::vector<int> > hits_chains; // stores (cx, cy, R)
 
         for (int ihit = 0; ihit < nvtx_hits; ++ihit)
         {
@@ -2441,7 +2441,7 @@ namespace MyDileptonAnalysis
                 float dphi = phi1 - phi0;
                 float dtheta = the1 - the0;
 
-                if (fabs(dphi) > sdphi*4 || fabs(dtheta) > sdthe)
+                if (fabs(dphi) > sdphi + 0.01 || fabs(dtheta) > sdthe)
                     continue;
 
                 float x0 = hit0->GetXHit();
@@ -2460,52 +2460,69 @@ namespace MyDileptonAnalysis
                     float x2 = hit2->GetXHit();
                     float y2 = hit2->GetYHit();
 
-                    float r0  = sqrt( SQR(x2) + SQR(y2) );
-                    float r1  = sqrt( SQR(x1) + SQR(y1) );
+                    float r0 = sqrt(SQR(x2) + SQR(y2));
+                    float r1 = sqrt(SQR(x1) + SQR(y1));
                     float r01 = r0 - r1;
-                    float r12 = r1 - sqrt( SQR(x0) + SQR(y0) );
+                    float r12 = r1 - sqrt(SQR(x0) + SQR(y0));
 
-                    float dphi1 = phi2 - ( phi1 + dphi * r01 / r12 );
+                    float dphi1 = phi2 - (phi1 + dphi * r01 / r12);
                     float dthe1 = the2 - the1; // - ( the0 + dtheta * z02 / z01 );
 
-                    if (fabs(dphi1) > sddphi*10 || fabs(dthe1) > sddthe)
+                    if (fabs(dphi1) > sddphi + 0.015 || fabs(dthe1) > sddthe)
                         continue;
-                    
-                    int are_used[3] = {0, 0, 0};
-                    int iter_hit[3] = {ihit, jhit, khit};
-                    for (int ilayer = 0; ilayer < 3; ilayer++)
-                    {
-                        for (size_t i = 0; i < good_hits[ilayer].size(); ++i)
-                        {
-                            if (good_hits[ilayer][i] == iter_hit[ilayer])
-                                are_used[ilayer] = 1;
-                        }
-                        if (are_used[ilayer] == 0 ) good_hits[ilayer].push_back(iter_hit[ilayer]);
-                    }
+
+                    std::vector<int> iter_hit(3);
+                    iter_hit[0] = ihit;
+                    iter_hit[1] = jhit;
+                    iter_hit[2] = khit;
+                    hits_chains.push_back(iter_hit);
                 }
             }
         }
+        
+        std::map<int, std::vector< std::pair<int, int> > > khit_to_chain;
 
-        if (verbosity>10) std::cout<< "\033[32mFound " << good_hits[0].size() << " hits in layer 0, " << good_hits[1].size() << " hits in layer 1, " << good_hits[2].size() << " hits in layer 2\033[0m" << std::endl;
+        for (size_t i = 0; i < hits_chains.size(); ++i)
+        {
+            const std::vector<int> &chain = hits_chains[i];
+            if (chain.size() != 3)
+                continue; // safety check
 
-        std::vector<std::pair<float, float> > track_vertices; // (x at y_beam, y at x_beam)
-        std::vector<int> n_tracks_vec;
+            int ihit = chain[0];
+            int jhit = chain[1];
+            int khit = chain[2];
+
+            khit_to_chain[khit].push_back(std::make_pair(ihit, jhit));
+        }
+
+        if (verbosity)
+            std::cout << "\n\033[32mFound " << hits_chains.size() << " " << khit_to_chain.size() << std::endl;
+
+        std::vector<std::pair<float, float> > track_vertices, track_vertices_west, track_vertices_east; // (x at y_beam, y at x_beam)
+        std::vector<int> n_tracks_vec, n_tracks_vec_west, n_tracks_vec_east;
         for (float xvtx = beam_x - x_range; xvtx <= beam_x + x_range; xvtx += step_size)
         {
             for (float yvtx = beam_y - y_range; yvtx <= beam_y + y_range; yvtx += step_size)
             {
                 int n_tracks = 0, n_wtracks = 0;
+                int n_tracks_east = 0, n_tracks_west = 0;
 
-                for (unsigned int ihit = 0; ihit < good_hits[0].size(); ++ihit)
+                for (std::map<int, std::vector<std::pair<int, int> > >::iterator it = khit_to_chain.begin();
+                     it != khit_to_chain.end(); ++it)
                 {
-                    MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(good_hits[0][ihit]);
-                    if (hit0->GetLayer() < 2)
-                        continue;
-
+                    const unsigned int khit = it->first;
+                    const std::vector<std::pair<int, int> > &layer12_hits = it->second;
                     std::vector<std::vector<float> > circle_params; // stores (cx, cy, R)
-                    for (unsigned int jhit = 0; jhit < good_hits[1].size(); ++jhit)
+                    for (unsigned int ichain = 0; ichain < layer12_hits.size(); ++ichain)
                     {
-                        MyDileptonAnalysis::MyVTXHit *hit1 = event->GetVTXHitEntry(good_hits[1][jhit]);
+                        const unsigned int ihit = layer12_hits[ichain].first;
+                        const unsigned int jhit = layer12_hits[ichain].second;
+
+                        MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(ihit);
+                        if (hit0->GetLayer() < 2)
+                            continue;
+
+                        MyDileptonAnalysis::MyVTXHit *hit1 = event->GetVTXHitEntry(jhit);
                         if (hit1->GetLayer() != 1)
                             continue;
 
@@ -2525,100 +2542,115 @@ namespace MyDileptonAnalysis
                         float x1 = hit1->GetXHit();
                         float y1 = hit1->GetYHit();
 
-                        for (unsigned int khit = 0; khit < good_hits[2].size(); ++khit)
-                        {
-                            MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(good_hits[2][khit]);
-                            if (hit2->GetLayer() != 0)
-                                continue;
+                        MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(khit);
+                        if (hit2->GetLayer() != 0)
+                            continue;
 
-                            float phi2 = hit2->GetPhiHit(xvtx, yvtx, beam_z);
-                            float the2 = hit2->GetTheHit(xvtx, yvtx, beam_z);
-                            float x2 = hit2->GetXHit();
-                            float y2 = hit2->GetYHit();
+                        float phi2 = hit2->GetPhiHit(xvtx, yvtx, beam_z);
+                        float the2 = hit2->GetTheHit(xvtx, yvtx, beam_z);
+                        float x2 = hit2->GetXHit();
+                        float y2 = hit2->GetYHit();
 
-                            float r0  = sqrt( SQR(x2) + SQR(y2) );
-                            float r1  = sqrt( SQR(x1) + SQR(y1) );
-                            float r01 = r0 - r1;
-                            float r12 = r1 - sqrt( SQR(x0) + SQR(y0) );
-        
-                            float dphi1 = phi2 - ( phi1 + dphi * r01 / r12 );
-                            float dthe1 = the2 - the1; // - ( the0 + dtheta * z02 / z01 );
+                        float r0 = sqrt(SQR(x2) + SQR(y2));
+                        float r1 = sqrt(SQR(x1) + SQR(y1));
+                        float r01 = r0 - r1;
+                        float r12 = r1 - sqrt(SQR(x0) + SQR(y0));
 
-                            if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe)
-                                continue;
+                        float dphi1 = phi2 - (phi1 + dphi * r01 / r12);
+                        float dthe1 = the2 - the1; // - ( the0 + dtheta * z02 / z01 );
 
-                            float x12 = x1 - x0;
-                            float y12 = y1 - y0;
-                            float x23 = x2 - x1;
-                            float y23 = y2 - y1;
-                            float det = x12 * y23 - y12 * x23;
-                            if (fabs(det) < 1e-6)
-                                continue; // collinear points
-            
-                            float A = x0 * x0 + y0 * y0;
-                            float B = x1 * x1 + y1 * y1;
-                            float C = x2 * x2 + y2 * y2;
-            
-                            float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
-                            float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
-                            float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
-            
-                            std::vector<float> best_circle(4);
-                            best_circle[0] = cx;
-                            best_circle[1] = cy;
-                            best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
-                            best_circle[3] = TMath::Abs(dphi1);
+                        if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe)
+                            continue;
 
-                            circle_params.push_back(best_circle);
-                        }
-                    }
+                        float x12 = x1 - x0;
+                        float y12 = y1 - y0;
+                        float x23 = x2 - x1;
+                        float y23 = y2 - y1;
+                        float det = x12 * y23 - y12 * x23;
+                        if (fabs(det) < 1e-6)
+                            continue; // collinear points
 
-                    int charge_flip = 0;
+                        float A = x0 * x0 + y0 * y0;
+                        float B = x1 * x1 + y1 * y1;
+                        float C = x2 * x2 + y2 * y2;
 
-                    if (circle_params.size() > 1)
+                        float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
+                        float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
+                        float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+
+                        std::vector<float> best_circle(4);
+                        best_circle[0] = cx;
+                        best_circle[1] = cy;
+                        best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
+                        best_circle[3] = x0 > 0? 1:-1 * TMath::Abs(dphi1);
+
+                        circle_params.push_back(best_circle);
+
+                    } // end of loop over chains
+
+                    if (false) //using only one circle and no conversios:
                     {
-                        // std::cout << "\033[31mcircle_params.size() = " << circle_params.size() << "\033[0m" << std::endl;
-                        float min_R = 999999;
-                        int min_index = -1;
-
-                        int charge = 0;
-                        for (size_t i = 0; i < circle_params.size(); ++i)
+                        int charge_flip = 0;
+                        if (circle_params.size() > 1)
                         {
-                            if (charge * circle_params[i][2] < 0)
+                            // std::cout << "\033[31mcircle_params.size() = " << circle_params.size() << "\033[0m" << std::endl;
+                            float min_R = 999999;
+                            int min_index = -1;
+
+                            int charge = 0;
+                            for (size_t i = 0; i < circle_params.size(); ++i)
                             {
-                                // std::cout << "\033[31mcharge flip to Q = " << charge << "\033[0m" << std::endl;
-                                charge_flip = 1;
+                                if (charge * circle_params[i][2] < 0)
+                                {
+                                    // std::cout << "\033[31mcharge flip to Q = " << charge << "\033[0m" << std::endl;
+                                    charge_flip = 1;
+                                }
+                                charge = (circle_params[i][2] > 0) ? 1 : -1;
+                                if (TMath::Abs(circle_params[i][3]) < min_R)
+                                {
+                                    min_R = TMath::Abs(circle_params[i][3]);
+                                    min_index = i;
+                                }
                             }
-                            charge = (circle_params[i][2] > 0) ? 1 : -1;
-                            if (TMath::Abs(circle_params[i][3]) < min_R)
+
+                            std::vector<std::vector<float> > keep_one;
+                            if (min_index >= 0)
                             {
-                                min_R = TMath::Abs(circle_params[i][3]);
-                                min_index = i;
+                                keep_one.push_back(circle_params[min_index]);
                             }
+                            if (false) circle_params = keep_one;
+                            if (false)
+                                circle_params.pop_back();
                         }
 
-                        std::vector<std::vector<float> > keep_one;
-                        if (min_index >= 0)
-                        {
-                            keep_one.push_back(circle_params[min_index]);
-                        }
-                        circle_params = keep_one;
-                        if (false)
-                            circle_params.pop_back();
+                        if (charge_flip)
+                            continue;
                     }
 
-                    if (charge_flip)
-                        continue;
-                    if (circle_params.size())
+                    for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
                     {
                         double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]);
-                        n_wtracks += (int) (10./(SQR(dca)+SQR(0.005)));
+                        const int local_weight = (int)(10. / (SQR(dca) + SQR(0.005)));
+                        n_wtracks += local_weight;
+                        if(circle_params[0][3] < 0) n_tracks_east+=local_weight;
+                        else n_tracks_west+=local_weight;
+
                         n_tracks++;
                     }
                 }
                 n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
+                if(n_tracks_west)
+                {
+                    track_vertices_west.push_back(std::make_pair(xvtx, yvtx));
+                    n_tracks_vec_west.push_back(n_tracks_west);
+                }
+                if (n_tracks_east)
+                {
+                    track_vertices_east.push_back(std::make_pair(xvtx, yvtx));
+                    n_tracks_vec_east.push_back(n_tracks_east);
+                }
                 if (n_tracks > max_tracks)
                 {
                     max_tracks = n_tracks;
@@ -2628,8 +2660,8 @@ namespace MyDileptonAnalysis
             }
         }
         int min_tracks = *std::min_element(n_tracks_vec.begin(), n_tracks_vec.end());
-        int track_treshold = (max_tracks - min_tracks)*0.9 + min_tracks;
-        if(n_tracks_vec.size())
+        int track_treshold = (max_tracks - min_tracks) * 0.9 + min_tracks;
+        if (n_tracks_vec.size())
         {
             double sum_weights = 0.0;
             double sum_x = 0.0;
@@ -2637,7 +2669,7 @@ namespace MyDileptonAnalysis
 
             for (size_t i = 0; i < n_tracks_vec.size(); ++i)
             {
-                if(n_tracks_vec[i]>track_treshold)
+                if (n_tracks_vec[i] > track_treshold)
                 {
                     const double weight = n_tracks_vec[i] - track_treshold;
                     sum_weights += weight;
@@ -2650,12 +2682,71 @@ namespace MyDileptonAnalysis
             best_x = new_vx;
             best_y = new_vy;
         }
+        float best_x_west = best_x;
+        float best_y_west = best_y;
+        float best_x_east = best_x;
+        float best_y_east = best_y;
+        if(n_tracks_vec_east.size())
+        {
+            double sum_weights = 0.0;
+            double sum_x = 0.0;
+            double sum_y = 0.0;
+
+            int max_tracks_east = *std::max_element(n_tracks_vec_east.begin(), n_tracks_vec_east.end());
+            int min_tracks_east = *std::min_element(n_tracks_vec_east.begin(), n_tracks_vec_east.end());
+            int track_treshold_east = (max_tracks_east - min_tracks_east) * 0.9 + min_tracks_east;
+            for (size_t i = 0; i < n_tracks_vec_east.size(); ++i)
+            {
+                if (n_tracks_vec_east[i] > track_treshold_east)
+                {
+                    const double weight = n_tracks_vec_east[i] - track_treshold_east;
+                    sum_weights += weight;
+                    sum_x += track_vertices_east[i].first * weight;
+                    sum_y += track_vertices_east[i].second * weight;
+                }
+            }
+            double new_vx = sum_x / sum_weights;
+            double new_vy = sum_y / sum_weights;
+            best_x_east = new_vx;
+            best_y_east = new_vy;
+        }
+        if(n_tracks_vec_west.size())
+        {
+            double sum_weights = 0.0;
+            double sum_x = 0.0;
+            double sum_y = 0.0;
+
+            int max_tracks_west = *std::max_element(n_tracks_vec_west.begin(), n_tracks_vec_west.end());
+            int min_tracks_west = *std::min_element(n_tracks_vec_west.begin(), n_tracks_vec_west.end());
+            int track_treshold_west = (max_tracks_west - min_tracks_west) * 0.9 + min_tracks_west;
+            for (size_t i = 0; i < n_tracks_vec_west.size(); ++i)
+            {
+                if (n_tracks_vec_west[i] > track_treshold_west)
+                {
+                    const double weight = n_tracks_vec_west[i] - track_treshold_west;
+                    sum_weights += weight;
+                    sum_x += track_vertices_west[i].first * weight;
+                    sum_y += track_vertices_west[i].second * weight;
+                }
+            }
+            double new_vx = sum_x / sum_weights;
+            double new_vy = sum_y / sum_weights;
+            best_x_west = new_vx;
+            best_y_west = new_vy;
+        }
+        
         if (hist_vtx_z)
             hist_vtx_z->Fill(best_x, best_y, event->GetCentrality());
+        
+        if (hist_vtx_delta_x)
+            hist_vtx_delta_x->Fill(best_x_west-best_x_east,best_x, event->GetCentrality());
+        if (hist_vtx_delta_y)
+            hist_vtx_delta_y->Fill(best_y_west-best_y_east,best_y, event->GetCentrality());
 
         if (verbosity)
-            std::cout << "\n\033[32mBest X and Y vertex = " << best_x << " " << best_y << " with " << max_tracks << " " << min_tracks<< " " << track_treshold << " tracks\033[0m" << " previous " << event->GetPreciseX() << " " << event->GetPreciseY()<< std::endl;
-
+            std::cout << "\033[32mBest X and Y vertex = " << best_x << " " << best_y << " with " << max_tracks << " " << min_tracks << " " << track_treshold << " tracks\033[0m" << " previous " << event->GetPreciseX() << " " << event->GetPreciseY() << std::endl;
+        if (verbosity)
+            std::cout << "\033[32mBest X and Y vertex (east-west) = " << best_x_east<< " "<< best_x_west << " " << best_y_east<<" "<<best_y_west << " tracks\033[0m" << std::endl;
         if (max_tracks < min_track_count)
             return; // Not enough hits to form a vertex
         event->SetPreciseX(best_x);
