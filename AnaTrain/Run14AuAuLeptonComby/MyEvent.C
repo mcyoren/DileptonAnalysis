@@ -2632,7 +2632,7 @@ namespace MyDileptonAnalysis
                         double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]);
                         const int local_weight = (int)(10. / (SQR(dca) + SQR(0.005)));
                         n_wtracks += local_weight;
-                        if(circle_params[0][3] < 0) n_tracks_east+=local_weight;
+                        if(khit%2==1) n_tracks_east+=local_weight;
                         else n_tracks_west+=local_weight;
 
                         n_tracks++;
@@ -2659,8 +2659,9 @@ namespace MyDileptonAnalysis
                 }
             }
         }
+        const float fraction = 0.5;
         int min_tracks = *std::min_element(n_tracks_vec.begin(), n_tracks_vec.end());
-        int track_treshold = (max_tracks - min_tracks) * 0.9 + min_tracks;
+        int track_treshold = (max_tracks - min_tracks) * fraction + min_tracks;
         if (n_tracks_vec.size())
         {
             double sum_weights = 0.0;
@@ -2694,7 +2695,7 @@ namespace MyDileptonAnalysis
 
             int max_tracks_east = *std::max_element(n_tracks_vec_east.begin(), n_tracks_vec_east.end());
             int min_tracks_east = *std::min_element(n_tracks_vec_east.begin(), n_tracks_vec_east.end());
-            int track_treshold_east = (max_tracks_east - min_tracks_east) * 0.9 + min_tracks_east;
+            int track_treshold_east = (max_tracks_east - min_tracks_east) * fraction + min_tracks_east;
             for (size_t i = 0; i < n_tracks_vec_east.size(); ++i)
             {
                 if (n_tracks_vec_east[i] > track_treshold_east)
@@ -2718,7 +2719,7 @@ namespace MyDileptonAnalysis
 
             int max_tracks_west = *std::max_element(n_tracks_vec_west.begin(), n_tracks_vec_west.end());
             int min_tracks_west = *std::min_element(n_tracks_vec_west.begin(), n_tracks_vec_west.end());
-            int track_treshold_west = (max_tracks_west - min_tracks_west) * 0.9 + min_tracks_west;
+            int track_treshold_west = (max_tracks_west - min_tracks_west) * fraction + min_tracks_west;
             for (size_t i = 0; i < n_tracks_vec_west.size(); ++i)
             {
                 if (n_tracks_vec_west[i] > track_treshold_west)
