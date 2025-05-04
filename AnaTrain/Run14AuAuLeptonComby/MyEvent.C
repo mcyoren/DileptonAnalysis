@@ -2181,10 +2181,13 @@ namespace MyDileptonAnalysis
                 weights_x.push_back(w_x);
                 weights_y.push_back(w_y);
 
+                const float dca = sqrt(SQR(cx - beam_x) + SQR(cy - beam_y)) - R;
+                const float dca_beam = sqrt(SQR(cx - 0.322) + SQR(cy - 0.038)) - R;
+
                 if (fill_hist)
-                    hist_dca_x->Fill(x_proj-beam_x, pt, event->GetCentrality(), w_x);
+                    hist_dca_x->Fill(dca, pt, event->GetCentrality(), 1);
                 if (fill_hist)
-                    hist_dca_y->Fill(y_proj-beam_y, pt, event->GetCentrality(), w_y);
+                    hist_dca_y->Fill(dca_beam, pt, event->GetCentrality(), 1);
             }
         }
 
@@ -2303,9 +2306,9 @@ namespace MyDileptonAnalysis
                 float diffx = vx1 / sumwx1 - vx2 / sumwx2;
                 float diffy = vy1 / sumwy1 - vy2 / sumwy2;
 
-                if (fill_hist)
+                if (false)
                     hist_vtx_delta_x->Fill(diffx,event->GetPreciseX(), event->GetCentrality());
-                if (fill_hist)
+                if (false)
                     hist_vtx_delta_y->Fill(diffy,event->GetPreciseY(), event->GetCentrality());
             }
         }
@@ -2409,7 +2412,7 @@ namespace MyDileptonAnalysis
         float sddthe = 0.01;     // +/- rad
         float x_range = 0.05;    // +/- cm
         float y_range = 0.05;    // +/- cm
-        float step_size = 0.005; // cm = 25 microns
+        float step_size = 0.0025; // cm = 25 microns
         int min_track_count = 3;
         float beam_x = event->GetPreciseX();
         float beam_y = event->GetPreciseY();
@@ -2630,9 +2633,11 @@ namespace MyDileptonAnalysis
                     for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
                     {
                         double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]);
-                        const int local_weight = (int)(10. / (SQR(dca) + SQR(0.005)));
+                        const double pt = TMath::Abs(circle_params[0][2] * (0.003 * 0.9));
+                        const double rescattering_resolution = 0.00115 / pt + 0.00555; // rescattering
+                        const int local_weight = (int)(10. / (SQR(dca) + SQR(rescattering_resolution)));
                         n_wtracks += local_weight;
-                        if(khit%2==1) n_tracks_east+=local_weight;
+                        if(n_tracks%2==1) n_tracks_east+=local_weight;
                         else n_tracks_west+=local_weight;
 
                         n_tracks++;
