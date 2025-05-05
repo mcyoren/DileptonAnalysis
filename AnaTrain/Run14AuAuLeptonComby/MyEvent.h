@@ -1048,7 +1048,7 @@ namespace MyDileptonAnalysis
             std::vector<MyDileptonAnalysis::MyVTXHit> GetVTXHits() { return VTXHitList; };
 
             void SetDCA(const unsigned int itrk = 0, const int layer2 = 1);
-            void SetDCA2(const unsigned int itrk = 0, const int layer3 = 2);
+            void SetDCA2(const unsigned int itrk = 0, const int layer3 = 2, const int type = 0);
             void ReshuffleElectrons();
 
             ClassDef(MyEvent, 1) // MyEvent structure
@@ -1224,12 +1224,14 @@ namespace MyDileptonAnalysis
             void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0, float sigma_theta = 5.0);
             void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
+            void Associate_Hits_to_Hadrons_Dynamic(float sigma = 2);
             void IdenElectrons();
 
             void Reveal_Hadron();
 
             void FillDphiHists();
             void FillTrueDCA(const float weight = 1);
+            void FillTrueDCAHadrons(const float weight = 1);
 
             MyEvent *GetEvent() { return event; };
             void SetEvent(MyDileptonAnalysis::MyEvent *ev) { event = ev; };
@@ -1254,7 +1256,7 @@ namespace MyDileptonAnalysis
             void VertexReFinder(int fill_hist = 0, int verbosity = 0 );
             int CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float>& p1, std::pair<float, float>& p2);
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
-            void VertexZScan(int fill_hist, int verbosity);
+            void VertexXYScan(int fill_hist, int verbosity);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

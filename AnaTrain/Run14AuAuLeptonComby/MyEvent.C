@@ -1036,9 +1036,11 @@ namespace MyDileptonAnalysis
         return 0;
     }
 
-    void MyEvent::SetDCA2(const unsigned int itrk, const int layer3)
+    void MyEvent::SetDCA2(const unsigned int itrk, const int layer3, const int type)
     {
-        MyDileptonAnalysis::MyElectron *mytrk = this->GetEntry(itrk);
+        MyDileptonAnalysis::MyElectron *mytrk;
+        if(type) mytrk = this->GetElecCand(itrk);
+        else mytrk = this->GetEntry(itrk);
         if (!mytrk)
             return;
 
@@ -2269,8 +2271,8 @@ namespace MyDileptonAnalysis
             if (fill_hist)
                 hist_vtx_y->Fill(median_y - event->GetPreciseY(), median_y, event->GetCentrality());
 
-                event->SetPreciseX(median_x);
-                event->SetPreciseY(median_y);
+                //event->SetPreciseX(median_x);
+                //event->SetPreciseY(median_y);
         }
         else
         {
@@ -2313,96 +2315,104 @@ namespace MyDileptonAnalysis
             }
         }
 
-        std::vector<std::pair<float, float> > intersections; // (x at y_beam, y at x_beam)
-        std::vector<float> weights_inter_x;
-        std::vector<float> weights_inter_y;    
-        for (size_t icircle = 0; icircle < all_circles.size(); ++icircle)
+        if (false)
         {
-            float cx1 = all_circles[icircle][0];
-            float cy1 = all_circles[icircle][1];
-            float R1 = TMath::Abs(all_circles[icircle][2]);
-            float dca1 = TMath::Abs(sqrt((cx1 - beam_x)*(cx1 - beam_x) + (cy1 - beam_y)*(cy1 - beam_y)) - R1);
-            if (dca1 > 0.015) continue; // reject this circle if DCA > 150 μm
-            float pt1 = R1 * (0.003 * 0.9);
-
-            for (size_t jcircle = icircle + 1; jcircle < all_circles.size(); ++jcircle)
+            std::vector<std::pair<float, float> > intersections; // (x at y_beam, y at x_beam)
+            std::vector<float> weights_inter_x;
+            std::vector<float> weights_inter_y;
+            for (size_t icircle = 0; icircle < all_circles.size(); ++icircle)
             {
-                float cx2 = all_circles[jcircle][0];
-                float cy2 = all_circles[jcircle][1];
-                float R2 = TMath::Abs(all_circles[jcircle][2]);
-                float dca2 = TMath::Abs(sqrt((cx2 - beam_x)*(cx2 - beam_x) + (cy2 - beam_y)*(cy2 - beam_y)) - R2);
-                if (dca2 > 0.015) continue; // reject this circle if DCA > 150 μm
-                float pt2 = R2 * (0.003 * 0.9);
+                float cx1 = all_circles[icircle][0];
+                float cy1 = all_circles[icircle][1];
+                float R1 = TMath::Abs(all_circles[icircle][2]);
+                float dca1 = TMath::Abs(sqrt((cx1 - beam_x) * (cx1 - beam_x) + (cy1 - beam_y) * (cy1 - beam_y)) - R1);
+                if (dca1 > 0.015)
+                    continue; // reject this circle if DCA > 150 μm
+                float pt1 = R1 * (0.003 * 0.9);
 
-                std::pair<float, float> inter1, inter2;
-                if (!CircleIntersection(cx1, cy1, R1, cx2, cy2, R2, inter1, inter2))
-                    continue;
+                for (size_t jcircle = icircle + 1; jcircle < all_circles.size(); ++jcircle)
+                {
+                    float cx2 = all_circles[jcircle][0];
+                    float cy2 = all_circles[jcircle][1];
+                    float R2 = TMath::Abs(all_circles[jcircle][2]);
+                    float dca2 = TMath::Abs(sqrt((cx2 - beam_x) * (cx2 - beam_x) + (cy2 - beam_y) * (cy2 - beam_y)) - R2);
+                    if (dca2 > 0.015)
+                        continue; // reject this circle if DCA > 150 μm
+                    float pt2 = R2 * (0.003 * 0.9);
 
-                float d1 = SQR(inter1.first - beam_x) + SQR(inter1.second - beam_y);
-                float d2 = SQR(inter2.first - beam_x) + SQR(inter2.second - beam_y);
-                float x_proj = (d1 < d2) ? inter1.first : inter2.first;
-                float y_proj = (d1 < d2) ? inter1.second : inter2.second;
+                    std::pair<float, float> inter1, inter2;
+                    if (!CircleIntersection(cx1, cy1, R1, cx2, cy2, R2, inter1, inter2))
+                        continue;
 
-                // Tangents at intersection point
-                float tx1 = -(y_proj - cy1);
-                float ty1 =  (x_proj - cx1);
-                float tx2 = -(y_proj - cy2);
-                float ty2 =  (x_proj - cx2);
-                    
-                float norm1 = sqrt(tx1 * tx1 + ty1 * ty1);
-                float norm2 = sqrt(tx2 * tx2 + ty2 * ty2);
-                if (norm1 < 1e-6 || norm2 < 1e-6) continue;
-                    
-                // Normalize and get cosine of angle
-                float dot = (tx1 * tx2 + ty1 * ty2) / (norm1 * norm2);
-                dot = std::max(-1.0f, std::min(1.0f, dot)); // Clamp for safety
-                //float delta_alpha = acos(dot);
-                float geom_weight =  sqrt(1. - SQR(dot));// fabs(sin(delta_alpha)); // ~0 if parallel, ~1 if orthogonal
-                    
-                // Beam direction angle
-                float beam_angle1 = atan2(cy1 - beam_y, cx1 - beam_x);
-                float beam_angle2 = atan2(cy2 - beam_y, cx2 - beam_x);
-                float w_x = sqrt(fabs(cos(beam_angle1)*cos(beam_angle2)) * SQR(geom_weight) / (0.115 / pt1 + 0.555) / (0.115 / pt2 + 0.555));
-                float w_y = sqrt(fabs(sin(beam_angle1)*sin(beam_angle2)) * SQR(geom_weight) / (0.115 / pt1 + 0.555) / (0.115 / pt2 + 0.555));
+                    float d1 = SQR(inter1.first - beam_x) + SQR(inter1.second - beam_y);
+                    float d2 = SQR(inter2.first - beam_x) + SQR(inter2.second - beam_y);
+                    float x_proj = (d1 < d2) ? inter1.first : inter2.first;
+                    float y_proj = (d1 < d2) ? inter1.second : inter2.second;
 
-                intersections.push_back(std::make_pair(x_proj, y_proj));
-                weights_inter_x.push_back(w_x);
-                weights_inter_y.push_back(w_y);
+                    // Tangents at intersection point
+                    float tx1 = -(y_proj - cy1);
+                    float ty1 = (x_proj - cx1);
+                    float tx2 = -(y_proj - cy2);
+                    float ty2 = (x_proj - cx2);
 
-                // now you can store or use (x_proj, y_proj) and weights (w_x, w_y)
+                    float norm1 = sqrt(tx1 * tx1 + ty1 * ty1);
+                    float norm2 = sqrt(tx2 * tx2 + ty2 * ty2);
+                    if (norm1 < 1e-6 || norm2 < 1e-6)
+                        continue;
+
+                    // Normalize and get cosine of angle
+                    float dot = (tx1 * tx2 + ty1 * ty2) / (norm1 * norm2);
+                    dot = std::max(-1.0f, std::min(1.0f, dot)); // Clamp for safety
+                    // float delta_alpha = acos(dot);
+                    float geom_weight = sqrt(1. - SQR(dot)); // fabs(sin(delta_alpha)); // ~0 if parallel, ~1 if orthogonal
+
+                    // Beam direction angle
+                    float beam_angle1 = atan2(cy1 - beam_y, cx1 - beam_x);
+                    float beam_angle2 = atan2(cy2 - beam_y, cx2 - beam_x);
+                    float w_x = sqrt(fabs(cos(beam_angle1) * cos(beam_angle2)) * SQR(geom_weight) / (0.115 / pt1 + 0.555) / (0.115 / pt2 + 0.555));
+                    float w_y = sqrt(fabs(sin(beam_angle1) * sin(beam_angle2)) * SQR(geom_weight) / (0.115 / pt1 + 0.555) / (0.115 / pt2 + 0.555));
+
+                    intersections.push_back(std::make_pair(x_proj, y_proj));
+                    weights_inter_x.push_back(w_x);
+                    weights_inter_y.push_back(w_y);
+
+                    // now you can store or use (x_proj, y_proj) and weights (w_x, w_y)
+                }
+            }
+
+            if (!intersections.empty())
+            {
+                float sumx = 0.0, sumy = 0.0;
+                float sumwx = 0.0, sumwy = 0.0;
+
+                for (size_t i = 0; i < intersections.size(); ++i)
+                {
+                    sumx += intersections[i].first * weights_inter_x[i];
+                    sumwx += weights_inter_x[i];
+                    sumy += intersections[i].second * weights_inter_y[i];
+                    sumwy += weights_inter_y[i];
+                }
+
+                float vx = (sumwx > 0) ? sumx / sumwx : beam_x;
+                float vy = (sumwy > 0) ? sumy / sumwy : beam_y;
+
+                if (verbosity)
+                    std::cout << "\033[36mnovel VTX: " << vx << " " << vy << "\033[0m" << " using " << track_vertices.size() << " tracks at " << (int)event->GetCentrality() << std::endl;
+
+                // if (fill_hist)
+                //     hist_vtx_x->Fill(vx - event->GetPreciseX(), vx, event->GetCentrality());
+                // if (fill_hist)
+                //     hist_vtx_y->Fill(vy - event->GetPreciseY(), vy, event->GetCentrality());
+
+                // event->SetPreciseX(vx);
+                // event->SetPreciseY(vy);
             }
         }
-
-        if (!intersections.empty())
-        {
-            float sumx = 0.0, sumy = 0.0;
-            float sumwx = 0.0, sumwy = 0.0;
     
-            for (size_t i = 0; i < intersections.size(); ++i)
-            {
-                sumx += intersections[i].first * weights_inter_x[i];
-                sumwx += weights_inter_x[i];
-                sumy += intersections[i].second * weights_inter_y[i];
-                sumwy += weights_inter_y[i];
-            }
-    
-            float vx = (sumwx > 0) ? sumx / sumwx : beam_x;
-            float vy = (sumwy > 0) ? sumy / sumwy : beam_y;
-            
-            if (verbosity) std::cout<< "\033[36mnovel VTX: " << vx << " " << vy << "\033[0m" << " using " <<track_vertices.size() << " tracks at "<< (int) event->GetCentrality() << std::endl;
-
-            //if (fill_hist)
-            //    hist_vtx_x->Fill(vx - event->GetPreciseX(), vx, event->GetCentrality());
-            //if (fill_hist)
-            //    hist_vtx_y->Fill(vy - event->GetPreciseY(), vy, event->GetCentrality());
-
-            //event->SetPreciseX(vx);
-            //event->SetPreciseY(vy);
-        }
     }
 
     // Function to scan vertex Z and find the best estimate using circular track matching
-    void MyEventContainer::VertexZScan(
+    void MyEventContainer::VertexXYScan(
         int fill_hist = 0,
         int verbosity = 0)
     {
@@ -2621,7 +2631,7 @@ namespace MyDileptonAnalysis
                             {
                                 keep_one.push_back(circle_params[min_index]);
                             }
-                            if (false) circle_params = keep_one;
+                            if (true) circle_params = keep_one;
                             if (false)
                                 circle_params.pop_back();
                         }
@@ -3066,7 +3076,7 @@ namespace MyDileptonAnalysis
             INIT_HIST  (3, truehithist,      10, 0, 10, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, truehitsigmahist, 50, 0, 50, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, charge_recover_hist, 2, -2, 2, 16, 0, 16, 50, 0, 5);
-            if(fill_ell>1)
+            if(fill_ell==2)
             {
                 INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
                 INIT_HISTOS(3, dthe_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
@@ -3074,7 +3084,7 @@ namespace MyDileptonAnalysis
                 INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
                 is_fill_hsits = 2;
             }
-            is_fill_hsits = 1;
+            if(fill_ell<3)is_fill_hsits = 1;
         }
 
         if (fill_had)
@@ -3850,4 +3860,327 @@ namespace MyDileptonAnalysis
             //mytrk->ClearNumberVectors();
         }     // enf of e loop
     }         // end
+    
+    void MyEventContainer::Associate_Hits_to_Hadrons_Dynamic(float sigma)
+    {
+        const int nhadrons = event->GetNeleccand();
+        const int nvtxhits = event->GetNVTXhit();
+        const int centrality = event->GetCentrality();
+        const int rungroup = event->GetRunGroup();
+        const int is_fill_hsits_hdphi = 1;
+        
+        const int central_bin = (int)centrality / 20;
+        if (central_bin > 4 || central_bin < 0)
+            return;
+        for (int itrk = 0; itrk < nhadrons; itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetElecCand(itrk);
+
+            mytrk->ZeroHitCounters();
+            mytrk->ClearNumberVectors();
+            mytrk->SetGhost(0);
+            const float pt = mytrk->GetPtPrime();
+
+            const float thetaprime = mytrk->GetThe0Prime();
+
+            float phi0_trk_proj = mytrk->GetPhi0Prime();
+            float the0_trk_proj = mytrk->GetThe0Prime();
+            const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
+
+            float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
+            float xp = event->GetPreciseX();
+            float yp = event->GetPreciseY();
+            float zp = event->GetPreciseZ();
+
+            float phi_now = phi0_trk_proj;
+            float the_now = the0_trk_proj;
+
+            float dilep_phi_projection[total_vtx_layers];
+            float dilep_the_projection[total_vtx_layers];
+            for (int ii = 0; ii < total_vtx_layers; ii++)
+            {
+                dilep_phi_projection[ii] = -999;
+                dilep_the_projection[ii] = -999;
+            }
+            for (int p = 1; p < N_steps; p++)
+            {
+                rp = sqrt(SQR(xp) + SQR(yp) );
+
+                for (int l = 0; l < total_vtx_layers; l++)
+                {
+                    if (TMath::Abs(rp - radii[l]) < step_size && dilep_phi_projection[l] < -900)
+                    {
+                        dilep_phi_projection[l] = phi0_trk_proj;
+                        dilep_the_projection[l] = the0_trk_proj;
+                    }
+                }
+
+                const int rbin = hist_bz->GetXaxis()->FindBin(rp);
+                const int zbin = hist_bz->GetYaxis()->FindBin(zp);
+
+                const float bz = hist_bz->GetBinContent(rbin, zbin) / 10000;
+
+                const float delta_phi0 = (mytrk->GetChargePrime() * 0.3 * step_size * bz) / (2 * mytrk->GetPtPrime() * 100 );
+                phi0_trk_proj += delta_phi0;
+                phi_now += 2*delta_phi0;
+
+                const float bradial = hist_br->GetBinContent(rbin, zbin) / 10000;
+
+                const float delta_the0 = 0.3 * bradial * (step_size * TMath::Tan(pi / 2 - the_now)) / (2 * pz * 100 );
+
+                if (thetaprime > pi / 2)
+                    {the0_trk_proj -= delta_the0; the_now -= 2*delta_the0;}
+                else
+                    {the0_trk_proj += delta_the0; the_now += 2*delta_the0;}
+
+                zp += step_size * TMath::Tan(pi / 2 - the_now);
+                xp += step_size * TMath::Cos(phi_now);
+                yp += step_size * TMath::Sin(phi_now);
+                //rp += step_size;
+            }
+            const unsigned int charge_bin = (1 - mytrk->GetChargePrime()) / 2;
+
+            float min[nvtx_layers] = {100, 100, 100, 100};
+            std::vector<std::vector<double> > hit_counter_jlayer[total_vtx_layers+2];
+
+            std::vector<long long> numbers[4];
+            long long iter_nums[4] = {0,0,0,0};
+
+            for (int iter_layer = 3; iter_layer >= 0; iter_layer--)
+            {
+                int n_iter_hits = 1;
+                if(iter_layer==2) n_iter_hits += mytrk->GetHitCounter(iter_layer+1);
+                if(iter_layer==1 && mytrk->GetHitCounter(2)+mytrk->GetHitCounter(3)==0) break;
+                if(iter_layer==1) n_iter_hits = mytrk->GetHitCounter(2)+mytrk->GetHitCounter(3);/////crunh
+                if(iter_layer==0 && mytrk->GetHitCounter(1)==0) break;
+                if(iter_layer==0) n_iter_hits = mytrk->GetHitCounter(1);
+                for (int iassociatedhit = 0; iassociatedhit < n_iter_hits; iassociatedhit++)
+                {
+                    float dphi_previous_layer = 0;
+                    float dthe_previous_layer = 0;
+                    float sdphi_previous_layer = 0;
+                    float sdthe_previous_layer = 0;
+
+                    if(iassociatedhit>0&&iter_layer>1)
+                    {
+                        dphi_previous_layer = mytrk->GetdPhi(iter_layer+1, iassociatedhit-1);
+                        dthe_previous_layer = mytrk->GetdThe(iter_layer+1, iassociatedhit-1);
+                        sdphi_previous_layer = mytrk->GetsdPhi(iter_layer+1, iassociatedhit-1);
+                        sdthe_previous_layer = mytrk->GetsdThe(iter_layer+1, iassociatedhit-1);
+                        numbers[3].push_back(iassociatedhit);
+                    }
+                    if(iter_layer<2 && !(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) )
+                    {
+                        dphi_previous_layer = mytrk->GetdPhi(iter_layer+1, iassociatedhit);
+                        dthe_previous_layer = mytrk->GetdThe(iter_layer+1, iassociatedhit);
+                        sdphi_previous_layer = mytrk->GetsdPhi(iter_layer+1, iassociatedhit);
+                        sdthe_previous_layer = mytrk->GetsdThe(iter_layer+1, iassociatedhit);
+                    }
+                    if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2))
+                    {
+                        dphi_previous_layer = mytrk->GetdPhi(iter_layer+2, iassociatedhit-mytrk->GetHitCounter(2));
+                        dthe_previous_layer = mytrk->GetdThe(iter_layer+2, iassociatedhit-mytrk->GetHitCounter(2));
+                        sdphi_previous_layer = mytrk->GetsdPhi(iter_layer+2, iassociatedhit-mytrk->GetHitCounter(2));
+                        sdthe_previous_layer = mytrk->GetsdThe(iter_layer+2, iassociatedhit-mytrk->GetHitCounter(2));
+                    }
+
+                    for (int ihit = 0; ihit < nvtxhits; ihit++)
+                    {
+                        MyDileptonAnalysis::MyVTXHit *vtxhit = event->GetVTXHitEntry(ihit);
+
+                        const int layer = vtxhit->GetLayer();
+
+                        if (layer != iter_layer)
+                            continue;
+
+                        const int ilayer = vtxhit->GetiLayer();
+                        if (ilayer < 0)
+                            continue;
+
+                        const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        
+                        const float dphi = (dilep_phi_projection[ilayer] - phi_hit) + 
+                            (dilep_phi_projection[ilayer<7?ilayer+1:6] - dilep_phi_projection[ilayer])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer<7?ilayer+1:6] - radii[ilayer]);
+                        const float dthe = (dilep_the_projection[ilayer] - theta_hit) + 
+                            (dilep_the_projection[ilayer<7?ilayer+1:6] - dilep_the_projection[ilayer])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer<7?ilayer+1:6] - radii[ilayer]);
+                        if ((TMath::Abs(dphi-2*pi)<0.1||TMath::Abs(dphi+2*pi)<0.1)&&mytrk->GetPtPrime()>0.4) std::cout<<  mytrk->GetChargePrime() << " "<<  mytrk->GetPtPrime() << " "<<dphi<< " "<<dphi-2*pi<< " "<<dphi+2*pi<<std::endl;
+                        if (abs(dphi) > 0.1 || abs(dthe) > 0.1) continue;
+
+                        float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
+                        float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
+                        float sigma_theta_value = mytrk->get_sigma_theta_data(0*rungroup, central_bin, layer);
+                        float mean_theta_value = mytrk->get_mean_theta_data(0*rungroup, central_bin, layer);
+
+                        int cycle_layer = layer;
+                        if((iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || iter_layer==2) cycle_layer++;
+                        if(iter_layer<2||iassociatedhit>0)
+                        {
+                            sigma_phi_value   = mytrk->get_dynamic_sigma_phi_data  (cycle_layer, dphi_previous_layer);
+                            mean_phi_value    = mytrk->get_dynamic_mean_phi_data   (cycle_layer, dphi_previous_layer);
+                            sigma_theta_value = mytrk->get_dynamic_sigma_theta_data(cycle_layer, dthe_previous_layer);
+                            mean_theta_value  = mytrk->get_dynamic_mean_theta_data (cycle_layer, dthe_previous_layer);
+                        }
+
+                        const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;// - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
+                        const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
+
+                        const float diff = sqrt(std::pow(sdphi, 2) + std::pow(sdthe, 2));
+
+
+                        bool SignTrack = true;
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < sigma)
+                        {
+                            if (diff < min[layer])
+                            {
+                                min[layer] = diff;
+                                mytrk->SetMinDist(diff, layer);
+                                mytrk->SetMinDphi(dphi * mytrk->GetChargePrime(), layer);
+                                mytrk->SetMinDthe(dthe * mytrk->GetChargePrime(), layer);
+                                mytrk->SetMinsDphi(sdphi * mytrk->GetChargePrime(), layer);
+                                mytrk->SetMinsDthe(sdthe * mytrk->GetChargePrime(), layer);
+                                mytrk->SetHitIndex(ihit, layer);
+                            }
+                            //vtxhit->AddAssociatedTrack(itrk, diff);
+                            mytrk->AddHitCounter(layer);
+                            mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
+                            iter_nums[layer]++;
+                            if((iter_nums[layer]>99&&layer>=2)||iter_nums[layer]>999) 
+                            {
+                                std::cout<<layer<<" "<<iter_nums[layer]<< " " <<mytrk->GetChargePrime()<<std::endl;
+                                return;
+                            }
+                            if(iter_layer==2 && iassociatedhit >0) numbers[2].push_back(iter_nums[layer]*100  +numbers[3][iassociatedhit-1]);
+                            if(iter_layer==2 && iassociatedhit==0) numbers[2].push_back(iter_nums[layer]*100  );
+                            if(iter_layer==1 && iassociatedhit <  mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[2][iassociatedhit]);
+                            if(iter_layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) numbers[1].push_back(iter_nums[layer]*10000 +numbers[3][iassociatedhit-mytrk->GetHitCounter(2)]);
+                            if(iter_layer==0 ) numbers[0].push_back(iter_nums[layer]*10000000+numbers[1][iassociatedhit]);
+                            std::vector<double> var_counter_jlayer;  
+                            var_counter_jlayer.push_back(sdphi);var_counter_jlayer.push_back(sdthe);var_counter_jlayer.push_back(phi_hit);var_counter_jlayer.push_back(theta_hit);
+                            hit_counter_jlayer[ilayer].push_back(var_counter_jlayer);
+                            if(layer==2) hit_counter_jlayer[8].push_back(var_counter_jlayer);
+                            if(layer==3) hit_counter_jlayer[9].push_back(var_counter_jlayer);
+                            //std::cout<<ilayer<<" "<<radii[ilayer]<<" "<<sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))<<" "<<dilep_phi_projection[ilayer]<<" "<<mytrk->GetPtPrime()<<" "<<
+                            //(dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<7?ilayer+1:6])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer]-radii[ilayer<7?ilayer+1:6])*1000<<" "<<
+                            //(dilep_phi_projection[ilayer]-dilep_phi_projection[ilayer<6?ilayer+2:5])/(radii[ilayer]-radii[ilayer<6?ilayer+2:5])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])*1000<<std::endl;
+                        } // end of association
+                        else
+                        {
+                            if (vtxhit->N_AssociatedTracks() > 0)
+                                SignTrack = false;
+                        }
+                        int in_arg = 1*mytrk->GetArm()+4*layer+2*charge_bin;
+                        if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=4;
+                        if(iter_layer>1 && iassociatedhit==0) in_arg+=8;
+
+                        if (TMath::Abs(sdthe) < sigma && SignTrack && is_fill_hsits_hdphi)
+                        {
+                            dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
+                            sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
+                        }
+                        if (sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits_hdphi)
+                        {
+                            dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
+                            sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
+                        }
+                    } // enf of hit loop
+                } // end of hits in prev layer 
+            } //ens of layers   
+            float min_chi2=1000000.;
+            long long final_number = 0;
+            for (unsigned int inum = 0; inum < numbers[0].size(); inum++)
+            {
+                const int inum0 = numbers[0][inum] / 10000000-1;
+                const int inum1 = numbers[0][inum] / 10000 %1000-1;
+                const int inum2 = numbers[0][inum] / 100 %100-1;
+                const int inum3 = numbers[0][inum] %100-1;
+                if(inum0>=0 && inum1>=0)
+                {   
+                    float chi2 = 800001;
+                    float recon_pt = 0;
+                    mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
+                    mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
+                    if (inum2>=0) mytrk->SetHitIndex(mytrk->GetHits(2,inum2), 2);
+                    if (inum3>=0) mytrk->SetHitIndex(mytrk->GetHits(3,inum3), 3);
+                    if( inum3>=0) 
+                    {
+                        event->SetDCA2(itrk,3,1);
+                        recon_pt += mytrk->GetReconPT();
+                    }
+                    if( inum2>=0) 
+                    {
+                        event->SetDCA2(itrk,2,1);
+                        recon_pt += mytrk->GetReconPT();
+                        if (inum3>=0) recon_pt/=2;
+                    }
+                    
+                    chi2 = TMath::Abs(recon_pt-pt)/pt*30/(2+(int)(inum2>=0)+(int)(inum3>=0));
+                    if(chi2<min_chi2) {min_chi2=chi2;final_number=numbers[0][inum];} 
+                    
+                    if (numbers[0].size()<10) chi2_ndf[central_bin]->Fill(chi2, numbers[0].size(), pt);
+                }
+            }
+            if(is_fill_hsits_hdphi) chi2_ndf[central_bin]->Fill(min_chi2, 19, pt);
+
+            if(min_chi2<800000)
+            {
+                mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
+
+                const int inum0 = final_number / 10000000-1;
+                const int inum1 = final_number / 10000 %1000-1;
+                const int inum2 = final_number / 100 %100-1;
+                const int inum3 = final_number %100-1;
+                mytrk->SetHitIndex(mytrk->GetHits(0,inum0), 0);
+                mytrk->SetHitIndex(mytrk->GetHits(1,inum1), 1);
+                if (inum2>=0) 
+                {
+                    mytrk->SetHitIndex(mytrk->GetHits(2,inum2 ), 2);
+                    mytrk->SetHitCounter(2,1);
+                    mytrk->SetMinsDphi(mytrk->GetsdPhi(2, inum2) * mytrk->GetChargePrime(), 2);
+                    mytrk->SetMinsDthe(mytrk->GetsdThe(2, inum2) * mytrk->GetChargePrime(), 2);
+                }
+                if (inum3>=0) 
+                {
+                    mytrk->SetHitIndex(mytrk->GetHits(3,inum3 ), 3);
+                    mytrk->SetHitCounter(3,1);
+                    mytrk->SetMinsDphi(mytrk->GetsdPhi(3, inum3) * mytrk->GetChargePrime(), 3);
+                    mytrk->SetMinsDthe(mytrk->GetsdThe(3, inum3) * mytrk->GetChargePrime(), 3);
+                }
+                mytrk->SetHitCounter(0,1);mytrk->SetHitCounter(1,1);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(0, inum0) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(0, inum0) * mytrk->GetChargePrime(), 0);
+                mytrk->SetMinsDphi(mytrk->GetsdPhi(1, inum1) * mytrk->GetChargePrime(), 1);
+                mytrk->SetMinsDthe(mytrk->GetsdThe(1, inum1) * mytrk->GetChargePrime(), 1);
+                //event->SetDCA2(itrk, 1);
+                if (mytrk->GetHitCounter(3)>0)  event->SetDCA2(itrk, 3, 1);
+                if (mytrk->GetHitCounter(2)>0)  event->SetDCA2(itrk, 2, 1);
+               
+
+            }else{
+                mytrk->SetHitCounter(0,0);
+            }
+            //mytrk->ClearNumberVectors();
+        }     // enf of e loop
+    }         // end
+
+    void MyEventContainer::FillTrueDCAHadrons(const float weight)
+    {
+        const int central_bin = (int)event->GetCentrality() / 20;
+        const int nhadorns = event->GetNeleccand();
+        for (int itrk = 0; itrk < nhadorns; itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetElecCand(itrk);
+            const float pt = mytrk->GetPtPrime();
+            DCA12_hist[central_bin]->Fill(mytrk->GetDCAX2(),mytrk->GetDCAY2(),pt);
+            const int centrality = event->GetCentrality()/4;
+            if (mytrk->GetChargePrime()>0)
+                DCA2_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,centrality,weight);
+            else
+                sDCA2_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,centrality,weight);
+
+            DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
+            
+        }
+    }
+
 }
