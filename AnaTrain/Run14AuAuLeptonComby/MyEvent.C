@@ -2412,9 +2412,7 @@ namespace MyDileptonAnalysis
     }
 
     // Function to scan vertex Z and find the best estimate using circular track matching
-    void MyEventContainer::VertexXYScan(
-        int fill_hist = 0,
-        int verbosity = 0)
+    void MyEventContainer::VertexXYScan(const float run_beam_x = 0.328, const float run_beam_y = 0.038, int fill_hist = 0, int verbosity = 0)
     {
         float sdphi = 0.05;      // +/- rad
         float sdthe = 0.01;      // +/- rad
@@ -2424,8 +2422,8 @@ namespace MyDileptonAnalysis
         float y_range = 0.05;    // +/- cm
         float step_size = 0.0025; // cm = 25 microns
         int min_track_count = 3;
-        float beam_x = event->GetPreciseX();
-        float beam_y = event->GetPreciseY();
+        float beam_x = run_beam_x;
+        float beam_y = run_beam_y;
         float beam_z = event->GetPreciseZ();
         float best_x = beam_x;
         float best_y = beam_y;
@@ -2687,10 +2685,20 @@ namespace MyDileptonAnalysis
             {
                 if (n_tracks_vec[i] > track_treshold)
                 {
+                    {
+                        hist_vtx_grid_xy->Fill(track_vertices[i].first, track_vertices[i].second, event->GetCentrality(), n_tracks_vec[i]);
+                    }
                     const double weight = n_tracks_vec[i] - track_treshold;
                     sum_weights += weight;
                     sum_x += track_vertices[i].first * weight;
                     sum_y += track_vertices[i].second * weight;
+                }
+            }
+            if (fill_hist && TMath::Abs(event->GetPreciseX()-beam_x)<0.0025 && TMath::Abs(event->GetPreciseY()-beam_y)<0.0025)
+            {
+                for (size_t i = 0; i < n_tracks_vec.size(); ++i)
+                {
+                    hist_vtx_grid_xy->Fill(track_vertices[i].first, track_vertices[i].second, event->GetCentrality(), n_tracks_vec[i]);
                 }
             }
             double new_vx = sum_x / sum_weights;
@@ -2750,14 +2758,6 @@ namespace MyDileptonAnalysis
             best_x_west = new_vx;
             best_y_west = new_vy;
         }
-        
-        if (hist_vtx_z)
-            hist_vtx_z->Fill(best_x, best_y, event->GetCentrality());
-        
-        if (hist_vtx_delta_x)
-            hist_vtx_delta_x->Fill(best_x_west-best_x_east,best_x, event->GetCentrality());
-        if (hist_vtx_delta_y)
-            hist_vtx_delta_y->Fill(best_y_west-best_y_east,best_y, event->GetCentrality());
 
         if (verbosity)
             std::cout << "\033[32mBest X and Y vertex = " << best_x << " " << best_y << " with " << max_tracks << " " << min_tracks << " " << track_treshold << " tracks\033[0m" << " previous " << event->GetPreciseX() << " " << event->GetPreciseY() << std::endl;
@@ -2765,8 +2765,105 @@ namespace MyDileptonAnalysis
             std::cout << "\033[32mBest X and Y vertex (east-west) = " << best_x_east<< " "<< best_x_west << " " << best_y_east<<" "<<best_y_west << " tracks\033[0m" << std::endl;
         if (max_tracks < min_track_count)
             return; // Not enough hits to form a vertex
+
+        if (fill_hist)
+        {
+            hist_vtx_delta_x->Fill(best_x_west-best_x_east,best_x, event->GetCentrality());
+            hist_vtx_delta_y->Fill(best_y_west-best_y_east,best_y, event->GetCentrality());
+            hist_vtx_x->Fill(best_x - event->GetPreciseX(), best_x, event->GetCentrality());
+            hist_vtx_y->Fill(best_y - event->GetPreciseY(), best_y, event->GetCentrality());
+            hist_vtx_grid_xy->Fill(best_x, best_y, event->GetCentrality());
+            hist_vtx_z->Fill(best_x, best_y, event->GetCentrality());
+            vtx_nhitshist->Fill(max_tracks, event->GetCentrality());
+        }
+
         event->SetPreciseX(best_x);
         event->SetPreciseY(best_y);
+
+        if (fill_hist)
+        {
+            for (std::map<int, std::vector<std::pair<int, int> > >::iterator it = khit_to_chain.begin();
+                 it != khit_to_chain.end(); ++it)
+            {
+                const unsigned int khit = it->first;
+                const std::vector<std::pair<int, int> > &layer12_hits = it->second;
+                std::vector<std::vector<float> > circle_params; // stores (cx, cy, R)
+                for (unsigned int ichain = 0; ichain < layer12_hits.size(); ++ichain)
+                {
+                    const unsigned int ihit = layer12_hits[ichain].first;
+                    const unsigned int jhit = layer12_hits[ichain].second;
+
+                    MyDileptonAnalysis::MyVTXHit *hit0 = event->GetVTXHitEntry(ihit);
+                    if (hit0->GetLayer() < 2)
+                        continue;
+
+                    MyDileptonAnalysis::MyVTXHit *hit1 = event->GetVTXHitEntry(jhit);
+                    if (hit1->GetLayer() != 1)
+                        continue;
+
+                    float phi0 = hit0->GetPhiHit(best_x, best_y, beam_z);
+                    float the0 = hit0->GetTheHit(best_x, best_y, beam_z);
+                    float phi1 = hit1->GetPhiHit(best_x, best_y, beam_z);
+                    float the1 = hit1->GetTheHit(best_x, best_y, beam_z);
+
+                    float dphi = phi1 - phi0;
+                    float dtheta = the1 - the0;
+
+                    float x0 = hit0->GetXHit();
+                    float y0 = hit0->GetYHit();
+                    float x1 = hit1->GetXHit();
+                    float y1 = hit1->GetYHit();
+
+                    MyDileptonAnalysis::MyVTXHit *hit2 = event->GetVTXHitEntry(khit);
+                    if (hit2->GetLayer() != 0)
+                        continue;
+
+                    float phi2 = hit2->GetPhiHit(best_x, best_y, beam_z);
+                    float the2 = hit2->GetTheHit(best_x, best_y, beam_z);
+                    float x2 = hit2->GetXHit();
+                    float y2 = hit2->GetYHit();
+
+                    float r0 = sqrt(SQR(x2) + SQR(y2));
+                    float r1 = sqrt(SQR(x1) + SQR(y1));
+                    float r01 = r0 - r1;
+                    float r12 = r1 - sqrt(SQR(x0) + SQR(y0));
+
+                    float dphi1 = phi2 - (phi1 + dphi * r01 / r12);
+                    float dthe1 = the2 - the1; // - ( the0 + dtheta * z02 / z01 );
+
+                    float x12 = x1 - x0;
+                    float y12 = y1 - y0;
+                    float x23 = x2 - x1;
+                    float y23 = y2 - y1;
+                    float det = x12 * y23 - y12 * x23;
+                    if (fabs(det) < 1e-6)
+                        continue; // collinear points
+
+                    float A = x0 * x0 + y0 * y0;
+                    float B = x1 * x1 + y1 * y1;
+                    float C = x2 * x2 + y2 * y2;
+
+                    float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
+                    float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
+                    float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+                    float pt = R * (0.003 * 0.9);
+
+                    float dca = sqrt(SQR(cx - best_x) + SQR(cy - best_y)) - R;
+                    float dca_beam = sqrt(SQR(cx - beam_x) + SQR(cy - beam_y)) - R;
+                    
+                    if (fabs(dthe1) < sddthe && fill_hist)
+                        vtx_dphi_dphi_hist->Fill(dphi1, dphi, pt);
+                    if (fabs(dphi1) < sddphi && fill_hist)
+                        vtx_dthe_dthe_hist->Fill(dthe1, dtheta, pt);
+                        
+                    if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe )
+                    continue;
+
+                    hist_dca_x->Fill(dca, pt, event->GetCentrality());
+                    hist_dca_y->Fill(dca_beam, pt, event->GetCentrality());
+                }
+            }
+        }
     }
 
     void MyEventContainer::FillQAHist(const int mc_id)
@@ -3239,6 +3336,7 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_vtx_x, 200,  -0.05, 0.05, 100,  0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_y, 200,  -0.05, 0.05, 100,  0.0, 0.2, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_z, 100,   0.00, 0.60, 100,  0.0, 0.2, 10, 0, 100);
+            INIT_HIST( 3, hist_vtx_grid_xy, 100,   0.28, 0.38, 100,  -0.01, 0.09, 10, 0, 100);
             INIT_HIST( 3, vtx_dphi_dphi_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
             INIT_HIST( 3, vtx_dthe_dthe_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
             INIT_HIST( 3, vtx_dphi_dphi_hist_new, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);

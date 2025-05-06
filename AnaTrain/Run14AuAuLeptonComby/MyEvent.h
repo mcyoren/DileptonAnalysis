@@ -1094,7 +1094,7 @@ namespace MyDileptonAnalysis
             TH3D* myvtx_hist[N_centr], *vtx_accaptance_hist, *vtx_deadmaps_hist;
             TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             TH3D *BDT_eID_hist;
-            TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dphi_dphi_hist_new;
+            TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *hist_vtx_grid_xy, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dphi_dphi_hist_new;
             TH3D *hist_vtx_delta_x, *hist_vtx_delta_y, *phi_the_pt_hist, *conv_photon_mass_hist, *pi0_mass_hist;
             TH3D *hist_vtx_z;
             TH2D *vtx_nchainhist, *vtx_nhitshist;
@@ -1122,10 +1122,10 @@ namespace MyDileptonAnalysis
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
                   vtx_accaptance_hist = nullptr, vtx_deadmaps_hist = nullptr;
                   BDT_eID_hist = nullptr;
-                  hist_dca_x = nullptr, hist_dca_y = nullptr, hist_vtx_x = nullptr, hist_vtx_y = nullptr, vtx_dphi_dphi_hist = nullptr, vtx_dthe_dthe_hist = nullptr, vtx_dphi_dphi_hist_new = nullptr; 
-                  phi_the_pt_hist = nullptr, hist_vtx_delta_x = nullptr, hist_vtx_delta_y = nullptr, conv_photon_mass_hist = nullptr, pi0_mass_hist = nullptr;
-                  vtx_nchainhist = nullptr,  vtx_nhitshist = nullptr;
-                  hist_vtx_z = nullptr;
+                  hist_dca_x = nullptr; hist_dca_y = nullptr; hist_vtx_x = nullptr; hist_vtx_y = nullptr; vtx_dphi_dphi_hist = nullptr; vtx_dthe_dthe_hist = nullptr; vtx_dphi_dphi_hist_new = nullptr; 
+                  phi_the_pt_hist = nullptr; hist_vtx_delta_x = nullptr; hist_vtx_delta_y = nullptr; conv_photon_mass_hist = nullptr; pi0_mass_hist = nullptr;
+                  vtx_nchainhist = nullptr;  vtx_nhitshist = nullptr;
+                  hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1256,7 +1256,7 @@ namespace MyDileptonAnalysis
             void VertexReFinder(int fill_hist = 0, int verbosity = 0 );
             int CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float>& p1, std::pair<float, float>& p2);
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
-            void VertexXYScan(int fill_hist, int verbosity);
+            void VertexXYScan(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

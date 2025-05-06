@@ -443,11 +443,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
-        if (event_container->GetNGoodElectrons()<1) return 0;
+        //if (event_container->GetNGoodElectrons()<1) return 0;
         //std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
-        event->SetPreciseX(0.322);
-        event->SetPreciseY(0.038);
-        event_container->VertexXYScan(1,0);
+        //event->SetPreciseX(0.322);
+        //event->SetPreciseY(0.038);
+        //event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
@@ -456,14 +456,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
         //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(1,0);
-        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
+        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(1,0);
+        //if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
 
-        if(fill_ddphi_hadron) 
-        {
-            event_container->Associate_Hits_to_Hadrons_Dynamic(2.);
-            if (fill_true_DCA)event_container->FillTrueDCAHadrons();
-        }
+        //if(fill_ddphi_hadron) 
+        //{
+        //    event_container->Associate_Hits_to_Hadrons_Dynamic(2.);
+        //    if (fill_true_DCA)event_container->FillTrueDCAHadrons();
+        //}
         
         if(false)
         {
@@ -579,6 +579,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if( n_good_el<1 && fill_inv_mass ) return 0;
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(7);
+    
+    if(fill_inv_mass)
+    {
+     
+        event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
+        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
+
+        if(fill_ddphi_hadron) 
+        {
+            event_container->Associate_Hits_to_Hadrons_Dynamic(2.);
+            if (fill_true_DCA)event_container->FillTrueDCAHadrons();
+        }
+    }
 
     if(n_good_el>=0 && (remove_hadron_hits||fill_QA_hadron_hists))
     {
