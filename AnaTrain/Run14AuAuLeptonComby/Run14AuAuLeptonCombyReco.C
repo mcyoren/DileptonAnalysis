@@ -225,7 +225,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         return 0;   
         
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(5);
-    if(fill_TTree||fill_true_DCA) event_container->FillCentrHist(centrality);
+    if(fill_TTree||fill_true_DCA) event_container->FillCentrHist(centrality, bbcq);
     
     globalCNT->setBbcZVertex(precise_z);
 

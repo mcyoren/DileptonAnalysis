@@ -189,7 +189,7 @@ namespace MyDileptonAnalysis
                 event->GetCentrality()/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs( mytrk->GetEcore()/mytrk->GetPtot()-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
-            mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
+            //mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
             mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
@@ -2420,7 +2420,7 @@ namespace MyDileptonAnalysis
         float sddthe = 0.01;     // +/- rad
         float x_range = 0.05;    // +/- cm
         float y_range = 0.05;    // +/- cm
-        float step_size = 0.0025; // cm = 25 microns
+        float step_size = 0.005; // cm = 25 microns
         int min_track_count = 3;
         float beam_x = run_beam_x;
         float beam_y = run_beam_y;
@@ -2509,14 +2509,14 @@ namespace MyDileptonAnalysis
         if (verbosity)
             std::cout << "\n\033[32mFound " << hits_chains.size() << " " << khit_to_chain.size() << std::endl;
 
-        std::vector<std::pair<float, float> > track_vertices, track_vertices_west, track_vertices_east; // (x at y_beam, y at x_beam)
-        std::vector<int> n_tracks_vec, n_tracks_vec_west, n_tracks_vec_east;
+        std::vector<std::pair<float, float> > track_vertices, track_vertices_west, track_vertices_east, track_vertices_notused; // (x at y_beam, y at x_beam)
+        std::vector<int> n_tracks_vec, n_tracks_vec_west, n_tracks_vec_east, n_tracks_vec_notused;
         for (float xvtx = beam_x - x_range; xvtx <= beam_x + x_range; xvtx += step_size)
         {
             for (float yvtx = beam_y - y_range; yvtx <= beam_y + y_range; yvtx += step_size)
             {
                 int n_tracks = 0, n_wtracks = 0;
-                int n_tracks_east = 0, n_tracks_west = 0;
+                int n_tracks_east = 0, n_tracks_west = 0, n_tracks_notused = 0;
 
                 for (std::map<int, std::vector<std::pair<int, int> > >::iterator it = khit_to_chain.begin();
                      it != khit_to_chain.end(); ++it)
@@ -2589,11 +2589,12 @@ namespace MyDileptonAnalysis
                         float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
                         float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
 
-                        std::vector<float> best_circle(4);
+                        std::vector<float> best_circle(5);
                         best_circle[0] = cx;
                         best_circle[1] = cy;
                         best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
                         best_circle[3] = x0 > 0? 1:-1 * TMath::Abs(dphi1);
+                        best_circle[4] = (((hit0->GetLadder()>25&&hit0->GetLadder()<48)) || (hit1->GetLadder()>25&&hit1->GetLadder()<48) || (hit2->GetLadder()>25&&hit2->GetLadder()<48)) ? 1 : 0;
 
                         circle_params.push_back(best_circle);
 
@@ -2623,20 +2624,21 @@ namespace MyDileptonAnalysis
                                     min_index = i;
                                 }
                             }
-
-                            std::vector<std::vector<float> > keep_one;
-                            if (min_index >= 0)
+                            if (false) 
                             {
-                                keep_one.push_back(circle_params[min_index]);
+                                std::vector<std::vector<float> > keep_one;
+                                if (min_index >= 0)
+                                {
+                                    keep_one.push_back(circle_params[min_index]);
+                                }
+                                circle_params = keep_one;
                             }
-                            if (true) circle_params = keep_one;
-                            if (false)
-                                circle_params.pop_back();
+                            
                         }
 
                         if (charge_flip)
                             continue;
-                    }
+                    }// end of charge flip
 
                     for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
                     {
@@ -2647,6 +2649,7 @@ namespace MyDileptonAnalysis
                         n_wtracks += local_weight;
                         if(n_tracks%2==1) n_tracks_east+=local_weight;
                         else n_tracks_west+=local_weight;
+                        if(!circle_params[0][4]) n_tracks_notused+=local_weight;
 
                         n_tracks++;
                     }
@@ -2664,14 +2667,19 @@ namespace MyDileptonAnalysis
                     track_vertices_east.push_back(std::make_pair(xvtx, yvtx));
                     n_tracks_vec_east.push_back(n_tracks_east);
                 }
+                if(n_tracks_notused)
+                {
+                    track_vertices_notused.push_back(std::make_pair(xvtx, yvtx));
+                    n_tracks_vec_notused.push_back(n_tracks_notused);
+                }
                 if (n_tracks > max_tracks)
                 {
                     max_tracks = n_tracks;
                     best_x = xvtx;
                     best_y = yvtx;
                 }
-            }
-        }
+            }// end of loop over yvtx
+        }// end of loop over xvtx
         const float fraction = 0.5;
         int min_tracks = *std::min_element(n_tracks_vec.begin(), n_tracks_vec.end());
         int track_treshold = (max_tracks - min_tracks) * fraction + min_tracks;
@@ -2710,6 +2718,8 @@ namespace MyDileptonAnalysis
         float best_y_west = best_y;
         float best_x_east = best_x;
         float best_y_east = best_y;
+        float best_x_notused = best_x;
+        float best_y_notused = best_y;
         if(n_tracks_vec_east.size())
         {
             double sum_weights = 0.0;
@@ -2758,30 +2768,56 @@ namespace MyDileptonAnalysis
             best_x_west = new_vx;
             best_y_west = new_vy;
         }
+        if(n_tracks_vec_notused.size())
+        {
+            double sum_weights = 0.0;
+            double sum_x = 0.0;
+            double sum_y = 0.0;
+
+            int max_tracks_notused = *std::max_element(n_tracks_vec_notused.begin(), n_tracks_vec_notused.end());
+            int min_tracks_notused = *std::min_element(n_tracks_vec_notused.begin(), n_tracks_vec_notused.end());
+            int track_treshold_notused = (max_tracks_notused - min_tracks_notused) * fraction + min_tracks_notused;
+            for (size_t i = 0; i < n_tracks_vec_notused.size(); ++i)
+            {
+                if (n_tracks_vec_notused[i] > track_treshold_notused)
+                {
+                    const double weight = n_tracks_vec_notused[i] - track_treshold_notused;
+                    sum_weights += weight;
+                    sum_x += track_vertices_notused[i].first * weight;
+                    sum_y += track_vertices_notused[i].second * weight;
+                }
+            }
+            double new_vx = sum_x / sum_weights;
+            double new_vy = sum_y / sum_weights;
+            best_x_notused = new_vx;
+            best_y_notused = new_vy;
+        }
 
         if (verbosity)
             std::cout << "\033[32mBest X and Y vertex = " << best_x << " " << best_y << " with " << max_tracks << " " << min_tracks << " " << track_treshold << " tracks\033[0m" << " previous " << event->GetPreciseX() << " " << event->GetPreciseY() << std::endl;
         if (verbosity)
             std::cout << "\033[32mBest X and Y vertex (east-west) = " << best_x_east<< " "<< best_x_west << " " << best_y_east<<" "<<best_y_west << " tracks\033[0m" << std::endl;
+        if (verbosity)
+            std::cout << "\033[32mBest X and Y vertex (notused) = " << best_x_notused<< " "<< best_y_notused << " tracks\033[0m" << std::endl;
         if (max_tracks < min_track_count)
             return; // Not enough hits to form a vertex
 
         if (fill_hist)
         {
-            hist_vtx_delta_x->Fill(best_x_west-best_x_east,best_x, event->GetCentrality());
-            hist_vtx_delta_y->Fill(best_y_west-best_y_east,best_y, event->GetCentrality());
+            hist_vtx_delta_x->Fill(best_x-best_x_notused, best_x, event->GetCentrality());
+            hist_vtx_delta_y->Fill(best_y-best_y_notused, best_y, event->GetCentrality());
             hist_vtx_x->Fill(best_x - event->GetPreciseX(), best_x, event->GetCentrality());
             hist_vtx_y->Fill(best_y - event->GetPreciseY(), best_y, event->GetCentrality());
             hist_vtx_grid_xy->Fill(best_x, best_y, event->GetCentrality());
             hist_vtx_z->Fill(best_x, best_y, event->GetCentrality());
-            vtx_nhitshist->Fill(max_tracks, event->GetCentrality());
         }
 
         event->SetPreciseX(best_x);
         event->SetPreciseY(best_y);
 
         if (fill_hist)
-        {
+        {   
+            int n_used_tracks = 0;
             for (std::map<int, std::vector<std::pair<int, int> > >::iterator it = khit_to_chain.begin();
                  it != khit_to_chain.end(); ++it)
             {
@@ -2861,8 +2897,10 @@ namespace MyDileptonAnalysis
 
                     hist_dca_x->Fill(dca, pt, event->GetCentrality());
                     hist_dca_y->Fill(dca_beam, pt, event->GetCentrality());
+                    n_used_tracks++;
                 }
             }
+            vtx_nhitshist->Fill(n_used_tracks, event->GetCentrality());
         }
     }
 
@@ -2874,9 +2912,6 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime());
 
-            const float bdt = electron->GetEmcdphi_e();
-            if (bdt>0 && bdt <1) BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+300);
-            else BDT_eID_hist->Fill(0., electron->GetPtPrime(), event->GetCentrality()+300);
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
             //if ( electron->GetEcore()/electron->GetPtot() < 0.5 || electron->GetN0() < 0 )
             //    continue;
@@ -2884,7 +2919,6 @@ namespace MyDileptonAnalysis
 
             int central_bin = (int) event->GetCentrality() / 20;
             central_bin += N_centr * ( 1 - electron->GetChargePrime() ) / 2;
-            BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+200);
 
             const float eConv = std::log10(electron->GetNHits()+1)*5 + std::log10(electron->GetTOFDPHI()+1);
 
@@ -2954,10 +2988,6 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime())+200;
 
-            const float bdt = electron->GetEmcdphi_e();
-            if (bdt>0 && bdt <1) BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality()+100);
-            else BDT_eID_hist->Fill(0., electron->GetPtPrime(), event->GetCentrality()+100);
-
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
 
             temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin+200);
@@ -2973,8 +3003,6 @@ namespace MyDileptonAnalysis
                 disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin);
             if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
                 chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin);
-
-            BDT_eID_hist->Fill(bdt, electron->GetPtPrime(), event->GetCentrality());
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
@@ -3206,7 +3234,7 @@ namespace MyDileptonAnalysis
             tree = new TTree("tree", "tree");
             tree->Branch("MyEvent", event);
             INIT_HIST(1, event_hist, 10, 0, 10);
-            INIT_HIST(1, centr_hist, 100, 0, 100);
+            INIT_HIST(2, centr_hist, 100, 0, 100, 2000, 0, 2000);
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 50, 0, 5, 2, 0, 2, 100, 0, 100);
             is_fill_tree = 1;
         }
@@ -3267,7 +3295,7 @@ namespace MyDileptonAnalysis
         if (fill_true_DCA)
         {
             INIT_HIST(1, event_hist, 20, 0, 20);
-            INIT_HIST(1, centr_hist, 100, 0, 100);
+            INIT_HIST(2, centr_hist, 100, 0, 100, 2000, 0, 2000);
             INIT_HIST(3, counter_assoc_ghost_hist, 50,0,50, 33, 0, 33, 60, 0, 600);
             INIT_HISTOS(3, myvtx_hist, N_centr, 100, 0, 1, 100, -0.5 ,0.5, 20, -10 ,10);
 

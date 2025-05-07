@@ -1065,7 +1065,8 @@ namespace MyDileptonAnalysis
             TFile *infile, *outfile;
             TH2D *hist_br, *hist_bz;
             TTree *tree;
-            TH1D *event_hist, *centr_hist;
+            TH1D *event_hist;
+            TH2D *centr_hist;
             TH3D *el_pt_hist[N_centr*2];
             TH3D *dphi_hist[N_centr], *dthe_hist[N_centr], *sdphi_hist[N_centr], *sdthe_hist[N_centr];
             TH3D *chi2_ndf[N_centr], *truehithist, *truehitsigmahist, *charge_recover_hist, *ilayerhitshist[N_centr];
@@ -1238,7 +1239,7 @@ namespace MyDileptonAnalysis
 
             void CheckVeto();
             void FillEventHist(const float varX){ event_hist->Fill(varX); };
-            void FillCentrHist(const float centr){ centr_hist->Fill(centr); };
+            void FillCentrHist(const float centr, const float bbcq){ centr_hist->Fill(centr, bbcq); };
             void FillMyVTXHist(const int centr_bin, const float varX, const float varY, const float varZ){ myvtx_hist[centr_bin]->Fill(varX,varY,varZ); };
             int GetNGoodElectrons();
 
