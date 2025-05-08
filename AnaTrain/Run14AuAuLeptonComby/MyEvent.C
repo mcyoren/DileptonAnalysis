@@ -2079,7 +2079,7 @@ namespace MyDileptonAnalysis
             }
             
             if(fill_hist)
-                vtx_nchainhist->Fill(circle_params.size(), event->GetCentrality());
+                hits_vtx_ntracks->Fill(circle_params.size(), event->GetCentrality());
             
             int charge_flip = 0;
             
@@ -2194,7 +2194,7 @@ namespace MyDileptonAnalysis
         }
 
         if (fill_hist)
-            vtx_nhitshist->Fill(track_vertices.size(), event->GetCentrality());
+            hits_vtx_ntracks->Fill(track_vertices.size(), event->GetCentrality());
 
         if (false && photons.size() > 1)
         {
@@ -2594,7 +2594,7 @@ namespace MyDileptonAnalysis
                         best_circle[1] = cy;
                         best_circle[2] = ((phi2 - phi0) > 0 ? 1 : -1) * R;
                         best_circle[3] = x0 > 0? 1:-1 * TMath::Abs(dphi1);
-                        best_circle[4] = (((hit0->GetLadder()>25&&hit0->GetLadder()<48)) || (hit1->GetLadder()>25&&hit1->GetLadder()<48) || (hit2->GetLadder()>25&&hit2->GetLadder()<48)) ? 1 : 0;
+                        best_circle[4] = (((hit0->GetLadder()>24&&hit0->GetLadder()<48)) || (hit1->GetLadder()>24&&hit1->GetLadder()<48) || (hit2->GetLadder()>24&&hit2->GetLadder()<48)) ? 1 : 0;
 
                         circle_params.push_back(best_circle);
 
@@ -2804,20 +2804,22 @@ namespace MyDileptonAnalysis
 
         if (fill_hist)
         {
-            hist_vtx_delta_x->Fill(best_x-best_x_notused, best_x, event->GetCentrality());
-            hist_vtx_delta_y->Fill(best_y-best_y_notused, best_y, event->GetCentrality());
+            hist_vtx_delta_x->Fill(best_x_west-best_x_east, best_x, event->GetCentrality());
+            hist_vtx_delta_y->Fill(best_y_west-best_y_east, best_y, event->GetCentrality());
             hist_vtx_x->Fill(best_x - event->GetPreciseX(), best_x, event->GetCentrality());
             hist_vtx_y->Fill(best_y - event->GetPreciseY(), best_y, event->GetCentrality());
             hist_vtx_grid_xy->Fill(best_x, best_y, event->GetCentrality());
             hist_vtx_z->Fill(best_x, best_y, event->GetCentrality());
+            hist_vtx_delta_x_reuse->Fill(best_x-best_x_notused, best_x, event->GetCentrality());
+            hist_vtx_delta_y_reuse->Fill(best_y-best_y_notused, best_y, event->GetCentrality());
         }
 
-        event->SetPreciseX(best_x);
-        event->SetPreciseY(best_y);
+        event->SetPreciseX(best_x_notused);
+        event->SetPreciseY(best_y_notused);
 
         if (fill_hist)
         {   
-            int n_used_tracks = 0;
+            int n_used_tracks = 0, n_used_tracks_notused = 0; 
             for (std::map<int, std::vector<std::pair<int, int> > >::iterator it = khit_to_chain.begin();
                  it != khit_to_chain.end(); ++it)
             {
@@ -2884,7 +2886,7 @@ namespace MyDileptonAnalysis
                     float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
                     float pt = R * (0.003 * 0.9);
 
-                    float dca = sqrt(SQR(cx - best_x) + SQR(cy - best_y)) - R;
+                    float dca = sqrt(SQR(cx - best_x_notused) + SQR(cy - best_y_notused)) - R;
                     float dca_beam = sqrt(SQR(cx - beam_x) + SQR(cy - beam_y)) - R;
                     
                     if (fabs(dthe1) < sddthe && fill_hist)
@@ -2898,9 +2900,12 @@ namespace MyDileptonAnalysis
                     hist_dca_x->Fill(dca, pt, event->GetCentrality());
                     hist_dca_y->Fill(dca_beam, pt, event->GetCentrality());
                     n_used_tracks++;
+                    if(!(((hit0->GetLadder()>24&&hit0->GetLadder()<48)) || (hit1->GetLadder()>24&&hit1->GetLadder()<48) || (hit2->GetLadder()>24&&hit2->GetLadder()<48))) n_used_tracks_notused++;
                 }
             }
-            vtx_nhitshist->Fill(n_used_tracks, event->GetCentrality());
+            if(verbosity) std::cout << "\033[32mUsed tracks = " << n_used_tracks << " " << n_used_tracks_notused << "\033[0m" << std::endl;
+            hits_vtx_ntracks->Fill(n_used_tracks, event->GetCentrality());
+            hits_vtx_ntracks_ofnotusedhits->Fill(n_used_tracks_notused, event->GetCentrality());
         }
     }
 
@@ -3371,10 +3376,12 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, phi_the_pt_hist, 100, -3.14/2, 3.14*3/2, 100, 0.6, 2.6, 50, -5, 5);
             INIT_HIST( 3, conv_photon_mass_hist, 100, 0, 0.05, 50, 0.0, 5.0, 10, 0, 100);
             INIT_HIST( 3, pi0_mass_hist,         100, 0, 0.50, 50, 0.0, 10., 10, 0, 100);
-            INIT_HIST( 2, vtx_nchainhist,  10, 0,   10, 10, 0, 100);
-            INIT_HIST( 2, vtx_nhitshist, 1000, 0, 1000, 10, 0, 100);
+            INIT_HIST( 2, hits_vtx_ntracks, 1000, 0, 1000, 10, 0, 100);
+            INIT_HIST( 2, hits_vtx_ntracks_ofnotusedhits, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_x, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_y, 200, -0.05, 0.05, 100, 0.0, 0.2, 10, 0, 100);
+            INIT_HIST( 3, hist_vtx_delta_x_reuse, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
+            INIT_HIST( 3, hist_vtx_delta_y_reuse, 200, -0.05, 0.05, 100, 0.0, 0.2, 10, 0, 100);
         }
     }
     

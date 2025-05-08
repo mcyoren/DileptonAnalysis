@@ -1097,8 +1097,8 @@ namespace MyDileptonAnalysis
             TH3D *BDT_eID_hist;
             TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *hist_vtx_grid_xy, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dphi_dphi_hist_new;
             TH3D *hist_vtx_delta_x, *hist_vtx_delta_y, *phi_the_pt_hist, *conv_photon_mass_hist, *pi0_mass_hist;
-            TH3D *hist_vtx_z;
-            TH2D *vtx_nchainhist, *vtx_nhitshist;
+            TH3D *hist_vtx_z, *hist_vtx_delta_x_reuse, *hist_vtx_delta_y_reuse;
+            TH2D *hits_vtx_ntracks, *hits_vtx_ntracks_ofnotusedhits;
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
            
@@ -1125,8 +1125,8 @@ namespace MyDileptonAnalysis
                   BDT_eID_hist = nullptr;
                   hist_dca_x = nullptr; hist_dca_y = nullptr; hist_vtx_x = nullptr; hist_vtx_y = nullptr; vtx_dphi_dphi_hist = nullptr; vtx_dthe_dthe_hist = nullptr; vtx_dphi_dphi_hist_new = nullptr; 
                   phi_the_pt_hist = nullptr; hist_vtx_delta_x = nullptr; hist_vtx_delta_y = nullptr; conv_photon_mass_hist = nullptr; pi0_mass_hist = nullptr;
-                  vtx_nchainhist = nullptr;  vtx_nhitshist = nullptr;
-                  hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr;
+                  hits_vtx_ntracks = nullptr;  hits_vtx_ntracks_ofnotusedhits = nullptr;
+                  hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr; hist_vtx_delta_x_reuse = nullptr; hist_vtx_delta_y_reuse = nullptr;
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
