@@ -1258,6 +1258,7 @@ namespace MyDileptonAnalysis
             int CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float>& p1, std::pair<float, float>& p2);
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
             void VertexXYScan(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
+            void ConversionFinder(int fill_hist, int verbosity);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

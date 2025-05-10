@@ -2909,6 +2909,115 @@ namespace MyDileptonAnalysis
         }
     }
 
+    void MyEventContainer::ConversionFinder(int fill_hist = 0, int verbosity = 0)
+    {
+        const int Ntracks = event->GetNtrack();
+        for (int itrk = 0; itrk < Ntracks; itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            const int charge = mytrk->GetChargePrime();
+            if(charge==1)  continue;
+            if(!mytrk->GetHitCounter(0)) continue;
+            const int layer0_hit_id = mytrk->GetHitIndex(0);
+            MyDileptonAnalysis::MyVTXHit *layer0_hit = event->GetVTXHitEntry(layer0_hit_id);
+            const float phi0 = layer0_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+            const float the0 = layer0_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+            const float x0 = layer0_hit->GetXHit();
+            const float y0 = layer0_hit->GetYHit();
+            int is_conversion = 0;
+            for (int ihit2 = 0; ihit2 < event->GetNVTXhit(); ihit2++)
+            {
+                MyDileptonAnalysis::MyVTXHit *layer1_hit = event->GetVTXHitEntry(ihit2);
+                if (layer1_hit->GetLayer() == 0 || layer1_hit->GetLayer() == 3)
+                    continue;
+                const int inner_layer = layer1_hit->GetLayer();
+                const float phi1 = layer1_hit->GetPhiHit(x0, y0, event->GetPreciseZ());
+                const float the1 = layer1_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                const float dphi = phi1 - phi0; ///dphi = |f(R,pt)|*charge => dphi*charge -> psotive for track but negative for second tracks
+                const float cdphi = charge*dphi;
+                const float dthe = TMath::Abs(the1 - the0);
+
+                if (cdphi < 0 && cdphi> -0.1 && dthe < 0.01 )///make dthe in layer 1 to 0.001
+                {
+                    for (int ihit3 = 0; ihit3 < event->GetNVTXhit(); ihit3++)
+                    {
+                        MyDileptonAnalysis::MyVTXHit *layer2_hit = event->GetVTXHitEntry(ihit3);
+                        if (layer2_hit->GetLayer() <= inner_layer)
+                            continue;
+                        const float phi2 = layer2_hit->GetPhiHit(x0, y0, event->GetPreciseZ());
+                        const float the2 = layer2_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                        const float r10 = sqrt(SQR(layer1_hit->GetXHit()-x0) + SQR(layer1_hit->GetYHit()-y0));
+                        const float r20 = sqrt(SQR(layer2_hit->GetXHit()-x0) + SQR(layer2_hit->GetYHit()-y0));
+                        const float dphi1 = phi2 - phi0;
+                        if(dphi1*charge > 0) continue;
+                        const float dphi2 = dphi1 - dphi * r20 / r10;
+                        const float dthe2 = TMath::Abs(the2 - the1);
+                        if (fill_hist)
+                        {
+                            if(dthe2 < 0.01) vtx_dphi_dphi_hist->Fill(dphi2, dphi, 0.5+1.*inner_layer+0.2*layer2_hit->GetLayer());
+                        }
+                        if ( TMath::Abs(dphi2) < 0.1 && dthe2 < 0.01 )
+                        {
+                            is_conversion = 1;
+                            if (verbosity)
+                            {
+                                std::cout << "\033[32mFound conversion\033[0m" << std::endl;
+                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+            const float phi00 = mytrk->GetPhi0();
+            for (int ihit0 = 0; ihit0 < event->GetNVTXhit(); ihit0++)
+            {
+                MyDileptonAnalysis::MyVTXHit *layer0_hit2 = event->GetVTXHitEntry(ihit0);
+                if (layer0_hit2->GetLayer() == 3)
+                    continue;
+                const int inner_layer = layer0_hit2->GetLayer();
+                const float phi1 = layer0_hit2->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                const float the1 = layer0_hit2->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                const float dphi = phi1 - phi00; ///dphi = |f(R,pt)|*charge => dphi*charge -> psotive for track but negative for second tracks
+                const float cdphi = charge*dphi;
+                const float dthe = TMath::Abs(the1 - the0);
+                if (cdphi < 0 && cdphi > -0.1 && dthe < 0.01 )
+                {
+                    for (int ihit1 = 0; ihit1 < event->GetNVTXhit(); ihit1++)
+                    {
+                        MyDileptonAnalysis::MyVTXHit *layer1_hit = event->GetVTXHitEntry(ihit1);
+                        if (layer1_hit->GetLayer() <= inner_layer)
+                            continue;
+                        const float phi2 = layer1_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                        const float dphi1 = phi2 - phi00;
+                        if(dphi1*charge>0) continue;
+                        const float the2 = layer1_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                        const float r10 = sqrt(SQR(layer0_hit2->GetXHit()-event->GetPreciseX()) + SQR(layer0_hit2->GetYHit()-event->GetPreciseY()));
+                        const float r20 = sqrt(SQR(layer1_hit ->GetXHit()-event->GetPreciseX()) + SQR(layer1_hit ->GetYHit()-event->GetPreciseY()));
+                        const float dphi2 = dphi1 - dphi * r20 / r10;
+                        const float dthe2 = TMath::Abs(the2 - the1);
+                        if (fill_hist)
+                        {
+                            if(dthe2 < 0.01) vtx_dphi_dphi_hist_new->Fill(dphi2, dphi, 0.5+1.*inner_layer+0.2*layer1_hit->GetLayer());
+                            if ( TMath::Abs(dphi2) < 0.1) vtx_dthe_dthe_hist->Fill(dthe2, dthe, 0.5+1.*inner_layer+0.2*layer1_hit->GetLayer());
+                        }
+                        if ( TMath::Abs(dphi2) < 0.1 && dthe2 < 0.01 )
+                        {
+                            if (is_conversion) is_conversion = 3;
+                            else is_conversion = 2;
+                            if (verbosity)
+                            {
+                                std::cout << "\033[32mFound conversion\033[0m" << std::endl;
+                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
+                            }
+                        }
+                    }
+                }
+            }
+            conv_photon_mass_hist->Fill(0.01*is_conversion, mytrk->GetPtPrime(), event->GetCentrality());
+            pi0_mass_hist->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetPtPrime(), event->GetCentrality());
+        }
+    }
+
     void MyEventContainer::FillQAHist(const int mc_id)
     {
         const int Nelectrons = event->GetNtrack();
@@ -3372,10 +3481,10 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_vtx_grid_xy, 100,   0.28, 0.38, 100,  -0.01, 0.09, 10, 0, 100);
             INIT_HIST( 3, vtx_dphi_dphi_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
             INIT_HIST( 3, vtx_dthe_dthe_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
-            INIT_HIST( 3, vtx_dphi_dphi_hist_new, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HIST( 3, vtx_dphi_dphi_hist_new, 100, -0.10, 0.10, 100, -0.1, 0.1, 50, 0, 5);
             INIT_HIST( 3, phi_the_pt_hist, 100, -3.14/2, 3.14*3/2, 100, 0.6, 2.6, 50, -5, 5);
             INIT_HIST( 3, conv_photon_mass_hist, 100, 0, 0.05, 50, 0.0, 5.0, 10, 0, 100);
-            INIT_HIST( 3, pi0_mass_hist,         100, 0, 0.50, 50, 0.0, 10., 10, 0, 100);
+            INIT_HIST( 3, pi0_mass_hist,         100, -10, 10, 50, 0.0, 5., 10, 0, 100);
             INIT_HIST( 2, hits_vtx_ntracks, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 2, hits_vtx_ntracks_ofnotusedhits, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_x, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
