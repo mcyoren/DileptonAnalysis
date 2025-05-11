@@ -2920,7 +2920,7 @@ namespace MyDileptonAnalysis
             if(!mytrk->GetHitCounter(0)) continue;
             const int layer0_hit_id = mytrk->GetHitIndex(0);
             MyDileptonAnalysis::MyVTXHit *layer0_hit = event->GetVTXHitEntry(layer0_hit_id);
-            const float phi0 = layer0_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+            const float phi0 = layer0_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ())+0.001;
             const float the0 = layer0_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
             const float x0 = layer0_hit->GetXHit();
             const float y0 = layer0_hit->GetYHit();
@@ -2962,7 +2962,7 @@ namespace MyDileptonAnalysis
                             if (verbosity)
                             {
                                 std::cout << "\033[32mFound conversion\033[0m" << std::endl;
-                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
+                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << inner_layer << " " << layer2_hit->GetLayer() << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
                             }
                         }
                     }
@@ -3006,8 +3006,8 @@ namespace MyDileptonAnalysis
                             else is_conversion = 2;
                             if (verbosity)
                             {
-                                std::cout << "\033[32mFound conversion\033[0m" << std::endl;
-                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
+                                std::cout << "\033[32mFound Dalitz\033[0m" << std::endl;
+                                std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << inner_layer << " " << layer1_hit->GetLayer() << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
                             }
                         }
                     }
