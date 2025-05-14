@@ -1023,7 +1023,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V12(PHParticle *Type1, const unsigned i
   const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
   const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);\
+  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
 
   const double DCA = TMath::Sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
   

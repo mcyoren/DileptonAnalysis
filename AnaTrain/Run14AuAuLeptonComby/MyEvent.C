@@ -2912,11 +2912,13 @@ namespace MyDileptonAnalysis
     void MyEventContainer::ConversionFinder(int fill_hist = 0, int verbosity = 0)
     {
         const int Ntracks = event->GetNtrack();
+        const int central_bin = event->GetCentrality()/20;
         for (int itrk = 0; itrk < Ntracks; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
             const int charge = mytrk->GetChargePrime();
-            if(charge==1)  continue;
+            const float pt = mytrk->GetPtPrime();
+            //if(charge==1)  continue;
             if(!mytrk->GetHitCounter(0)) continue;
             const int layer0_hit_id = mytrk->GetHitIndex(0);
             MyDileptonAnalysis::MyVTXHit *layer0_hit = event->GetVTXHitEntry(layer0_hit_id);
@@ -2927,7 +2929,7 @@ namespace MyDileptonAnalysis
             const float y0 = layer0_hit->GetYHit();
             const float r0 = sqrt(SQR(x0-event->GetPreciseX()) + SQR(y0-event->GetPreciseY())); 
             const float dphi_dr = (phi0 - phi00) / r0;
-            int is_conversion = 0;
+            int is_conversion = 0, is_dalitz = 0;
             for (int ihit2 = 0; ihit2 < event->GetNVTXhit(); ihit2++)
             {
                 MyDileptonAnalysis::MyVTXHit *layer1_hit = event->GetVTXHitEntry(ihit2);
@@ -2962,11 +2964,13 @@ namespace MyDileptonAnalysis
                         const float dthe2 = the2 - the1;
                         if (fill_hist)
                         {
-                            if(TMath::Abs(dthe2) < 0.01) vtx_dphi_dphi_hist->Fill(dphi2, dphi, 0.5+1.*inner_layer+0.2*layer2_hit->GetLayer());
+                            const int layer_bin = (inner_layer>1 ? 1 : 0) + (layer2_hit->GetLayer()-2) + (central_bin>2 ? 3:0);
+                            if(TMath::Abs(dthe2) < 0.01) hist_conv_phi_phi[layer_bin]->Fill(dphi2, dphi, pt);
+                            if(TMath::Abs(dphi2) < 0.10) hist_conv_the_the[layer_bin]->Fill(dthe2, dthe, pt);
                         }
                         if ( TMath::Abs(dphi2) < 0.1 && TMath::Abs(dthe2) < 0.01 )
                         {
-                            is_conversion = 1;
+                            is_conversion++;
                             if (verbosity)
                             {
                                 std::cout << "\033[32mFound conversion\033[0m" << std::endl;
@@ -3008,13 +3012,13 @@ namespace MyDileptonAnalysis
                         const float dthe2 = the2 - the1;
                         if (fill_hist)
                         {
-                            if ( TMath::Abs(dthe2) < 0.01) vtx_dphi_dphi_hist_new->Fill(dphi2, dphi, 0.5+1.*inner_layer+0.2*layer1_hit->GetLayer());
-                            if ( TMath::Abs(dphi2) < 0.10) vtx_dthe_dthe_hist->Fill(dthe2, dthe, 0.5+1.*inner_layer+0.2*layer1_hit->GetLayer());
+                            const int layer_bin = (inner_layer==0?0:(inner_layer==1?2:3)) + (layer1_hit->GetLayer()-1) + (central_bin>2 ? 6:0);
+                            if(TMath::Abs(dthe2) < 0.01) hist_daltz_phi_phi[layer_bin]->Fill(dphi2, dphi, pt);
+                            if(TMath::Abs(dphi2) < 0.10) hist_daltz_the_the[layer_bin]->Fill(dthe2, dthe, pt);
                         }
                         if ( TMath::Abs(dphi2) < 0.1 && TMath::Abs(dthe2) < 0.01 )
                         {
-                            if (is_conversion) is_conversion = 3;
-                            else is_conversion = 2;
+                            is_dalitz++;
                             if (verbosity)
                             {
                                 std::cout << "\033[32mFound Dalitz\033[0m" << std::endl;
@@ -3024,8 +3028,13 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            conv_photon_mass_hist->Fill(0.01*is_conversion, mytrk->GetPtPrime(), event->GetCentrality());
-            pi0_mass_hist->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetPtPrime(), event->GetCentrality());
+            hist_is_dalitz_conv[central_bin]->Fill(is_conversion, is_dalitz, pt);
+            hist_is_ml_conv[central_bin]->Fill(is_conversion, TMath::Log10 ( mytrk->GetTOFDPHI()>1 ?  mytrk->GetTOFDPHI() : 1 ), pt);
+            sdphi_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
+            if (is_conversion>1) 
+                sdphi_real_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
+
+            mytrk->SetEmcdphi_e(is_dalitz*100+is_conversion);
         }
     }
 
@@ -3304,7 +3313,7 @@ namespace MyDileptonAnalysis
     }
     void MyEventContainer::CreateOutFileAndInitHists(std::string outfilename, const int fill_ell, const int fill_had, const int fill_tree, const int fill_dphi,
                                                      const int fill_DCA, const int fill_track_QA, const int fill_flow, const int fill_true_DCA, 
-                                                     const int check_veto, const int fill_inv_mas, const int fill_vertex_reco)
+                                                     const int check_veto, const int fill_inv_mas, const int fill_vertex_reco, const int do_conv_dalitz_finder)
     {
         outfilename = "my-" + outfilename;
         const int compress = 9;
@@ -3502,6 +3511,18 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_vtx_delta_y, 200, -0.05, 0.05, 100, 0.0, 0.2, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_x_reuse, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_y_reuse, 200, -0.05, 0.05, 100, 0.0, 0.2, 10, 0, 100);
+        }
+        if(do_conv_dalitz_finder)
+        {
+            
+            INIT_HISTOS(3, hist_conv_phi_phi,    6,       100, -0.1, 0.1, 20, -0.1, 0.1, 25, 0, 5); 
+            INIT_HISTOS(3, hist_conv_the_the,    6,       100, -0.1, 0.1, 20, -0.1, 0.1, 25, 0, 5); 
+            INIT_HISTOS(3, hist_daltz_phi_phi,   12,      100, -0.1, 0.1, 20, -0.1, 0.1, 25, 0, 5); 
+            INIT_HISTOS(3, hist_daltz_the_the,   12,      100, -0.1, 0.1, 20, -0.1, 0.1, 25, 0, 5); 
+            INIT_HISTOS(3, hist_is_dalitz_conv,  N_centr, 10, 0, 10, 10, 0, 10, 50, 0, 5); 
+            INIT_HISTOS(3, hist_is_ml_conv,      N_centr, 10, 0, 10, 10, 0, 10, 50, 0, 5); 
+            INIT_HISTOS(3, sdphi_conv_hist,      N_centr,  50,  -10,  10, 50, -5.0, 5.0, 50, 0, 5); 
+            INIT_HISTOS(3, sdphi_real_conv_hist, N_centr,  50,  -10,  10, 50, -5.0, 5.0, 50, 0, 5);
         }
     }
     

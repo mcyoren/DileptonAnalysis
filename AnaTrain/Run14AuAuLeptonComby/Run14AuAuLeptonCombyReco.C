@@ -31,6 +31,8 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     fill_inv_mass = 0;
     vtx_mean_x = 0;
     vtx_mean_y = 0;
+    do_reco_vertex = 0;
+    do_conv_dalitz_finder = 0;
 
     ul = nullptr;
     event_container = nullptr;
@@ -67,30 +69,34 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
     check_veto = rc->get_IntFlag("Check_Veto", 0);
     fill_inv_mass = rc->get_IntFlag("fill_inv_mass", 0);
+    do_reco_vertex = rc->get_IntFlag("do_reco_vertex", 0);
+    do_conv_dalitz_finder = rc->get_IntFlag("do_conv_dalitz_finder", 0);
 
 
-    std::cout<<"Remove_hadron_hits:   "<<remove_hadron_hits<<std::endl;
-    std::cout<<"fill_QA_hadron_hists: "<<fill_QA_hadron_hists<<std::endl;
-    std::cout<<"fill_QA_lepton_hists: "<<fill_QA_lepton_hists<<std::endl;
-    std::cout<<"fill_ddphi_hadron:    "<<fill_ddphi_hadron<<std::endl;
-    std::cout<<"fill_TTree:           "<<fill_TTree<<std::endl;
-    std::cout<<"fill_d_dphi_hists:    "<<fill_d_dphi_hists<<std::endl;
-    std::cout<<"fill_DCA_hists:       "<<fill_DCA_hists<<std::endl;
-    std::cout<<"use_iden:             "<<use_iden<<std::endl;
-    std::cout<<"Do_track_QA:          "<<do_track_QA<<std::endl;
-    std::cout<<"Do_electron_QA:       "<<do_electron_QA<<std::endl;
-    std::cout<<"do_reveal_hadron:     "<<do_reveal_hadron<<std::endl;
-    std::cout<<"fill_flow_hists:      "<<fill_flow_hists<<std::endl;
-    std::cout<<"fill_true_DCA:        "<<fill_true_DCA<<std::endl;
-    std::cout<<"check_veto:           "<<check_veto<<std::endl;
-    std::cout<<"fill_inv_mass:        "<<fill_inv_mass<<std::endl;
+    std::cout<<"Remove_hadron_hits:     "<<remove_hadron_hits<<std::endl;
+    std::cout<<"fill_QA_hadron_hists:   "<<fill_QA_hadron_hists<<std::endl;
+    std::cout<<"fill_QA_lepton_hists:   "<<fill_QA_lepton_hists<<std::endl;
+    std::cout<<"fill_ddphi_hadron:      "<<fill_ddphi_hadron<<std::endl;
+    std::cout<<"fill_TTree:             "<<fill_TTree<<std::endl;
+    std::cout<<"fill_d_dphi_hists:      "<<fill_d_dphi_hists<<std::endl;
+    std::cout<<"fill_DCA_hists:         "<<fill_DCA_hists<<std::endl;
+    std::cout<<"use_iden:               "<<use_iden<<std::endl;
+    std::cout<<"Do_track_QA:            "<<do_track_QA<<std::endl;
+    std::cout<<"Do_electron_QA:         "<<do_electron_QA<<std::endl;
+    std::cout<<"do_reveal_hadron:       "<<do_reveal_hadron<<std::endl;
+    std::cout<<"fill_flow_hists:        "<<fill_flow_hists<<std::endl;
+    std::cout<<"fill_true_DCA:          "<<fill_true_DCA<<std::endl;
+    std::cout<<"check_veto:             "<<check_veto<<std::endl;
+    std::cout<<"fill_inv_mass:          "<<fill_inv_mass<<std::endl;
+    std::cout<<"do_reco_vertex:         "<<do_reco_vertex<<std::endl;
+    std::cout<<"do_conv_dalitz_finder:  "<<do_conv_dalitz_finder<<std::endl;
     
     event_container = new MyDileptonAnalysis::MyEventContainer();
     event_container->InitEvent();
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists+3*fill_ddphi_hadron,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,///temporary to be removed
                                                fill_DCA_hists, do_track_QA+do_electron_QA, fill_flow_hists, fill_true_DCA, check_veto,
-                                               fill_flow_hists>0?0:fill_inv_mass, 1);
+                                               fill_flow_hists>0?0:fill_inv_mass, do_reco_vertex, do_conv_dalitz_finder);
 
     return 0;
 }
@@ -585,7 +591,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
      
         event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
         if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
-        event_container->ConversionFinder(1,1);
+        event_container->ConversionFinder(1,0);
 
         if(fill_ddphi_hadron) 
         {
@@ -690,8 +696,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (mytrk->GetHitCounter(2)>0) vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(2));
         else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
         
-        int conv_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
-        //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<<" "<<mytrk->GetIsConv()<<" "<<hadron_reject<<" "<<hit_assocaition<<" "<<conv_reject<<std::endl;
+        //int conv_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
+        int conv_reject = 0;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=10;
+        if ( ((int)mytrk->GetEmcdphi_e())/100==0) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
+        if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=10000;
+        //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<< " " << conv_reject << " " << mytrk->GetTOFDPHI() <<" "<<mytrk->GetIsConv()<<std::endl;
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 

@@ -1099,6 +1099,10 @@ namespace MyDileptonAnalysis
             TH3D *hist_vtx_delta_x, *hist_vtx_delta_y, *phi_the_pt_hist, *conv_photon_mass_hist, *pi0_mass_hist;
             TH3D *hist_vtx_z, *hist_vtx_delta_x_reuse, *hist_vtx_delta_y_reuse;
             TH2D *hits_vtx_ntracks, *hits_vtx_ntracks_ofnotusedhits;
+            TH3D *hist_conv_phi_phi[6], *hist_conv_the_the[6];
+            TH3D *hist_daltz_phi_phi[12], *hist_daltz_the_the[12];
+            TH3D *hist_is_dalitz_conv[N_centr], *hist_is_ml_conv[N_centr], *sdphi_conv_hist[N_centr], *sdphi_real_conv_hist[N_centr];
+
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
            
@@ -1127,6 +1131,7 @@ namespace MyDileptonAnalysis
                   phi_the_pt_hist = nullptr; hist_vtx_delta_x = nullptr; hist_vtx_delta_y = nullptr; conv_photon_mass_hist = nullptr; pi0_mass_hist = nullptr;
                   hits_vtx_ntracks = nullptr;  hits_vtx_ntracks_ofnotusedhits = nullptr;
                   hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr; hist_vtx_delta_x_reuse = nullptr; hist_vtx_delta_y_reuse = nullptr;
+
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1172,6 +1177,7 @@ namespace MyDileptonAnalysis
                         sDCA2_2D_hist[i] = nullptr;
                         DCA12_hist[i]  = nullptr;
                         veto_phi_hist[i] = nullptr, veto_the_hist[i] = nullptr, veto_phi_phi_hist[i] = nullptr, veto_the_the_hist[i] = nullptr;
+                        hist_is_dalitz_conv[i] = nullptr; hist_is_ml_conv[i] = nullptr; sdphi_conv_hist[i] = nullptr; sdphi_real_conv_hist[i] = nullptr;
                   }
 
                   for (int i = 0; i < N_centr*2; i++)  el_pt_hist[i] = nullptr;
@@ -1191,6 +1197,8 @@ namespace MyDileptonAnalysis
                   { 
                         veto_sphi_sphi_hist[i] = nullptr, veto_sthe_sthe_hist[i] = nullptr;
                   }
+                  for (int i = 0; i < 6; i++)  {hist_conv_phi_phi[i] = nullptr; hist_conv_the_the[i] = nullptr;}
+                  for (int i = 0; i < 12; i++) {hist_daltz_phi_phi[i] = nullptr; hist_daltz_the_the[i] = nullptr;}
                   is_fill_hsits = 0;
                   is_fill_hadron_hsits = 0;
                   is_fill_tree = 0;
@@ -1218,7 +1226,7 @@ namespace MyDileptonAnalysis
             void GetHistsFromFile(const std::string &loc);
             void CreateOutFileAndInitHists(std::string outfilename, const int fill_el = 0, const int fill_had = 0, const int fill_tree = 0, const int fill_dphi = 0, 
             const int fill_DCA = 0, const int fill_track_QA = 0, const int fill_flow = 0, const int fill_true_DCA= 0, const int check_veto= 0, const int fill_inv_mas = 0,
-            const int fill_vertex_reco = 0);
+            const int fill_vertex_reco = 0, const int do_conv_dalitz_finder = 0);
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
