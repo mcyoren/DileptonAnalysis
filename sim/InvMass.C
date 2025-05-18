@@ -85,6 +85,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int fill_inv_mass_sim = 0;
   const int fill_vtx_accaptance = 0;
   const int do_vertex_reco = 1;
+  const int do_conv_dalitz_finder = 1;
 
   char outname[200];
   sprintf(outname,"kek_%d.root",itread);
@@ -94,7 +95,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   event_container->InitEvent();
   event_container->GetHistsFromFile("../../ee_QA/AnaTrain/Run14AuAuLeptonComby/field_map.root");
   event_container->CreateOutFileAndInitHists(outname,fill_QA_lepton_hists,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,
-                                               fill_DCA_hists, do_track_QA+do_electron_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass, do_vertex_reco);
+                                               fill_DCA_hists, do_track_QA+do_electron_QA, do_reveal_hadron, fill_true_DCA, check_veto, fill_inv_mass, do_vertex_reco, do_conv_dalitz_finder);
   MyDileptonAnalysis::MyEvent *myevent = 0;                                            
   //event = 0;
   br->SetAddress(&myevent);
@@ -263,12 +264,13 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
 
     if(do_ident_electrons) event_container->IdenElectrons();
     if(do_electron_QA)event_container->FillQAHistPreAssoc();
-    if(do_vertex_reco) event_container->VertexReFinder(1,0);
+    //if(do_vertex_reco) event_container->VertexXYScan(myevent->GetPreciseX(), myevent->GetPreciseY(), 1,0);
     if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,0,2);
     if(associate_hits ) event_container->Associate_Hits_to_Leptons(5,5,5,0,1,3);
     if(associate_hits && fill_inv_mass && event_container->GetNGoodElectrons()<2  ) continue;
     if(associate_hits && fill_inv_mass ) event_container->Associate_Hits_to_Leptons(5,5,5,0,1);
     if(false) event_container->Associate_Hits_to_Leptons_OLD(20,20,20);
+    if(do_conv_dalitz_finder) event_container->ConversionFinder(1,0);
 
     if(associate_hits && fill_inv_mass && event_container->GetNGoodElectrons()<1  ) continue;
 

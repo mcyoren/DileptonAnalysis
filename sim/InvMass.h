@@ -25,7 +25,7 @@ const TString inFile[] = {"/home/yoren/bnl/PHENIX/ee/AuAu/my-10M_photon_embed_si
                             "/home/yoren/bnl/PHENIX/ee/AuAu/2M_photon_embed_helios_v0.root"};
 const char field_file_path[200]="../AnaTrain/November/field_map.root";
 //const double dNdy_pp[] = {43.5,0.41,0.759/1000.,0.12,0.01,4.3,10,0.133/1000};//pi0, phi, jpsi, ccbar, bbbar, omega, qgp, psi2s
-const double dNdy_pp[13] = {42.2*95/257,42.2*11/257,8.6*42/257,4.3,4.3,0.92,0.93,0.93,1.77e-5,0.133/1000,0.12,0.01,10};//pi0, eta, rho->ee, omega->pi0ee, omega, eta'->gamma ee, phi, jpsi, psi2s, ccbar, bbbar, qgp
+const double dNdy_pp[13] = {42.2*95/257,42.2*11/257,8.6*42/257,4.3,4.3,0.92,0.93,0.93,1.77e-5,0.133/1000/42.2,0.12,0.01,10};//pi0, eta, rho->ee, omega->pi0ee, omega, eta'->gamma ee, phi, jpsi, psi2s, ccbar, bbbar, qgp
 const double T_pp[13] = {0.113,0.113,0.139,0.139,0.110,0.110,0.139,0.139,0.149,0.164,0.3,0.3,0.3};
 const double n_pp[13] = {9.57, 9.57, 10.8, 9.7, 9.78, 9.78, 10.8, 10.8, 12.3, 14, 0, 0, 0};
 const double m_pp[13] = {0.1349766, 0.547862, 0.77526, 0.78265, 0.78265, 0.95778, 1.019461, 1.019461, 3.096916, 3.68609, -1.019461, -9.46030, 1};
