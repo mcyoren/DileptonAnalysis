@@ -259,15 +259,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     // FVTX, all sectors w/ eta>1.0
     rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 1));
-    float psi2_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    float psi2_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
 
     rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 2));
-    float psi3_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    float psi3_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
 
     event->SetPsi2FVTXA0(psi2_FVTXA0);
     event->SetPsi3FVTXA0(psi3_FVTXA0);
 
-    rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1))->SetPsi(psi2_FVTXA0);
+    //rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1))->SetPsi(psi2_FVTXA0);
 
     rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, 1));
     float psi2_BBCS = (rpsngl) ? rpsngl->GetPsi() : -9999;
@@ -680,15 +680,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 
             || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6 ) hadron_reject+=10;
         if ( mytrk->GetProb()>0.1  ) hadron_reject+=50;
-        int hit_assocaition = mytrk->GetNHits();
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3 && TMath::Abs(mytrk->GetMinsDthe(3))<3) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<3 && TMath::Abs(mytrk->GetMinsDthe(2))<3) ) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3) ) ) hit_assocaition+=1;
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-               (TMath::Abs(mytrk->GetMinsDthe(1))<3 && TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDthe(0))<3 && TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> -1 )) hit_assocaition+=5;
 
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
         MyDileptonAnalysis::MyVTXHit *vtxhit1 = event->GetVTXHitEntry(mytrk->GetHitIndex(1));
@@ -697,6 +688,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         else                           vtxhit2 = event->GetVTXHitEntry(mytrk->GetHitIndex(3));
         
         //int conv_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
+        //int hit_assocaition = mytrk->GetNHits();
+        int hit_assocaition = 0;
+        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
+               (TMath::Abs(mytrk->GetMinsDphi(2))<3) ) && 
+               (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
+               (TMath::Abs(mytrk->GetMinsDphi(0))<3) ) ) hit_assocaition=100;
+        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
+               (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+               (TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
+               (TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> -1 )) hit_assocaition=10000;
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=10;
         if ( ((int)mytrk->GetEmcdphi_e())/100==0) conv_reject=100;
