@@ -207,6 +207,7 @@ namespace MyDileptonAnalysis
         const int nvtxhits = event->GetNVTXhit();
         const int centrality = event->GetCentrality();
         const int rungroup = event->GetRunGroup();
+        is_fill_hsits = !not_fill;
 
         BDTracklist.clear();
 
@@ -2988,7 +2989,7 @@ namespace MyDileptonAnalysis
                 MyDileptonAnalysis::MyVTXHit *layer0_hit2 = event->GetVTXHitEntry(ihit0);
                 if (layer0_hit2->GetLayer() == 3)
                     continue;
-                //if ((layer0_hit2->GetLadder()>24&&layer0_hit2->GetLadder()<48)) continue;
+                if ((layer0_hit2->GetLadder()>24&&layer0_hit2->GetLadder()<48)) continue;
                 const int inner_layer = layer0_hit2->GetLayer();
                 const float phi1 = layer0_hit2->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
                 const float the1 = layer0_hit2->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
@@ -3002,7 +3003,7 @@ namespace MyDileptonAnalysis
                         MyDileptonAnalysis::MyVTXHit *layer1_hit = event->GetVTXHitEntry(ihit1);
                         if (layer1_hit->GetLayer() <= inner_layer)
                             continue;
-                        //if ((layer1_hit->GetLadder()>24&&layer1_hit->GetLadder()<48)) continue;
+                        if ((layer1_hit->GetLadder()>24&&layer1_hit->GetLadder()<48)) continue;
                         const float phi2 = layer1_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
                         const float dphi1 = phi2 - phi00;
                         if(dphi1*charge>-0.002||(phi2-phi1)*charge>-0.002) continue;
@@ -3051,7 +3052,7 @@ namespace MyDileptonAnalysis
                         if (layer1_hit->GetLayer() == 0 || layer1_hit->GetLayer() == 3)
                             continue;
                         const int layer2 = layer1_hit->GetLayer();
-                        //if ((layer1_hit->GetLadder()>24&&layer1_hit->GetLadder()<48)) continue;
+                        if ((layer1_hit->GetLadder()>24&&layer1_hit->GetLadder()<48)) continue;
                         const float phi2 = layer1_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
                         const float dphi1 = phi2 - phi1;
                         const float the2 = layer1_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
@@ -3062,6 +3063,7 @@ namespace MyDileptonAnalysis
                             MyDileptonAnalysis::MyVTXHit *layer2_hit = event->GetVTXHitEntry(ihit2);
                             if (layer2_hit->GetLayer() <= layer2)
                                 continue;
+                            if ((layer2_hit->GetLadder()>24&&layer2_hit->GetLadder()<48)) continue;
                             const float phi3 = layer2_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
                             const float dphi2 = phi3 - phi1;
                             if (dphi2 * charge > -0.002)

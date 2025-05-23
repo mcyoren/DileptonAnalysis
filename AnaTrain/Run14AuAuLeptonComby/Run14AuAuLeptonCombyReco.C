@@ -446,9 +446,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             event_container->FillEventHist(19);
             event_container->FillVTXAcceptance();
         } 
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,2,3.0);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,0,1,3.0);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,1,2,3.0);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0);
+        event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0);
         //if (event_container->GetNGoodElectrons()<1) return 0;
         //std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
         //event->SetPreciseX(0.322);
@@ -590,7 +590,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
      
         event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
-        if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
+        if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
         event_container->ConversionFinder(1,0);
 
         if(fill_ddphi_hadron) 
