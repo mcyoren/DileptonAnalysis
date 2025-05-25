@@ -589,7 +589,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_inv_mass)
     {
      
-        event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
+        if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
         event_container->ConversionFinder(1,0);
 
