@@ -418,7 +418,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     
     event_container->IdenElectrons();
 
-    n_electrons = event->GetNtrack()*0;
+    n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
@@ -693,15 +693,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<3) ) && 
                (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (TMath::Abs(mytrk->GetMinsDphi(0))<3) ) ) hit_assocaition=100;
+               (mytrk->GetMinsDphi(0))>-3 ) ) hit_assocaition=100;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                (TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-               (TMath::Abs(mytrk->GetMinsDphi(0))<3)  && mytrk->GetMinsDphi(0)> -1 )) hit_assocaition=10000;
+               (mytrk->GetMinsDphi(0)> -1 ) )) hit_assocaition=10000;
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=10;
-        if ( ((int)mytrk->GetEmcdphi_e())/100==0) conv_reject=100;
-        if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
+        if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
         if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=10000;
         //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<< " " << conv_reject << " " << mytrk->GetTOFDPHI() <<" "<<mytrk->GetIsConv()<<std::endl;
 

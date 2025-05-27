@@ -1425,6 +1425,31 @@ namespace MyDileptonAnalysis
                 sDCA2_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,eConv,weight);
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
+
+
+            int hit_assocaition = 0;
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<3) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
+                   (mytrk->GetMinsDphi(0))>-3 ) ) hit_assocaition=5;
+            if (hit_assocaition==10 && mytrk->GetMinsDphi(0)<3 ) hit_assocaition=10;
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
+                   (mytrk->GetMinsDphi(0)> -1 ) )) hit_assocaition=15;
+            if (hit_assocaition==1000 && mytrk->GetMinsDphi(0)<2 ) hit_assocaition=20;
+            int conv_reject = 0;
+            if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=1;
+            if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=2;
+            if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=3;
+            if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=4;
+
+            const int hist_in = hit_assocaition + conv_reject;
+
+            if (mytrk->GetChargePrime()>0)
+                DCA_2D_hist[central_bin] ->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
+            else
+                sDCA_2D_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
             
         }
     }
@@ -3508,6 +3533,8 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, DCA12_hist, N_centr, 100, -2000, 2000, 100, -2000, 2000, 50, 0, 5);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
             INIT_HISTOS(3, sDCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
+            INIT_HISTOS(3,  DCA_2D_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
+            INIT_HISTOS(3, sDCA_2D_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
 
             INIT_HIST(3, vtx_accaptance_hist, 300, -1.5, 4.5, 240 , -12, 12, 8, 0 ,8 );
             INIT_HIST(3, vtx_deadmaps_hist,   30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
