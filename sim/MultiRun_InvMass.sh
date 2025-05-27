@@ -4,7 +4,7 @@ Purple='\033[0;35m'
 NC='\033[0m' # No Color
 
 if [ "$#" -ne 5 ]; then
-    echo -e "${Purple}You need to run the script with the following 4 parameters: input file, number of threads, output file name, number of events${NC}, particle type : pi0, phi, jpsi, ccbar, bbbar, omega, qgp, psi2s"
+    echo -e "${Purple}You need to run the script with the following 5 parameters: input file, number of threads, output file name, number of events${NC}, particle type : pi0, phi, jpsi, ccbar, bbbar, omega, qgp, psi2s"
     exit 1
 fi
 

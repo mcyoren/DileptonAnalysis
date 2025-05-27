@@ -69,7 +69,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int associate_hits = 1;
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 0;
+  const int fill_QA_lepton_hists = 1;
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
