@@ -203,7 +203,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         return 0;
     if (fabs(bbc_vertex) > BBC_VERTEX_CUT && do_event_selection)
         return 0;
-    if (fabs(bbc_vertex) > 15)////cut used by vt group 
+    if (fabs(bbc_vertex) > 10)////cut used by vtx group 
         return false;
 
     if (centrality < 0 || centrality > 93)
@@ -595,7 +595,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         if(fill_ddphi_hadron) 
         {
-            event_container->Associate_Hits_to_Hadrons_Dynamic(2.);
+            event_container->Associate_Hits_to_Hadrons_Dynamic(5.);
             if (fill_true_DCA)event_container->FillTrueDCAHadrons();
         }
     }
