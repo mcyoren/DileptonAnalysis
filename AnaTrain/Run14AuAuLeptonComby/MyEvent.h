@@ -1042,6 +1042,7 @@ namespace MyDileptonAnalysis
             void RemoveTrackEntry(const unsigned int i){ TrackList.erase(TrackList.begin() + i); };
             void RemoveHadronEntry(const unsigned int i){ HadronList.erase(HadronList.begin() + i); };
             void RemoveVTXHitEntry(const unsigned int i){ VTXHitList.erase(VTXHitList.begin() + i); };
+            void RemoveElecCandEntry(const unsigned int i){ ElecCandList.erase(ElecCandList.begin() + i); };
 
             std::vector<MyDileptonAnalysis::MyElectron> GetTracks() { return TrackList; };
             std::vector<MyDileptonAnalysis::MyHadron> GetHadrons() { return HadronList; };
@@ -1095,9 +1096,9 @@ namespace MyDileptonAnalysis
             TH3D* myvtx_hist[N_centr], *vtx_accaptance_hist, *vtx_deadmaps_hist;
             TH3D *BBC_psi_hist, *FVTX_psi_hist, *cos_BBC_hist, *cos_FVTX_hist, *v2_BBC_hist, *v2_FVTX_hist; 
             TH3D *BDT_eID_hist;
-            TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *hist_vtx_grid_xy, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dphi_dphi_hist_new;
+            TH3D *hist_dca_x, *hist_dca_y, *hist_vtx_x, *hist_vtx_y, *hist_vtx_grid_xy, *vtx_dphi_dphi_hist, *vtx_dthe_dthe_hist, *vtx_dca_pion_hist;
             TH3D *hist_vtx_delta_x, *hist_vtx_delta_y, *phi_the_pt_hist, *conv_photon_mass_hist, *pi0_mass_hist;
-            TH3D *hist_vtx_z, *hist_vtx_delta_x_reuse, *hist_vtx_delta_y_reuse;
+            TH3D *hist_vtx_z, *hist_vtx_delta_x_reuse, *hist_vtx_delta_y_reuse, *hist_vtx_delta_x_pion, *hist_vtx_delta_y_pion;
             TH2D *hits_vtx_ntracks, *hits_vtx_ntracks_ofnotusedhits;
             TH3D *hist_conv_phi_phi[6], *hist_conv_the_the[6];
             TH3D *hist_daltz_phi_phi[12], *hist_daltz_the_the[12];
@@ -1127,10 +1128,10 @@ namespace MyDileptonAnalysis
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
                   vtx_accaptance_hist = nullptr, vtx_deadmaps_hist = nullptr;
                   BDT_eID_hist = nullptr;
-                  hist_dca_x = nullptr; hist_dca_y = nullptr; hist_vtx_x = nullptr; hist_vtx_y = nullptr; vtx_dphi_dphi_hist = nullptr; vtx_dthe_dthe_hist = nullptr; vtx_dphi_dphi_hist_new = nullptr; 
+                  hist_dca_x = nullptr; hist_dca_y = nullptr; hist_vtx_x = nullptr; hist_vtx_y = nullptr; vtx_dphi_dphi_hist = nullptr; vtx_dthe_dthe_hist = nullptr; vtx_dca_pion_hist = nullptr; 
                   phi_the_pt_hist = nullptr; hist_vtx_delta_x = nullptr; hist_vtx_delta_y = nullptr; conv_photon_mass_hist = nullptr; pi0_mass_hist = nullptr;
                   hits_vtx_ntracks = nullptr;  hits_vtx_ntracks_ofnotusedhits = nullptr;
-                  hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr; hist_vtx_delta_x_reuse = nullptr; hist_vtx_delta_y_reuse = nullptr;
+                  hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr; hist_vtx_delta_x_reuse = nullptr; hist_vtx_delta_y_reuse = nullptr; hist_vtx_delta_x_pion = nullptr; hist_vtx_delta_y_pion = nullptr;
 
                   for (int i = 0; i < N_dynamic; i++)
                   {
@@ -1233,7 +1234,7 @@ namespace MyDileptonAnalysis
             void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0, float sigma_theta = 5.0);
             void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
-            void Associate_Hits_to_Hadrons_Dynamic(float sigma = 2);
+            void Associate_Hits_to_Hadrons_Dynamic(float sigma, float vertex_x, float vertex_y);
             void IdenElectrons();
 
             void Reveal_Hadron();
@@ -1267,6 +1268,7 @@ namespace MyDileptonAnalysis
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
             void VertexXYScan(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
             void ConversionFinder(int fill_hist, int verbosity);
+            void VertexXYScanDC(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

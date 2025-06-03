@@ -309,7 +309,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 set_track(&newElectron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
                 newElectron.SetCrkphi(-999);
                 //event->AddTrack(&newElectron); 
-                if(fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
+                if(newElectron.GetPtPrime()>0.4&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2&&fabs(newElectron.GetTOFE()-1)>10)
                     event->AddElecCand(&newElectron);
             }
             break;
@@ -419,6 +419,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     event_container->IdenElectrons();
 
     n_electrons = event->GetNtrack();
+    for (int itrk = 0; itrk < n_electrons; itrk++)
+    {
+      MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+      if ( mytrk->GetPtPrime() > 4.4 && mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 && 
+           mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5
+        && mytrk->GetN0()>2 && mytrk->GetDisp()<4)
+            mytrk->SetMcId(10000); // 1000 is the electron id
+    }
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
@@ -538,7 +546,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;   
-        if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
+        //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
+        //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
         if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
         //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
@@ -589,13 +598,15 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_inv_mass)
     {
      
+        if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
-        if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
+        if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.);
         event_container->ConversionFinder(1,0);
 
         if(fill_ddphi_hadron) 
         {
-            event_container->Associate_Hits_to_Hadrons_Dynamic(5.);
+            event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
+            event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetBBCchargeN(), event->GetBBCchargeS());
             if (fill_true_DCA)event_container->FillTrueDCAHadrons();
         }
     }
@@ -660,7 +671,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     //event->ReshuffleElectrons();
     if(fill_TTree) event_container->CleanUpHitList();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
-    if(fill_true_DCA&&!fill_ddphi_hadron) event_container->FillTrueDCA();
+    //if(fill_true_DCA&&!fill_ddphi_hadron) event_container->FillTrueDCA();
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
@@ -674,7 +685,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
            
-        if ( mytrk->GetPtPrime() > 4.4) continue;///temporary cut
+        //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
+        //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
 
         int hadron_reject = mytrk->GetMcId();
         if ( (mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 

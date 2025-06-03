@@ -82,6 +82,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V30", "delt_phi_ee_DCA_V30", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V31", "delt_phi_ee_DCA_V31", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V32", "delt_phi_ee_DCA_V32", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
 
 
   fcn_3Dx.clear();
@@ -151,8 +152,10 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_phi_ee);
+  fcn_3Dx.push_back(get_mass_ee);
 
   fcn_3Dy.clear();
+  fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
@@ -288,8 +291,10 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_pt_V30);
   fcn_3Dz.push_back(get_pt_V31);
   fcn_3Dz.push_back(get_pt_V32);
+  fcn_3Dz.push_back(get_pt_V0);
 
   fcn_3D_weight.clear();
+  fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
