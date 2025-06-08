@@ -1,14 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
-echo "$1"
+Green='\033[0;32m'
+NC='\033[0m' # No Color
+
+echo -e "${Green}$1${NC}"
 
 start=`date +%s`
 
 root -l -b << EOF
+    gSystem->Load("MyEvent_OLD_C.so")
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyML_C.so")
     gSystem->Load("../AnaTrain/Run14AuAuLeptonComby/MyEvent_C.so")
     gSystem->Load("Calib_C.so")
-    Calib("$1",$2,$3,$4)
+    Calib("$1",$2,$3,$4, $5)
 EOF
 
 end=`date +%s`
@@ -18,4 +22,4 @@ mysec=$(($duration % $sec))
 mymin=$(($duration / $sec))
 myhours=$(($mymin / $sec))
 
-echo "Accumulated time:" $myhours "hours" $mymin "minutes" $mysec "seconds"
+echo -e "${Green}Accumulated time: $myhours hours $mymin minutes $mysec seconds${NC}"
