@@ -265,7 +265,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
     if (true)
     {
 
-      for (int ihit = 0; ihit < n_hits; ihit++)
+      for (int ihit = 0; ihit < n_hits*0; ihit++)
       {
         MyDileptonAnalysis::MyVTXHit *myhit = myevent->GetVTXHitEntry(ihit);
         if(myhit->GetLayer() == 5)
@@ -318,6 +318,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
 
     if(fill_d_dphi_hists)
     {
+      event_container->CorrectVTXOffset(-1);
       for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
       {
         MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
