@@ -802,4 +802,27 @@ const float phi_sMean_pt_params[1][8][3] = {
     },
 };
 
+const float vtx_pixel_offsets[2][2][2][2] = { // arm; pixel layer; x/y; pol0 pol1
+    {//east arm
+        { //layer 0
+            {-4.29 , 2.4}, // x0 x1
+            {0.567 , 1.73}, // y0 y1
+        },
+        { //layer 1
+            {-0.128 , 0.831}, // x0 x1
+            {-1.13 , -0.565}, // y0 y1
+        },
+    },
+    {//west arm
+        { //layer 0
+            {-9.61 , -1.07}, // x0 x1
+            {1.29 , -0.94}, // y0 y1
+        },
+        { //layer 1
+            {-1.22 , 1.96}, // x0 x1
+            {2.53 , 0.901}, // y0 y1
+        },
+    },
+};
+
 #endif

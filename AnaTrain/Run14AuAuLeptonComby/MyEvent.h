@@ -1269,6 +1269,7 @@ namespace MyDileptonAnalysis
             void VertexXYScan(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
             void ConversionFinder(int fill_hist, int verbosity);
             void VertexXYScanDC(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
+            void CorrectVTXOffset(int keff = 1);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

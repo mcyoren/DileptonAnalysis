@@ -2437,6 +2437,27 @@ namespace MyDileptonAnalysis
     
     }
 
+    void MyEventContainer::CorrectVTXOffset(int keff)
+    {
+        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            const int layer = myhit->GetLayer();
+            if (layer > 1) continue; // skip striplex
+            for (int ilayer = layer; ilayer < 2; ilayer++)
+            {
+                const double z = myhit->GetZHit();
+                const double x = myhit->GetXHit();
+                const double y = myhit->GetYHit();
+                const int arm = x>0 ? 1 : 0; // east is 0; west is 1
+                const double delta_x =  (vtx_pixel_offsets[arm][ilayer][0][0] + vtx_pixel_offsets[arm][ilayer][0][1] * z) / 10000 * sqrt(12);
+                const double delta_y = -(vtx_pixel_offsets[arm][ilayer][1][0] + vtx_pixel_offsets[arm][ilayer][1][1] * z) / 10000 * sqrt(12);
+                myhit->SetXHit(x + keff*delta_x);
+                myhit->SetYHit(y + keff*delta_y);
+            }
+        }
+    }
+
     // Function to scan vertex Z and find the best estimate using circular track matching
     void MyEventContainer::VertexXYScan(const float run_beam_x = 0.328, const float run_beam_y = 0.038, int fill_hist = 0, int verbosity = 0)
     {
@@ -4544,14 +4565,14 @@ namespace MyDileptonAnalysis
 
                         if (TMath::Abs(sdthe) < 2 && SignTrack && is_fill_hsits_hdphi && TMath::Abs(sdphi) < sigma )
                         {
-                            dphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, phi_hit, vtxhit->GetZHit());
-                            if(pt>1.4)sdphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, phi_hit, vtxhit->GetZHit());
+                            dphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            if(pt>1.4)sdphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
                             if(false)sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
                         }
                         if (TMath::Abs(sdthe) < sigma && sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < 2 && SignTrack && is_fill_hsits_hdphi)
                         {
-                            dthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, theta_hit, vtxhit->GetZHit());
-                            if(pt>1.4)sdthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, theta_hit, vtxhit->GetZHit());
+                            dthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            if(pt>1.4)sdthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
                             if(false)sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
                         }
                     } // enf of hit loop
