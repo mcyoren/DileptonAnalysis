@@ -2439,22 +2439,105 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::CorrectVTXOffset(int keff)
     {
-        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+        for (int ihit = 0; ihit < event->GetNVTXhit()*0; ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
-            const int layer = myhit->GetLayer();
-            if (layer > 1) continue; // skip striplex
-            for (int ilayer = layer; ilayer < 2; ilayer++)
+            int layer = myhit->GetLayer();
+            if (layer == 0 ) continue; // skip most inner
+            for (int ilayer = 0; ilayer < layer; ilayer++)
             {
                 const double z = myhit->GetZHit();
                 const double x = myhit->GetXHit();
                 const double y = myhit->GetYHit();
+                const double r = sqrt(SQR(x) + SQR(y));
                 const int arm = x>0 ? 1 : 0; // east is 0; west is 1
-                const double delta_x =  (vtx_pixel_offsets[arm][ilayer][0][0] + vtx_pixel_offsets[arm][ilayer][0][1] * z) / 10000 * sqrt(12);
-                const double delta_y = -(vtx_pixel_offsets[arm][ilayer][1][0] + vtx_pixel_offsets[arm][ilayer][1][1] * z) / 10000 * sqrt(12);
-                myhit->SetXHit(x + keff*delta_x);
+                const int z_bin = z>0 ? 1 : 0; // south is 0; north is 1
+                const double delta_x =  (vtx_pixel_offsets[arm][ilayer][z_bin][0][0] + vtx_pixel_offsets[arm][ilayer][z_bin][0][1] * z) / 10000 * r;
+                const double delta_y = -(vtx_pixel_offsets[arm][ilayer][z_bin][1][0] + vtx_pixel_offsets[arm][ilayer][z_bin][1][1] * z) / 10000 * r;
+                myhit->SetXHit(x - keff*delta_x);
+                myhit->SetYHit(y - keff*delta_y);
+            }
+        }
+        for (int ihit = 0; ihit < event->GetNVTXhit()*0; ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            const int layer = myhit->GetLayer();
+            if (layer > 2) continue; // skip striplex
+            for (int ilayer = layer; ilayer < 3; ilayer++)
+            {
+                const double x = myhit->GetXHit();
+                const double y = myhit->GetYHit();
+                const double r = sqrt(SQR(x) + SQR(y)); 
+                int z_bin = (myhit->GetZHit()+12)/3; // 24 cm range, 3 cm per bin
+                if (z_bin < 0) z_bin = 0;
+                if (z_bin > 7) z_bin = 7; // 24 cm range
+                const int arm = x>0 ? 1 : 0; // east is 0; west is 1
+                const int ii = arm + ilayer*2;
+                const double phi = myhit->GetPhiHit(0,0,0);
+                int phi_bin = 0;
+                for (int iphi = 0; iphi < 6; ++iphi)
+                {
+                    if (phi > phi_vtx_bins[arm][iphi][0] && phi <= phi_vtx_bins[arm][iphi][1])
+                    {
+                        phi_bin = iphi;
+                        break;
+                    }
+                }
+                const double delta_x =  VTX_seg_alignment[ii][z_bin][phi_bin][0] / 10000 * r + VTX_seg_alignment[ii][z_bin][phi_bin][2]/10000 * r * TMath::Sin(phi);
+                const double delta_y =  VTX_seg_alignment[ii][z_bin][phi_bin][1] / 10000 * r + VTX_seg_alignment[ii][z_bin][phi_bin][2]/10000 * r * TMath::Cos(phi);
+                //const double dphi = VTX_seg_alignment[ii][z_bin][phi_bin][0] / 10000 * TMath::Sin(phi) + VTX_seg_alignment[ii][z_bin][phi_bin][1] / 10000 * TMath::Cos(phi) + VTX_seg_alignment[ii][z_bin][phi_bin][2] / 10000;
+                //const double delta_x = dphi * r * TMath::Sin(phi);
+                //const double delta_y = dphi * r * TMath::Cos(phi); 
+                myhit->SetXHit(x - keff*delta_x);
                 myhit->SetYHit(y + keff*delta_y);
             }
+        }
+        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            const int layer = myhit->GetLayer();
+            if (layer < 1) continue; // skip striplex
+            for (int ilayer = 0; ilayer < layer; ilayer++)
+            {
+                const double x = myhit->GetXHit();
+                const double y = myhit->GetYHit();
+                const double r = sqrt(SQR(x) + SQR(y)); 
+                int z_bin = (myhit->GetZHit()+12)/3; // 24 cm range, 3 cm per bin
+                if (z_bin < 0) z_bin = 0;
+                if (z_bin > 7) z_bin = 7; // 24 cm range
+                const int arm = x>0 ? 1 : 0; // east is 0; west is 1
+                const int ii = arm + ilayer*2;
+                const double phi = myhit->GetPhiHit(0,0,0);
+                int phi_bin = 0;
+                for (int iphi = 0; iphi < 6; ++iphi)
+                {
+                    if (phi > phi_vtx_bins[arm][iphi][0] && phi <= phi_vtx_bins[arm][iphi][1])
+                    {
+                        phi_bin = iphi;
+                        break;
+                    }
+                }
+                const double delta_x =  VTX_seg_alignment[ii][z_bin][phi_bin][0] / 10000 * r + VTX_seg_alignment[ii][z_bin][phi_bin][2]/10000 * r * TMath::Sin(phi);
+                const double delta_y =  VTX_seg_alignment[ii][z_bin][phi_bin][1] / 10000 * r + VTX_seg_alignment[ii][z_bin][phi_bin][2]/10000 * r * TMath::Cos(phi);
+                //const double dphi = VTX_seg_alignment[ii][z_bin][phi_bin][0] / 10000 * TMath::Sin(phi) + VTX_seg_alignment[ii][z_bin][phi_bin][1] / 10000 * TMath::Cos(phi) + VTX_seg_alignment[ii][z_bin][phi_bin][2] / 10000;
+                //const double delta_x = dphi * r * TMath::Sin(phi);
+                //const double delta_y = dphi * r * TMath::Cos(phi); 
+                myhit->SetXHit(x + keff*delta_x);
+                myhit->SetYHit(y - keff*delta_y);
+            }
+        }
+        for (int ihit = 0; ihit < event->GetNVTXhit()*0; ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            if(myhit->GetZHit()>0)
+                continue; // skip north hits
+            const float x = myhit->GetXHit();
+            const float y = myhit->GetYHit();
+            const float dx = x > 0 ? -11.9e-4 : +3.12e-4;
+            const float dy = x > 0 ?  4.27e-4 : -13.5e-4;
+            
+            myhit->SetXHit(x + keff*dx);
+            myhit->SetYHit(y + keff*dy);
         }
     }
 
@@ -2701,8 +2784,8 @@ namespace MyDileptonAnalysis
                         //if (pt<0.2||dca>0.05) continue; // reject tracks with pt < 0.2 GeV/c or DCA > 500 μm
                         const int local_weight = 1. / TMath::Sqrt( SQR(rescattering_resolution) + SQR(dca) ); // weight based on DCA and pt
                         n_wtracks += local_weight;
-                        //if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
-                        //else n_tracks_west+=local_weight;
+                        if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
+                        else n_tracks_west+=local_weight;
                         if(!circle_params[0][4]%2==1) n_tracks_notused+=local_weight;
                         if (circle_params[0][4] < 2) n_tracks_pions += local_weight; // pions
                         weight_of_tracks.push_back(local_weight);
@@ -2715,7 +2798,7 @@ namespace MyDileptonAnalysis
                 n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
-                if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
+                if(false)//if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
                 {
                     std::srand(unsigned(time(0))); 
                     std::random_shuffle(weight_of_tracks.begin(), weight_of_tracks.end());
@@ -2996,8 +3079,12 @@ namespace MyDileptonAnalysis
                     float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
                     float pt = R * (0.003 * 0.9);
 
+                    float angle_beam = atan2(best_y_notused - cy, best_x_notused - cx);
+                    float x_proj = cx + R * cos(angle_beam);
+                    float y_proj = cy + R * sin(angle_beam);
                     float dca = sqrt(SQR(cx - best_x_notused) + SQR(cy - best_y_notused)) - R;//  - 0.0671 * pow(pt, -0.062) + 0.0690;
-                    float dca_beam = sqrt(SQR(cx - beam_x) + SQR(cy - beam_y)) - R;//  - 0.0671 * pow(pt, -0.062) + 0.0690;
+                    float dca_x = best_x_notused - x_proj;
+                    float dca_y = best_y_notused - y_proj;
                     
                     if (fabs(dthe1) < sddthe && fill_hist)
                         vtx_dphi_dphi_hist->Fill(dphi1, dphi, pt);
@@ -3008,11 +3095,15 @@ namespace MyDileptonAnalysis
                         continue;
                     if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe )
                         continue;
-
-                    hist_dca_x->Fill(dca, pt, event->GetCentrality());
-                    hist_dca_y->Fill(dca_beam, pt, event->GetCentrality());
                     n_used_tracks++;
                     if(!(((hit0->GetLadder()>24&&hit0->GetLadder()<48)) || (hit1->GetLadder()>24&&hit1->GetLadder()<48) || (hit2->GetLadder()>24&&hit2->GetLadder()<48))) n_used_tracks_notused++;
+
+                    if ( TMath::Abs(hit2->GetZHit())>12) continue; // skip if z is too large add centrality
+                    int z_bin =  ( (int) ((hit2->GetZHit()+12)/3) )*20 + ( (int) ((phi2 + 1.5) / 0.3) ) + 160*( (int) (event->GetCentrality()>20 ? 1:0) ); // 0-20 for negative z, 20-40 for positive z
+                    hist_dca_x->Fill(dca_x, pt, z_bin);
+                    hist_dca_y->Fill(dca_y, pt, z_bin);
+                    if (hit2->GetZHit()>0)  conv_photon_mass_hist->Fill(dca, phi2, pt);
+                    else pi0_mass_hist->Fill(dca, phi2, pt);
                 }
             }
             if(verbosity) std::cout << "\033[32mUsed tracks = " << n_used_tracks << " " << n_used_tracks_notused << "\033[0m" << std::endl;
@@ -3634,7 +3725,7 @@ namespace MyDileptonAnalysis
 
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 200);
 
-            INIT_HISTOS(3, DCA12_hist, N_centr, 100, -2000, 2000, 100, -2000, 2000, 50, 0, 5);
+            INIT_HISTOS(3, DCA12_hist, N_centr, 50, -500, 500, 50, -500, 500, 160, 0, 160);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
             INIT_HISTOS(3, sDCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
             INIT_HISTOS(3,  DCA_2D_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
@@ -3694,8 +3785,8 @@ namespace MyDileptonAnalysis
         {
             do_vertex_reco = 1;
 
-            INIT_HIST( 3, hist_dca_x, 200,  -0.05, 0.05, 50,   0.0, 5.0, 10, 0, 100);
-            INIT_HIST( 3, hist_dca_y, 200,  -0.05, 0.05, 50,   0.0, 5.0, 10, 0, 100);
+            INIT_HIST( 3, hist_dca_x, 200,  -0.05, 0.05, 50,   0.0, 5.0, 320, 0, 320);
+            INIT_HIST( 3, hist_dca_y, 200,  -0.05, 0.05, 50,   0.0, 5.0, 320, 0, 320);
             INIT_HIST( 3, hist_vtx_x, 200,  -0.05, 0.05, 100,  0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_y, 200,  -0.05, 0.05, 100,  0.0, 0.2, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_z, 100,   0.00, 0.60, 100,  0.0, 0.2, 20, -10, 10);
@@ -3704,8 +3795,8 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, vtx_dthe_dthe_hist,     100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
             INIT_HIST( 3, vtx_dca_pion_hist, 200, -0.10, 0.10, 200, 0, 0.02, 250, 0, 25);
             INIT_HIST( 3, phi_the_pt_hist, 100, -3.14/2, 3.14*3/2, 100, 0.6, 2.6, 50, -5, 5);
-            INIT_HIST( 3, conv_photon_mass_hist, 100, 0, 0.05, 50, 0.0, 5.0, 10, 0, 100);
-            INIT_HIST( 3, pi0_mass_hist,         100, -10, 10, 50, 0.0, 5., 10, 0, 100);
+            INIT_HIST( 3, conv_photon_mass_hist, 200, -0.05, 0.05, 60, -1.5, 4.5, 50, 0.0, 5.0);
+            INIT_HIST( 3, pi0_mass_hist,         200, -0.05, 0.05, 60, -1.5, 4.5, 50, 0.0, 5.0);
             INIT_HIST( 2, hits_vtx_ntracks, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 2, hits_vtx_ntracks_ofnotusedhits, 1000, 0, 1000, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_x, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
@@ -4699,6 +4790,10 @@ namespace MyDileptonAnalysis
                 DCA2_hist[central_bin] ->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
             else
                 sDCA2_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
+            
+            if( TMath::Abs(event->GetPreciseZ()) > 12 ) continue; // skip events with large z vertex
+            int z_bin =  ( (int) ((event->GetPreciseZ()+12)/3) )*20 + ( (int) ((mytrk->GetPhi0Prime() + 1.5) / 0.3) ); 
+            DCA12_hist[central_bin]->Fill(mytrk->GetDCAX2(),mytrk->GetDCAY2(),z_bin,weight);
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
             

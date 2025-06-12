@@ -1024,15 +1024,12 @@ float Run14AuAuLeptonCombyHistos::get_pt_V12(PHParticle *Type1, const unsigned i
   if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
       return -999;
 
-  const double DCA_X_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-  const double DCA_Y_pip = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
 
-  const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-  const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+  const double pt = TMath::Sqrt(px*px + py*py);
 
-  const double DCA = TMath::Sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
-  
-  return DCA;
+  return pt;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V13(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
