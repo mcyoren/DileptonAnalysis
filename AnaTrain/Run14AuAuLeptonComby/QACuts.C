@@ -4,7 +4,7 @@ void Run14AuAuLeptonCombyReco::InitParams()
 {
     BBC_VERTEX_CUT = 10;
     TRIGGERBIT = 4; // 4 - BBCLL1(>1 tubes) narrowvtx, 5 - BBCLL1(>1 tubes), 6 - BBCLL1(>1 tubes) novertex
-    E_PT = 0.4;    // 0.15 in RDanalyzer for simulation to study smearing effect
+    E_PT = 0.3;    // 0.15 in RDanalyzer for simulation to study smearing effect
     MAX_PT = 10;
     QUALITY[0] = 31;
     QUALITY[1] = 51;
