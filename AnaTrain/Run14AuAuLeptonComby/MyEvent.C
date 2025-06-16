@@ -2483,6 +2483,23 @@ namespace MyDileptonAnalysis
                 myhit->SetYHit(y - keff*delta_y);
             }
         }
+        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+        {
+            MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            const float z = myhit->GetZHit();
+            const float x = myhit->GetXHit();
+            const float y = myhit->GetYHit();
+            const float phi = myhit->GetPhiHit(0, 0, 0);
+            int z_bin = (z + 12) / 3; // 24 cm range, 3 cm per bin
+            if (z_bin < 0) z_bin = 0;
+            if (z_bin > 7) z_bin = 7; // 24 cm range
+            const int phi_bin = (phi + 1.5) / 0.3;
+            const float offset = offsets_dca[z_bin][phi_bin];
+            const float offsets_x = offset*cos(phi+TMath::Pi()/2);
+            const float offsets_y = offset*sin(phi+TMath::Pi()/2);
+            myhit->SetXHit(x - keff*offsets_x);
+            myhit->SetYHit(y - keff*offsets_y);
+        }
         if (false)
         {
             for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
