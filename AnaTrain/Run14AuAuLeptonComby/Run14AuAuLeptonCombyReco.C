@@ -325,7 +325,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 newElectron.SetCrkphi(-999);
                 //event->AddTrack(&newElectron); 
                 //if(newElectron.GetPtPrime()>0.4&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2&&fabs(newElectron.GetTOFE()-1)>10)
-                if(newElectron.GetPtPrime()>0.4&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
+                if(newElectron.GetPtPrime()>0.3&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
                     event->AddElecCand(&newElectron);
             }
             break;
@@ -556,10 +556,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         int hit_association = -1;
         int conv_rejection = 0;
-
+        const float pt = mytrk->GetPtPrime();
         if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
-        if ( (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) && conv_rejection < 0 ) conv_rejection = -10;
+        if ( (pt >  0.4 && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
+        if ( (pt <= 0.4 && (mytrk->GetHitCounter(2) > 0  && mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;   
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
@@ -618,7 +619,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if(do_reco_vertex) event_container->CorrectVTXOffset(1);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.);
-        event_container->ConversionFinder(1,0);
+        event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0);
 
         if(fill_ddphi_hadron) 
         {

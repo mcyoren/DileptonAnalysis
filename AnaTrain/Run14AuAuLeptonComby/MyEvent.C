@@ -2843,8 +2843,8 @@ namespace MyDileptonAnalysis
                         //if (pt<0.2||dca>0.05) continue; // reject tracks with pt < 0.2 GeV/c or DCA > 500 μm
                         const int local_weight = 1. / TMath::Sqrt( SQR(rescattering_resolution) + SQR(dca) ); // weight based on DCA and pt
                         n_wtracks += local_weight;
-                        if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
-                        else n_tracks_west+=local_weight;
+                        //if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
+                        //else n_tracks_west+=local_weight;
                         if(!circle_params[0][4]%2==1) n_tracks_notused+=local_weight;
                         if (circle_params[0][4] < 2) n_tracks_pions += local_weight; // pions
                         weight_of_tracks.push_back(local_weight);
@@ -2857,7 +2857,7 @@ namespace MyDileptonAnalysis
                 n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
-                if(false)//if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
+                if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
                 {
                     std::srand(unsigned(time(0))); 
                     std::random_shuffle(weight_of_tracks.begin(), weight_of_tracks.end());
@@ -3357,13 +3357,16 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            sdphi_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
-            if (is_conversion>1) 
-                sdphi_real_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
             if(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) < -2) is_conversion += 10;
-            hist_is_dalitz_conv[central_bin]->Fill(is_conversion, is_dalitz, pt);
-            hist_is_ml_conv[central_bin]->Fill(is_conversion, TMath::Log10 ( mytrk->GetTOFDPHI()>1 ?  mytrk->GetTOFDPHI() : 1 ), pt);
             mytrk->SetEmcdphi_e(is_dalitz*100+is_conversion);
+            if(fill_hist)
+            {
+                sdphi_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
+                if (is_conversion>1) 
+                    sdphi_real_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt);
+                hist_is_dalitz_conv[central_bin]->Fill(is_conversion, is_dalitz, pt);
+                hist_is_ml_conv[central_bin]->Fill(is_conversion, TMath::Log10 ( mytrk->GetTOFDPHI()>1 ?  mytrk->GetTOFDPHI() : 1 ), pt);
+            }
         }
     }
 
@@ -3668,14 +3671,14 @@ namespace MyDileptonAnalysis
 
         if (fill_ell)
         {   
-            //INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            //INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            //INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
-            //INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
-            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
+            //INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            //INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            //INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            //INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
             INIT_HISTOS(3, chi2_ndf, N_centr,      50, 0, 10,  20, 0, 20, 25, 0, 5);
             INIT_HISTOS(3, ilayerhitshist, N_centr,50, -0.5, 49.5, 40, 0, 40, 50, 0, 5);
             INIT_HISTOS(3, dphi_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 5, 0, 5);
@@ -3866,7 +3869,7 @@ namespace MyDileptonAnalysis
             INIT_HIST( 3, hist_vtx_delta_x_pion, 200, -0.05, 0.05, 100, 0.1, 0.6, 10, 0, 100);
             INIT_HIST( 3, hist_vtx_delta_y_pion, 200, -0.05, 0.05, 100, 0.0, 0.2, 10, 0, 100);
         }
-        if(do_conv_dalitz_finder)
+        if(do_conv_dalitz_finder==2)
         {
             
             INIT_HISTOS(3, hist_conv_phi_phi,    6,       100, -0.1, 0.1, 20, -0.1, 0.1, 25, 0, 5); 
@@ -4714,17 +4717,19 @@ namespace MyDileptonAnalysis
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=4;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=8;
 
-                        if (TMath::Abs(sdthe) < 2 && SignTrack && is_fill_hsits_hdphi && TMath::Abs(sdphi) < sigma )
+                        if (TMath::Abs(sdthe) < 2 && SignTrack && is_fill_hsits_hdphi )
                         {
-                            dphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
-                            if(pt>1.4)sdphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
-                            if(false)sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
+                            //dphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            //if(pt>1.4)sdphi_hist_el_dynamic[in_arg]->Fill(dphi-dphi_previous_layer, vtxhit->GetPhiHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
+                            sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
                         }
-                        if (TMath::Abs(sdthe) < sigma && sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < 2 && SignTrack && is_fill_hsits_hdphi)
+                        if (sdphi*mytrk->GetChargePrime()>-2 && sdphi*mytrk->GetChargePrime() < 2 && SignTrack && is_fill_hsits_hdphi)//TMath::Abs(sdthe) < sigma && 
                         {
-                            dthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
-                            if(pt>1.4)sdthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
-                            if(false)sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
+                            //dthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            //if(pt>1.4)sdthe_hist_el_dynamic[in_arg]->Fill(dthe-dthe_previous_layer, vtxhit->GetTheHit(0,0,event->GetPreciseZ()), vtxhit->GetZHit());
+                            dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
+                            sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
                         }
                     } // enf of hit loop
                 } // end of hits in prev layer 
