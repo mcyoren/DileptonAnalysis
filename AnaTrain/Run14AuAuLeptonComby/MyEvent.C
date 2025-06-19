@@ -907,8 +907,16 @@ namespace MyDileptonAnalysis
                 const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                 const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
 
-                const float dphi = (dilep_phi_projection[ilayer] - phi_hit);
-                const float dthe = (dilep_the_projection[ilayer] - theta_hit);
+                const float dphi0 = (dilep_phi_projection[ilayer] - phi_hit);
+                const float dthe0 = (dilep_the_projection[ilayer] - theta_hit);
+                const float dphi = dphi0 +
+                    (dilep_phi_projection[ilayer<7?ilayer+1:6] - dilep_phi_projection[ilayer])*
+                    (sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/
+                    (radii[ilayer<7?ilayer+1:6] - radii[ilayer]);
+                const float dthe = dthe0 + 
+                    (dilep_the_projection[ilayer<7?ilayer+1:6] - dilep_the_projection[ilayer])*
+                    (sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/
+                    (radii[ilayer<7?ilayer+1:6] - radii[ilayer]);
 
                 if (abs(dphi) > 0.1 || abs(dthe) > 0.1)
                     continue;
@@ -964,7 +972,7 @@ namespace MyDileptonAnalysis
                         mytrk->AddHitCounter(layer);
                     }
                     if(false)vtxhit->AddAssociatedTrack(itrk, diff);
-                    if(is_fill_hadron_hsits)
+                    if(false)
                     {
                         myvtx_hist[central_bin]->Fill(event->GetPreciseX()-vtxhit->GetXHit()+sqrt(SQR(vtxhit->GetXHit()-event->GetPreciseX())
                                         +SQR(vtxhit->GetYHit()-event->GetPreciseY()))*TMath::Cos(mytrk->GetPhi0Prime()),event->GetRunGroup(),0.5);
@@ -984,8 +992,8 @@ namespace MyDileptonAnalysis
                 {
                     dphi_hist[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, hist_2nd_arg, pt);
+                    if (pt<1.5) continue;
                     const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
-
                     dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin);
                     dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin);
                     dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
@@ -997,6 +1005,7 @@ namespace MyDileptonAnalysis
                 {
                     dthe_hist[central_bin] ->Fill( dthe, hist_2nd_arg, pt);
                     sdthe_hist[central_bin]->Fill(sdthe, hist_2nd_arg, pt);
+                    if (pt<1.5) continue;
                     const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
                     const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
                     dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin);
@@ -3713,7 +3722,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, dphi_the0_init_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
             INIT_HISTOS(3, dthe_phi0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, -1.57, 4.71, 4, 0, 4);
             INIT_HISTOS(3, dphi_the0_corr_hist,  nvtx_layers, 400, -0.05, 0.05, 120, 0.785, 2.36, 4, 0, 4);
-            INIT_HISTOS(3, myvtx_hist, N_centr, 1000, -1, 1, 12, 0 ,12, 4, 0 ,4);
+            //INIT_HISTOS(3, myvtx_hist, N_centr, 1000, -1, 1, 12, 0 ,12, 4, 0 ,4);
             is_fill_hadron_hsits = 1;
         }
         if (fill_tree)

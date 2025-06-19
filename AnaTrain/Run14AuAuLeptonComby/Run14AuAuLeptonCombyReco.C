@@ -132,7 +132,7 @@ int Run14AuAuLeptonCombyReco::ResetEvent(PHCompositeNode *topNode)
 
 int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 {
-
+    
     if (ncalls++ % 10000 == 0)
     {
         printf("Ncalls = %dk\n", ncalls / 1000);
@@ -316,7 +316,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             if(remove_hadron_hits||do_track_QA||fill_QA_hadron_hists){
                 set_track(&newHadron, particleCNT, itrk_reco, bbc_vertex, precise_z, run_group_beamoffset, emccont);
                 if(remove_hadron_hits||do_track_QA)event->AddHadron(&newHadron);
-                if(fill_QA_hadron_hists&&newHadron.GetPtPrime()>1.5&&fabs(newHadron.GetPC3SDPHI())<2&&fabs(newHadron.GetPC3SDZ())<2)
+                if(fill_QA_hadron_hists&&newHadron.GetPtPrime()>0.3&&fabs(newHadron.GetPC3SDPHI())<2&&fabs(newHadron.GetPC3SDZ())<2)
                     event->AddHadron(&newHadron);
             }
             if(fill_ddphi_hadron)
@@ -325,7 +325,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 newElectron.SetCrkphi(-999);
                 //event->AddTrack(&newElectron); 
                 //if(newElectron.GetPtPrime()>0.4&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2&&fabs(newElectron.GetTOFE()-1)>10)
-                if(newElectron.GetPtPrime()>0.3&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
+                if(centrality>20&&centrality<40&& newElectron.GetPtPrime()>0.3&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
                     event->AddElecCand(&newElectron);
             }
             break;
@@ -584,8 +584,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2()>-8000?mytrk->GetDCAX2():100*mytrk->GetChargePrime());
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2()>-8000?mytrk->GetDCAY2():100*mytrk->GetChargePrime());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2()>-8000?mytrk->GetDCA2():400);
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2()>-8000?mytrk->GetDCAY2():400);
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
 
@@ -752,7 +752,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA2());
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
