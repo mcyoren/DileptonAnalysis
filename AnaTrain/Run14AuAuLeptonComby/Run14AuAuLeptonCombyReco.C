@@ -584,7 +584,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCAX2()>-8000?mytrk->GetDCA2():400);
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA2()>-8000?mytrk->GetDCA2():400);
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2()>-8000?mytrk->GetDCAY2():400);
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
@@ -730,10 +730,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
                (mytrk->GetMinsDphi(0)> -2 ) )) hit_assocaition=10000;
         int conv_reject = 0;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=10;
-        if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=100;
-        if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
-        if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=10000;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0) conv_reject=10;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
+        //if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=10000;
         //std::cout<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()*mytrk->GetChargePrime()<< " " << conv_reject << " " << mytrk->GetTOFDPHI() <<" "<<mytrk->GetIsConv()<<std::endl;
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;

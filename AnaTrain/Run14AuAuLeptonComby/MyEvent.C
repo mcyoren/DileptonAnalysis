@@ -921,7 +921,7 @@ namespace MyDileptonAnalysis
                 if (abs(dphi) > 0.1 || abs(dthe) > 0.1)
                     continue;
                 
-                if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
+                //if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
 
                 const float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
                 const float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
@@ -992,24 +992,28 @@ namespace MyDileptonAnalysis
                 {
                     dphi_hist[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
                     sdphi_hist[central_bin]->Fill(sdphi, hist_2nd_arg, pt);
-                    if (pt<1.5) continue;
-                    const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
-                    dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin);
-                    dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin);
-                    dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
-                    dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
-                    dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin);
-                    dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin);
+                    if (pt>0.4)
+                    {
+                        const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
+                        dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), 2*mytrk->GetArm() + charge_bin);
+                        dphi_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhi0Prime(), 2*mytrk->GetArm() + charge_bin);
+                        dphi_the0_init_hist[layer]->Fill(dphi0, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
+                        dphi_the0_corr_hist[layer]->Fill(dphi, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
+                        dthe_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin);
+                        dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), 2*mytrk->GetArm() + charge_bin);
+                    }
                 }
                 if (abs(sdphi) < sigma && is_fill_hadron_hsits)
                 {
                     dthe_hist[central_bin] ->Fill( dthe, hist_2nd_arg, pt);
                     sdthe_hist[central_bin]->Fill(sdthe, hist_2nd_arg, pt);
-                    if (pt<1.5) continue;
-                    const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
-                    const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
-                    dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin);
-                    dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);
+                    if (pt>0.4)
+                    {
+                        const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
+                        const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
+                        dthe_the0_init_hist[layer]->Fill(dthe0, newthe0, 2*mytrk->GetArm() + charge_bin);
+                        dthe_the0_corr_hist[layer]->Fill(dthe, mytrk->GetThe0Prime(), 2*mytrk->GetArm() + charge_bin);    
+                    }
                 }
             } // enf of hit loop
         }     // end of hadron loop
