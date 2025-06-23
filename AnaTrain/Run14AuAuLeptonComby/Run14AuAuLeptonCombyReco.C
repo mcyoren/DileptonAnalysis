@@ -325,7 +325,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 newElectron.SetCrkphi(-999);
                 //event->AddTrack(&newElectron); 
                 //if(newElectron.GetPtPrime()>0.4&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2&&fabs(newElectron.GetTOFE()-1)>10)
-                if(centrality>20&&centrality<40&& newElectron.GetPtPrime()>0.3&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)
+                if(newElectron.GetPtPrime()>0.3&&fabs(newElectron.GetPC3SDPHI())<2&&fabs(newElectron.GetPC3SDZ())<2)//centrality>20&&centrality<40&& 
                     event->AddElecCand(&newElectron);
             }
             break;

@@ -378,7 +378,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA(PHParticle *Type1, const unsigned int 
   //const double DCA_X_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   //const double DCA_Y_pim = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
   //const double DCA = TMath::Sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
-  const double DCA = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX) + p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  const double DCA = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX) - p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   if (DCA > 3000) return 3000;
   if (DCA < -3000) return -3000;
   
