@@ -2469,7 +2469,7 @@ namespace MyDileptonAnalysis
                 const double y = myhit->GetYHit();
                 const double r = sqrt(SQR(x) + SQR(y)); 
                 int z_bin = (myhit->GetZHit()+12)/3; // 24 cm range, 3 cm per bin
-                if (z_bin < 1) continue;
+                if (z_bin < 1) z_bin = 0;
                 if (z_bin > 7) z_bin = 7; // 24 cm range
                 const int arm = x>0 ? 1 : 0; // east is 0; west is 1
                 const int ii = arm + ilayer*2;
