@@ -1264,17 +1264,26 @@ float Run14AuAuLeptonCombyHistos::get_pt_V17(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const int centrality1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
+  const int centrality2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
+
+  if ( centrality1 < 10 || centrality2 < 10 ) return -999;
+
+  const int bbcq = p1->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
+  const int bbcq2 = p2->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
+  if ( centrality1 > 50 && bbcq > 200 ) return -999;
+  if ( centrality2 > 50 && bbcq2 > 200 ) return -999;
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);  
-
-  if( hadron_reject1 < 10000 || hadron_reject2 < 10000 ) return -999;
-  if( hadron_reject1%10 <6 || hadron_reject2%10 <6 ) return -999;
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -1725,11 +1734,27 @@ float Run14AuAuLeptonCombyHistos::get_pt_V31(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const int centrality1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
+  const int centrality2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
+
+  if ( centrality1 < 10 || centrality2 < 10 ) return -999;
+
+  const int bbcq = p1->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
+  const int bbcq2 = p2->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
   
+  if ( centrality1 > 50 && bbcq > 200 ) return -999;
+  if ( centrality2 > 50 && bbcq2 > 200 ) return -999;
+
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 > -10 || conv_reject2 > -10 ) return -999;
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();

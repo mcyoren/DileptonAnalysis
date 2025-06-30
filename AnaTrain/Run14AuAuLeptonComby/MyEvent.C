@@ -2502,7 +2502,7 @@ namespace MyDileptonAnalysis
                 myhit->SetYHit(y - keff*delta_y);
             }
         }
-        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+        for (int ihit = 0; ihit < event->GetNVTXhit()*0; ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
             const float z = myhit->GetZHit();

@@ -604,6 +604,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_integer(Run14AuAuLeptonCombyEnum::SECTOR, mytrk->GetSect()+mytrk->GetArm()*4);
         ult.set_integer(Run14AuAuLeptonCombyEnum::YSECT, mytrk->GetYsect());
         ult.set_integer(Run14AuAuLeptonCombyEnum::ZSECT, mytrk->GetZsect());
+        ult.set_integer(Run14AuAuLeptonCombyEnum::CENTRALITY, event->GetCentrality());
+        ult.set_integer(Run14AuAuLeptonCombyEnum::BBCQ, event->GetRunNumber());
         ul->AddTrack(&ult);
     }
 
@@ -773,6 +775,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_integer(Run14AuAuLeptonCombyEnum::SECTOR, mytrk->GetSect()+mytrk->GetArm()*4);
         ult.set_integer(Run14AuAuLeptonCombyEnum::YSECT, mytrk->GetYsect());
         ult.set_integer(Run14AuAuLeptonCombyEnum::ZSECT, mytrk->GetZsect());
+        ult.set_integer(Run14AuAuLeptonCombyEnum::CENTRALITY, event->GetCentrality());
+        ult.set_integer(Run14AuAuLeptonCombyEnum::BBCQ, event->GetRunNumber());
         ul->AddTrack(&ult);
     }
 

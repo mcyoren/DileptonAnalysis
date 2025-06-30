@@ -33,6 +33,8 @@ public:
       SECTOR,
       YSECT,
       ZSECT,
+      CENTRALITY,
+      BBCQ,
       LAST_INTEGER  // special...always use this
     };
 };
