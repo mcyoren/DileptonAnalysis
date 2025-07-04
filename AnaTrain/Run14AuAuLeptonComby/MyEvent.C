@@ -118,8 +118,14 @@ namespace MyDileptonAnalysis
 
         this->SetPhi0(this->GetPhi0() -  new_phi_the_offset);        
 
-        const float new_phi_offset = phi_offset_params[rungroup][DCArm][charge][0] * TMath::Sin(this->GetPhiDC()) + 
-        phi_offset_params[rungroup][DCArm][charge][1] * TMath::Cos(this->GetPhiDC()) + phi_offset_params[rungroup][DCArm][charge][2];
+        const float z = svxz + TMath::Cos(this->GetThe0Prime()) * radii[4];
+        const int z_bin = z > 0 ? 1 : 0;
+        const float delta_x = delta_x_zed_DC_VTX_fit[DCArm][z_bin][0] + delta_x_zed_DC_VTX_fit[DCArm][z_bin][1] * z;
+        const float delta_y = delta_y_zed_DC_VTX_fit[DCArm][z_bin][0] + delta_y_zed_DC_VTX_fit[DCArm][z_bin][1] * z;
+        const float new_phi_offset = (phi_offset_params[rungroup][DCArm][charge][0] + delta_x)* TMath::Sin(this->GetPhiDC()) + 
+        (phi_offset_params[rungroup][DCArm][charge][1]+delta_y) * TMath::Cos(this->GetPhiDC()) + phi_offset_params[rungroup][DCArm][charge][2];
+        //const float new_phi_offset = phi_offset_params[rungroup][DCArm][charge][0] * TMath::Sin(this->GetPhiDC()) + 
+        //phi_offset_params[rungroup][DCArm][charge][1] * TMath::Cos(this->GetPhiDC()) + phi_offset_params[rungroup][DCArm][charge][2];
 
         this->SetPhi0Prime(this->GetPhi0() -  new_phi_offset - new_phi_the_offset);
     }
@@ -2502,7 +2508,7 @@ namespace MyDileptonAnalysis
                 myhit->SetYHit(y - keff*delta_y);
             }
         }
-        for (int ihit = 0; ihit < event->GetNVTXhit()*0; ++ihit)
+        for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
             const float z = myhit->GetZHit();
@@ -2622,7 +2628,7 @@ namespace MyDileptonAnalysis
     // Function to scan vertex Z and find the best estimate using circular track matching
     void MyEventContainer::VertexXYScan(const float run_beam_x = 0.328, const float run_beam_y = 0.038, int fill_hist = 0, int verbosity = 0)
     {
-        float sdphi = 0.05;      // +/- rad
+        float sdphi = 0.2;      // +/- rad
         float sdthe = 0.01;      // +/- rad
         float sddphi = 0.005;    // +/- rad
         float sddthe = 0.01;     // +/- rad
@@ -2660,7 +2666,7 @@ namespace MyDileptonAnalysis
                 float dphi = phi1 - phi0;
                 float dtheta = the1 - the0;
 
-                if (fabs(dphi) > sdphi + 0.01 || fabs(dtheta) > sdthe)
+                if (fabs(dphi) > sdphi + 0.05 || fabs(dtheta) > sdthe)
                     continue;
 
                 float x0 = hit0->GetXHit();
@@ -2782,8 +2788,50 @@ namespace MyDileptonAnalysis
                         float dphi1 = phi2 - (phi1 + dphi * r01 / r12);
                         float dthe1 = the2 - the1; // - ( the0 + dtheta * z02 / z01 );
 
-                        if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe)
+                        if (fabs(dphi1) > sddphi + 0.0025 || fabs(dthe1) > sddthe)
                             continue;
+
+                        if(true)
+                        {
+                            float x12 = x1 - x0;
+                            float y12 = y1 - y0;
+                            float x2b = xvtx - x0;
+                            float y2b = yvtx - y0;
+                            float det = x12 * y2b - y12 * x2b;
+                            if (fabs(det) < 1e-9) continue;
+
+                            float A = xvtx * xvtx + yvtx * yvtx;
+                            float B = x0 * x0 + y0 * y0;
+                            float C = x1 * x1 + y1 * y1;
+
+                            float cx0 = (A * (y0 - y1) + B * (y1 - yvtx) + C * (yvtx - y0)) / (2 * det);
+                            float cy0 = (A * (x1 - x0) + B * (xvtx - x1) + C * (x0 - xvtx)) / (2 * det);
+                            float R0 = sqrt((xvtx - cx0) * (xvtx - cx0) + (yvtx - cy0) * (yvtx - cy0));
+                            float pt0 = R0 * (0.003 * 0.9); 
+
+                            float r_hit = sqrt(x2 * x2 + y2 * y2);
+                            std::pair<float, float> inter1, inter2;
+                            if (!CircleIntersection(cx0, cy0, R0, 0.0, 0.0, r_hit, inter1, inter2)) continue;
+                            
+                            // Pick intersection point closest to hit2
+                            float dist1 = (x2 - inter1.first)*(x2 - inter1.first) + (y2 - inter1.second)*(y2 - inter1.second);
+                            float dist2 = (x2 - inter2.first)*(x2 - inter2.first) + (y2 - inter2.second)*(y2 - inter2.second);
+                            float px = (dist1 < dist2) ? inter1.first : inter2.first;
+                            float py = (dist1 < dist2) ? inter1.second : inter2.second;
+                            
+                            // New projected angle on the track
+                            float phi_proj = atan2(py - yvtx, px - xvtx);
+                            if (phi_proj < - TMath::Pi() / 2)
+                                phi_proj += 2 * TMath::Pi();
+
+                            float dphir = phi2 - phi_proj;
+
+                            float loc_sdphi = 2*TMath::Sqrt(1.44e-6 + 1e-6 / SQR( pt0 ));
+                            if (TMath::Abs(dphir) > loc_sdphi)
+                                continue; // reject if dphi1 is too large
+                            dphi1 = dphir; // use the new projected angle
+                            //if (fabs(dphir) > sddphi) continue;
+                        }
 
                         float x12 = x1 - x0;
                         float y12 = y1 - y0;
@@ -2800,6 +2848,12 @@ namespace MyDileptonAnalysis
                         float cx = (A * (y1 - y2) + B * (y2 - y0) + C * (y0 - y1)) / (2 * det);
                         float cy = (A * (x2 - x1) + B * (x0 - x2) + C * (x1 - x0)) / (2 * det);
                         float R = sqrt((x0 - cx) * (x0 - cx) + (y0 - cy) * (y0 - cy));
+                        //float pt = R * (0.003 * 0.9); // GeV/c
+
+                        //if(pt<0.4) continue; // reject tracks with pt < 0.2 GeV/c
+                        //float loc_sdphi = 2*TMath::Sqrt(1.44e-6 + 1e-6 / SQR( pt));
+                        //if (TMath::Abs(dphi1) > loc_sdphi)
+                        //    continue; // reject if dphi1 is too large
 
                         std::vector<float> best_circle(7);
                         best_circle[0] = cx;
@@ -2856,14 +2910,14 @@ namespace MyDileptonAnalysis
 
                     for (size_t icircle = 0; icircle < circle_params.size(); ++icircle)
                     {
-                        const double pt = TMath::Abs(circle_params[0][2] * (0.003 * 0.9));
-                        double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]) - 0.0671 * pow(pt, -0.062) + 0.0690;
+                        //const double pt = TMath::Abs(circle_params[0][2] * (0.003 * 0.9));
+                        double dca = sqrt(SQR(circle_params[0][0] - xvtx) + SQR(circle_params[0][1] - yvtx)) - TMath::Abs(circle_params[0][2]);
                         const double rescattering_resolution =  step_size/sqrt(2) + 0.0130;// + 0*TMath::Sqrt( 0.18 / pt / pt + 0.99 ) / 100; // rescattering
                         //if (pt<0.2||dca>0.05) continue; // reject tracks with pt < 0.2 GeV/c or DCA > 500 μm
                         const int local_weight = 1. / TMath::Sqrt( SQR(rescattering_resolution) + SQR(dca) ); // weight based on DCA and pt
                         n_wtracks += local_weight;
-                        //if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
-                        //else n_tracks_west+=local_weight;
+                        if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
+                        else n_tracks_west+=local_weight;
                         if(!circle_params[0][4]%2==1) n_tracks_notused+=local_weight;
                         if (circle_params[0][4] < 2) n_tracks_pions += local_weight; // pions
                         weight_of_tracks.push_back(local_weight);
@@ -2876,7 +2930,7 @@ namespace MyDileptonAnalysis
                 n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
-                if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
+                if(false&&weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
                 {
                     std::srand(unsigned(time(0))); 
                     std::random_shuffle(weight_of_tracks.begin(), weight_of_tracks.end());
@@ -3173,6 +3227,51 @@ namespace MyDileptonAnalysis
                         continue;
                     if (fabs(dphi1) > sddphi || fabs(dthe1) > sddthe )
                         continue;
+                    //float loc_sdphi = 2*TMath::Sqrt(1.44e-6 + 1e-6 / SQR( pt));
+                    //if (TMath::Abs(dphi1) > loc_sdphi)
+                    //    continue; // reject if dphi1 is too large
+                    if(true)
+                        {
+                            float x12 = x1 - x0;
+                            float y12 = y1 - y0;
+                            float x2b = best_x_notused - x0;
+                            float y2b = best_y_notused - y0;
+                            float det = x12 * y2b - y12 * x2b;
+                            if (fabs(det) < 1e-9) continue;
+
+                            float A = best_x_notused * best_x_notused + best_y_notused * best_y_notused;
+                            float B = x0 * x0 + y0 * y0;
+                            float C = x1 * x1 + y1 * y1;
+
+                            float cx0 = (A * (y0 - y1) + B * (y1 - best_y_notused) + C * (best_y_notused - y0)) / (2 * det);
+                            float cy0 = (A * (x1 - x0) + B * (best_x_notused - x1) + C * (x0 - best_x_notused)) / (2 * det);
+                            float R0 = sqrt((best_x_notused - cx0) * (best_x_notused - cx0) + (best_y_notused - cy0) * (best_y_notused - cy0));
+                            float pt0 = R0 * (0.003 * 0.9);
+
+                            float r_hit = sqrt(x2 * x2 + y2 * y2);
+                            std::pair<float, float> inter1, inter2;
+                            if (!CircleIntersection(cx0, cy0, R0, 0.0, 0.0, r_hit, inter1, inter2)) continue;
+                            
+                            // Pick intersection point closest to hit2
+                            float dist1 = (x2 - inter1.first)*(x2 - inter1.first) + (y2 - inter1.second)*(y2 - inter1.second);
+                            float dist2 = (x2 - inter2.first)*(x2 - inter2.first) + (y2 - inter2.second)*(y2 - inter2.second);
+                            float px = (dist1 < dist2) ? inter1.first : inter2.first;
+                            float py = (dist1 < dist2) ? inter1.second : inter2.second;
+                            
+                            // New projected angle on the track
+                            float phi_proj = atan2(py - best_y_notused, px - best_x_notused);
+                            if (phi_proj < - TMath::Pi() / 2)
+                                phi_proj += 2 * TMath::Pi();
+
+                            float dphir = phi2 - phi_proj;
+
+                            float loc_sdphi = 2*TMath::Sqrt(1.44e-6 + 1e-6 / SQR( pt0 ));
+                            if (TMath::Abs(dphir) > loc_sdphi)
+                                continue; // reject if dphi1 is too large
+                            dphi1 = dphir; // use the new projected angle
+                            //if (fabs(dphir) > sddphi) continue;
+                        }
+                    
                     n_used_tracks++;
                     if(!(((hit0->GetLadder()>24&&hit0->GetLadder()<48)) || (hit1->GetLadder()>24&&hit1->GetLadder()<48) || (hit2->GetLadder()>24&&hit2->GetLadder()<48))) n_used_tracks_notused++;
 
@@ -3694,10 +3793,10 @@ namespace MyDileptonAnalysis
             //INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
             //INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
             //INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
-            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100, -0.1, 0.1, 60, -1.5, 4.5, 40, -20, 20);
-            INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100, -0.1, 0.1, 60, -1.5, 4.5, 40, -20, 20);
+            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
+            INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
             INIT_HISTOS(3, chi2_ndf, N_centr,      50, 0, 10,  20, 0, 20, 25, 0, 5);
             INIT_HISTOS(3, ilayerhitshist, N_centr,50, -0.5, 49.5, 40, 0, 40, 50, 0, 5);
             INIT_HISTOS(3, dphi_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 5, 0, 5);
