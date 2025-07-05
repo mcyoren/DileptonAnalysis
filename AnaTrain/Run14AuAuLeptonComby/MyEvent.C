@@ -2916,8 +2916,8 @@ namespace MyDileptonAnalysis
                         //if (pt<0.2||dca>0.05) continue; // reject tracks with pt < 0.2 GeV/c or DCA > 500 μm
                         const int local_weight = 1. / TMath::Sqrt( SQR(rescattering_resolution) + SQR(dca) ); // weight based on DCA and pt
                         n_wtracks += local_weight;
-                        if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
-                        else n_tracks_west+=local_weight;
+                        //if( circle_params[0][3]>0 ) n_tracks_east+=local_weight;//(int) (pt*1000)
+                        //else n_tracks_west+=local_weight;
                         if(!circle_params[0][4]%2==1) n_tracks_notused+=local_weight;
                         if (circle_params[0][4] < 2) n_tracks_pions += local_weight; // pions
                         weight_of_tracks.push_back(local_weight);
@@ -2930,7 +2930,7 @@ namespace MyDileptonAnalysis
                 n_tracks = n_wtracks;
                 n_tracks_vec.push_back(n_tracks);
                 track_vertices.push_back(std::make_pair(xvtx, yvtx));
-                if(false&&weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
+                if(weight_of_tracks.size()>1) //splitting vecotr in 2 randomly
                 {
                     std::srand(unsigned(time(0))); 
                     std::random_shuffle(weight_of_tracks.begin(), weight_of_tracks.end());
