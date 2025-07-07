@@ -76,7 +76,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   const int fill_QA_hadron_hists = 0;
   const int fill_QA_lepton_hists = 0;
   const int fill_TTree = 0;
-  const int fill_d_dphi_hists = 1;
+  const int fill_d_dphi_hists = 2;
   const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 0;
   const int do_track_QA = 0;
@@ -91,6 +91,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   const int fill_vtx_accaptance = 0;
   const int do_vertex_reco = 1;
   const int do_conv_dalitz_finder = 1;
+  const int do_vtx_alignment = 1;
 
   char outname[200];
   sprintf(outname, "kek_%d.root", itread);
@@ -121,8 +122,9 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   f.SetParameter(0, 1);
   f.SetParameter(1, 0);
   f.SetParameter(2, 1);
-  const float event_vertex_sigma[3] = {30. / 10000, 20. / 10000, 100. / 10000};
-
+  const float vtx_res_x[10] = {11.230207768822911, 15.513529449537671, 22.531823570971877, 34.84444416454522, 56.20224235212148, 63.49982193792116, 34.532082234545115, 59.04595127212345, 88.05661267571188};
+  const float vtx_res_y[10] = {8.371575188112432, 11.568339997868744, 16.67911971193379, 25.30942307499768, 40.12995663836892, 45.64541101003287, 26.354141654758998, 45.37353955674754, 68.76196216542816};
+ 
   for (int ievent = beggin; ievent < endish; ievent++)
   {
     if ((ievent - beggin) % 50000 == 0)
@@ -174,7 +176,8 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
       hist_pt_mother->Fill(pt, myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt, myevent->GetCentrality(), weight);
     }
-
+    const int icenrality = myevent->GetCentrality() / 10;
+    const float event_vertex_sigma[3] = {vtx_res_x[icenrality] / 10000, vtx_res_y[icenrality] / 10000, 100. / 10000};
     myevent->SetPreciseX(myevent->GetPreciseX() + f.GetRandom() * event_vertex_sigma[0]);
     myevent->SetPreciseY(myevent->GetPreciseY() + f.GetRandom() * event_vertex_sigma[1]);
     myevent->SetPreciseZ(myevent->GetPreciseZ() + f.GetRandom() * event_vertex_sigma[2]);
@@ -262,7 +265,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
         continue;
       }
     }
-    if (true)
+    if (do_vtx_alignment)
     {
 
       for (int ihit = 0; ihit < n_hits*0; ihit++)
@@ -326,7 +329,61 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
       }
       event_container->Associate_Hits_to_Hadrons_Dynamic(5, myevent->GetPreciseX(), myevent->GetPreciseY());
       event_container->FillTrueDCAHadrons();
-      continue;;
+      continue;
+    }
+    if(fill_QA_hadron_hists)
+    {
+      //myevent->SetPreciseX(myevent->GetPreciseX());
+      //myevent->SetPreciseY(myevent->GetPreciseY());
+      //for (int ihit = 0; ihit < myevent->GetNVTXhit(); ihit++)
+      //{
+      //  MyDileptonAnalysis::MyVTXHit *myhit = myevent->GetVTXHitEntry(ihit);
+      //  myhit->SetXHit(myhit->GetXHit() + 3);
+      //  myhit->SetYHit(myhit->GetYHit() + 0);
+      //}
+      for (int i = 0; i < myevent->GetNtrack(); i++)
+      {
+        MyDileptonAnalysis::MyElectron trk = *myevent->GetEntry(i);
+        //if (trk.GetPtPrime()>1.5 ) continue;
+        MyDileptonAnalysis::MyHadron *newTrack = new MyDileptonAnalysis::MyHadron;
+        newTrack->SetTrkId(i);
+        newTrack->SetArm(trk.GetArm());
+        newTrack->SetSect(trk.GetSect());
+        newTrack->SetTrkQuality(63);
+        newTrack->SetPt(trk.GetPtPrime());
+        newTrack->SetPtPrime(trk.GetPtPrime());
+        newTrack->SetQ(trk.GetChargePrime());
+        newTrack->SetQPrime(trk.GetChargePrime());
+        newTrack->SetPhiDC(trk.GetPhiDC());
+        newTrack->SetPhi0(trk.GetPhi0Prime());
+        newTrack->SetThe0(trk.GetThe0Prime());
+        newTrack->SetPhi0Prime(trk.GetPhi0Prime());
+        newTrack->SetThe0Prime(trk.GetThe0Prime());
+        newTrack->SetZDC(trk.GetZDC());
+        newTrack->SetAlpha(trk.GetAlphaPrime());
+        newTrack->SetAlphaPrime(trk.GetAlphaPrime());
+        newTrack->SetEmcId(trk.GetEmcId());
+        newTrack->SetEcore(trk.GetEcore());
+        newTrack->SetDep(trk.GetDep());
+        newTrack->SetProb(trk.GetProb());
+        newTrack->SetEmcdz(trk.GetEmcdz());
+        newTrack->SetEmcdphi(trk.GetEmcdphi());
+        newTrack->SetTOFE(trk.GetTOFE());
+        newTrack->SetEmcTOF(trk.GetEmcTOF());
+        newTrack->SetCrkphi(trk.GetCrkphi());
+        newTrack->SetCrkz(trk.GetCrkz());
+        newTrack->SetChi2(trk.GetChi2());
+        newTrack->SetN0(trk.GetN0());
+        newTrack->SetDISP(trk.GetDisp());
+        newTrack->SetNPE0(trk.GetNpe0());
+        newTrack->SetEmcdz_e(trk.GetEmcdz_e());
+        newTrack->SetEmcdphi_e(trk.GetEmcdphi_e());
+        newTrack->SetSect(trk.GetSect());
+        newTrack->SetMcId(trk.GetMcId());
+        myevent->AddHadron(newTrack);
+      }
+      event_container->Associate_Hits_to_Hadrons(5);
+      continue;
     }
 
     if (do_track_QA)
