@@ -257,21 +257,31 @@ namespace MyDileptonAnalysis
 
             void SetPrimes(const float bbcz = 0, const float svxz = 0, const int rg_beamoffset = 0, const int rungroup = 0);
 
-            float get_mean_phi_data(int rungroup, int centr_bin, int layer) { return mean_phi_pars[rungroup][centr_bin][layer]; };
-            float get_mean_theta_data(int rungroup, int centr_bin, int layer) { return mean_theta_pars[rungroup][centr_bin][layer]; };
+            float get_mean_phi_data(int rungroup, int centr_bin, int layer) { return mean_phi_pars[rungroup][centr_bin][arm + (1-q_prime) + 4 * layer]; };
+            float get_mean_theta_data(int rungroup, int centr_bin, int layer) { return mean_theta_pars[rungroup][centr_bin][arm + (1-q_prime) + 4 * layer]; };
+            //float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
+            //{
+            //      layer = arm + (1-q_prime) + 4 * layer;
+            //      const float local_pt = pt_prime;//>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
+            //      return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * local_pt)
+            //      +sigma_phi_pars[rungroup][centr_bin][layer][3] * local_pt;
+            //};
+            //float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
+            //{
+            //      layer = arm + (1-q_prime) + 4 * layer;
+            //      const float local_pt = pt_prime;//>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
+            //      return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * local_pt)
+            //      +sigma_theta_pars[rungroup][centr_bin][layer][3] * local_pt;
+            //};
             float get_sigma_phi_data(int rungroup, int centr_bin, int layer)
             {
                   layer = arm + (1-q_prime) + 4 * layer;
-                  const float local_pt = pt_prime;//>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
-                  return sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] * exp(sigma_phi_pars[rungroup][centr_bin][layer][2] * local_pt)
-                  +sigma_phi_pars[rungroup][centr_bin][layer][3] * local_pt;
+                  return TMath::Sqrt(sigma_phi_pars[rungroup][centr_bin][layer][0] + sigma_phi_pars[rungroup][centr_bin][layer][1] / pt_prime / pt_prime);
             };
             float get_sigma_theta_data(int rungroup, int centr_bin, int layer)
             {
                   layer = arm + (1-q_prime) + 4 * layer;
-                  const float local_pt = pt_prime;//>1.5?1.5:pt_prime;///trying to fix sigma at pt>1.5
-                  return sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] * exp(sigma_theta_pars[rungroup][centr_bin][layer][2] * local_pt)
-                  +sigma_theta_pars[rungroup][centr_bin][layer][3] * local_pt;
+                  return TMath::Sqrt(sigma_theta_pars[rungroup][centr_bin][layer][0] + sigma_theta_pars[rungroup][centr_bin][layer][1] / pt_prime / pt_prime);
             };
 
             float get_dynamic_mean_phi_data(int ilay, float phi_prev, int rungroup = 0 ) 

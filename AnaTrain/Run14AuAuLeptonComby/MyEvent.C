@@ -108,8 +108,14 @@ namespace MyDileptonAnalysis
 
         const float new_the0 = this->GetThe0() - ((bbcz - svxz) / 220) * TMath::Sin(this->GetThe0());
 
-        const float theta_offset = the_offset_params[rungroup][DCArm][charge][0] * TMath::Sin(new_the0) + 
-        the_offset_params[rungroup][DCArm][charge][1] * TMath::Cos(new_the0) + the_offset_params[rungroup][DCArm][charge][2];
+        //const float theta_offset = the_offset_params[rungroup][DCArm][charge][0] * TMath::Sin(new_the0) + 
+        //the_offset_params[rungroup][DCArm][charge][1] * TMath::Cos(new_the0) + the_offset_params[rungroup][DCArm][charge][2];
+        const float z_theta = svxz + TMath::Cos(new_the0) * radii[4];
+        const int z_bin_theta = z_theta > 0 ? 1 : 0;
+        const float delta_x_theta = delta_x_zed_DC_VTX_fit_theta[DCArm][z_bin_theta][0] + delta_x_zed_DC_VTX_fit_theta[DCArm][z_bin_theta][1] * z_theta;
+        const float delta_y_theta = delta_y_zed_DC_VTX_fit_theta[DCArm][z_bin_theta][0] + delta_y_zed_DC_VTX_fit_theta[DCArm][z_bin_theta][1] * z_theta;
+        const float theta_offset = (the_offset_params[rungroup][DCArm][charge][0] + delta_x_theta) * TMath::Sin(new_the0) + 
+        (the_offset_params[rungroup][DCArm][charge][1] + delta_y_theta) * TMath::Cos(new_the0) + the_offset_params[rungroup][DCArm][charge][2];
 
         this->SetThe0Prime( new_the0 - theta_offset);
 
