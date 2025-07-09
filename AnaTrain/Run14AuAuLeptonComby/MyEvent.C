@@ -2538,8 +2538,8 @@ namespace MyDileptonAnalysis
                 MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
                 const float x = myhit->GetXHit();
                 const float y = myhit->GetYHit();
-                const float random_gaus_offset_x = 0.0020 * (gRandom->Gaus(0, 1));
-                const float random_gaus_offset_y = 0.0020 * (gRandom->Gaus(0, 1));
+                const float random_gaus_offset_x = 0.0010 * (gRandom->Gaus(0, 1));
+                const float random_gaus_offset_y = 0.0010 * (gRandom->Gaus(0, 1));
                 myhit->SetXHit(x + random_gaus_offset_x);
                 myhit->SetYHit(y + random_gaus_offset_y);
             }

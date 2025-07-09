@@ -297,7 +297,8 @@ namespace MyDileptonAnalysis
             float get_dynamic_sigma_phi_data(int ilay, float phi_prev, int rungroup = 0 )
             {
                   const int arg0 = 4*ilay + (1-q_prime) + arm;
-                  const float sigma_pt = phi_sigma_pt_params[arg0][0] + phi_sigma_pt_params[arg0][1] * exp(phi_sigma_pt_params[arg0][2] * pt_prime);
+                  //const float sigma_pt = phi_sigma_pt_params[arg0][0] + phi_sigma_pt_params[arg0][1] * exp(phi_sigma_pt_params[arg0][2] * pt_prime);
+                  const float sigma_pt = TMath::Sqrt(phi_sigma_pt_params[arg0][0] + phi_sigma_pt_params[arg0][1] / pt_prime / pt_prime);
                   return sigma_pt;//*(phi_sigma_phi_params[rungroup][arg0][0]+phi_sigma_phi_params[rungroup][arg0][1]* phi_prev+phi_sigma_phi_params[rungroup][arg0][2]* phi_prev* phi_prev);
             };
             float get_dynamic_sigma_theta_data(int ilay, float phi_prev, int rungroup = 0 )
