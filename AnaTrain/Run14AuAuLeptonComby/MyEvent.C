@@ -2536,13 +2536,38 @@ namespace MyDileptonAnalysis
             for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
             {
                 MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+                const int layer = myhit->GetLayer();
+                const float phi = myhit->GetPhiHit(0, 0, 0);
+                const int arm = (phi > 1.5) ? 0 : 1; // east is 0; west is 1
+                int jbin = -1;
+                for (int ibin = 0; ibin < 10; ++ibin)
+                {
+                    if (phi > phi_offsets_DC_sim[0][layer][arm][ibin] && phi <= phi_offsets_DC_sim[0][layer][arm][ibin+1])
+                    {
+                        jbin = ibin;
+                        break;
+                    }
+                }
+                if (jbin < 0) jbin = 5;
+                const float dphi = offsets_DC_sim[0][layer][arm][jbin];
                 const float x = myhit->GetXHit();
                 const float y = myhit->GetYHit();
-                const float random_gaus_offset_x = 0.0010 * (gRandom->Gaus(0, 1));
-                const float random_gaus_offset_y = 0.0010 * (gRandom->Gaus(0, 1));
-                myhit->SetXHit(x + random_gaus_offset_x);
-                myhit->SetYHit(y + random_gaus_offset_y);
+                const float dx = dphi * y;
+                const float dy = dphi * x;
+                ///std::cout<< " dx , dy = " << dx << " " << dy << std::endl;
+                myhit->SetXHit(x - dx);
+                myhit->SetYHit(y - dy);
             }
+            //for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
+            //{
+            //    MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
+            //    const float x = myhit->GetXHit();
+            //    const float y = myhit->GetYHit();
+            //    const float random_gaus_offset_x = 0.0010 * (gRandom->Gaus(0, 1));
+            //    const float random_gaus_offset_y = 0.0010 * (gRandom->Gaus(0, 1));
+            //    myhit->SetXHit(x + random_gaus_offset_x);
+            //    myhit->SetYHit(y + random_gaus_offset_y);
+            //}
         }
         if (false)
         {
@@ -3808,8 +3833,8 @@ namespace MyDileptonAnalysis
 
         if (fill_ell)
         {   
-            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.1, 0.1, 100, -0.1, 0.1, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
             INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 50,  -5,  5, 50,  -5,  5, 50, 0, 5);
             INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 50,  -5,  5, 50,  -5,  5, 50, 0, 5);
             //INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
@@ -3943,6 +3968,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, myvtx_hist, N_centr, 50, 0, 1, 50, -0.5 ,0.5, 20, -10 ,10);
 
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 200);
+            INIT_HISTOS(3, dcphi0_truephi0_hist, N_centr, 100, -0.025, 0.025, 30, -1.5, 4.5, 50, -2.5, 2.5);
 
             INIT_HISTOS(3, DCA12_hist, N_centr, 50, -500, 500, 100, -5, 5, 160, 0, 160);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
@@ -4827,7 +4853,7 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < 2)
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < 5)
                         {
                             vtxhit->SetLadder(44);
                             if (diff < min[layer])
@@ -5047,6 +5073,9 @@ namespace MyDileptonAnalysis
         for (int itrk = 0; itrk < nhadorns; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetElecCand(itrk);
+            
+            if  ( ( TMath::Abs(mytrk->GetMinsDthe(3))>2 && TMath::Abs(mytrk->GetMinsDthe(2))>2 )
+                 || TMath::Abs(mytrk->GetMinsDthe(1))>2 || TMath::Abs(mytrk->GetMinsDthe(0))>2 )  continue;
             const float pt = mytrk->GetPtPrime();
             int hit_assocaition = 0;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
@@ -5077,7 +5106,8 @@ namespace MyDileptonAnalysis
             DCA12_hist[central_bin]->Fill(mytrk->GetDCA2()*mytrk->GetChargePrime(),pt*mytrk->GetChargePrime(),z_bin,weight);
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
-            
+            if (mytrk->GetHitCounter(0))
+                dcphi0_truephi0_hist[central_bin]->Fill(mytrk->GetPhi0()-mytrk->GetPhi0Prime(),mytrk->GetPhi0Prime(),pt*mytrk->GetChargePrime(),weight);
         }
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
