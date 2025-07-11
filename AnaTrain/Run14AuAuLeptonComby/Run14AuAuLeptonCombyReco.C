@@ -621,11 +621,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if(do_reco_vertex) event_container->CorrectVTXOffset(1);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.);
-        event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0);
+        event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
 
         if(fill_ddphi_hadron) 
         {
             event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
+            event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,1);
             //event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetBBCchargeN(), event->GetBBCchargeS());
             event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetPreciseX(), event->GetPreciseY());
             if (fill_true_DCA)event_container->FillTrueDCAHadrons();
@@ -725,12 +726,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         int hit_assocaition = 0;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<2) ) && 
-               (TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+               (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
                (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
         if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-               (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (mytrk->GetMinsDphi(0)> -4 ) )) hit_assocaition=10000;
+               (TMath::Abs(mytrk->GetMinsDphi(1))<3 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+               (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0) conv_reject=10;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=100;
