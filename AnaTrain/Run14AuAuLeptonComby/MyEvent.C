@@ -4854,7 +4854,7 @@ namespace MyDileptonAnalysis
 
 
                         bool SignTrack = true;
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < 5)
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < 2)
                         {
                             vtxhit->SetLadder(44);
                             if (diff < min[layer])
@@ -5082,13 +5082,13 @@ namespace MyDileptonAnalysis
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<3) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-                   (mytrk->GetMinsDphi(0))>-3 ) ) hit_assocaition=5;
-            if (hit_assocaition==5 && mytrk->GetMinsDphi(0)<3 ) hit_assocaition=10;
+                   (mytrk->GetMinsDphi(0))>-3 ) ) hit_assocaition=1;
+            if (hit_assocaition==1 && mytrk->GetMinsDphi(0)<3 ) hit_assocaition=2;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -2 ) )) hit_assocaition=15;
-            if (hit_assocaition==15 && mytrk->GetMinsDphi(0)<2 ) hit_assocaition=20;
+                   (mytrk->GetMinsDphi(0)> -1 ) )) hit_assocaition=3;
+            if (hit_assocaition==3 && mytrk->GetMinsDphi(0)<2 ) hit_assocaition=4;
             int conv_reject = 0;
             if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=5;
             if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=10;

@@ -625,10 +625,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
         if(fill_ddphi_hadron) 
         {
-            event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
+            event_container->Associate_Hits_to_Hadrons_Dynamic(3., -999,-999);
             event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,1);
             //event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetBBCchargeN(), event->GetBBCchargeS());
-            event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetPreciseX(), event->GetPreciseY());
+            event_container->Associate_Hits_to_Hadrons_Dynamic(3., event->GetPreciseX(), event->GetPreciseY());
             if (fill_true_DCA)event_container->FillTrueDCAHadrons();
         }
     }
@@ -724,14 +724,25 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //int conv_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
         //int hit_assocaition = mytrk->GetNHits();
         int hit_assocaition = 0;
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<2) ) && 
-               (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-               (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
-        if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
-               (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-               (TMath::Abs(mytrk->GetMinsDphi(1))<3 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
-               (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
+        if (mytrk->GetPtPrime() > 0.4){    
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0) ||
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<2.0) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+                   (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<2.0 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                   (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
+        }else{
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0) &&
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<2.0) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+                   (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
+            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
+                   (TMath::Abs(mytrk->GetMinsDphi(2))<2.0 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                   (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
+        }
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0) conv_reject=10;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=100;
