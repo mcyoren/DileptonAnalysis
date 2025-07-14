@@ -727,20 +727,20 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (mytrk->GetPtPrime() > 0.4){    
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.0) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) && 
                    (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.0 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<4 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
                    (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
         }else{
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.0) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<4) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) && 
                    (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.0 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<4 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
                    (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
         }
         int conv_reject = 0;

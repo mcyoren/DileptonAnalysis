@@ -5107,7 +5107,7 @@ namespace MyDileptonAnalysis
             DCA12_hist[central_bin]->Fill(mytrk->GetDCA2()*mytrk->GetChargePrime(),pt*mytrk->GetChargePrime(),z_bin,weight);
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
-            if (mytrk->GetHitCounter(0)&&hist_in>24)
+            if (mytrk->GetHitCounter(0)&&hist_in>23)
                 dcphi0_truephi0_hist[central_bin]->Fill(mytrk->GetPhi0()-mytrk->GetPhi0Prime(),mytrk->GetPhi0Prime(),pt*mytrk->GetChargePrime(),weight);
         }
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
