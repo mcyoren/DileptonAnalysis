@@ -2470,10 +2470,12 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::CorrectVTXOffset(int keff)
     {
+        int n_hits_in_layer[4] = {0, 0, 0, 0};
         for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
             const int layer = myhit->GetLayer();
+            n_hits_in_layer[layer]++;
             if (layer < 1) continue; // skip striplex
             for (int ilayer = 0; ilayer < layer; ilayer++)
             {
@@ -2514,6 +2516,8 @@ namespace MyDileptonAnalysis
                 myhit->SetYHit(y - keff*delta_y);
             }
         }
+        //if(n_hits_in_layer[0]+n_hits_in_layer[1] < 0.5*(n_hits_in_layer[2]+n_hits_in_layer[3]))
+        //std::cout << "\033[31mWARNING: too few hits in striplex layers: " << n_hits_in_layer[0] << " " << n_hits_in_layer[1] << " vs " << n_hits_in_layer[2] << " " << n_hits_in_layer[3] << " at " << event->GetCentrality() << "\033[0m" << std::endl;
         for (int ihit = 0; ihit < event->GetNVTXhit(); ++ihit)
         {
             MyDileptonAnalysis::MyVTXHit *myhit = event->GetVTXHitEntry(ihit);
@@ -4783,7 +4787,7 @@ namespace MyDileptonAnalysis
                 for (int iassociatedhit = 0; iassociatedhit < n_iter_hits; iassociatedhit++)
                 {
                     float dphi_previous_layer = 0;
-                    float dthe_previous_layer = 0   ;
+                    float dthe_previous_layer = 0;
                     float sdphi_previous_layer = 0;
                     float sdthe_previous_layer = 0;
 
@@ -4852,9 +4856,8 @@ namespace MyDileptonAnalysis
 
                         const float diff = sqrt(std::pow(sdphi, 2) + std::pow(sdthe, 2));
 
-
                         bool SignTrack = true;
-                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < 2)
+                        if ( sdphi*mytrk->GetChargePrime()>-sigma && sdphi*mytrk->GetChargePrime() < sigma && TMath::Abs(sdthe) < sigma)
                         {
                             vtxhit->SetLadder(44);
                             if (diff < min[layer])
@@ -4943,12 +4946,12 @@ namespace MyDileptonAnalysis
                                 const int hist_2nd_arg = 2*charge_bin + 1 * mytrk->GetArm() + 4 * layer + 16 * z_bin; // for dphi and dthe hists
                                 const int alig_hist_2nd_arg = 2*mytrk->GetArm() + charge_bin + 4 * z_bin; // for alignment hists
 
-                                if (abs(sdthe) < 2)
+                                if (TMath::Abs(sdthe) < 2)
                                 {
                                     //std::cout<<itrk << " " << ihit << " " << layer << " " << dphi << " " << dthe << " " << phi_hit << " " << theta_hit << " " << sdphi << " " << sdthe << std::endl;
                                     dphi_hist[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
                                     sdphi_hist[central_bin]->Fill(sdphi_loc, hist_2nd_arg, pt);
-                                    if (pt>1.5)
+                                    if (pt>0.4)
                                     {
                                         const float dphi0 = dphi + mytrk->GetPhi0() - mytrk->GetPhi0Prime();
                                         dphi_phi0_init_hist[layer]->Fill(dphi0, mytrk->GetPhi0(), alig_hist_2nd_arg);
@@ -4959,11 +4962,11 @@ namespace MyDileptonAnalysis
                                         dthe_phi0_corr_hist[layer]->Fill(dphi, mytrk->GetPhiDC(), alig_hist_2nd_arg);
                                     }
                                 }
-                                if (abs(sdphi) < 2)
+                                if (TMath::Abs(sdphi) < 2)
                                 {
                                     dthe_hist[central_bin] ->Fill( dthe, hist_2nd_arg, pt);
                                     sdthe_hist[central_bin]->Fill(sdthe_loc, hist_2nd_arg, pt);
-                                    if (pt>1.5)
+                                    if (pt>0.4)
                                     {
                                         const float newthe0 = mytrk->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(mytrk->GetThe0());
                                         const float dthe0 = dthe + newthe0 - mytrk->GetThe0Prime();
