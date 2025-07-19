@@ -436,16 +436,26 @@ namespace MyDileptonAnalysis
                         int in_arg = 1*mytrk->GetArm()+4*layer+2*charge_bin;
                         if( (layer==1 && iassociatedhit >= mytrk->GetHitCounter(2)) || (layer==2 && iassociatedhit>0) ) in_arg+=4;
                         if(iter_layer>1 && iassociatedhit==0) in_arg+=8;
+                        float z_rtk = vtxhit->GetZHit();
+                        int z_bin = (z_rtk+12)/3;
+                        const int hist_2nd_arg = 2*charge_bin + 1 * mytrk->GetArm() + 4 * layer + 16 * z_bin; // for dphi and dthe hists
+                        const float sdphi_loc = (dphi -  mytrk->get_mean_phi_data(0, central_bin, layer)) / mytrk->get_sigma_phi_data(0, central_bin, layer);
+                        const float sdthe_loc = (dthe -  mytrk->get_mean_theta_data(0, central_bin, layer)) / mytrk->get_sigma_theta_data(0, central_bin, layer);
 
                         if (TMath::Abs(sdthe) < sigma && SignTrack && is_fill_hsits && !not_fill)
                         {
                             dphi_hist_el_dynamic[in_arg]->Fill(dphi, dphi_previous_layer, pt);
                             sdphi_hist_el_dynamic[in_arg]->Fill(sdphi, sdphi_previous_layer, pt);
+                            dphi_hist_el[central_bin] ->Fill( dphi, hist_2nd_arg, pt);
+                            sdphi_hist_el[central_bin]->Fill(sdphi_loc, hist_2nd_arg, pt);
+                            //std::cout << "\033[31m"<< " itrk " << itrk << " layer " << layer << " ihit " << ihit << " dphi: " << dphi << " sdthe: " << sdthe << "\033[0m" << std::endl;
                         }
                         if (sdphi*mytrk->GetChargePrime()>-sigma_veto && sdphi*mytrk->GetChargePrime() < sigma && SignTrack && is_fill_hsits)
                         {
                             dthe_hist_el_dynamic[in_arg]->Fill(dthe, dthe_previous_layer, pt);
                             sdthe_hist_el_dynamic[in_arg]->Fill(sdthe, sdthe_previous_layer, pt);
+                            dthe_hist_el[central_bin] ->Fill( dthe, hist_2nd_arg, pt);
+                            sdthe_hist_el[central_bin]->Fill(sdthe_loc, hist_2nd_arg, pt);
                         }
                     } // enf of hit loop
                 } // end of hits in prev layer 
@@ -1459,21 +1469,46 @@ namespace MyDileptonAnalysis
 
 
             int hit_assocaition = 0;
-            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<3) ||
-                   (TMath::Abs(mytrk->GetMinsDphi(2))<3) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<3) && 
-                   (mytrk->GetMinsDphi(0))>-3 ) ) hit_assocaition=1;
-            if (hit_assocaition==1 && mytrk->GetMinsDphi(0)<3 ) hit_assocaition=2;
-            if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
-                   (TMath::Abs(mytrk->GetMinsDphi(2))<2 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -1 ) )) hit_assocaition=3;
-            if (hit_assocaition==3 && mytrk->GetMinsDphi(0)<2 ) hit_assocaition=4;
+            if (mytrk->GetPtPrime() > 0.4){    
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<4.0) ||
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<4.0) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<4.0) )) 
+                            hit_assocaition=1;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) ||
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) ) ) 
+                            hit_assocaition=2;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) )) 
+                            hit_assocaition=3;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                       (mytrk->GetMinsDphi(0)> -2 ) )) hit_assocaition=4;
+            }else{
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<4.0) &&
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<4.0) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<4.0) )) 
+                            hit_assocaition=1;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) &&
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) ) ) 
+                            hit_assocaition=2;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) )) 
+                            hit_assocaition=3;
+                if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
+                       (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
+                       (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
+                       (mytrk->GetMinsDphi(0)> -2 ) )) hit_assocaition=4;
+            }
             int conv_reject = 0;
-            if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=5;
-            if ( ((int)mytrk->GetEmcdphi_e())%100<3 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=10;
-            if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=15;
-            if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=20;
+            if ( ((int)mytrk->GetEmcdphi_e())%10==0) conv_reject=5;
+            if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=10;
+            if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=15;
+            if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=20;
 
             const int hist_in = hit_assocaition + conv_reject;
 
@@ -3033,8 +3068,11 @@ namespace MyDileptonAnalysis
             {
                 if (n_tracks_vec[i] > track_treshold)
                 {
+                    if (fill_hist)
                     {
-                        hist_vtx_grid_xy->Fill(track_vertices[i].first, track_vertices[i].second, event->GetCentrality(), n_tracks_vec[i]);
+                        {
+                            hist_vtx_grid_xy->Fill(track_vertices[i].first, track_vertices[i].second, event->GetCentrality(), n_tracks_vec[i]);
+                        }
                     }
                     const double weight = n_tracks_vec[i] - track_treshold;
                     sum_weights += weight;
@@ -3850,21 +3888,25 @@ namespace MyDileptonAnalysis
             //INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 100, -0.025, 0.025, 60, -1.5, 4.5, 40, -20, 20);
             INIT_HISTOS(3, chi2_ndf, N_centr,      50, 0, 10,  20, 0, 20, 25, 0, 5);
             INIT_HISTOS(3, ilayerhitshist, N_centr,50, -0.5, 49.5, 40, 0, 40, 50, 0, 5);
-            INIT_HISTOS(3, dphi_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 5, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 8, 0, 8, 5, 0, 5);
-            INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   8, 0, 8, 5, 0, 5);
-            INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   8, 0, 8, 5, 0, 5);
+            //INIT_HISTOS(3, dphi_hist_el,  1, 50, -0.1, 0.1, 128, 0, 8, 50, 0, 5);
+            //INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 128, 0, 8, 50, 0, 5);
+            //INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   128, 0, 8, 50, 0, 5);
+            //INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   128, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
             INIT_HIST  (3, truehithist,      10, 0, 10, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, truehitsigmahist, 50, 0, 50, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, charge_recover_hist, 2, -2, 2, 16, 0, 16, 50, 0, 5);
-            if(fill_ell==2)
-            {
-                INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-                INIT_HISTOS(3, dthe_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
-                INIT_HISTOS(3, sdphi_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
-                INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
-                is_fill_hsits = 2;
-            }
+            //if(fill_ell==2)
+            //{
+            //    INIT_HISTOS(3, dphi_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            //    INIT_HISTOS(3, dthe_hist_el,  N_centr, 100, -0.1, 0.1, 8, 0, 8, 50, 0, 5);
+            //    INIT_HISTOS(3, sdphi_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            //    INIT_HISTOS(3, sdthe_hist_el, N_centr, 100, -10, 10,   8, 0, 8, 50, 0, 5);
+            //    is_fill_hsits = 2;
+            //}
             if(fill_ell<3)is_fill_hsits = 1;
         }
 
@@ -4031,7 +4073,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS( 3, inv_mass_dca_gen, 3*N_centr, 50, 0, 2000, 90, 0, 4.50, 25, 0, 10);
             is_fill_inv_mass = 1;
         }
-        if(fill_vertex_reco)
+        if(fill_vertex_reco == 2)
         {
             do_vertex_reco = 1;
 

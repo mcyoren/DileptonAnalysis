@@ -619,14 +619,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
      
         //if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
         if(do_reco_vertex) event_container->CorrectVTXOffset(1);
-        if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
+        if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.);
-        event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
+        if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
 
         if(fill_ddphi_hadron) 
         {
             event_container->Associate_Hits_to_Hadrons_Dynamic(2., -999,-999);
-            event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,1);
+            if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,1);
             event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetBBCchargeN(), event->GetBBCchargeS());
             //event_container->Associate_Hits_to_Hadrons_Dynamic(5., event->GetPreciseX(), event->GetPreciseY());
             if (fill_true_DCA)event_container->FillTrueDCAHadrons();
@@ -693,7 +693,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     //event->ReshuffleElectrons();
     if(fill_TTree) event_container->CleanUpHitList();
     if(fill_d_dphi_hists)  event_container->FillDphiHists();
-    //if(fill_true_DCA&&!fill_ddphi_hadron) event_container->FillTrueDCA();
+    if(fill_true_DCA&&!fill_ddphi_hadron) event_container->FillTrueDCA();
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
@@ -727,25 +727,25 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if (mytrk->GetPtPrime() > 0.4){    
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4.0) && 
                    (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
+                   (mytrk->GetMinsDphi(0)> -5 &&  TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
         }else{
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
-                   (TMath::Abs(mytrk->GetMinsDphi(1))<3.0) && 
+                   (TMath::Abs(mytrk->GetMinsDphi(1))<4.0) && 
                    (mytrk->GetMinsDphi(0))>-5 ) ) hit_assocaition=100;
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<3.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -5 ) )) hit_assocaition=10000;
+                   (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
         }
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0) conv_reject=10;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=100;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
         //if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
         if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<1) conv_reject=10000;
