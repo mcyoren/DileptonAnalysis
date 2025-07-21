@@ -109,7 +109,8 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   TH3D *hist_pt_orig = new TH3D("hist_pt_orig", "hist_pt_orig", 50, 0, 5, 5, 0, 100, 2, 0, 2);
   TH2D *hist_pt_mother = new TH2D("hist_pt_mother", "hist_pt_mother", 500, 0, 10, 5, 0, 100);
   TH2D *hist_pt_mother_weight = new TH2D("hist_pt_mother_weight", "hist_pt_mother_weight", 500, 0, 10, 5, 0, 100);
-  TH2D *n_hits_hist = new TH2D("n_hits_hist", "n_hits_hist", 1000, 0, 1000, 100, 0, 100);
+  TH3D *hist_dca_mother_3d = new TH3D("hist_dca_3d", "hist_dca_3d", 200, -500, 500, 50, 0, 10, 10, 0, 100);
+  TH3D *n_hits_hist = new TH3D("n_hits_hist", "n_hits_hist", 1000, 0, 1000, 100, 0, 100, 4, 0, 4);
   TH3D *hist_pt_reco = new TH3D("hist_pt_reco", "hist_pt_reco", 50, 0, 5, 4, 0, 4, 5, 0, 5);
 
   std::cout << "Trees read!" << std::endl;
@@ -122,8 +123,8 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   f.SetParameter(0, 1);
   f.SetParameter(1, 0);
   f.SetParameter(2, 1);
-  const float vtx_res_x[10] = {11.230207768822911, 15.513529449537671, 22.531823570971877, 34.84444416454522, 56.20224235212148, 63.49982193792116, 34.532082234545115, 59.04595127212345, 88.05661267571188};
-  const float vtx_res_y[10] = {8.371575188112432, 11.568339997868744, 16.67911971193379, 25.30942307499768, 40.12995663836892, 45.64541101003287, 26.354141654758998, 45.37353955674754, 68.76196216542816};
+  const float vtx_res_x[10] = {11.573013950655056, 15.215734440960366, 21.771775161191638, 33.458415120576696, 53.807666598553, 60.86003298271064, 34.027076037074465, 58.177590775412874, 87.71163737802117};
+  const float vtx_res_y[10] = {7.398283944195731, 9.657671603622507, 13.770485615750985, 21.207408416267437, 34.80991174557141, 40.69221130423994, 24.078456294746875, 42.90731740850407, 67.81600271377448};
  
   for (int ievent = beggin; ievent < endish; ievent++)
   {
@@ -176,13 +177,21 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
       hist_pt_mother->Fill(pt, myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt, myevent->GetCentrality(), weight);
     }
-    const int icenrality = myevent->GetCentrality() / 10;
+    for (int itrk = 0; itrk < myevent->GetNgentrack(); itrk++)
+    {
+      MyDileptonAnalysis::MyGenTrack *mygentrk = myevent->GetGenTrack(itrk);
+      const int charge = mygentrk->GetID() > 0 ? -1 : 1;
+      const double dca = TMath::Sqrt(SQR(mygentrk->GetVx()*1e-9 - myevent->GetPreciseX()*1e4) + SQR(mygentrk->GetVy()*1e-9 - myevent->GetPreciseY()*1e4));
+      hist_dca_mother_3d->Fill(dca*charge, mygentrk->GetPt(), myevent->GetCentrality());
+    }
+    int icenrality = myevent->GetCentrality() / 20; 
+    icenrality *= 2;
     const float event_vertex_sigma[3] = {vtx_res_x[icenrality] / 10000, vtx_res_y[icenrality] / 10000, 100. / 10000};
     myevent->SetPreciseX(myevent->GetPreciseX() + f.GetRandom() * event_vertex_sigma[0]);
     myevent->SetPreciseY(myevent->GetPreciseY() + f.GetRandom() * event_vertex_sigma[1]);
     myevent->SetPreciseZ(myevent->GetPreciseZ() + f.GetRandom() * event_vertex_sigma[2]);
     myevent->SetVtxZ(myevent->GetPreciseZ());
-    // if(myevent->GetCentrality()>30) continue;
+    //if(myevent->GetCentrality()>20) continue;
     if (fill_inv_mass_sim)
       event_container->fill_inv_mass_sim(weight);
     if (fill_inv_mass && myevent->GetNtrack() < 2)
@@ -196,6 +205,9 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
       MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
       if (mytrk->GetArm() < 2)
         mytrk->SetPtPrime(mytrk->GetPtPrime() * 0.97);
+        //const float dphi_smear = - 0.001 * mytrk->GetChargePrime() + 0.0005 + 0.0025 /mytrk->GetPtPrime() * f.GetRandom();
+        //mytrk->SetPhi0Prime(mytrk->GetPhi0Prime() + dphi_smear);
+        //mytrk->SetPtPrime(mytrk->GetPtPrime() * mytrk->GetAlphaPrime() / (mytrk->GetAlphaPrime() + dphi_smear ));
     }
 
     int n_electrons = myevent->GetNtrack();
@@ -236,11 +248,14 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
       continue;
     }
     int n_hits = myevent->GetNVTXhit();
+    int n_layers_hits[4] = {0, 0, 0, 0};
     for (int ihit = 0; ihit < n_hits; ihit++)
     {
       MyDileptonAnalysis::MyVTXHit myhit = *myevent->GetVTXHitEntry(ihit);
       if (myhit.GetLadder() > 24)
         std::cout << myhit.GetLadder() << std::endl;
+      n_layers_hits[myhit.GetLayer()]++;
+      if(myhit.N_AssociatedTracks()) std::cout << "ihit: " << ihit << " n_associated_tracks: " << myhit.N_AssociatedTracks() << std::endl;
       if (myhit.GetSensor() == 1)
       {
         myevent->RemoveVTXHitEntry(ihit);
@@ -264,7 +279,27 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
         ihit--;
         continue;
       }
+      //removing double hits:
+      if(false)
+      {
+        for (int jhit = ihit + 1; jhit < n_hits; jhit++)
+        {
+          MyDileptonAnalysis::MyVTXHit myhit2 = *myevent->GetVTXHitEntry(jhit);
+          if (myhit.GetLayer() == myhit2.GetLayer() && TMath::Abs(myhit.GetPhiHit(0, 0, 0) - myhit2.GetPhiHit(0, 0, 0)) < 5e-4 && TMath::Abs(myhit.GetZHit() - myhit2.GetZHit()) < 0.001)
+          {
+            myevent->RemoveVTXHitEntry(jhit);
+            n_hits--;
+            jhit--;
+          }
+        }
+      }
     }
+    for (int ilayer = 0; ilayer < 4; ilayer++) n_hits_hist->Fill(n_layers_hits[ilayer], myevent->GetCentrality(), ilayer);
+    //if (myevent->GetCentrality()<40 && (n_layers_hits[0] + n_layers_hits[1] < 2))
+    //{
+    //  myevent->SetCentrality(100);
+    //  continue;
+    //}
     if (do_vtx_alignment)
     {
 
@@ -313,7 +348,6 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
 
       }
     }
-    n_hits_hist->Fill(n_hits, myevent->GetCentrality());
 
     event_container->SetEvent(myevent);
 
@@ -322,12 +356,24 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
     if(fill_d_dphi_hists)
     {
       event_container->CorrectVTXOffset(-1);
+      for (int itrk = 0; itrk < myevent->GetNeleccand(); itrk++)
+      {
+        MyDileptonAnalysis::MyElectron *myell = myevent->GetElecCand(itrk);
+        myevent->RemoveElecCandEntry(itrk);
+      }
       for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
       {
         MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+        mytrk->SetEmcdphi_e(0);
+        mytrk->SetEcore(0.1);
+        mytrk->SetN0(-9999);
+        mytrk->SetEmcdphi(0);
+        mytrk->SetEmcdz(0);
         myevent->AddElecCand(mytrk);
       }
-      event_container->Associate_Hits_to_Hadrons_Dynamic(5, myevent->GetPreciseX(), myevent->GetPreciseY());
+      //event_container->ConversionFinder(0,0,1);
+      //event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
+      event_container->Associate_Hits_to_Hadrons_Dynamic(5, myevent->GetPreciseX(), myevent->GetPreciseY());///need action to run is sim //set false for sim
       event_container->FillTrueDCAHadrons();
       continue;
     }
@@ -405,7 +451,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
     if (false)
       event_container->Associate_Hits_to_Leptons_OLD(20, 20, 20);
     if (do_conv_dalitz_finder)
-      event_container->ConversionFinder(1, 0);
+      event_container->ConversionFinder(1, 0, 0);
 
     if (associate_hits && fill_inv_mass && event_container->GetNGoodElectrons() < 1)
       continue;
@@ -455,6 +501,7 @@ void Calib(const TString inname = inFile[0], int itread = 0, int ntreads = 1, in
   hist_pt_orig->Write();
   hist_pt_mother->Write();
   hist_pt_mother_weight->Write();
+  hist_dca_mother_3d->Write();
   n_hits_hist->Write();
   hist_pt_reco->Write();
   event_container->WriteOutFile();
