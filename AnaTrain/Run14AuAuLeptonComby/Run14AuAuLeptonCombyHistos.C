@@ -1506,7 +1506,12 @@ float Run14AuAuLeptonCombyHistos::get_pt_V21(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 10 || conv_reject2 < 10 ) return -999;
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
@@ -1527,7 +1532,12 @@ float Run14AuAuLeptonCombyHistos::get_pt_V22(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 10000 || hit_assoc2 < 10000 ) return -999;
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
