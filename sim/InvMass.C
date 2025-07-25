@@ -44,7 +44,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
 {
   std::cout<<"start"<<std::endl;
 
-  TF1* hadron_yield[5];
+  TF1* hadron_yield[5];TF1 *generated_spectrum = nullptr;
   for (int i = 0; i < 5; i++)
   {
     TString name = Form("hagedorr_yield_%d", i);
@@ -56,6 +56,11 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if (part == 8 || part == 9 ) hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) / hadron_yield[i]->Integral(0.01,10) * dNdy_pp[part] * Ncolls[i] * Br_to_ee[part] * RAA_jpsi[i] );
     if (part < 8 && part >0)
       hadron_yield[i]->SetParameter(1, hadron_yield[i]->GetParameter(1) * hith_pt_ratio[part] / (hadron_yield[i]->Eval(5.0) / Br_to_ee[part] / pi0_high_pt_ratio[i] ) );
+    if (part == 0 && true)
+    {
+      generated_spectrum = fHagedorn(name, 0.01, 20, dNdy_pp[part], m_pp[part], 377, 0.356, 0.068, 0.7,8.25);
+      generated_spectrum->SetParameter(1, generated_spectrum->GetParameter(1) / generated_spectrum->Integral(0.01,10) *10 );
+    }
     std::cout<<" integral " << i << " " << hadron_yield[i]->Integral(0.01,20)/Br_to_ee[part] << " " << dNdy_pp[part]/42.2*Ncolls[i] <<" "<<Br_to_ee[part] << " " << hadron_yield[i]->Eval(5.0)/Br_to_ee[part]<<std::endl;
   }
 
@@ -69,20 +74,20 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int associate_hits = 1;
   const int remove_hadron_hits = 0;
   const int fill_QA_hadron_hists = 0;
-  const int fill_QA_lepton_hists = 0;//1
+  const int fill_QA_lepton_hists = 1;//1
   const int fill_TTree = 0;
   const int fill_d_dphi_hists = 0;
   const int fill_DCA_hists = 0;
   const int use_d_dphi_DCA = 0;
   const int do_track_QA = 0;
   const int do_electron_QA = 1;
-  const int do_ident_electrons = 1;
+  const int do_ident_electrons = 2;//1
   const int do_reveal_hadron = 0;
   const int Use_ident = 0;
-  const int fill_true_DCA = 0;//1
+  const int fill_true_DCA = 1;//1
   const int check_veto = 0;
-  const int fill_inv_mass = 1;//0
-  const int fill_inv_mass_sim = 1;//0
+  const int fill_inv_mass = 0;//0
+  const int fill_inv_mass_sim = 0;//0
   const int fill_vtx_accaptance = 0;
   const int uncorrect_vtx_offset = 1;
   const int do_vertex_reco = 1;
@@ -152,6 +157,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
       //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
       if ( part < 10) weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      if ( part == 0 ) weight /= generated_spectrum->Eval(pt);
       hist_pt_mother->Fill(pt,myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
@@ -166,6 +172,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       //weight = Hagedorn(pt, dNdy_pp[part]*Br_to_ee[part], m_pp[part]);
       //weight = Tsallis(pt, m_pp[part], n_pp[part], T_pp[part], dNdy_pp[part]/42.2*Ncolls[(int)myevent->GetCentrality()/20]);
       if ( part < 10) weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
+      if ( part == 0 ) weight /= generated_spectrum->Eval(pt);
       hist_pt_mother->Fill(pt,myevent->GetCentrality());
       hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
@@ -199,8 +206,6 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     //if(myevent->GetCentrality()>30) continue;
     if(fill_inv_mass_sim) event_container->fill_inv_mass_sim(weight);
     if (fill_inv_mass && myevent->GetNtrack()<2) continue;
-
-
     if(myevent->GetNtrack()<1 && !do_track_QA) continue;
     
     for (int itrk = 0; itrk < myevent->GetNtrack(); itrk++)
@@ -218,7 +223,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
         bool skip = false; 
           if(mytrk.GetTrkQuality()!=63 && mytrk.GetTrkQuality()!=51 && mytrk.GetTrkQuality()!=31)
             skip = true;
-          if (mytrk.GetPtPrime()>4.4 || mytrk.GetPtPrime() < 0.4)
+          if (mytrk.GetPtPrime()>8.4 || mytrk.GetPtPrime() < 0.2)
             skip = true;
           if (mytrk.GetCrkphi()<-99)
             skip = true;
@@ -239,11 +244,41 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
           //std::cout<<mytrk.GetPt()<<" "<<mytrk.GetPtPrime()<<" "<<mytrk.GetReconPT()<<std::endl;
       }
     }
+    if (do_ident_electrons == 2)
+    {
+      event_container->SetEvent(myevent);
+      event_container->IdenElectrons();
+      n_electrons = myevent->GetNtrack();
+      for (int itrk = 0; itrk < n_electrons; itrk++)
+      {
+        MyDileptonAnalysis::MyElectron *mytrk = myevent->GetEntry(itrk);
+        if (mytrk->GetPtPrime() > 4.4 && mytrk->GetProb() > 0.8 && mytrk->GetEcore() / mytrk->GetPtot() > 0.8 &&
+            mytrk->GetEcore() / mytrk->GetPtot() < 1.4 && TMath::Abs(mytrk->GetEmcdphi()) < 0.005 * 3 && TMath::Abs(mytrk->GetEmcdz()) < 10 && mytrk->GetN0() > 1 && mytrk->GetDisp() < 5)
+          mytrk->SetMcId(10000); // 1000 is the electron id
+      }
+      for (int itrk = 0; itrk < n_electrons; itrk++)
+      {
+        MyDileptonAnalysis::MyElectron mytrk = *myevent->GetEntry(itrk);
+
+        if (mytrk.GetMcId() < 100 || (myevent->GetCentrality() < 40 && mytrk.GetMcId() < 1000) || (myevent->GetCentrality() < 20 && mytrk.GetMcId() < 10000) ||
+            (mytrk.GetPtPrime() < 0.4 && (fabs(mytrk.GetEmcdphi()) > 0.02 || fabs(mytrk.GetEmcdz()) > 8 || mytrk.GetDisp() > 3 || mytrk.GetMcId() % 10 < 6))) // adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8
+        {
+          myevent->RemoveTrackEntry(itrk);
+          // event->AddElecCand(&mytrk);
+          n_electrons--;
+          itrk--;
+          continue;
+        }
+      }
+    }
     if (fill_vtx_accaptance) {
       event_container->SetEvent(myevent);
       event_container->FillVTXAcceptance();
       continue;
     }
+    if (fill_inv_mass && myevent->GetNtrack()<2) continue;
+    if(myevent->GetNtrack()<1 && !do_track_QA) continue;
+    
     int n_hits = myevent->GetNVTXhit();
     int h_hits_mc[2] = {0, 0};
     for (int ihit = 0; ihit < n_hits; ihit++)
@@ -254,7 +289,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     //if (myhit.GetSensor() == 1) std::cout << "1 sesnsor:  " << myhit.GetLayer() << " " << myhit.GetPhiHit() << " " << myhit.GetZHit() << " " <<myhit.GetLadder()<<std::endl;
      //if (myhit.GetSensor() == 0) h_hits_mc[0]++;
      //if (myhit.GetSensor() == 1) h_hits_mc[1]++;
-     if (myhit.GetSensor() != 1)
+     if (myhit.GetSensor() == 1)
      {
          myevent->RemoveVTXHitEntry(ihit);
          n_hits--;
@@ -280,7 +315,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     //if(h_hits_mc[0]+5<h_hits_mc[1]) std::cout<<"Warning: hits in sensor 0 less than in 1 sensor: " << h_hits_mc[0] << " " << h_hits_mc[1] << std::endl;
     n_hits_hist->Fill(myevent->GetNVTXhit(),myevent->GetCentrality());
     
-    event_container->SetEvent(myevent);
+    if(do_ident_electrons!=2 )event_container->SetEvent(myevent);
 
     event_container->correct_beam_offset();
     bool skip_event = false;
@@ -294,7 +329,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if(do_track_QA) event_container->FillQAHist(in_id);
 
     if (uncorrect_vtx_offset) event_container->CorrectVTXOffset(-1);
-    if(do_ident_electrons) event_container->IdenElectrons();
+    if(do_ident_electrons==1) event_container->IdenElectrons();
     if(do_electron_QA)event_container->FillQAHistPreAssoc();
     //if(do_vertex_reco) event_container->VertexXYScan(myevent->GetPreciseX(), myevent->GetPreciseY(), 1,0);
     if(associate_hits) event_container->Associate_Hits_to_Leptons(5,5,5,1,2,3);
@@ -306,7 +341,7 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
 
     if(associate_hits && fill_inv_mass && event_container->GetNGoodElectrons()<1  ) continue;
     
-    if(associate_hits && event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5,5,3,!fill_QA_lepton_hists,0,3);
+    if(associate_hits && event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5,5,5,!fill_QA_lepton_hists,0,3);
   
     
     if(remove_hadron_hits) 
@@ -328,6 +363,16 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
               n_electrons--;
               itrk--;
               continue;
+          }
+          if(mytrk->GetPtPrime()<0.4)
+          {
+            if(mytrk->GetHitCounter(2) < 1 || mytrk->GetHitCounter(3) < 1)
+              {
+                myevent->RemoveTrackEntry(itrk);
+                n_electrons--;
+                itrk--;
+                continue;
+              }
           }
       }
     }
