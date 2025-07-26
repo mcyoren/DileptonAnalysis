@@ -15,6 +15,12 @@
 # Yuri Mitrankov (mitrankovy@gmail.com)                                 #
 #########################################################################
 
+setenv is_me 1
+if ( "$USER" == "mitrankov" ) then
+setenv LOGNAME mitran
+setenv USER $LOGNAME
+setenv is_me 0
+endif
 setenv HOME /phenix/u/$LOGNAME
 setenv prompt 1
 source /etc/csh.login
@@ -54,6 +60,8 @@ echo "${Green} type of input       $3                  ${Color_Off}"
 echo "${Green} selected_paticle    $selected_paticle   ${Color_Off}"
 echo "${Green} shift               $shift              ${Color_Off}"
 echo "${Green} NEVT                $NEVT               ${Color_Off}"
+echo "${Green} USER                $USER               ${Color_Off}"
+echo "${Green} is_me               $is_me              ${Color_Off}"
 
 setenv DATADIR $PWD
 
@@ -171,6 +179,7 @@ endif
 echo "${Green}finished running${Color_Off}"
 echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
+chmod 777 $outsingle/$oscarname
 echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
@@ -189,7 +198,8 @@ set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_0_10_50M.root
  #set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
 endif
 if( $selected_paticle == 0) then
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_50M.root
+ #set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_50M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_0_6_100M.root
 endif
 if( $selected_paticle == 3) then
  set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_25M.root
@@ -246,6 +256,7 @@ echo "${Green}running ./$scriptname $inputvtx $jobno 10000 $inputhelios $oscarna
 echo "${Green}finished running${Color_Off}"
 echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
+chmod 777 $outsingle/$oscarname
 echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
@@ -265,9 +276,16 @@ endif
 if( $selected_paticle == 3) then
  set inputpythia = $DATADIR/output_single/pythia8/jetpairstree$DIR.root
 endif
+if( $selected_paticle == 4) then
+ set inputpythia = /phenix/plhf/vdoomra/standalone_pythia8/output_ccbar_bbbar_SoftQCD_inelastic_part1/HeavyFlavor_$DIR.root
+endif
 set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh
-set macroname   = WriteROOT2OscarPythia.C
+set macrname_forscript = WriteROOT2OscarPythia.C
+set macroname   = WriteROOT2OscarPythia1.C
+if( $selected_paticle == 4) then
+ set macroname   = WriteROOT2OscarPythia.C
+endif
 set outsingle   = $DATADIR/output_single/pythia8
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_pythia_$INPUT"
 
@@ -290,12 +308,13 @@ echo "${Green}cd $tmpdir${Color_Off}"
 cd       $tmpdir
 
 cp $scriptdir/$scriptname .
-cp $scriptdir/$macroname .
+cp $scriptdir/$macroname $macrname_forscript
 echo "${Green}running ./$scriptname $inputvtx $inputpythia $oscarname ${Color_Off}"
 ./$scriptname $inputvtx $inputpythia $oscarname
 echo "${Green}finished running${Color_Off}"
 echo "${Green}copying${Color_Off}"
 cp $oscarname  $outsingle/
+chmod 777 $outsingle/$oscarname
 echo "${Green}finished copying${Color_Off}"
 #remove tmp dir
 cd $DATADIR
@@ -366,6 +385,7 @@ echo "${Green}finished running${Color_Off}"
 if ( -f dst_out.root ) then
 echo "${Green}moving${Color_Off}"
 mv dst_out.root $outpisadir/$outdstname
+chmod 777 $outpisadir/$outdstname
 echo "${Green}finished moving${Color_Off}"
 else 
 echo "${Green}something is fkng wrong${Color_Off}"
@@ -389,7 +409,7 @@ echo "${Purple}===============================================${Color_Off}"
 
 echo "${Green}Compiling libs${Color_Off}"
 setenv sourcedir /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/embed/svx_cent_ana/build
-if( $1 == 0) then
+if( $1 == 0 && $is_me == 1) then
 cd $sourcedir
 make -j4
 make install
@@ -492,6 +512,7 @@ echo "${Green}end of running${Color_Off}"
 
 echo "${Green}start moving outfiles${Color_Off}"
 mv -f my-$outntana $outmytreedir/
+chmod 777 $outmytreedir/my-$outntana
 echo "${Green}end of moving outfiles${Color_Off}"
 
 #remove tmp dir

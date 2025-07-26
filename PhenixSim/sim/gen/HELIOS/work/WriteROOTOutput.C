@@ -44,7 +44,7 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 	WriteTrack MyTrack;
 
 	TH2F* h_input = new TH2F("h_input", "PID vs decay", 2500, -0.5, 2499.5, 10, -0.5, 9.5);
-	TH1F* h_input_pt = new TH1F("h_input_pt", "pt profile of input", 100, 0., 10.0);
+	TH1F* h_input_pt = new TH1F("h_input_pt", "pt profile of input", 500, 0., 10.0);
 	TH1F* h_input_eta = new TH1F("h_input_eta", "eta profile of input", 200, -1.0, 1.0);
 	TH1F* h_input_phi = new TH1F("h_input_phi", "phi profile of input", 200, -10.0, 10.0);
 
