@@ -213,7 +213,7 @@ namespace MyDileptonAnalysis
         }    
     }
 
-    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg, float sigma_theta)
+    void MyEventContainer::Associate_Hits_to_Leptons(float sigma, float sigma_veto, float sigma_inner, int not_fill,int recover_fg, float sigma_theta, float sigma_second)
     {
         const int nleptons = event->GetNtrack();
         const int nvtxhits = event->GetNVTXhit();
@@ -382,16 +382,14 @@ namespace MyDileptonAnalysis
 
                         const float sdphi = (dphi - mean_phi_value) / sigma_phi_value;// - mytrk->get_dynamic_smean_phi_data(0, cycle_layer, dphi_previous_layer);
                         const float sdthe = (dthe - mean_theta_value) / sigma_theta_value;
-
-                        const float sdphi_rec = (iter_layer==2&&iassociatedhit)?((dphi -  mytrk->get_mean_phi_data(0, central_bin, layer)) / mytrk->get_sigma_phi_data(0, central_bin, layer)):sdphi;
-                        const float sdthe_rec = (iter_layer==2&&iassociatedhit)?((dthe -  mytrk->get_mean_theta_data(0, central_bin, layer)) / mytrk->get_sigma_theta_data(0, central_bin, layer)):sdthe;
-
+                        //const float sdphi_rec = (iter_layer==2&&iassociatedhit)?((dphi -  mytrk->get_mean_phi_data(0, central_bin, layer)) / mytrk->get_sigma_phi_data(0, central_bin, layer)):sdphi;
+                        //const float sdthe_rec = (iter_layer==2&&iassociatedhit)?((dthe -  mytrk->get_mean_theta_data(0, central_bin, layer)) / mytrk->get_sigma_theta_data(0, central_bin, layer)):sdthe;
                         const float diff = sqrt(std::pow(sdphi, 2) + std::pow(sdthe, 2));
-
 
                         bool SignTrack = true;
                         float sigma_veto0 = sigma, sigma_inner0=sigma;
                         if(layer == 0) {sigma_veto0=sigma_veto;sigma_inner0=sigma_inner;}
+                        else if(layer == 1) {sigma_veto0=sigma_second;sigma_inner0=sigma_second;}
                         if ( sdphi*mytrk->GetChargePrime()>-sigma_veto0 && sdphi*mytrk->GetChargePrime() < sigma_inner0 && TMath::Abs(sdthe) < sigma_theta)
                         {
                             if(false && vtxhit->GetLadder()<25) vtxhit->SetLadder(25+itrk);/// do no taking all hits in cone
@@ -407,7 +405,7 @@ namespace MyDileptonAnalysis
                             }
                             //vtxhit->AddAssociatedTrack(itrk, diff);
                             mytrk->AddHitCounter(layer);
-                            mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi_rec,sdthe_rec,diff,ihit);
+                            mytrk->SetdPhidThe(iter_layer,dphi,dthe,sdphi,sdthe,diff,ihit);
                             iter_nums[layer]++;
                             if((iter_nums[layer]>99&&layer>=2)||iter_nums[layer]>999) 
                             {
@@ -689,6 +687,7 @@ namespace MyDileptonAnalysis
                         newBDTHit.SetIsTrue(1, MyML::GetConvBDT(BDTConv_prob,probsConv));
                         newBDTrack.AddBDTHit(&newBDTHit);
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1]);
+                        chi2 /= ( hit_in_graph > 3 && TMath::Abs(newBDTHit.Getsdphi(2)) < 2.5) ? 3.0 : 1.0;
                         if(chi2<min_chi2) 
                         {
                             if (recover_fg) mytrk->SetNHits(newBDTHit.GetIsTrue(0));
@@ -712,6 +711,10 @@ namespace MyDileptonAnalysis
             if(min_chi2<800000)
             {
                 mytrk->SetHitCounter(3,0);mytrk->SetHitCounter(2,0);
+                if (true) 
+                {
+                    mytrk->SetMinsDphi(99,3);mytrk->SetMinsDthe(99,3);mytrk->SetMinsDphi(99,2);mytrk->SetMinsDthe(99,2);
+                }
                 mytrk->SetGhost( (int) (mytrk->GetGhost()*1./newBDTrack.GetNBDThit()));
                 BDTracklist.push_back(newBDTrack);
 
@@ -1654,7 +1657,7 @@ namespace MyDileptonAnalysis
                 //const float dca2_x = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Sin(newTrack2->GetPhi0());
                 //const float dca2_y = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Cos(newTrack2->GetPhi0());
                 //const float dca = sqrt(SQR(dca1_x - dca2_x) + SQR(dca1_y - dca2_y));
-                const float dca = sqrt(SQR(newTrack1->GetDCA2()) - SQR(newTrack2->GetDCA2()));
+                const float dca = sqrt(SQR(newTrack1->GetDCA2()) + SQR(newTrack2->GetDCA2()));
 
                 const float pair_pt = sqrt( SQR(newTrack1->GetPx() + newTrack2->GetPx()) + SQR(newTrack1->GetPy() + newTrack2->GetPy()) );
 
@@ -1713,7 +1716,7 @@ namespace MyDileptonAnalysis
                     if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) ||
                            (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
-                           (TMath::Abs(newTrack1->GetMinsDphi(1))<3.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
+                           (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                            (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) ) hit_assocaition1=10000;
                 }else{
                     if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5) &&
@@ -1722,7 +1725,7 @@ namespace MyDileptonAnalysis
                            (newTrack1->GetMinsDphi(0))>-5 ) ) hit_assocaition1=100;
                     if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) &&
                            (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
-                           (TMath::Abs(newTrack1->GetMinsDphi(1))<3.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
+                           (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                            (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) )) hit_assocaition1=10000;
                 }
                 int conv_reject1 = 0;
@@ -1741,8 +1744,18 @@ namespace MyDileptonAnalysis
                     if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) ||
                            (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
-                           (TMath::Abs(newTrack2->GetMinsDphi(1))<3.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
+                           (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
                            (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )  hit_assocaition2=10000;
+                }
+                else{
+                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5) &&
+                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5) ) && 
+                           (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0) && 
+                           (newTrack2->GetMinsDphi(0))>-5 ) ) hit_assocaition2=100;
+                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) &&
+                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
+                           (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
+                           (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )) hit_assocaition2=10000;
                 }
                 int conv_reject2 = 0;
                 if ( ((int)newTrack2->GetEmcdphi_e())%10==0) conv_reject2+=10;
@@ -1817,7 +1830,7 @@ namespace MyDileptonAnalysis
                     //const float dca2_x = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Sin(newTrack2->GetPhi0());
                     //const float dca2_y = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Cos(newTrack2->GetPhi0());
                     //const float dca = sqrt(SQR(dca1_x - dca2_x) + SQR(dca1_y - dca2_y));
-                    const float dca = sqrt(SQR(newTrack1->GetDCA2()) - SQR(newTrack2->GetDCA2()));
+                    const float dca = sqrt(SQR(newTrack1->GetDCA2()) + SQR(newTrack2->GetDCA2()));
 
                     const float pair_pt = sqrt(SQR(newTrack1->GetPx() + newTrack2->GetPx()) + SQR(newTrack1->GetPy() + newTrack2->GetPy()));
 
@@ -1893,7 +1906,7 @@ namespace MyDileptonAnalysis
                                (newTrack1->GetMinsDphi(0))>-5 ) ) hit_assocaition1=100;
                         if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) &&
                                (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
-                               (TMath::Abs(newTrack1->GetMinsDphi(1))<3.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
+                               (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                                (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) )) hit_assocaition1=10000;
                     }
                     int conv_reject1 = 0;
@@ -1912,9 +1925,20 @@ namespace MyDileptonAnalysis
                         if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) ||
                                (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
                                (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
-                               (TMath::Abs(newTrack2->GetMinsDphi(1))<3.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
+                               (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
                                (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )  hit_assocaition2=10000;
                     }
+                    else{
+                        if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5) &&
+                               (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5) ) && 
+                               (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0) && 
+                               (newTrack2->GetMinsDphi(0))>-5 ) ) hit_assocaition2=100;
+                        if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) &&
+                               (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
+                               (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
+                               (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )) hit_assocaition2=10000;
+                    }
+
                     int conv_reject2 = 0;
                     if ( ((int)newTrack2->GetEmcdphi_e())%10==0) conv_reject2+=10;
                     if ( ((int)newTrack2->GetEmcdphi_e())%10==0 && ((int)newTrack2->GetEmcdphi_e())/100<3) conv_reject2=100;

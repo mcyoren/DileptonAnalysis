@@ -1283,7 +1283,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V17(PHParticle *Type1, const unsigned i
   const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
+  if ( hit_assoc1 < 10000 || hit_assoc2 < 10000 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
