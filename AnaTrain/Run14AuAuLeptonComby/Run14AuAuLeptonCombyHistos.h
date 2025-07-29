@@ -58,6 +58,8 @@ public:
       
 
       static float get_DCA(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA1(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float get_DCA2(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
       static float get_mass_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);
       static float get_phi_ee(PHParticle *, const unsigned int,PHParticle *, const unsigned int);

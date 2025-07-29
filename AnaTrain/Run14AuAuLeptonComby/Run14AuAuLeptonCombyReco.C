@@ -69,7 +69,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
     check_veto = rc->get_IntFlag("Check_Veto", 0);
     fill_inv_mass = rc->get_IntFlag("fill_inv_mass", 0);
-    do_reco_vertex = rc->get_IntFlag("do_reco_vertex", 0);
+    do_reco_vertex = 0*rc->get_IntFlag("do_reco_vertex", 0);
     do_conv_dalitz_finder = rc->get_IntFlag("do_conv_dalitz_finder", 0);
 
 
@@ -253,8 +253,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
 
     event->SetCentrality(centrality);
-    event->SetPreciseX(precise_x + 0*vtx_mean_x);
-    event->SetPreciseY(precise_y + 0*vtx_mean_y);
+    event->SetPreciseX(0*precise_x + vtx_mean_x);
+    event->SetPreciseY(0*precise_y + vtx_mean_y);
     event->SetPreciseZ(precise_z);
     event->SetEvtNo(ncalls);
     event->SetRunNumber(run_number);/////neeeds a doctor
@@ -618,7 +618,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
      
         //if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
-        if(do_reco_vertex) event_container->CorrectVTXOffset(1);
+        if(true) event_container->CorrectVTXOffset(1);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.,5);
         if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);

@@ -52,7 +52,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V0",  "delt_phi_ee_DCA_V0",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V1",  "delt_phi_ee_DCA_V1",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V2",  "delt_phi_ee_DCA_V2",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V3",  "delt_phi_ee_DCA_V3",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
+  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V3",  "delt_phi_ee_DCA_V3",  N_phi_bins,   phi_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V4",  "delt_phi_ee_DCA_V4",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V5",  "delt_phi_ee_DCA_V5",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V6",  "delt_phi_ee_DCA_V6",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
@@ -83,6 +83,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V31", "delt_phi_ee_DCA_V31", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("delt_phi_ee_DCA_V32", "delt_phi_ee_DCA_V32", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
   Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
+  Master3D.push_back(new TH3D("mass_DCA1_DCA2_v0" , "mass_DCA1_DCA2_v0" ,   N_inv_m,    inv_m_bins, N_DCA,      DCA_bins, N_DCA, DCA_bins));
 
 
   fcn_3Dx.clear();
@@ -153,6 +154,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_phi_ee);
   fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dx.push_back(get_mass_ee);
 
   fcn_3Dy.clear();
   fcn_3Dy.push_back(get_DCA);
@@ -192,7 +194,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
@@ -223,6 +225,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
+  fcn_3Dy.push_back(get_DCA1);
 
   fcn_3Dz.clear();
   fcn_3Dz.push_back(get_pt_V0);
@@ -261,7 +264,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_pt_V0);
   fcn_3Dz.push_back(get_pt_V1);
   fcn_3Dz.push_back(get_pt_V2);
-  fcn_3Dz.push_back(get_pt_V3);
+  fcn_3Dz.push_back(get_pt_V2);
   fcn_3Dz.push_back(get_pt_V4);
   fcn_3Dz.push_back(get_pt_V5);
   fcn_3Dz.push_back(get_pt_V6);
@@ -292,8 +295,10 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_pt_V31);
   fcn_3Dz.push_back(get_pt_V32);
   fcn_3Dz.push_back(get_pt_V0);
+  fcn_3Dz.push_back(get_DCA2);
 
   fcn_3D_weight.clear();
+  fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
   fcn_3D_weight.push_back(set_weight_1);
@@ -1917,6 +1922,64 @@ float Run14AuAuLeptonCombyHistos::get_phi_V_ee(const UltraLightTrack *p1, const 
   const TVector3 ua = (u.Cross(z)).Unit();
 
   return w.Angle(ua);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA1(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -9999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -9999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -9999;
+
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -9999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -9999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -9999;
+
+  return p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA2(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  return p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
 }
 
 
