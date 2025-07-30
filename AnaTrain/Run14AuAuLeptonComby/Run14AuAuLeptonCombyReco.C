@@ -69,7 +69,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     fill_true_DCA = rc->get_IntFlag("Fill_true_DCA", 0);
     check_veto = rc->get_IntFlag("Check_Veto", 0);
     fill_inv_mass = rc->get_IntFlag("fill_inv_mass", 0);
-    do_reco_vertex = 0*rc->get_IntFlag("do_reco_vertex", 0);
+    do_reco_vertex = rc->get_IntFlag("do_reco_vertex", 0);
     do_conv_dalitz_finder = rc->get_IntFlag("do_conv_dalitz_finder", 0);
 
 
@@ -253,8 +253,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     MyDileptonAnalysis::MyEvent *event = event_container->GetEvent();
 
     event->SetCentrality(centrality);
-    event->SetPreciseX(0*precise_x + vtx_mean_x);
-    event->SetPreciseY(0*precise_y + vtx_mean_y);
+    event->SetPreciseX(precise_x + 0*vtx_mean_x);
+    event->SetPreciseY(precise_y + 0*vtx_mean_y);
     event->SetPreciseZ(precise_z);
     event->SetEvtNo(ncalls);
     event->SetRunNumber(run_number);/////neeeds a doctor
@@ -584,7 +584,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA2()>-8000?mytrk->GetDCA2():400);
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetsDCA()>-8000?mytrk->GetsDCA():400);
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2()>-8000?mytrk->GetDCAY2():400);
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
@@ -774,7 +774,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA2());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetsDCA());
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());

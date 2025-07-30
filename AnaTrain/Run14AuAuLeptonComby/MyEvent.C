@@ -1137,6 +1137,10 @@ namespace MyDileptonAnalysis
         //const float vx = X_circle - dir * R * sin(phi);
         //const float vy = Y_circle + dir * R * cos(phi);
         mytrk->SetDCA2(dca);
+        const int central_bin = this->GetCentrality() / 20;
+        if (central_bin < 0 || central_bin > 4) return;
+        const float sdca = dca / (sigma_DCA[central_bin][0] + sigma_DCA[central_bin][1] * exp(sigma_DCA[central_bin][2] * mytrk->GetPtPrime()));
+        mytrk->SetsDCA(sdca*100);
 
         mytrk->SetDCAX2(X_circle * dca / L);
         mytrk->SetDCAY2(Y_circle * dca / L);
@@ -1460,9 +1464,11 @@ namespace MyDileptonAnalysis
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
             const float pt = mytrk->GetPtPrime();
-            DCA12_hist[central_bin]->Fill(mytrk->GetDCAX2(),mytrk->GetDCAY2(),pt);
+            if( TMath::Abs(event->GetPreciseZ()) > 12 ) continue; // skip events with large z vertex
+            int z_bin =  ( (int) ((event->GetPreciseZ()+12)/3) )*20 + ( (int) ((mytrk->GetPhi0Prime() + 1.5) / 0.3) ); 
+            DCA12_hist[central_bin]->Fill(mytrk->GetDCA2()*mytrk->GetChargePrime(),pt*mytrk->GetChargePrime(),z_bin,weight);
 
-            if (mytrk->GetNHits()>9) {
+            if (false && mytrk->GetNHits()>9) {
                 const float eConv = std::log10(mytrk->GetNHits()+1)*5 + std::log10(mytrk->GetTOFDPHI()+1);
                 if (mytrk->GetChargePrime()>0)
                     DCA2_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,eConv,weight);
@@ -1521,6 +1527,10 @@ namespace MyDileptonAnalysis
                 DCA_2D_hist[central_bin] ->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
             else
                 sDCA_2D_hist[central_bin]->Fill(mytrk->GetDCA2(),pt,hist_in,weight);
+            if (mytrk->GetChargePrime()>0)
+                DCA2_hist[central_bin] ->Fill(mytrk->GetsDCA(),pt,hist_in,weight);
+            else
+                sDCA2_hist[central_bin]->Fill(mytrk->GetsDCA(),pt,hist_in,weight);
             
         }
     }
@@ -1657,7 +1667,7 @@ namespace MyDileptonAnalysis
                 //const float dca2_x = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Sin(newTrack2->GetPhi0());
                 //const float dca2_y = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Cos(newTrack2->GetPhi0());
                 //const float dca = sqrt(SQR(dca1_x - dca2_x) + SQR(dca1_y - dca2_y));
-                const float dca = sqrt(SQR(newTrack1->GetDCA2()) + SQR(newTrack2->GetDCA2()));
+                const float dca = sqrt(SQR(newTrack1->GetsDCA()) + SQR(newTrack2->GetsDCA()));
 
                 const float pair_pt = sqrt( SQR(newTrack1->GetPx() + newTrack2->GetPx()) + SQR(newTrack1->GetPy() + newTrack2->GetPy()) );
 
@@ -1713,9 +1723,9 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5) ) && 
                            (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0) && 
                            (newTrack1->GetMinsDphi(0))>-5 ) ) hit_assocaition1=100;
-                    if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) ||
-                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
-                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
+                    if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.0 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) ||
+                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
+                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                            (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) ) hit_assocaition1=10000;
                 }else{
@@ -1723,8 +1733,8 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5) ) && 
                            (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0) && 
                            (newTrack1->GetMinsDphi(0))>-5 ) ) hit_assocaition1=100;
-                    if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) &&
-                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
+                    if ( (((TMath::Abs(newTrack1->GetMinsDphi(3))<2.0 && TMath::Abs(newTrack1->GetMinsDthe(3))<2) &&
+                           (TMath::Abs(newTrack1->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack1->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                            (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) )) hit_assocaition1=10000;
                 }
@@ -1741,9 +1751,9 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5) ) && 
                            (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0) && 
                            (newTrack2->GetMinsDphi(0))>-5 ) ) hit_assocaition2=100;
-                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) ||
-                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
-                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
+                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.0 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) ||
+                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
+                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
                            (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )  hit_assocaition2=10000;
                 }
@@ -1752,8 +1762,8 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5) ) && 
                            (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0) && 
                            (newTrack2->GetMinsDphi(0))>-5 ) ) hit_assocaition2=100;
-                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) &&
-                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.5 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
+                    if ( (((TMath::Abs(newTrack2->GetMinsDphi(3))<2.0 && TMath::Abs(newTrack2->GetMinsDthe(3))<2) &&
+                           (TMath::Abs(newTrack2->GetMinsDphi(2))<2.0 && TMath::Abs(newTrack2->GetMinsDthe(2))<2) ) && 
                            (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
                            (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )) hit_assocaition2=10000;
                 }
@@ -1830,7 +1840,7 @@ namespace MyDileptonAnalysis
                     //const float dca2_x = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Sin(newTrack2->GetPhi0());
                     //const float dca2_y = newTrack2->GetDCA2()*newTrack2->GetChargePrime()*TMath::Cos(newTrack2->GetPhi0());
                     //const float dca = sqrt(SQR(dca1_x - dca2_x) + SQR(dca1_y - dca2_y));
-                    const float dca = sqrt(SQR(newTrack1->GetDCA2()) + SQR(newTrack2->GetDCA2()));
+                    const float dca = sqrt(SQR(newTrack1->GetsDCA()) + SQR(newTrack2->GetsDCA()));
 
                     const float pair_pt = sqrt(SQR(newTrack1->GetPx() + newTrack2->GetPx()) + SQR(newTrack1->GetPy() + newTrack2->GetPy()));
 
@@ -4311,8 +4321,8 @@ namespace MyDileptonAnalysis
         const float dca = (L - R) * 10000; // In Micro Meters
 
         mytrk->SetDCA(dca);
-        const float sdca = dca / (sigma_DCA[0][0][layer2 - 1][0] + sigma_DCA[0][0][layer2 - 1][1] * exp(sigma_DCA[0][0][layer2 - 1][2] * mytrk->GetPtPrime()));
-        mytrk->SetsDCA(sdca);
+        //const float sdca = dca / (sigma_DCA[0][0][layer2 - 1][0] + sigma_DCA[0][0][layer2 - 1][1] * exp(sigma_DCA[0][0][layer2 - 1][2] * mytrk->GetPtPrime()));
+        //mytrk->SetsDCA(sdca);
 
         mytrk->SetDCAX(X_circle * dca / L);
         mytrk->SetDCAY(Y_circle * dca / L);
