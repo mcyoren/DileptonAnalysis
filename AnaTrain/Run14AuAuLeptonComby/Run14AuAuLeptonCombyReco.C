@@ -584,14 +584,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetsDCA()>-8000?mytrk->GetsDCA():400);
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2()>-8000?mytrk->GetDCAY2():400);
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  5000);
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  5000);
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
 
-        ult.set_double(Run14AuAuLeptonCombyEnum::PHI1, mytrk->GetPhi0Prime());
-        ult.set_double(Run14AuAuLeptonCombyEnum::PHI2, mytrk->GetPhi0Prime());
-        ult.set_double(Run14AuAuLeptonCombyEnum::PHI3, mytrk->GetPhi0Prime());
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI1, mytrk->GetPhi0Prime() + ( mytrk->GetPhiDC() - mytrk->GetPhi0Prime() ) * 2.5 / 220);
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI2, mytrk->GetPhi0Prime() + ( mytrk->GetPhiDC() - mytrk->GetPhi0Prime() ) * 5.0 / 220);
+        ult.set_double(Run14AuAuLeptonCombyEnum::PHI3, mytrk->GetPhi0Prime() + ( mytrk->GetPhiDC() - mytrk->GetPhi0Prime() ) * 15 / 220);
         ult.set_double(Run14AuAuLeptonCombyEnum::THE1, mytrk->GetThe0Prime());
         ult.set_double(Run14AuAuLeptonCombyEnum::THE2, mytrk->GetThe0Prime());
         ult.set_double(Run14AuAuLeptonCombyEnum::THE3, mytrk->GetThe0Prime());

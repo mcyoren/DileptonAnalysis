@@ -167,6 +167,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
+  fcn_3Dy.push_back(get_DCA);//10
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
@@ -176,20 +177,19 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
+  fcn_3Dy.push_back(get_DCA);//20
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
+  fcn_3Dy.push_back(get_DCA);//24
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
+  fcn_3Dy.push_back(get_DCA_BG);
   
   fcn_3Dy.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_mass_ee);
@@ -442,6 +442,27 @@ float Run14AuAuLeptonCombyHistos::get_pt_V0(PHParticle *Type1, const unsigned in
   const double pt = TMath::Sqrt(px*px + py*py);
   
   return pt;
+}
+
+float Run14AuAuLeptonCombyHistos::get_DCA_BG(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  double DCA1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  double DCA2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+
+  if (DCA1 > 4999 ) DCA1 = 0;
+  if (DCA2 > 4999 ) DCA2 = 0;
+  
+  const double DCA = TMath::Sqrt( TMath::Abs ( 2*DCA1 * DCA1 + 2*DCA2 * DCA2 ) );
+  if (DCA > 3000) return 3000;
+  //if (DCA < -3000) return -3000;
+  
+  return DCA;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V1(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1733,13 +1754,42 @@ float Run14AuAuLeptonCombyHistos::get_pt_V27(PHParticle *Type1, const unsigned i
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
 
-  if ( conv_reject1 > -10 || conv_reject2 > -10 ) return -999;
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
   if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
@@ -1760,13 +1810,42 @@ float Run14AuAuLeptonCombyHistos::get_pt_V28(PHParticle *Type1, const unsigned i
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
 
-  if ( conv_reject1 > -1 || conv_reject2 > -1 ) return -999;
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
   if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
@@ -1786,8 +1865,42 @@ float Run14AuAuLeptonCombyHistos::get_pt_V29(PHParticle *Type1, const unsigned i
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
 
-  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 10000 && hit_assoc2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
@@ -1835,22 +1948,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V31(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const int centrality1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
-  const int centrality2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
-
-  if ( centrality1 < 10 || centrality2 < 10 ) return -999;
-
-  const int bbcq = p1->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
-  const int bbcq2 = p2->get_integer(Run14AuAuLeptonCombyEnum::BBCQ);
   
-  if ( centrality1 > 50 && bbcq > 200 ) return -999;
-  if ( centrality2 > 50 && bbcq2 > 200 ) return -999;
-
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  if ( conv_reject1 > -10 || conv_reject2 > -10 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
