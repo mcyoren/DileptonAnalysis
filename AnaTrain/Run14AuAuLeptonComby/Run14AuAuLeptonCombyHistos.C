@@ -1,7 +1,7 @@
 #include "Run14AuAuLeptonCombyHistos.h"
 
 using namespace std;
-
+  
 Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
 {
   // 1D hists
@@ -15,356 +15,116 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
 
   // 3D hists // DCA, sigma DCA, 2*with 3 hits, 2*phi_v and pc3
   Master3D.clear();
-
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V0",  "inv_mass_ee_DCA_V0",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V1",  "inv_mass_ee_DCA_V1",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V2",  "inv_mass_ee_DCA_V2",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V3",  "inv_mass_ee_DCA_V3",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V4",  "inv_mass_ee_DCA_V4",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V5",  "inv_mass_ee_DCA_V5",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V6",  "inv_mass_ee_DCA_V6",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V7",  "inv_mass_ee_DCA_V7",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V8",  "inv_mass_ee_DCA_V8",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V9",  "inv_mass_ee_DCA_V9",  N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V10", "inv_mass_ee_DCA_V10", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V11", "inv_mass_ee_DCA_V11", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V12", "inv_mass_ee_DCA_V12", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V13", "inv_mass_ee_DCA_V13", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V14", "inv_mass_ee_DCA_V14", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V15", "inv_mass_ee_DCA_V15", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V16", "inv_mass_ee_DCA_V16", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V17", "inv_mass_ee_DCA_V17", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V18", "inv_mass_ee_DCA_V18", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V19", "inv_mass_ee_DCA_V19", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V20", "inv_mass_ee_DCA_V20", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V21", "inv_mass_ee_DCA_V21", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V22", "inv_mass_ee_DCA_V22", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V23", "inv_mass_ee_DCA_V23", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V24", "inv_mass_ee_DCA_V24", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V25", "inv_mass_ee_DCA_V25", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V26", "inv_mass_ee_DCA_V26", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V27", "inv_mass_ee_DCA_V27", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V28", "inv_mass_ee_DCA_V28", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V29", "inv_mass_ee_DCA_V29", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V30", "inv_mass_ee_DCA_V30", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V31", "inv_mass_ee_DCA_V31", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("inv_mass_ee_DCA_V32", "inv_mass_ee_DCA_V32", N_inv_m,    inv_m_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V0",  "delt_phi_ee_DCA_V0",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V1",  "delt_phi_ee_DCA_V1",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V2",  "delt_phi_ee_DCA_V2",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V3",  "delt_phi_ee_DCA_V3",  N_phi_bins,   phi_bins, N_DCA,      DCA_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V4",  "delt_phi_ee_DCA_V4",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V5",  "delt_phi_ee_DCA_V5",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V6",  "delt_phi_ee_DCA_V6",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V7",  "delt_phi_ee_DCA_V7",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V8",  "delt_phi_ee_DCA_V8",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V9",  "delt_phi_ee_DCA_V9",  N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V10", "delt_phi_ee_DCA_V10", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V11", "delt_phi_ee_DCA_V11", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V12", "delt_phi_ee_DCA_V12", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V13", "delt_phi_ee_DCA_V13", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V14", "delt_phi_ee_DCA_V14", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V15", "delt_phi_ee_DCA_V15", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V16", "delt_phi_ee_DCA_V16", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V17", "delt_phi_ee_DCA_V17", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V18", "delt_phi_ee_DCA_V18", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V19", "delt_phi_ee_DCA_V19", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V20", "delt_phi_ee_DCA_V20", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V21", "delt_phi_ee_DCA_V21", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V22", "delt_phi_ee_DCA_V22", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V23", "delt_phi_ee_DCA_V23", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V24", "delt_phi_ee_DCA_V24", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V25", "delt_phi_ee_DCA_V25", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V26", "delt_phi_ee_DCA_V26", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V27", "delt_phi_ee_DCA_V27", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V28", "delt_phi_ee_DCA_V28", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V29", "delt_phi_ee_DCA_V29", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V30", "delt_phi_ee_DCA_V30", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V31", "delt_phi_ee_DCA_V31", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("delt_phi_ee_DCA_V32", "delt_phi_ee_DCA_V32", N_phi_bins,   phi_bins, N_inv_m,  inv_m_bins,  N_pt, pt_bins));
-  Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
-  Master3D.push_back(new TH3D("mass_DCA1_DCA2_v0" , "mass_DCA1_DCA2_v0" ,   N_inv_m,    inv_m_bins, N_DCA,      DCA_bins, N_DCA, DCA_bins));
-
-
   fcn_3Dx.clear();
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_phi_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-  fcn_3Dx.push_back(get_mass_ee);
-
   fcn_3Dy.clear();
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);//10
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);//20
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA);//24
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  fcn_3Dy.push_back(get_DCA_BG);
-  
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_mass_ee);
-  fcn_3Dy.push_back(get_DCA);
-  fcn_3Dy.push_back(get_DCA1);
-
   fcn_3Dz.clear();
-  fcn_3Dz.push_back(get_pt_V0);
-  fcn_3Dz.push_back(get_pt_V1);
-  fcn_3Dz.push_back(get_pt_V2);
-  fcn_3Dz.push_back(get_pt_V3);
-  fcn_3Dz.push_back(get_pt_V4);
-  fcn_3Dz.push_back(get_pt_V5);
-  fcn_3Dz.push_back(get_pt_V6);
-  fcn_3Dz.push_back(get_pt_V7);
-  fcn_3Dz.push_back(get_pt_V8);
-  fcn_3Dz.push_back(get_pt_V9);
-  fcn_3Dz.push_back(get_pt_V10);
-  fcn_3Dz.push_back(get_pt_V11);
-  fcn_3Dz.push_back(get_pt_V12);
-  fcn_3Dz.push_back(get_pt_V13);
-  fcn_3Dz.push_back(get_pt_V14);
-  fcn_3Dz.push_back(get_pt_V15);
-  fcn_3Dz.push_back(get_pt_V16);
-  fcn_3Dz.push_back(get_pt_V17);
-  fcn_3Dz.push_back(get_pt_V18);
-  fcn_3Dz.push_back(get_pt_V19);
-  fcn_3Dz.push_back(get_pt_V20);
-  fcn_3Dz.push_back(get_pt_V21);
-  fcn_3Dz.push_back(get_pt_V22);
-  fcn_3Dz.push_back(get_pt_V23);
-  fcn_3Dz.push_back(get_pt_V24);
-  fcn_3Dz.push_back(get_pt_V25);
-  fcn_3Dz.push_back(get_pt_V26);
-  fcn_3Dz.push_back(get_pt_V27);
-  fcn_3Dz.push_back(get_pt_V28);
-  fcn_3Dz.push_back(get_pt_V29);
-  fcn_3Dz.push_back(get_pt_V30);
-  fcn_3Dz.push_back(get_pt_V31);
-  fcn_3Dz.push_back(get_pt_V32);
-  fcn_3Dz.push_back(get_pt_V0);
-  fcn_3Dz.push_back(get_pt_V1);
-  fcn_3Dz.push_back(get_pt_V2);
-  fcn_3Dz.push_back(get_pt_V2);
-  fcn_3Dz.push_back(get_pt_V4);
-  fcn_3Dz.push_back(get_pt_V5);
-  fcn_3Dz.push_back(get_pt_V6);
-  fcn_3Dz.push_back(get_pt_V7);
-  fcn_3Dz.push_back(get_pt_V8);
-  fcn_3Dz.push_back(get_pt_V9);
-  fcn_3Dz.push_back(get_pt_V10);
-  fcn_3Dz.push_back(get_pt_V11);
-  fcn_3Dz.push_back(get_pt_V12);
-  fcn_3Dz.push_back(get_pt_V13);
-  fcn_3Dz.push_back(get_pt_V14);
-  fcn_3Dz.push_back(get_pt_V15);
-  fcn_3Dz.push_back(get_pt_V16);
-  fcn_3Dz.push_back(get_pt_V17);
-  fcn_3Dz.push_back(get_pt_V18);
-  fcn_3Dz.push_back(get_pt_V19);
-  fcn_3Dz.push_back(get_pt_V20);
-  fcn_3Dz.push_back(get_pt_V21);
-  fcn_3Dz.push_back(get_pt_V22);
-  fcn_3Dz.push_back(get_pt_V23);
-  fcn_3Dz.push_back(get_pt_V24);
-  fcn_3Dz.push_back(get_pt_V25);
-  fcn_3Dz.push_back(get_pt_V26);
-  fcn_3Dz.push_back(get_pt_V27);
-  fcn_3Dz.push_back(get_pt_V28);
-  fcn_3Dz.push_back(get_pt_V29);
-  fcn_3Dz.push_back(get_pt_V30);
-  fcn_3Dz.push_back(get_pt_V31);
-  fcn_3Dz.push_back(get_pt_V32);
-  fcn_3Dz.push_back(get_pt_V0);
-  fcn_3Dz.push_back(get_DCA2);
-
   fcn_3D_weight.clear();
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
-  fcn_3D_weight.push_back(set_weight_1);
+
+  for (int i = 0; i < 24; ++i) {
+    Master3D.push_back(new TH3D(Form("inv_mass_ee_DCA_V%d", i), Form("inv_mass_ee_DCA_V%d;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]", i), 180, 0, 4.5, 40, 0, 1000, 12, 0, 4.8));
+    fcn_3Dx.push_back(get_mass_ee);
+    if (i<20 && i!=3) fcn_3Dy.push_back(get_DCA);
+    else fcn_3Dy.push_back(get_DCA_BG);
+    switch(i) {
+      case 0:  fcn_3Dz.push_back(get_pt_V0); break;
+      case 1:  fcn_3Dz.push_back(get_pt_V1); break;
+      case 2:  fcn_3Dz.push_back(get_pt_V2); break;
+      case 3:  fcn_3Dz.push_back(get_pt_V3); break;
+      case 4:  fcn_3Dz.push_back(get_pt_V4); break;
+      case 5:  fcn_3Dz.push_back(get_pt_V5); break;
+      case 6:  fcn_3Dz.push_back(get_pt_V6); break;
+      case 7:  fcn_3Dz.push_back(get_pt_V7); break;
+      case 8:  fcn_3Dz.push_back(get_pt_V8); break;
+      case 9:  fcn_3Dz.push_back(get_pt_V9); break;
+      case 10: fcn_3Dz.push_back(get_pt_V10); break;
+      case 11: fcn_3Dz.push_back(get_pt_V11); break;
+      case 12: fcn_3Dz.push_back(get_pt_V12); break;
+      case 13: fcn_3Dz.push_back(get_pt_V13); break;
+      case 14: fcn_3Dz.push_back(get_pt_V14); break;
+      case 15: fcn_3Dz.push_back(get_pt_V15); break;
+      case 16: fcn_3Dz.push_back(get_pt_V16); break;
+      case 17: fcn_3Dz.push_back(get_pt_V17); break;
+      case 18: fcn_3Dz.push_back(get_pt_V18); break;
+      case 19: fcn_3Dz.push_back(get_pt_V19); break;
+      case 20: fcn_3Dz.push_back(get_pt_V20); break;
+      case 21: fcn_3Dz.push_back(get_pt_V21); break;
+      case 22: fcn_3Dz.push_back(get_pt_V22); break;
+      case 23: fcn_3Dz.push_back(get_pt_V23); break;
+      case 24: fcn_3Dz.push_back(get_pt_V24); break;
+      case 25: fcn_3Dz.push_back(get_pt_V25); break;
+      case 26: fcn_3Dz.push_back(get_pt_V26); break;
+      case 27: fcn_3Dz.push_back(get_pt_V27); break;
+      case 28: fcn_3Dz.push_back(get_pt_V28); break;
+      case 29: fcn_3Dz.push_back(get_pt_V29); break;
+      case 30: fcn_3Dz.push_back(get_pt_V30); break;
+      case 31: fcn_3Dz.push_back(get_pt_V31); break;
+      default: fcn_3Dz.push_back(get_pt_V0); break;
+    }
+    fcn_3D_weight.push_back(set_weight_1);
+  }
+  for (int i = 0; i < 24; ++i) {
+    Master3D.push_back(new TH3D(Form("delt_phi_ee_DCA_V%d", i), Form("delt_phi_ee_DCA_V%d;#Delta#phi_{ee} [rad];m_{ee} [GeV];p_{T} [GeV]", i), 32, 0, 3.2, 45, 0, 4.5,  12, 0, 4.8));
+    fcn_3Dx.push_back(get_phi_ee);
+    fcn_3Dy.push_back(get_mass_ee);
+    switch(i) {
+      case 0:  fcn_3Dz.push_back(get_pt_V0); break;
+      case 1:  fcn_3Dz.push_back(get_pt_V1); break;
+      case 2:  fcn_3Dz.push_back(get_pt_V2); break;
+      case 3:  fcn_3Dz.push_back(get_pt_V3); break;
+      case 4:  fcn_3Dz.push_back(get_pt_V4); break;
+      case 5:  fcn_3Dz.push_back(get_pt_V5); break;
+      case 6:  fcn_3Dz.push_back(get_pt_V6); break;
+      case 7:  fcn_3Dz.push_back(get_pt_V7); break;
+      case 8:  fcn_3Dz.push_back(get_pt_V8); break;
+      case 9:  fcn_3Dz.push_back(get_pt_V9); break;
+      case 10: fcn_3Dz.push_back(get_pt_V10); break;
+      case 11: fcn_3Dz.push_back(get_pt_V11); break;
+      case 12: fcn_3Dz.push_back(get_pt_V12); break;
+      case 13: fcn_3Dz.push_back(get_pt_V13); break;
+      case 14: fcn_3Dz.push_back(get_pt_V14); break;
+      case 15: fcn_3Dz.push_back(get_pt_V15); break;
+      case 16: fcn_3Dz.push_back(get_pt_V16); break;
+      case 17: fcn_3Dz.push_back(get_pt_V17); break;
+      case 18: fcn_3Dz.push_back(get_pt_V18); break;
+      case 19: fcn_3Dz.push_back(get_pt_V19); break;
+      case 20: fcn_3Dz.push_back(get_pt_V20); break;
+      case 21: fcn_3Dz.push_back(get_pt_V21); break;
+      case 22: fcn_3Dz.push_back(get_pt_V22); break;
+      case 23: fcn_3Dz.push_back(get_pt_V23); break;
+      case 24: fcn_3Dz.push_back(get_pt_V24); break;
+      case 25: fcn_3Dz.push_back(get_pt_V25); break;
+      case 26: fcn_3Dz.push_back(get_pt_V26); break;
+      case 27: fcn_3Dz.push_back(get_pt_V27); break;
+      case 28: fcn_3Dz.push_back(get_pt_V28); break;
+      case 29: fcn_3Dz.push_back(get_pt_V29); break;
+      case 30: fcn_3Dz.push_back(get_pt_V30); break;
+      case 31: fcn_3Dz.push_back(get_pt_V31); break;
+      default: fcn_3Dz.push_back(get_pt_V0); break;
+    }
+    fcn_3D_weight.push_back(set_weight_1);
+  }
+
+  Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA);
+  fcn_3Dz.push_back(get_pt_V0);
+  fcn_3D_weight.push_back(set_weight_1);
+  
+  Master3D.push_back(new TH3D("mass_DCA1_DCA2_v0" , "mass_DCA1_DCA2_v0;m_{ee} [GeV];DCA_{e} [#mum];DCA_{e} [#mum]" , 90, 0, 4.5, 20, -500, -500, 20, -500, 500));
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA1);
+  fcn_3Dz.push_back(get_DCA2);
+  fcn_3D_weight.push_back(set_weight_1);
+
+  Master3D.push_back(new TH3D("mass_dalitz_v0" , "mass_dalit_v0z;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 20, 0, 1000, 20, 0, 5));
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA1);
+  fcn_3Dz.push_back(get_pt_V11);
+  fcn_3D_weight.push_back(set_weight_1);
+  Master3D.push_back(new TH3D("mass_dalitz_v1" , "mass_dalitz_v1;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 20, 0, 1000, 20, 0, 5));
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA1);
+  fcn_3Dz.push_back(get_pt_V16);
   fcn_3D_weight.push_back(set_weight_1);
 }
 
@@ -386,7 +146,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA(PHParticle *Type1, const unsigned int 
   const double DCA1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA = TMath::Sqrt( TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
-  if (DCA > 3000) return 3000;
+  if (DCA > 1000) return 995;
   //if (DCA < -3000) return -3000;
   
   return DCA;
@@ -420,6 +180,27 @@ float Run14AuAuLeptonCombyHistos::get_mass_ee(PHParticle *Type1, const unsigned 
   return TMath::Sqrt(es * es - px * px - py * py - pz * pz);
 }
 
+float Run14AuAuLeptonCombyHistos::get_DCA_BG(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  double DCA1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+  double DCA2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
+
+  if (DCA1 > 4999 ) DCA1 = 0;
+  if (DCA2 > 4999 ) DCA2 = 0;
+  
+  const double DCA = TMath::Sqrt( TMath::Abs ( 2*DCA1 * DCA1 + 2*DCA2 * DCA2 ) );
+  if (DCA > 3000) return 3000;
+  //if (DCA < -3000) return -3000;
+  
+  return DCA;
+}
+
 float Run14AuAuLeptonCombyHistos::get_pt_V0(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
@@ -441,28 +222,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V0(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_DCA_BG(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  double DCA1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-  double DCA2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-
-  if (DCA1 > 4999 ) DCA1 = 0;
-  if (DCA2 > 4999 ) DCA2 = 0;
-  
-  const double DCA = TMath::Sqrt( TMath::Abs ( 2*DCA1 * DCA1 + 2*DCA2 * DCA2 ) );
-  if (DCA > 3000) return 3000;
-  //if (DCA < -3000) return -3000;
-  
-  return DCA;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V1(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -506,7 +266,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V1(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7; // Limit pt to 5 GeV/c
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V2(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -555,53 +315,34 @@ float Run14AuAuLeptonCombyHistos::get_pt_V2(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
-float Run14AuAuLeptonCombyHistos::get_pt_V3(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+float Run14AuAuLeptonCombyHistos::get_pt_V3(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)//26
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
+
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
-
 float Run14AuAuLeptonCombyHistos::get_pt_V4(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
@@ -700,7 +441,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V5(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V6(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -749,7 +490,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V6(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V7(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -798,7 +539,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V7(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V8(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -847,7 +588,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V8(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V9(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -901,7 +642,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V9(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V10(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -955,7 +696,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V10(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V11(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1009,7 +750,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V11(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V12(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1063,7 +804,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V12(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
 
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V13(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1118,7 +859,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V13(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V14(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1172,7 +913,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V14(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V15(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1226,7 +967,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V15(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V16(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1280,10 +1021,406 @@ float Run14AuAuLeptonCombyHistos::get_pt_V16(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V17(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+
+  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
+  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);  
+
+  if( hadron_reject1 < 10060 || hadron_reject2 < 10060 ) return -999;
+  if( hadron_reject1%10 <6 || hadron_reject2%10 <6 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+
+float Run14AuAuLeptonCombyHistos::get_pt_V18(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
+  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+
+  if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V19(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
+  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+
+  if ( pt1 < 0.5 || pt2 < 0.5 ) return -999;
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V20(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)//27
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+
+float Run14AuAuLeptonCombyHistos::get_pt_V21(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)//29
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 10000 && hit_assoc2 < 10000 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V22(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)//30
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
+  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+
+  if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
+
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V23(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)//32
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
+  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+
+  if ( pt1 < 0.5 || pt2 < 0.5 ) return -999;
+
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V24(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+
+  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V25(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
@@ -1344,64 +1481,10 @@ float Run14AuAuLeptonCombyHistos::get_pt_V17(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
-float Run14AuAuLeptonCombyHistos::get_pt_V18(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
-
-  const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
-  const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);  
-
-  if( hadron_reject1 < 10060 || hadron_reject2 < 10060 ) return -999;
-  if( hadron_reject1%10 <6 || hadron_reject2%10 <6 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V19(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+float Run14AuAuLeptonCombyHistos::get_pt_V26(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
@@ -1458,21 +1541,15 @@ float Run14AuAuLeptonCombyHistos::get_pt_V19(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
-
-float Run14AuAuLeptonCombyHistos::get_pt_V20(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+float Run14AuAuLeptonCombyHistos::get_pt_V27(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
@@ -1512,16 +1589,15 @@ float Run14AuAuLeptonCombyHistos::get_pt_V20(PHParticle *Type1, const unsigned i
 
   if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
       return -999;
-
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
-float Run14AuAuLeptonCombyHistos::get_pt_V21(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+float Run14AuAuLeptonCombyHistos::get_pt_V28(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
@@ -1544,10 +1620,10 @@ float Run14AuAuLeptonCombyHistos::get_pt_V21(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
-float Run14AuAuLeptonCombyHistos::get_pt_V22(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+float Run14AuAuLeptonCombyHistos::get_pt_V29(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
@@ -1570,344 +1646,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V22(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V23(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
-
-  if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V24(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
-
-  if ( pt1 < 0.5 || pt2 < 0.5 ) return -999;
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
-  
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V25(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-
-float Run14AuAuLeptonCombyHistos::get_pt_V26(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V27(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
-
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-  
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-  
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-
-float Run14AuAuLeptonCombyHistos::get_pt_V28(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  
-  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
-
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-  
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-  
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V29(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-  
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
-
-  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
-
-  if ( hit_assoc1 < 10000 && hit_assoc2 < 10000 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-  
-  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
-  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
-  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
-
-  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
-  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
-  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
-  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
-
-  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
-      return -999;
-
-  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
-      return -999;
-
-  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
-      return -999;
-  
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V30(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -1917,16 +1656,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V30(PHParticle *Type1, const unsigned i
 
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
-
-  if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
-
+  
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
+  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -1938,10 +1672,65 @@ float Run14AuAuLeptonCombyHistos::get_pt_V30(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V31(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+  
+  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  
+  if (! ( (conv_reject1 < 0 && conv_reject2 > 999) || (conv_reject2 < 0 && conv_reject1 > 999) ) ) return -999;
+
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 100 && hit_assoc2 < 100 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
+  
+  const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi13 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+  const float phi21 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI1);
+  const float phi22 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI2);
+  const float phi23 = p2->get_double(Run14AuAuLeptonCombyEnum::PHI3);
+
+  const float the11 = p1->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the12 = p1->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the13 = p1->get_double(Run14AuAuLeptonCombyEnum::THE3);
+  const float the21 = p2->get_double(Run14AuAuLeptonCombyEnum::THE1);
+  const float the22 = p2->get_double(Run14AuAuLeptonCombyEnum::THE2);
+  const float the23 = p2->get_double(Run14AuAuLeptonCombyEnum::THE3);
+
+  if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 )
+      return -999;
+
+  if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 )
+      return -999;
+
+  if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
+      return -999;
+  
+
+  const double px = p1->get_px() + p2->get_px();
+  const double py = p1->get_py() + p2->get_py();
+
+  const double pt = TMath::Sqrt(px*px + py*py);
+  
+  return pt < 4.7 ? pt : 4.7;
+}
+
+float Run14AuAuLeptonCombyHistos::get_pt_V32(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
@@ -1964,38 +1753,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V31(PHParticle *Type1, const unsigned i
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt;
-}
-
-float Run14AuAuLeptonCombyHistos::get_pt_V32(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
-{
-  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
-  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
-
-  UltraLightTrack *p1 = ct1->GetTrack(i1);
-  UltraLightTrack *p2 = ct2->GetTrack(i2);
-
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
-
-  if ( pt1 < 0.5 || pt2 < 0.5 ) return -999;
-
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 999) || (conv_reject2 == -10 && conv_reject1 > 999) ) ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
-  const double px = p1->get_px() + p2->get_px();
-  const double py = p1->get_py() + p2->get_py();
-
-  const double pt = TMath::Sqrt(px*px + py*py);
-  
-  return pt;
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_phi_ee(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
