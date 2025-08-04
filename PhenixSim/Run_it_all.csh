@@ -142,7 +142,7 @@ set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
 set ptmin = 0.0
 set ptmax = 10.0
-set n     = -1. #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
+set n     = -1 #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = $selected_paticle #0,1,2,3,4,5,6-pi0,pi+,pi-,e-,e+,p,antip################helios jpsi and phi####pythia ccbar bbar
 
 echo "${Green}jobno            $jobno            ${Color_Off}"
@@ -198,11 +198,13 @@ set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_0_10_50M.root
  #set inputhelios = $DATADIR/output_single/helios/helios_jpsi_ee_02_5_11M.root
 endif
 if( $selected_paticle == 0) then
- #set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_50M.root
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_0_6_100M.root
+ #set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_04_6_50M.root helios_pi0_gg_0_6_100M
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gg_flat_0_6_100M.root
+ 
 endif
 if( $selected_paticle == 3) then
- set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_04_10_25M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_0_10_100M.root
+ #helios_pi0_gee_04_10_25M.root
 endif
 if( $selected_paticle == 4) then
  set inputhelios = $DATADIR/output_single/helios/helios_omega_ee_0_10_10M.root
@@ -214,7 +216,7 @@ if( $selected_paticle == 6) then
  set inputhelios = $DATADIR/output_single/helios/helios_psip_ee_0_10_10M.root
 endif
 if( $selected_paticle == 7) then
- set inputhelios = $DATADIR/output_single/helios/helios_eta_gee_0_10_10M.root
+ set inputhelios = $DATADIR/output_single/helios/helios_eta_gee_0_10_50M.root
 endif
 if( $selected_paticle == 8) then
  set inputhelios = $DATADIR/output_single/helios/helios_etap_gee_0_10_10M.root
