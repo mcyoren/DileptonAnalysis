@@ -96,7 +96,7 @@ int Run14AuAuLeptonCombyReco::Init(PHCompositeNode *topNode)
     event_container->GetHistsFromFile(GetFilePath());
     event_container->CreateOutFileAndInitHists(outfilename,fill_QA_lepton_hists+3*fill_ddphi_hadron,fill_QA_hadron_hists,fill_TTree,fill_d_dphi_hists,///temporary to be removed
                                                fill_DCA_hists, do_track_QA+do_electron_QA, fill_flow_hists, fill_true_DCA, check_veto,
-                                               fill_flow_hists>0?0:fill_inv_mass, do_reco_vertex, do_conv_dalitz_finder);
+                                               (int)(fill_inv_mass==2), do_reco_vertex, do_conv_dalitz_finder);
 
     return 0;
 }
@@ -155,8 +155,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         findNode::getClass<VtxOut>(TopNode, "VtxOut");
     const emcClusterContainer* emccont =
         findNode::getClass<emcClusterContainer>(TopNode, "emcClusterContainer");
-    const ReactionPlaneObject* rpobject = 
-        findNode::getClass<ReactionPlaneObject>(TopNode, "ReactionPlaneObject");
 
     if (!globalCNT)
         std::cout << "NO GLOBAL!!!!!!!!!!!!!!!\n";
@@ -172,8 +170,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         std::cout << "NO vtxout!!!!!!!!!!!!!!!\n";
     if (!emccont)
         std::cout << "NO emcClusterContainer!!!!!!!!!!!!!!!\n";
-    if (!rpobject)
-        std::cout << "NO ReactionPlaneObject!!!!!!!!!!!!!!!\n";
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(1);
 
@@ -263,39 +259,49 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     event->SetBBCtimeN(bbcT0);
 
      // BBC sum
-    ReactionPlaneSngl *rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1));
-    float psi2_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
+    float psi2_BBCS = -9999, psi2_BBCN = -9999, psi2_FVTXS = -9999, psi2_FVTXN = -9999;
+    if(fill_flow_hists)
+    {
+        const ReactionPlaneObject* rpobject = 
+            findNode::getClass<ReactionPlaneObject>(TopNode, "ReactionPlaneObject");
 
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 2));
-    float psi3_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
+        if (!rpobject)
+            std::cout << "NO ReactionPlaneObject!!!!!!!!!!!!!!!\n";
 
-    event->SetPsi2BBC(psi2_BBC);
-    event->SetPsi3BBC(psi3_BBC);
+        ReactionPlaneSngl *rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1));
+        float psi2_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
 
-    // FVTX, all sectors w/ eta>1.0
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 1));
-    float psi2_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 2));
+        float psi3_BBC = (rpsngl) ? rpsngl->GetPsi() : -9999;
 
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 2));
-    float psi3_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
+        event->SetPsi2BBC(psi2_BBC);
+        event->SetPsi3BBC(psi3_BBC);
 
-    event->SetPsi2FVTXA0(psi2_FVTXA0);
-    event->SetPsi3FVTXA0(psi3_FVTXA0);
+        // FVTX, all sectors w/ eta>1.0
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 1));
+        float psi2_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
 
-    //rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1))->SetPsi(psi2_FVTXA0);
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 42, 2));
+        float psi3_FVTXA0 = (rpsngl) ? rpsngl->GetPsi() : 0;
 
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, 1));
-    float psi2_BBCS = (rpsngl) ? rpsngl->GetPsi() : -9999;
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 1, 1));
-    float psi2_BBCN = (rpsngl) ? rpsngl->GetPsi() : -9999;
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 40, 1));
-    float psi2_FVTXS = (rpsngl) ? rpsngl->GetPsi() : -9999;
-    rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 41, 1));
-    float psi2_FVTXN = (rpsngl) ? rpsngl->GetPsi() : -9999;
+        event->SetPsi2FVTXA0(psi2_FVTXA0);
+        event->SetPsi3FVTXA0(psi3_FVTXA0);
 
-    if((fill_TTree||fill_true_DCA) && (psi2_BBC>-9000 || psi2_FVTXA0 >-9000)) event_container->FillEventHist(6);
-    if((fill_TTree||fill_true_DCA)) event_container->FillMyVTXHist((int) (centrality/20),precise_x,precise_y,precise_z);
+        //rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 2, 1))->SetPsi(psi2_FVTXA0);
 
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 0, 1));
+        psi2_BBCS = (rpsngl) ? rpsngl->GetPsi() : -9999;
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_BBC, 1, 1));
+        psi2_BBCN = (rpsngl) ? rpsngl->GetPsi() : -9999;
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 40, 1));
+        psi2_FVTXS = (rpsngl) ? rpsngl->GetPsi() : -9999;
+        rpsngl = rpobject->getReactionPlane(RP::calcIdCode(RP::ID_FVT, 41, 1));
+        psi2_FVTXN = (rpsngl) ? rpsngl->GetPsi() : -9999;
+
+        if((fill_TTree||fill_true_DCA) && (psi2_BBC>-9000 || psi2_FVTXA0 >-9000)) event_container->FillEventHist(6);
+        if((fill_TTree||fill_true_DCA)) event_container->FillMyVTXHist((int) (centrality/20),precise_x,precise_y,precise_z);
+
+    }
     const int run_group_beamoffset = event->GetRunGroup(run_number);// what is this???? <8?event->GetRunGroup(run_number):7;
     const int n_tracks = particleCNT->get_npart();
     
@@ -446,8 +452,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
-     
-      if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) || 
+     ////change it
+      if ( mytrk.GetMcId()<1000 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) || 
          ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
       {
           event->RemoveTrackEntry(itrk);
@@ -565,7 +571,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_rejection == 0 ) continue;   
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
         //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
-        if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
+        //if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
         //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
@@ -697,7 +703,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
-    if(fill_inv_mass&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
+    if((fill_inv_mass==2)&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
     {
@@ -705,7 +711,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         if ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
-           if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
+           //if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
            
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
         //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
@@ -744,14 +750,18 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                    (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
         }
         int conv_reject = 0;
-        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 )
-        {
-            if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -3) conv_reject = 10;
-            if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2.5) conv_reject = 100;
-            if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2) conv_reject = 1000;
-            if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2 && ( mytrk->GetPtPrime() > 0.5 || 
-            (TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDphi(2))<2.0) )) conv_reject = 10000;
-        }
+        if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 ) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=1000;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<1 ) conv_reject=10000;
+        //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 )
+        //{
+        //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -3) conv_reject = 10;
+        //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2.5) conv_reject = 100;
+        //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2) conv_reject = 1000;
+        //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -2 && ( mytrk->GetPtPrime() > 0.5 || 
+        //    (TMath::Abs(mytrk->GetMinsDphi(3))<2.0 && TMath::Abs(mytrk->GetMinsDphi(2))<2.0) )) conv_reject = 10000;
+        //}
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=100;
         //if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
         ////if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
