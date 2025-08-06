@@ -154,7 +154,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   Master3D.push_back(new TH3D("mass_dalitz_v7" , "mass_dalitz_v7;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
-  fcn_3Dz.push_back(get_pt_V18);
+  fcn_3Dz.push_back(get_pt_V2);
   fcn_3D_weight.push_back(set_weight_1);
   Master3D.push_back(new TH3D("mass_dalitz_v8" , "mass_dalitz_v8;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
@@ -1075,12 +1075,12 @@ float Run14AuAuLeptonCombyHistos::get_pt_V17(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+  if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
 
   const int hadron_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);
   const int hadron_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HADRON_REJECT);  
 
-  if( hadron_reject1 < 10060 || hadron_reject2 < 10060 ) return -999;
+  //if( hadron_reject1 < 10060 || hadron_reject2 < 10060 ) return -999;
   if( hadron_reject1%10 <6 || hadron_reject2%10 <6 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
