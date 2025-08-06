@@ -411,19 +411,25 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetEmcdz(sngl->get_emcdz());
       newElectron.SetEmcdphi(sngl->get_emcdphi());
       newElectron.SetEmcTower(sngl->get_sect(), sngl->get_ysect(), sngl->get_zsect());
-      newElectron.SetTOFDPHI(sngl->get_n0());
-      newElectron.SetTOFDZ(sngl->get_plemc());
+      newElectron.SetTOFDPHI(sngl->get_tofdphi());
+      newElectron.SetTOFDZ(sngl->get_tofdz());
       newElectron.SetPC3SDPHI(sngl->get_pc3sdphi());
       newElectron.SetPC3SDZ(sngl->get_pc3sdz());
       newElectron.SetCrkphi(sngl->get_center_phi());
       newElectron.SetCrkz(sngl->get_center_z());
-      newElectron.SetTOFE(sngl->get_m2tof());
+      //newElectron.SetTOFE(sngl->get_m2tof());
       newElectron.SetEmcTOF(sngl->get_temc());
       newElectron.SetChi2(sngl->get_chi2());
       newElectron.SetN0(sngl->get_n0());
       newElectron.SetNPE0(sngl->get_npe0());
       newElectron.SetDISP(sngl->get_disp());
       newElectron.SetMcId(embed->get_partidG());
+      if(true) {
+        //std::cout<< " tof m2 using two approaches"<<sngl->get_m2tof()<<" "<<SQR(sngl->get_mom())*( SQR(sngl->get_ttof())/SQR(sngl->get_pltof()) - 1)<<std::endl;
+        if(embed->get_toftS()>-99 && embed->get_pltofS()>-99) 
+        newElectron.SetTOFE(SQR(sngl->get_mom())*( SQR(embed->get_toftS()/embed->get_pltofS()*30.) - 1));
+        else newElectron.SetTOFE(-9999);
+      }
       if(false) std::cout<<"embed trk pt n0 e/p cent: "<<newElectron.GetPt()<<" "<<newElectron.GetN0()<<" "<<newElectron.GetEcore()/newElectron.GetPtot()<<" "<<event->GetCentrality()<<std::endl;
       float min_dist = 99999;
       int n_had = 0;
@@ -484,13 +490,15 @@ int embedana::process_event(PHCompositeNode *topNode)
       newElectron.SetEmcdz(trk_mc->get_emcdz(itrk));
       newElectron.SetEmcdphi(trk_mc->get_emcdphi(itrk));
       newElectron.SetEmcTower(trk_mc->get_sect(itrk), trk_mc->get_ysect(itrk), trk_mc->get_zsect(itrk));
-      newElectron.SetTOFDPHI(trk_mc->get_n0(itrk));
-      newElectron.SetTOFDZ(trk_mc->get_plemc(itrk));
+      newElectron.SetTOFDPHI(trk_mc->get_tofdphi(itrk));
+      newElectron.SetTOFDZ(trk_mc->get_tofdz(itrk));
       newElectron.SetPC3SDPHI(trk_mc->get_pc3sdphi(itrk));
       newElectron.SetPC3SDZ(trk_mc->get_pc3sdz(itrk));
       newElectron.SetCrkphi(trk_mc->get_center_phi(itrk));
       newElectron.SetCrkz(trk_mc->get_center_z(itrk));
-      newElectron.SetTOFE(trk_mc->get_m2tof(itrk));
+      if (trk_mc->get_ttof(itrk)>-999 && trk_mc->get_pltof(itrk)>-999 )
+        newElectron.SetTOFE(SQR(trk_mc->get_mom(itrk))*( SQR(trk_mc->get_ttof(itrk)*30./trk_mc->get_pltof(itrk)) - 1));
+      else newElectron.SetTOFE(-9999);
       newElectron.SetEmcTOF(trk_mc->get_temc(itrk));
       newElectron.SetChi2(trk_mc->get_chi2(itrk));
       newElectron.SetN0(trk_mc->get_n0(itrk));
@@ -589,6 +597,8 @@ int embedana::process_event(PHCompositeNode *topNode)
     event->AddVTXHit(&newHit);
   }
   ////////////////all hits////////////////////
+  int n_layers_hits[4]= {0, 0, 0, 0};
+  int n_good_hits[4]= {0, 0, 0, 0};
   if (remove_hadron_hits)
   {
     for (int ihit = 0; ihit < svx->get_nClusters(); ihit++)
@@ -608,6 +618,7 @@ int embedana::process_event(PHCompositeNode *topNode)
         if(ihit==embed_ids[iid]) already_used = true;
       }
       if(already_used) continue;
+      n_layers_hits[svxhit->get_layer()]++;
       
       MyDileptonAnalysis::MyVTXHit newHit;
 
@@ -629,9 +640,32 @@ int embedana::process_event(PHCompositeNode *topNode)
       }
       event->AddVTXHit(&newHit);
     }
-
+    if(n_layers_hits[0]+n_layers_hits[1]<(n_layers_hits[2]+n_layers_hits[3])*0.1)
+    {
+      std::cout << "\033[31m" << "Too few hits in layers 0 and 1: " << n_layers_hits[0] + n_layers_hits[1] << " < "
+                << (n_layers_hits[2] + n_layers_hits[3])  << "\033[0m" << std::endl;
+      EventNumber++;
+      return 0;
+    }
     event_container->Associate_Hits_to_Leptons();
     if(true)event_container->CleanUpHitList();
+    for (int ihit = 0; ihit < event->GetNVTXhit(); ihit++)
+    {
+      MyDileptonAnalysis::MyVTXHit *svxhit = event->GetVTXHitEntry(ihit);
+
+      if(svxhit->GetSensor() == 2) n_good_hits[svxhit->GetLayer()]++;
+    }
+    if(false)
+    {
+      std::cout << "\033[31m"
+            << "n layers hits: " << n_layers_hits[0] << " " << n_layers_hits[1] << " "
+            << n_layers_hits[2] << " " << n_layers_hits[3]
+            << "\033[0m" << std::endl;
+      std::cout << "\033[34m"
+            << "n good hits: " << n_good_hits[0] << " " << n_good_hits[1] << " "
+            << n_good_hits[2] << " "<< n_good_hits[3]
+            << "\033[0m" << std::endl;
+    }
   }
 
   if (fill_TTree && write_ttree )

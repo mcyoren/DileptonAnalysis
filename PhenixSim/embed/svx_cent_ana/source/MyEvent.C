@@ -295,13 +295,7 @@ namespace MyDileptonAnalysis
                         MyDileptonAnalysis::MyVTXHit *vtxhit = event->GetVTXHitEntry(ihit);
 
                         const int layer = vtxhit->GetLayer();
-
-                        if (layer != iter_layer)
-                            continue;
-
                         const int ilayer = vtxhit->GetiLayer();
-                        if (ilayer < 0)
-                            continue;
 
                         const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
                         const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
@@ -314,6 +308,12 @@ namespace MyDileptonAnalysis
                         if (abs(dphi) > 0.1 || abs(dthe) > 0.1) continue;
 
                         if(vtxhit->GetLadder()>49)vtxhit->SetLadder(vtxhit->GetLadder()-50);
+
+                        if (layer != iter_layer)
+                            continue;
+
+                        if (ilayer < 0)
+                            continue;
 
                         float sigma_phi_value = mytrk->get_sigma_phi_data(0*rungroup, central_bin, layer);
                         float mean_phi_value = mytrk->get_mean_phi_data(0*rungroup, central_bin, layer);
