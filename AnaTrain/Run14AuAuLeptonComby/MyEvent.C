@@ -1656,7 +1656,14 @@ namespace MyDileptonAnalysis
                 if (TMath::Abs(dphiDC - (0.04 * dalpha)) < 0.015) continue;
                 if (TMath::Abs(dphiDC - (-0.065 * dalpha)) < 0.015) continue;
                 //////////////end of pair cuts
-                
+                const int Nsect1 = newTrack1->GetSect();
+                const int Nsect2 = newTrack2->GetSect();
+                const float Ysect1 = newTrack1->GetYsect();
+                const float Ysect2 = newTrack2->GetYsect();
+                const float Zsect1 = newTrack1->GetZsect();
+                const float Zsect2 = newTrack2->GetZsect();
+                if (Nsect1 == Nsect2 && TMath::Abs(Ysect1 - Ysect2) < 3 && TMath::Abs(Zsect1 - Zsect2) < 3)
+                    continue;
                 const int in_hist = (int) (event->GetCentrality() / 20) + N_centr*((newTrack1->GetChargePrime()+newTrack2->GetChargePrime()+2)/2);
                 //const float a2 = newTrack2->GetMinDist(0);
                 //const float b2 = newTrack2->GetMinDist(1);
@@ -1767,27 +1774,29 @@ namespace MyDileptonAnalysis
                 if ( ((int)newTrack2->GetEmcdphi_e())%100==0 && ((int)newTrack2->GetEmcdphi_e())/100<3) conv_reject2=1000;
                 if ( ((int)newTrack2->GetEmcdphi_e())%100==0 && ((int)newTrack2->GetEmcdphi_e())/100<1) conv_reject2=10000;
 
-                if (!(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
+                if (!(newTrack1->GetMcId()>90&&newTrack2->GetMcId()>90))
+                    continue;
+                if (event->GetCentrality()<40 && !(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
                     continue;
                 if (event->GetCentrality()<20 && !(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
                     continue;
 
-                if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
-                if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
-                if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
+                if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.017 ) continue;
+                if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 ) continue;
+                if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 ) continue;
+
+                inv_mass_dca_fg0[in_hist]->Fill(dca, invm, pair_pt, weight);
+                delt_phi_dca_fg0[in_hist]->Fill(invm, dphi, pair_pt, weight);
 
                 if(conv_reject1<10 || conv_reject2<10) continue;
 
                 if (hit_assocaition1>99 && hit_assocaition2>99) 
-                {
-                    inv_mass_dca_fg0[in_hist]->Fill(dca, invm, pair_pt, weight);
-                    delt_phi_dca_fg0[in_hist]->Fill(invm, dphi, pair_pt, weight);
+                { 
+                    inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
+                    delt_phi_dca_fg1[in_hist]->Fill(invm, dphi, pair_pt, weight);
                 }
 
                 if(conv_reject1<1000 || conv_reject2<1000) continue;
-                  
-                inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
-                delt_phi_dca_fg1[in_hist]->Fill(invm, dphi, pair_pt, weight);
 
                 if (hit_assocaition1<100 || hit_assocaition2<100) continue;
 
@@ -1837,6 +1846,14 @@ namespace MyDileptonAnalysis
                     if (TMath::Abs(dzed) < 6.0 && TMath::Abs(dphiDC - (0.13 * dalpha)) < 0.015) continue;
                     if (TMath::Abs(dphiDC - (0.04 * dalpha)) < 0.015) continue;
                     if (TMath::Abs(dphiDC - (-0.065 * dalpha)) < 0.015) continue;
+                    const int Nsect1 = newTrack1->GetSect();
+                    const int Nsect2 = newTrack2->GetSect();
+                    const float Ysect1 = newTrack1->GetYsect();
+                    const float Ysect2 = newTrack2->GetYsect();
+                    const float Zsect1 = newTrack1->GetZsect();
+                    const float Zsect2 = newTrack2->GetZsect();
+                    if (Nsect1 == Nsect2 && TMath::Abs(Ysect1 - Ysect2) < 3 && TMath::Abs(Zsect1 - Zsect2) < 3)
+                        continue;
                     //////////////end of pair cuts
                     const int in_hist = (int) (event->GetCentrality() / 20) + N_centr*((newTrack1->GetChargePrime()+newTrack2->GetChargePrime()+2)/2);
 
@@ -1957,7 +1974,9 @@ namespace MyDileptonAnalysis
                     //if ( ((int)mytrk->GetEmcdphi_e())%100<1 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=1000;
                     if ( ((int)newTrack2->GetEmcdphi_e())%100==0 && ((int)newTrack2->GetEmcdphi_e())/100<1) conv_reject2=10000;
 
-                    if (!(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
+                    if (!(newTrack1->GetMcId()>90&&newTrack2->GetMcId()>90))
+                        continue;
+                    if (event->GetCentrality()<40 && !(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
                         continue;
                     if (event->GetCentrality()<20 && !(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
                         continue;
@@ -3741,7 +3760,7 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            if(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) < -2) is_conversion += 10;
+            if(mytrk->GetMinsDphi(0)< -2 && mytrk->GetMinsDphi(1) < -2) is_conversion += 10;
             mytrk->SetEmcdphi_e(is_dalitz*100+is_conversion);
             if(fill_hist)
             {

@@ -751,9 +751,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0 ) conv_reject=100;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=1000;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0 && ((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=10000;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=100;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=1000;
+        if ( ((int)mytrk->GetEmcdphi_e())%100==0 &&((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=10000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 )
         //{
         //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -3) conv_reject = 10;
@@ -784,7 +784,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKPHI, mytrk->GetCrkphi());
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA2());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetsDCA());
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());

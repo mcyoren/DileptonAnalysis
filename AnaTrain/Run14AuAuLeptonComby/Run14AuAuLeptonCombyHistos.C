@@ -161,6 +161,11 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dy.push_back(get_DCA_BG);
   fcn_3Dz.push_back(get_pt_V20);
   fcn_3D_weight.push_back(set_weight_1);
+  Master3D.push_back(new TH3D("mass_dalitz_v9" , "mass_dalitz_v9;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  fcn_3Dx.push_back(get_mass_ee);
+  fcn_3Dy.push_back(get_DCA);
+  fcn_3Dz.push_back(get_pt_V18);
+  fcn_3D_weight.push_back(set_weight_1);
 }
 
 // ee
