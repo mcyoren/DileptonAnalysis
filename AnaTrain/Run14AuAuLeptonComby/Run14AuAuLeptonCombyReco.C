@@ -750,10 +750,14 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                    (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
         }
         int conv_reject = 0;
-        if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;
-        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=100;
-        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=1000;
-        if ( ((int)mytrk->GetEmcdphi_e())%100==0 &&((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=10000;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
+        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-3 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
+        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0)<0  && mytrk->GetMinsDphi(1)<0 && mytrk->GetPtPrime()<0.7)) conv_reject=1000;
+        if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0)<0  && mytrk->GetMinsDphi(1)<0 && mytrk->GetPtPrime()<1.0)) conv_reject=10000;
+        //if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;
+        //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=100;
+        //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=1000;
+        //if ( ((int)mytrk->GetEmcdphi_e())%100==0 &&((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=10000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 )
         //{
         //    if( mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) > -3) conv_reject = 10;
@@ -967,7 +971,7 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
 
 void Run14AuAuLeptonCombyReco::fill_SVXHits_to_myevent(const SvxClusterList *svxhitlist, MyDileptonAnalysis::MyEvent *event)
 {
-    
+    //float min_adc[2] = {1000,1000};
     for (int ihit = 0; ihit < svxhitlist->get_nClusters(); ihit++)
     {
 
@@ -996,7 +1000,15 @@ void Run14AuAuLeptonCombyReco::fill_SVXHits_to_myevent(const SvxClusterList *svx
             continue;
         }
         event->AddVTXHit(&newHit);
+        //if (svxhit->get_layer()>1)
+        //{
+        //    min_adc[svxhit->get_layer()-2] = min_adc[svxhit->get_layer()-2] > svxhit->get_adc(0)+ svxhit->get_adc(1) ? svxhit->get_adc(0)+ svxhit->get_adc(1) : min_adc[svxhit->get_layer()-2];
+        //}
     }
+    //std::cout<< "min adc "<<min_adc[0]<<" "<<min_adc[1]<<std::endl;
+    //verbosity = verbosity > min_adc[0] ? min_adc[0] : verbosity;
+    //verbosity = verbosity > min_adc[1] ? min_adc[1] : verbosity;
+    //std::cout << "Run14AuAuLeptonCombyReco::fill_SVXHits_to_myevent: verbosity set to " << verbosity << std::endl;  
 }
 
 int Run14AuAuLeptonCombyReco::InitUltraLight(PHCompositeNode *topNode)
