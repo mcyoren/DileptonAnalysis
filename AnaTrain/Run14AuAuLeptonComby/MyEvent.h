@@ -172,7 +172,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime / tan(the0_prime);
+                        return pt_prime / tan(the0);
                   }
             };
             float GetPtot() const
@@ -183,7 +183,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0_prime)/tan(the0_prime) ) );
+                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0)/tan(the0) ) );
                   }
             };
             float GetPt() const { return pt; };
@@ -1243,10 +1243,10 @@ namespace MyDileptonAnalysis
             void ResetTree() {tree->Reset();};
             void FillTree() {tree->Fill();};
             void WriteOutFile();
-            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0, float sigma_theta = 5.0, float sigma_second = 5.0);
+            void Associate_Hits_to_Leptons(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0, int recover_fg = 0, float sigma_theta = 5.0, float sigma_second = 5.0, const float weight = 1.0);
             void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
-            void Associate_Hits_to_Hadrons_Dynamic(float sigma = 5, float vertex_x = -999, float vertex_y = -999, float weight = 1.0);
+            void Associate_Hits_to_Hadrons_Dynamic(float sigma = 5, float vertex_x = -999, float vertex_y = -999, const float weight = 1.0);
             void IdenElectrons();
 
             void Reveal_Hadron();
@@ -1269,8 +1269,8 @@ namespace MyDileptonAnalysis
             void fill_inv_mass_sim(const float weight = 1.0);
             void correct_beam_offset();
             void CleanUpHitList();
-            void FillQAHist(const int mc_id = -999);
-            void FillQAHistPreAssoc();
+            void FillQAHist(const int mc_id = -999, const float weight = 1.0);
+            void FillQAHistPreAssoc(const float weight = 1.0);
             void FillFlow(const float psi_BBCS=-999, const float psi_BBCN=-999, const float psi_FVTXS=-999, const float psi_FVTXN=-999);
             int isGhostEvent();
             void ResetRecoverFGVars();
@@ -1279,7 +1279,7 @@ namespace MyDileptonAnalysis
             int CircleIntersection(float cx0, float cy0, float r0, float cx1, float cy1, float r1, std::pair<float, float>& p1, std::pair<float, float>& p2);
             float compute_weighted_median(std::vector<std::pair<float, float> >& value_weight_pairs);
             void VertexXYScan(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
-            void ConversionFinder(int fill_hist, int verbosity, int do_el_cand);
+            void ConversionFinder(int fill_hist = 0, int verbosity = 0, int do_el_cand = 0, const float weight = 1.0);
             void VertexXYScanDC(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
             void CorrectVTXOffset(int keff = 1);
 

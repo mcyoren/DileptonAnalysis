@@ -439,6 +439,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     
     event_container->IdenElectrons();
+    if(do_electron_QA) event_container->FillQAHistPreAssoc();
 
     n_electrons = event->GetNtrack();
     for (int itrk = 0; itrk < n_electrons; itrk++)
@@ -465,7 +466,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
 
     if(event->GetNtrack()<1) return 0;
-    if(do_electron_QA) event_container->FillQAHistPreAssoc();
+    //if(do_electron_QA) event_container->FillQAHistPreAssoc();
 
     if(True)
     {
