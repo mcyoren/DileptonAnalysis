@@ -454,7 +454,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      if ( mytrk.GetMcId()<1000 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) || 
+      //if (mytrk.GetMcId()%10<6 ||
+      if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<10000) || 
          ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
       {
           event->RemoveTrackEntry(itrk);
@@ -627,6 +628,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
         if(true) event_container->CorrectVTXOffset(1);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
+        if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, 0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.,5);
         if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
 
@@ -716,7 +718,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
         //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
-
         int hadron_reject = mytrk->GetMcId();
         if ( (mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 
             || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6 ) hadron_reject+=10;
@@ -752,9 +753,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
-        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-3 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
-        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0)<0  && mytrk->GetMinsDphi(1)<0 && mytrk->GetPtPrime()<0.7)) conv_reject=1000;
-        if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0)<0  && mytrk->GetMinsDphi(1)<0 && mytrk->GetPtPrime()<1.0)) conv_reject=10000;
+        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
+        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) +  mytrk->GetMinsDphi(1)<-2) && mytrk->GetPtPrime()<0.7) conv_reject=1000;
+        if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) +  mytrk->GetMinsDphi(1)<-2)) conv_reject=10000;
+        
+        //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime() << " phi0 "<<mytrk->GetPhi0()<< " " <<mytrk->GetPhi0Prime() << " phiDC "<<mytrk->GetPhiDC()
+        //<< " the0 "<<mytrk->GetThe0Prime()<< " hit_assocaition "<< hit_assocaition <<
+        //" conv_reject " << conv_reject << " hadron_reject " << hadron_reject<<std::endl;
         //if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=100;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<2 ) conv_reject=1000;
@@ -931,12 +936,15 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
 
     newTrack->SetPt(sqrt(trk->get_px(itrk_reco) * trk->get_px(itrk_reco) + trk->get_py(itrk_reco) * trk->get_py(itrk_reco)));
     newTrack->SetQ(trk->get_charge(itrk_reco));
+    newTrack->SetQPrime(trk->get_charge(itrk_reco));
 
     newTrack->SetPhiDC(trk->get_phi(itrk_reco));
     newTrack->SetPhi0(trk->get_phi0(itrk_reco));
+    newTrack->SetPhi0Prime(trk->get_phi0(itrk_reco));
     newTrack->SetThe0(trk->get_the0(itrk_reco));
     newTrack->SetZDC(trk->get_zed(itrk_reco));
     newTrack->SetAlpha(trk->get_alpha(itrk_reco));
+    newTrack->SetAlphaPrime(trk->get_alpha(itrk_reco));
     newTrack->SetEmcId(trk->get_emcid(itrk_reco));
     newTrack->SetEcore(trk->get_ecore(itrk_reco));
     newTrack->SetDep(trk->get_dep(itrk_reco));

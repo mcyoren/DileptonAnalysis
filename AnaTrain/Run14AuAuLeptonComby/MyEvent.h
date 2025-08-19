@@ -172,7 +172,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime / tan(the0);
+                        return pt_prime / tan(the0_prime);
                   }
             };
             float GetPtot() const
@@ -183,7 +183,7 @@ namespace MyDileptonAnalysis
                   }
                   else
                   {
-                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0)/tan(the0) ) );
+                        return pt_prime * sqrt( (float) ( 1.+1./tan(the0_prime)/tan(the0_prime) ) );
                   }
             };
             float GetPt() const { return pt; };
@@ -1282,6 +1282,7 @@ namespace MyDileptonAnalysis
             void ConversionFinder(int fill_hist = 0, int verbosity = 0, int do_el_cand = 0, const float weight = 1.0);
             void VertexXYScanDC(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
             void CorrectVTXOffset(int keff = 1);
+            void CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity = 0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

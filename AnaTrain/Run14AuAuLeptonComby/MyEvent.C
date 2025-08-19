@@ -35,21 +35,21 @@ namespace MyDileptonAnalysis
             alpha_offset = (fXoffset[1][rg_beamoffset] / 220) * TMath::Sin(this->GetPhiDC()) + (fYoffset[1][rg_beamoffset] / 220) * TMath::Cos(this->GetPhiDC());
             phi_offset = dilep_par0_phi[1] * TMath::Sin(this->GetPhi0()) + dilep_par1_phi[1] * TMath::Cos(this->GetPhi0()) + dilep_par2_phi[1];
         }
-        this->SetAlphaPrime(this->GetAlpha() - alpha_offset);
-
+        //this->SetAlphaPrime(this->GetAlpha() - alpha_offset);
+        this->SetPhi0(this->GetPhi0() + 2.0195 * alpha_offset);
         if (this->GetArm() == 0)
             this->SetPhi0Prime(this->GetPhi0() - phi_offset + res_rot_east);
         else
             this->SetPhi0Prime(this->GetPhi0() - phi_offset + res_rot_west);
         // set Phi0 to right value
-        this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset);
+        //this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset);
 
-        this->SetPtPrime(this->GetPt() * TMath::Abs(this->GetAlpha() / this->GetAlphaPrime()) * mscale);
+        //this->SetPtPrime(this->GetPt() * TMath::Abs(this->GetAlpha() / this->GetAlphaPrime()) * mscale);
 
-        if (this->GetAlpha() * this->GetAlphaPrime() < 0)
-            this->SetQPrime(-this->GetCharge());
-        else
-            this->SetQPrime(this->GetCharge());
+        //if (this->GetAlpha() * this->GetAlphaPrime() < 0)
+        //    this->SetQPrime(-this->GetCharge());
+        //else
+        //    this->SetQPrime(this->GetCharge());
 
         const int DCArm = this->GetArm();
 
@@ -187,8 +187,8 @@ namespace MyDileptonAnalysis
             mytrk->SetMcId(0);
             if (mytrk->GetEcore()/mytrk->GetPtot()<0.6 || mytrk->GetN0()<0 ) continue;
         
-            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 )  mytrk->SetMcId(mytrk->GetMcId()+1);
-            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.7 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 )  mytrk->SetMcId(mytrk->GetMcId()+1);
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.7 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
                  mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
             const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
@@ -1154,18 +1154,8 @@ namespace MyDileptonAnalysis
             std::cout<<"no parabola"<<std::endl;
             return;
         }
-        const float a = 1./(x1-x3)*((y1-y2)/(x1-x2)-(y2-y3)/(x2-x3));
-        const float b = (y1-y2)*(x3+x2)/(x1-x2)/(x3-x1)-(y2-y3)*(x1+x2)/(x2-x3)/(x3-x1);
-        const float c = y1-b*x1-a*x1*x1;
-        const float slope = b + 2*a*this->GetPreciseX();
-        float phi0_new_method = TMath::ATan(slope);
-        if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method += pi;
-        if(false)mytrk->SetPhi0Prime(phi0_new_method);
-        mytrk->SetMinDist(a,0);
-        mytrk->SetMinDist(b,1);
-        mytrk->SetMinDist(c,2);
-        const float xx1 = this->GetPreciseX() + X_circle * dca / L / 10000.;
-        const float yy1 = this->GetPreciseY() + Y_circle * dca / L / 10000.;
+        const float xx1 = this->GetPreciseX();// + X_circle * dca / L / 10000.;
+        const float yy1 = this->GetPreciseY();// + Y_circle * dca / L / 10000.;
         const float xx2 = x1;
         const float yy2 = y1;
         const float xx3 = x2;
@@ -1174,15 +1164,27 @@ namespace MyDileptonAnalysis
         const float b1 = (yy1-yy2)*(xx3+xx2)/(xx1-xx2)/(xx3-xx1)-(yy2-yy3)*(xx1+xx2)/(xx2-xx3)/(xx3-xx1);
         //const float c1 = yy1-b1*xx1-a1*xx1*xx1;
         const float slope1 = b1 + 2*a1*xx1;
-        float phi0_new_method1 = TMath::ATan(slope1);
+        float phi0_new_method1 = TMath::ATan(slope1) + 0.0075*(mytrk->GetArm() == 0 ? 1 : -1);
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
-        //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.1)
-        //    std::cout<<"pt " << mytrk->GetPtPrime() << " phi0_new_method1 = "<<phi0_new_method1<<" phi old = "<<mytrk->GetPhi0()
-        //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << 
-        //    " dphi2 "<< phi0_new_method1-mytrk->GetPhi0Prime() <<std::endl;
-        if(false)mytrk->SetPhi0(phi0_new_method1);
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;
+        //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.1 || final_charge != mytrk->GetChargePrime())
+        //    std::cout<<"pt " << mytrk->GetPtPrime() << " phi0_new_method1 = "<<phi0_new_method1<<" phi old = "<<mytrk->GetPhi0()
+        //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << " " << 0.0075*(mytrk->GetArm() == 0 ? 1 : -1) << 
+        //    " dphi2 "<< phi0_new_method1-mytrk->GetPhi0Prime() <<" "<<final_charge<< " "<< mytrk->GetChargePrime() <<std::endl;
+        if(true)mytrk->SetPhi0(phi0_new_method1);
         mytrk->SetQ(final_charge);
+        return;
+
+        //const float a = 1./(x1-x3)*((y1-y2)/(x1-x2)-(y2-y3)/(x2-x3));
+        //const float b = (y1-y2)*(x3+x2)/(x1-x2)/(x3-x1)-(y2-y3)*(x1+x2)/(x2-x3)/(x3-x1);
+        //const float c = y1-b*x1-a*x1*x1;
+        //const float slope = b + 2*a*this->GetPreciseX();
+        //float phi0_new_method = TMath::ATan(slope);
+        //if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method += pi;
+        //mytrk->SetPhi0Prime(phi0_new_method);
+        //mytrk->SetMinDist(a,0);
+        //mytrk->SetMinDist(b,1);
+        //mytrk->SetMinDist(c,2);
     }
 
     void MyEvent::ReshuffleElectrons()
@@ -2132,6 +2134,26 @@ namespace MyDileptonAnalysis
             if(false && electron->GetMcId()==2 && electron->GetChargePrime()==-1 && electron->GetPtPrime()>0.4) std::cout << "Positron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
             if(false && electron->GetMcId()==3 && electron->GetChargePrime()==+1 && electron->GetPtPrime()>0.4) std::cout << "Electron: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
             
+        }
+    }
+
+    void MyEventContainer::CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity)
+    {
+        const int n_elec = event->GetNtrack();
+        for (int i = 0; i < n_elec; i++)
+        {
+            MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
+            if (verbosity>1) std::cout << "before: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            const float alpha_offset = - ( event->GetPreciseX() - beam_average_x ) / 220. * TMath::Sin(electron->GetPhiDC()) 
+                                       - ( event->GetPreciseY() - beam_average_y ) / 220. * TMath::Cos(electron->GetPhiDC());
+            electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
+
+            electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
+
+            if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                electron->SetQPrime(-electron->GetChargePrime());
+
+            if (verbosity>1) std::cout << "after: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
         }
     }
 
@@ -3899,8 +3921,8 @@ namespace MyDileptonAnalysis
 
             const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
             el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin, weight);
-            el_had_dphi->Fill(electron->GetTOFDPHI(),electron->GetPtPrime(),charge_centr_bin, weight);
-            el_had_dz  ->Fill(electron->GetTOFDZ()  ,electron->GetPtPrime(),charge_centr_bin, weight);
+            el_had_dphi->Fill(electron->GetEmcdphi(),electron->GetPtPrime(),charge_centr_bin, weight);
+            el_had_dz  ->Fill(electron->GetEmcdz(),  electron->GetPtPrime(),charge_centr_bin, weight);
         }
     }
 
