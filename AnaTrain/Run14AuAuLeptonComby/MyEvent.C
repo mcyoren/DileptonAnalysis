@@ -34,9 +34,11 @@ namespace MyDileptonAnalysis
         {
             alpha_offset = (fXoffset[1][rg_beamoffset] / 220) * TMath::Sin(this->GetPhiDC()) + (fYoffset[1][rg_beamoffset] / 220) * TMath::Cos(this->GetPhiDC());
             phi_offset = dilep_par0_phi[1] * TMath::Sin(this->GetPhi0()) + dilep_par1_phi[1] * TMath::Cos(this->GetPhi0()) + dilep_par2_phi[1];
-        }
+        }        
         //this->SetAlphaPrime(this->GetAlpha() - alpha_offset);
-        this->SetPhi0(this->GetPhi0() + 2.0195 * alpha_offset);
+        this->SetAlpha(this->GetAlpha() + alpha_offset);
+        //std::cout << "phi0 " << this->GetPhi0() << " new phi " << this->GetPhi0() + 0.03 * (this->GetPhiDC() - this->GetPhi0()) << " phidc " << this->GetPhiDC() << std::endl;
+        //this->SetPhi0(this->GetPhi0() + 0.03 * (this->GetPhiDC() - this->GetPhi0()));
         if (this->GetArm() == 0)
             this->SetPhi0Prime(this->GetPhi0() - phi_offset + res_rot_east);
         else
@@ -61,7 +63,7 @@ namespace MyDileptonAnalysis
     void MyTrack::ResetPrimes(const float bbcz, const float svxz, const int rungroup)
     {
         ///reversing prev corrections
-        float phi_offset = -999;
+        /*float phi_offset = -999;
     
         this->SetPhi0(this->GetPhi0() + 2.0195 * (this->GetAlpha() - this->GetAlphaPrime()));
 
@@ -82,7 +84,7 @@ namespace MyDileptonAnalysis
         // set Phi0 to right value
         const float alpha_offset = this->GetAlpha() - this->GetAlphaPrime();
         this->SetPhi0(this->GetPhi0() - 2.0195 * alpha_offset*0 );
-
+        */
         ////new correction for phi ant the offset between VTX and DC
         const int DCArm = this->GetArm();
         const int charge = (1-this->GetChargePrime())/2;
@@ -121,8 +123,8 @@ namespace MyDileptonAnalysis
 
         const float new_phi_the_offset = phi_the_offset_params[rungroup*0][DCArm][charge][0] * TMath::Sin(this->GetThe0Prime()) + 
         phi_the_offset_params[rungroup*0][DCArm][charge][1] * TMath::Cos(this->GetThe0Prime()) + phi_the_offset_params[rungroup*0][DCArm][charge][2];
-
-        this->SetPhi0(this->GetPhi0() -  new_phi_the_offset);        
+        
+        //this->SetPhi0(this->GetPhi0() -  new_phi_the_offset);        
 
         const float z = svxz + TMath::Cos(this->GetThe0Prime()) * radii[4];
         const int z_bin = z > 0 ? 1 : 0;
@@ -1167,11 +1169,11 @@ namespace MyDileptonAnalysis
         float phi0_new_method1 = TMath::ATan(slope1) + 0.0075*(mytrk->GetArm() == 0 ? 1 : -1);
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;
-        //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.1 || final_charge != mytrk->GetChargePrime())
-        //    std::cout<<"pt " << mytrk->GetPtPrime() << " phi0_new_method1 = "<<phi0_new_method1<<" phi old = "<<mytrk->GetPhi0()
-        //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << " " << 0.0075*(mytrk->GetArm() == 0 ? 1 : -1) << 
+        //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.001)
+        //    std::cout<<"pt " << mytrk->GetPtPrime() << " phi0_new_method1 = "<<phi0_new_method1<<" phi old = "<<mytrk->GetPhi0() << " phidc " << mytrk->GetPhiDC() + 2.0195*mytrk->GetAlphaPrime()
+        //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << " " << 0-0.03*mytrk->GetAlphaPrime() << 
         //    " dphi2 "<< phi0_new_method1-mytrk->GetPhi0Prime() <<" "<<final_charge<< " "<< mytrk->GetChargePrime() <<std::endl;
-        if(true)mytrk->SetPhi0(phi0_new_method1);
+        if(false)mytrk->SetPhi0(phi0_new_method1);
         mytrk->SetQ(final_charge);
         return;
 

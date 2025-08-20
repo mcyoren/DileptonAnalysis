@@ -754,7 +754,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
         if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
-        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) +  mytrk->GetMinsDphi(1)<-2) && mytrk->GetPtPrime()<0.7) conv_reject=1000;
+        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) +  mytrk->GetMinsDphi(1)<-2 && mytrk->GetPtPrime()<0.7)) conv_reject=1000;
         if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) +  mytrk->GetMinsDphi(1)<-2)) conv_reject=10000;
         
         //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime() << " phi0 "<<mytrk->GetPhi0()<< " " <<mytrk->GetPhi0Prime() << " phiDC "<<mytrk->GetPhiDC()
