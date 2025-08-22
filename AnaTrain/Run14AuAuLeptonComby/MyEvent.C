@@ -190,8 +190,9 @@ namespace MyDileptonAnalysis
             if (mytrk->GetEcore()/mytrk->GetPtot()<0.6 || mytrk->GetN0()<0 ) continue;
         
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.7 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 )  mytrk->SetMcId(mytrk->GetMcId()+1);
-            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.7 && mytrk->GetN0()>=2 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
-                 mytrk->GetProb()>0.01 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
+            if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot() < 1.2 && TMath::Abs(mytrk->GetEmcdphi()) < 0.02 && TMath::Abs(mytrk->GetEmcdz()-1) < 5 &&
+                mytrk->GetN0()>=3 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
+                 mytrk->GetProb()>0.1 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
             const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
             double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
@@ -3787,7 +3788,7 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            if(mytrk->GetMinsDphi(0)< -2 && mytrk->GetMinsDphi(1) < -2) is_conversion += 10;
+            if(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1) < -2) is_conversion += 10;
             mytrk->SetEmcdphi_e(is_dalitz*100+is_conversion);
             if(fill_hist)
             {
