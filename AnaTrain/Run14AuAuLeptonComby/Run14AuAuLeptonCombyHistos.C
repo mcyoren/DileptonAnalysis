@@ -1133,10 +1133,10 @@ float Run14AuAuLeptonCombyHistos::get_pt_V18(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+  //const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
+  //const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
 
-  if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
+  //if ( pt1 < 0.4 || pt2 < 0.4 ) return -999;
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
@@ -1175,6 +1175,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V18(PHParticle *Type1, const unsigned i
 
   if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 )
       return -999;
+
+  const float zed1 = p1->get_double(Run14AuAuLeptonCombyEnum::ZED);
+  const float zed2 = p2->get_double(Run14AuAuLeptonCombyEnum::ZED);
+
+  if ( TMath::Abs(zed1-zed2) < 4.0 ) return -999;
 
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
