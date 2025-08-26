@@ -1247,7 +1247,7 @@ namespace MyDileptonAnalysis
             void Associate_Hits_to_Leptons_OLD(float sigma = 2, float sigma_veto = 2, float sigma_inner = 2, int not_fill = 0);
             void Associate_Hits_to_Hadrons(float sigma = 2);
             void Associate_Hits_to_Hadrons_Dynamic(float sigma = 5, float vertex_x = -999, float vertex_y = -999, const float weight = 1.0);
-            void IdenElectrons();
+            void IdenElectrons(const int is_sim = 0);
 
             void Reveal_Hadron();
 

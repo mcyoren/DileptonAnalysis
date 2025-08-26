@@ -180,7 +180,7 @@ namespace MyDileptonAnalysis
         this->SetiLayer(ilayer);
     }
 
-    void MyEventContainer::IdenElectrons()
+    void MyEventContainer::IdenElectrons(const int is_sim)
     {
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
@@ -198,14 +198,18 @@ namespace MyDileptonAnalysis
             const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
             double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
             if (mytrk->GetPtPrime()<0.4) for (int i = 0; i < 4; i++) treshlods[i] = treshlods[i] + (0.4 - pt) / 20;
-            
-            const double mu_data  = 0.963644;//////podgon
-            const double sig_data = 0.0930464;
-            const double mu_sim   = 1.01519;
-            const double sig_sim  = 0.0734371;
-            
-            const double scale = sig_sim / sig_data;
-            double new_ep = mu_sim + scale * (mytrk->GetEcore()/mytrk->GetPtot() - mu_data);
+
+            double new_ep = mytrk->GetEcore()/mytrk->GetPtot();
+            if (is_sim == 0)
+            {
+                const double mu_data  = 0.963644;//////podgon
+                const double sig_data = 0.0930464;
+                const double mu_sim   = 1.01519;
+                const double sig_sim  = 0.0734371;
+                
+                const double scale = sig_sim / sig_data;
+                new_ep = mu_sim + scale * (mytrk->GetEcore()/mytrk->GetPtot() - mu_data);
+            }
 
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
             {
@@ -3872,19 +3876,21 @@ namespace MyDileptonAnalysis
             disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin, weight);
             chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
 
+            rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
+                electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10)), weight);
+
             if (electron->GetMcId()>0 && electron->GetMcId()%10>5)///figuring out how bdt actually works
             {
 
                 temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin, weight);
                 ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin, weight);
 
-                ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
-                    electron->GetSect() + 4 * electron->GetArm() + 8 * (electron->GetChargePrime() == 1 ? 1 : 0), weight);
+                ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime(), weight);
                 n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality(), weight);
                 prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality(), weight);
                 disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),event->GetCentrality(), weight);
                 chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),event->GetCentrality(), weight);
-                rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
+                //rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
                 rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
                 rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality(), weight);
 
@@ -3934,6 +3940,10 @@ namespace MyDileptonAnalysis
                 disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin, weight);
             if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
                 chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
+            
+            if (electron->GetN0()>= 4 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.1 && electron->GetChi2()>0) 
+                rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
+                electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10))+160, weight);
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
@@ -4231,12 +4241,12 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
             INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
 
-            INIT_HIST(3, ep_hist_el, 30, 0, 1.5, 50, 0., 5.0, 16, 0, 16);
+            INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
             INIT_HIST(3, prob_hist_el, 20, 0, 20, 50, 0, 10, 10, 0., 100);
             INIT_HIST(3, disp_hist_el, 50, 0, 10, 30, 0, 30, 10, 0., 100);
             INIT_HIST(3, chi2npe0_hist_el, 50, 0, 20, 30, 0, 30, 10, 0., 100);
-            INIT_HIST(3, rich_prob1, 50, 0, 20, 50, -10, 10, 10, 0., 100);
+            INIT_HIST(3, rich_prob1, 50, 0, 1.5, 50, 0, 5.0, 320, 0, 320);
             INIT_HIST(3, rich_prob2, 30, 0, 30, 50, -10, 10, 10, 0., 100);
             INIT_HIST(3, rich_prob3, 100, -0.05, 0.05, 100, -25, 25, 10, 0., 100);
             is_fill_track_QA = 1;
