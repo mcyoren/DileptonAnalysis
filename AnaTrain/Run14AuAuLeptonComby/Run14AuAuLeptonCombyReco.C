@@ -37,6 +37,8 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     ul = nullptr;
     event_container = nullptr;
 
+    read_in_emcmap();
+
     return;
 }
 
@@ -377,31 +379,22 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(use_iden)
     {
-        Walking(TopNode);
-        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        int n_loc_electrons = event->GetNtrack();
+        for (int itrk = 0; itrk < n_loc_electrons; itrk++)
         {
-            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-            mytrk->SetNHits(-1);
-            mytrk->SetTOFDPHI(-1);
-            if(mytrk->GetEmcId()>=0) 
+            MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
+            if(mytrk.GetEmcId()>=0) 
             {
-                emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
+                emcClusterContent* emc = emccont->getCluster(mytrk.GetEmcId());
                 if(!emc) continue;
-                
-	            //mytrk->SetEmcTOF(emc->tofcorr());  
-                const int icnttrack = mytrk->GetTrkId();
-                mytrk->SetEmcTOF( particleCNT->get_mom(icnttrack)*particleCNT->get_mom(icnttrack)*(emc->tofcorr()*emc->tofcorr()*900./particleCNT->get_plemc(icnttrack)/particleCNT->get_plemc(icnttrack)-1));
-            } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
-        }
-        int n_hadrons = event->GetNhadron();
-        for (int itrk = 0; itrk < n_hadrons; itrk++)
-        {
-            MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
-            if(mytrk->GetEmcId()>=0) 
-            {
-                emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
-                if(!emc) continue;
-	            mytrk->SetEmcTOF(emc->tofcorr());  
+                if (isEMCDead(emc)) 
+                {
+                    //std::cout<<"\033[31m"<<"Cluster cut failed for emc id: "<< " " << isEMCDead(emc) << " " <<mytrk.GetMcId() 
+                    //        << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
+                    event->RemoveTrackEntry(itrk);
+                    n_loc_electrons--;
+                    itrk--;
+                } //else std::cout<<"\033[32m"<<"Cluster cut passed for emc id: "<<mytrk.GetEmcId() << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
             } 
         }
     }
@@ -467,12 +460,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
 
     if(event->GetNtrack()<1) return 0;
-    //if(do_electron_QA) event_container->FillQAHistPreAssoc();
 
     if(True)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
-        ///std::cout<<n_tracks<<" "<<event->GetNVTXhit()<<" "<<bbcq<<std::endl;
         if(True)
         {
             event_container->FillEventHist(19);
@@ -481,69 +472,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         event_container->Associate_Hits_to_Leptons(5.,5.,5,1,2,3.0,5.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
-        //if (event_container->GetNGoodElectrons()<1) return 0;
-        //std::cout<<event->GetPreciseX()<<" "<<event->GetPreciseY()<<" "<<event->GetPreciseZ()<<std::endl;
-        //event->SetPreciseX(0.322);
-        //event->SetPreciseY(0.038);
-        //event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, 1,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,1);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(0,0);
-        //if(event_container->GetNGoodElectrons()>-1) event_container->VertexReFinder(1,0);
-        //if(event_container->GetNGoodElectrons()>1) event_container->Associate_Hits_to_Leptons(5.,5.,5,0,0,3.);
-
-        //if(fill_ddphi_hadron) 
-        //{
-        //    event_container->Associate_Hits_to_Hadrons_Dynamic(2.);
-        //    if (fill_true_DCA)event_container->FillTrueDCAHadrons();
-        //}
-        
-        if(false)
-        {
-            for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
-            {
-                MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-                if(event_container->GetNGoodElectrons()>0&&mytrk->GetHitCounter(0)>0) std::cout<< "1: " <<mytrk->GetNHits()<<" "<<mytrk->GetTOFDPHI()<<" "<<mytrk->GetGhost()<<std::endl;
-            }
-            for (int ibdtrack = 0; ibdtrack < (int) event_container->GetNBDThit(); ibdtrack++)
-            {       
-                if(event_container->GetNGoodElectrons()<1) continue;
-                for (int ihit = 0; ihit < event->GetNVTXhit(); ihit++)
-                {
-                  MyDileptonAnalysis::MyVTXHit myhit = *event->GetVTXHitEntry(ihit);
-                if(myhit.GetLadder()>24&&myhit.GetLadder()<50)std::cout<<myhit.GetLadder()<<" "<<myhit.GetClustId()<<std::endl;
-                }
-                std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetPt()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetEcore()<<" "<<event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit()<<std::endl;
-                //if(event_container->GetBDTHitEntry(ibdtrack)->GetPt()<0.4) continue;
-                MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(ibdtrack);
-                std::cout<<mytrk->GetHitIndex(0)<<" "<<mytrk->GetHitIndex(1)<<" "<<mytrk->GetHitIndex(2)<<" "<<mytrk->GetHitIndex(3)<<std::endl;
-                for (int jbdthit = 0; jbdthit < (int) event_container->GetBDTHitEntry(ibdtrack)->GetNBDThit(); jbdthit++)
-                {
-                    std::cout<<event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(0)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(2)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetIsTrue(3)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(0)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(2)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiL(3)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(0,1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(1,1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(2,1)<<" "<<
-                    event_container->GetBDTHitEntry(ibdtrack)->GetBDTHitEntry(jbdthit)->GetSecondHitPhiR(3,1)<<" "<<std::endl;
-                }
-            }
-        }
     }
+    
+    //if(do_electron_QA) event_container->FillQAHistPreAssoc();
     
     event_container->FillEventHist(10);
     if(event->GetNtrack()>1) event_container->FillEventHist(11);
@@ -565,16 +496,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         int hit_association = -1;
         int conv_rejection = 0;
         const float pt = mytrk->GetPtPrime();
-        if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;
+        if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;////podgon
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
         if ( (pt >  0.4 && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
         if ( (pt <= 0.4 && (mytrk->GetHitCounter(2) > 0  && mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;   
-        //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
-        //     mytrk->GetEcore()/mytrk->GetPtot()<1.2 && TMath::Abs(mytrk->GetEmcdphi())<0.005 && TMath::Abs(mytrk->GetEmcdz())<5  )) continue;///temporary cut
-        //if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
-        //if ( mytrk->GetProb() < 0.1) continue; //more hadron rejection
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
@@ -669,6 +596,37 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           itrk--;
           continue;
       }
+    }
+
+    if(use_iden)
+    {
+        Walking(TopNode);
+        for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            //mytrk->SetNHits(-1);
+            //mytrk->SetTOFDPHI(-1);
+            if(mytrk->GetEmcId()>=0) 
+            {
+                emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
+                if(!emc) continue;
+                
+	            //mytrk->SetEmcTOF(emc->tofcorr());  
+                const int icnttrack = mytrk->GetTrkId();
+                mytrk->SetEmcTOF( particleCNT->get_mom(icnttrack)*particleCNT->get_mom(icnttrack)*(emc->tofcorr()*emc->tofcorr()*900./particleCNT->get_plemc(icnttrack)/particleCNT->get_plemc(icnttrack)-1));
+            } /// 100*mytrk->GetPtot()*mytrk->GetPtot()*(emc->tofcorr()*emc->tofcorr()*900/mytrk->GetTOFDZ()/mytrk->GetTOFDZ()-1)
+        }
+        int n_hadrons = event->GetNhadron();
+        for (int itrk = 0; itrk < n_hadrons; itrk++)
+        {
+            MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
+            if(mytrk->GetEmcId()>=0) 
+            {
+                emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
+                if(!emc) continue;
+	            mytrk->SetEmcTOF(emc->tofcorr());  
+            } 
+        }
     }
     
     if(do_electron_QA) event_container->FillQAHist();

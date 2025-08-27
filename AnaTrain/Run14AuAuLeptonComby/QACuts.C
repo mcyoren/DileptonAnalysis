@@ -863,3 +863,52 @@ void Run14AuAuLeptonCombyReco::get_vtx_mean_values(int run_number, float &mean_x
     mean_x = -1;  // Indicate not found
     mean_y = -1;  // Indicate not found
 }
+
+
+void Run14AuAuLeptonCombyReco::read_in_emcmap()
+	{
+		TOAD toad_loader("Run14AuAuLeptonComby");
+		std::string fname = toad_loader.location("EmcalDeadMap.txt");
+		std::ifstream readmap( fname.c_str() );
+		if ( !readmap.is_open() )
+		{
+			std::cout<<"Abort. Fail to read in emc map: "<<fname<<std::endl;
+			exit(0);
+		}
+
+		for (int i = 0; i < 8; ++i)
+		{
+			for (int j = 0; j < 48; ++j)
+			{
+				for (int k = 0; k < 96; ++k)
+				{
+					EMCMAP[i][j][k] = 0;
+				}
+			}
+		}
+		int armsect = 0, ypos = 0, zpos = 0, status = 0;
+		std::cout<<"reading EMCal dead map: "<<std::endl;
+		while (readmap >> armsect >> ypos >> zpos >> status)
+		{
+			EMCMAP[armsect][ypos][zpos] = status;
+		}
+		readmap.close();
+	}
+
+int Run14AuAuLeptonCombyReco::isEMCDead(emcClusterContent *emc)
+{
+    // emc dead maps
+    int sector = -9999;
+    emc->arm() == 0 ? sector = emc->sector() : sector = 7 - emc->sector();
+    int y = emc->iypos();
+    int z = emc->izpos();
+    // at the edges
+    if(EMCMAP[sector][y][z]) return 3;
+    if ((y==0 || z==0) ) return 1;
+    if (sector < 6 && ( y == 35 || z == 71) ) return 1;
+    if (sector > 5 && ( y == 47 || z == 95) ) return 1;
+    // within 3x3 region of the hot/cold tower
+    if ((EMCMAP[sector][y-1][z-1] || EMCMAP[sector][y][z-1] || EMCMAP[sector][y+1][z-1] || EMCMAP[sector][y-1][z] || EMCMAP[sector][y+1][z] || EMCMAP[sector][y-1][z+1] || EMCMAP[sector][y][z+1] || EMCMAP[sector][y+1][z+1]) ) return 2;
+
+    return 0;
+}

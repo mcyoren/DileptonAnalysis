@@ -106,6 +106,8 @@ private:
                   MyDileptonAnalysis::Reconstruction* reco, float zVtx);
     bool is_bad_run(int run_number);
     void get_vtx_mean_values(int run_number, float &mean_x, float &mean_y);
+    void read_in_emcmap();
+    int isEMCDead(emcClusterContent *emc);
 
 
 protected:
@@ -168,6 +170,9 @@ protected:
     std::string outfilename;
 
     float vtx_mean_x, vtx_mean_y;
+
+    // emc map
+    int EMCMAP[8][48][96];
 };
 
 #endif /* __DATAANALYZER3DRECO_H__ */

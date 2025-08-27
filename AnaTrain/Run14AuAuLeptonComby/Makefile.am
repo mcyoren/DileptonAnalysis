@@ -6,7 +6,8 @@ mydatadir = $(datadir)/$(PACKAGE_INCLUDE_DIR)
 dist_mydata_DATA = \
   SectorBySector.txt \
   TowerByTower.txt \
-  WalkCorrection.txt
+  WalkCorrection.txt \
+  EmcalDeadMap.txt
 
 lib_LTLIBRARIES = \
   libRun14AuAuLeptonEvent.la \
