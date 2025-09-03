@@ -1114,6 +1114,7 @@ namespace MyDileptonAnalysis
             TH3D *hist_conv_phi_phi[6], *hist_conv_the_the[6];
             TH3D *hist_daltz_phi_phi[12], *hist_daltz_the_the[12];
             TH3D *hist_is_dalitz_conv[N_centr], *hist_is_ml_conv[N_centr], *sdphi_conv_hist[N_centr], *sdphi_real_conv_hist[N_centr];
+            TH3D *emcal_hist[8], *wemcal_hist[8];
 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
@@ -1212,6 +1213,7 @@ namespace MyDileptonAnalysis
                   }
                   for (int i = 0; i < 6; i++)  {hist_conv_phi_phi[i] = nullptr; hist_conv_the_the[i] = nullptr;}
                   for (int i = 0; i < 12; i++) {hist_daltz_phi_phi[i] = nullptr; hist_daltz_the_the[i] = nullptr;}
+                  for (int i = 0; i < 8; i++)  {emcal_hist[i] = nullptr; wemcal_hist[i] = nullptr;}
                   is_fill_hsits = 0;
                   is_fill_hadron_hsits = 0;
                   is_fill_tree = 0;
@@ -1283,6 +1285,7 @@ namespace MyDileptonAnalysis
             void VertexXYScanDC(const float run_beam_x, const float run_beam_y, int fill_hist, int verbosity);
             void CorrectVTXOffset(int keff = 1);
             void CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity = 0);
+            void FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight = 1.0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

@@ -100,7 +100,7 @@ private:
     void fill_SVXHits_to_myevent(const SvxClusterList *svxhitlist, MyDileptonAnalysis::MyEvent *event);
     void InitWalk(PHCompositeNode *topNode);
     void MoonWalk();
-    void Walking(PHCompositeNode *topNode);
+    void Walking(PHCompositeNode *topNode, const int icluster = 0);
     void StopWalking();
     int Solution(MyDileptonAnalysis::MyTrack* mytrk1, MyDileptonAnalysis::MyTrack* mytrk2, 
                   MyDileptonAnalysis::Reconstruction* reco, float zVtx);

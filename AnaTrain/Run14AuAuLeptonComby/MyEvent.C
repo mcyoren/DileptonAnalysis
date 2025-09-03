@@ -227,6 +227,13 @@ namespace MyDileptonAnalysis
             if(false) if (mytrk->GetMcId()>10 && mytrk->GetCrkphi()<-99 && mytrk->GetPtPrime()>0.4 ) std::cout<<MyML::GetProb(input_x)<<" "<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<" "<<mytrk->GetCrkphi()<<" "<<mytrk->GetEmcdz()<<std::endl;
             
+            //const double input_x[11]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2/npe0', 'prob', 'emcdphi', 'emcdz', 'disp2', 'centr+pt']
+            //{
+            //    event->GetCentrality(), pt, new_ep, (double) mytrk->GetN0(), mytrk->GetDisp(), 
+            //    TMath::Abs(mytrk->GetChi2()/(mytrk->GetNpe0()+0.001))<10 ? 1. : 0., 
+            //    TMath::Abs(mytrk->GetEmcdphi()) < 0.02 ? 1. : 0., TMath::Abs(mytrk->GetEmcdz()-1) < 8 ? 1. : 0., 
+            //    mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(pt)
+            //};
         }    
     }
 
@@ -1181,7 +1188,7 @@ namespace MyDileptonAnalysis
         const float b1 = (yy1-yy2)*(xx3+xx2)/(xx1-xx2)/(xx3-xx1)-(yy2-yy3)*(xx1+xx2)/(xx2-xx3)/(xx3-xx1);
         //const float c1 = yy1-b1*xx1-a1*xx1*xx1;
         const float slope1 = b1 + 2*a1*xx1;
-        float phi0_new_method1 = TMath::ATan(slope1) + 0.0075*(mytrk->GetArm() == 0 ? 1 : -1);
+        float phi0_new_method1 = TMath::ATan(slope1) - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;
         //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.001)
@@ -2167,17 +2174,51 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < n_elec; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            if (verbosity>1) std::cout << "before: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
-            const float alpha_offset = - ( event->GetPreciseX() - beam_average_x ) / 220. * TMath::Sin(electron->GetPhiDC()) 
-                                       - ( event->GetPreciseY() - beam_average_y ) / 220. * TMath::Cos(electron->GetPhiDC());
-            electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
+            if(true)
+            {
+                if (verbosity>1) std::cout << "before: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+                const float alpha_offset = - ( event->GetPreciseX() - beam_average_x ) / 220. * TMath::Sin(electron->GetPhiDC()) 
+                                           - ( event->GetPreciseY() - beam_average_y ) / 220. * TMath::Cos(electron->GetPhiDC());
+                electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
 
-            electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
+                electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
 
-            if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
-                electron->SetQPrime(-electron->GetChargePrime());
+                if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                    electron->SetQPrime(-electron->GetChargePrime());
 
-            if (verbosity>1) std::cout << "after: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+                if (verbosity>1) std::cout << "after: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
+            }
+
+
+            if(false)
+            {
+                const float dcax = electron->GetDCAX2();
+                const float dcay = electron->GetDCAY2();
+                const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
+
+                const float dphi = electron->GetDCAY() - electron->GetDCAX();
+                const float alpha_phi_offset = dphi * ( electron->GetAlphaPrime() / ( electron->GetDCAX() - electron->GetPhiDC() ) );
+                const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
+
+                if(alpha_offset*electron->GetAlphaPrime()<0) continue;
+                if (electron->GetPtPrime()>1.99 && electron->GetPtPrime()<2.01) 
+                    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) << " "<<
+                    electron->GetDCAY() << " " << electron->GetDCAX()<<" "<<electron->GetPhiDC() <<" "<<
+                    electron->GetAlphaPrime() <<" " <<alpha_offset  << std::endl;
+
+
+                electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
+
+                if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                    std::cout << "\033[31m" << "WARNING: charge was flipped!! at pt = " << electron->GetPtPrime() << "" << "\033[0m"<<std::endl;
+
+                electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
+
+                if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                    electron->SetQPrime(-electron->GetChargePrime());
+
+
+            }
         }
     }
 
@@ -4251,6 +4292,11 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, rich_prob3, 100, -0.05, 0.05, 100, -25, 25, 10, 0., 100);
             is_fill_track_QA = 1;
         }
+        if(fill_track_QA==2)
+        {
+            INIT_HISTOS(3,  emcal_hist, 8, 96, 0, 96, 48, 0, 48, 6, 0, 6);
+            INIT_HISTOS(3, wemcal_hist, 8, 96, 0, 96, 48, 0, 48, 6, 0, 6);
+        }
         if(fill_flow)
         {
             INIT_HIST(3, BBC_psi_hist ,  64, -1.6, 1.6, 20, 0, 100, 3, 0, 3);
@@ -4377,6 +4423,19 @@ namespace MyDileptonAnalysis
             outfile->Close();
         }
         std::cout << "Hists were written to My outfile" << std::endl;
+    }
+
+    void MyEventContainer::FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight)
+    {
+        if(isec<0 || isec>7) return;
+        if(ecore<0.3) return;
+        const int icore = (ecore < 0.5) ? 0 :
+        (ecore < 1.0) ? 1 :
+        (ecore < 2.0) ? 2 :
+        (ecore < 3.0) ? 3 :
+        (ecore < 5.0) ? 4 : 5;
+        emcal_hist[isec]->Fill(iz,iy,icore,weight);
+        wemcal_hist[isec]->Fill(iz,iy,icore,ecore*weight);
     }
 
     /// @yoren no longer in use

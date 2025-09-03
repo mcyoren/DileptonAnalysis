@@ -387,7 +387,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             {
                 emcClusterContent* emc = emccont->getCluster(mytrk.GetEmcId());
                 if(!emc) continue;
-                if (isEMCDead(emc)) 
+                if (isEMCDead(emc) > 2) 
                 {
                     //std::cout<<"\033[31m"<<"Cluster cut failed for emc id: "<< " " << isEMCDead(emc) << " " <<mytrk.GetMcId() 
                     //        << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
@@ -396,6 +396,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                     itrk--;
                 } //else std::cout<<"\033[32m"<<"Cluster cut passed for emc id: "<<mytrk.GetEmcId() << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
             } 
+        }
+        for (int icluster = 0; icluster <  (int) emccont->size(); icluster++)
+        {
+            emcClusterContent* emc = emccont->getCluster(icluster);
+            if(!emc) continue;
+            int sector = emc->arm() == 0 ? emc->sector() : 7 - emc->sector();
+            event_container->FillEmcalMapHist(sector,emc->iypos(),emc->izpos(),emc->ecore());
         }
     }
     
@@ -431,6 +438,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         }
     }
     
+    if(event->GetNtrack()<1) return 0;
     event_container->IdenElectrons();
     if(do_electron_QA) event_container->FillQAHistPreAssoc();
 
@@ -600,7 +608,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     if(use_iden)
     {
-        Walking(TopNode);
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
@@ -608,6 +615,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             //mytrk->SetTOFDPHI(-1);
             if(mytrk->GetEmcId()>=0) 
             {
+                Walking(TopNode, mytrk->GetEmcId());
                 emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
                 if(!emc) continue;
                 
@@ -622,6 +630,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             MyDileptonAnalysis::MyHadron *mytrk = event->GetHadronEntry(itrk);
             if(mytrk->GetEmcId()>=0) 
             {
+                Walking(TopNode, mytrk->GetEmcId());
                 emcClusterContent* emc = emccont->getCluster(mytrk->GetEmcId());
                 if(!emc) continue;
 	            mytrk->SetEmcTOF(emc->tofcorr());  

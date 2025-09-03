@@ -745,7 +745,7 @@ void Run14AuAuLeptonCombyReco::InitWalk(PHCompositeNode *topNode)
     return ;
 }
 
-void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
+void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode, const int icluster)
 {
     const PHGlobal *_phglobal_ptr =
         findNode::getClass<PHGlobal>(topNode, "PHGlobal");
@@ -761,11 +761,14 @@ void Run14AuAuLeptonCombyReco::Walking(PHCompositeNode *topNode)
     float bbct0 = _phglobal_ptr->getBbcTimeZero();
     
     int nclusters = _emcClusterContainer_ptr->size();
+    if(icluster>=nclusters) return;
     int ntowers = _emcTowerContainer_ptr->size();
     
-    for (int i = 0; i < nclusters; i++)
+    for (int i = icluster; i < icluster+1; i++)
     { 
         emcClusterContent *cluster = _emcClusterContainer_ptr->getCluster(i);
+        if (cluster == nullptr)
+            continue;
 
         int clustercent = cluster->towerid(0);
         emcTowerContent *tower = nullptr;
@@ -908,7 +911,10 @@ int Run14AuAuLeptonCombyReco::isEMCDead(emcClusterContent *emc)
     if (sector < 6 && ( y == 35 || z == 71) ) return 1;
     if (sector > 5 && ( y == 47 || z == 95) ) return 1;
     // within 3x3 region of the hot/cold tower
-    if ((EMCMAP[sector][y-1][z-1] || EMCMAP[sector][y][z-1] || EMCMAP[sector][y+1][z-1] || EMCMAP[sector][y-1][z] || EMCMAP[sector][y+1][z] || EMCMAP[sector][y-1][z+1] || EMCMAP[sector][y][z+1] || EMCMAP[sector][y+1][z+1]) ) return 2;
+    const int sum_of_neighbours = EMCMAP[sector][y-1][z-1] + EMCMAP[sector][y][z-1] + EMCMAP[sector][y+1][z-1] +
+                                  EMCMAP[sector][y-1][z]   + EMCMAP[sector][y+1][z]   +
+                                  EMCMAP[sector][y-1][z+1] + EMCMAP[sector][y][z+1] + EMCMAP[sector][y+1][z+1];
+    if (sum_of_neighbours) return sum_of_neighbours;
 
     return 0;
 }
