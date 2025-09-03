@@ -387,7 +387,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             {
                 emcClusterContent* emc = emccont->getCluster(mytrk.GetEmcId());
                 if(!emc) continue;
-                if (isEMCDead(emc) > 2) 
+                if (isEMCDead(emc) > 1) 
                 {
                     //std::cout<<"\033[31m"<<"Cluster cut failed for emc id: "<< " " << isEMCDead(emc) << " " <<mytrk.GetMcId() 
                     //        << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
@@ -397,12 +397,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 } //else std::cout<<"\033[32m"<<"Cluster cut passed for emc id: "<<mytrk.GetEmcId() << " " << mytrk.GetPtPrime() <<" "<<mytrk.GetEcore()/mytrk.GetPtot()<<"\033[0m"<<std::endl;
             } 
         }
-        for (int icluster = 0; icluster <  (int) emccont->size(); icluster++)
+        if (do_electron_QA==2)
         {
-            emcClusterContent* emc = emccont->getCluster(icluster);
-            if(!emc) continue;
-            int sector = emc->arm() == 0 ? emc->sector() : 7 - emc->sector();
-            event_container->FillEmcalMapHist(sector,emc->iypos(),emc->izpos(),emc->ecore());
+            for (int icluster = 0; icluster <  (int) emccont->size(); icluster++)
+            {
+                emcClusterContent* emc = emccont->getCluster(icluster);
+                if(!emc) continue;
+                if (isEMCDead(emc) > 1) continue;
+                int sector = emc->arm() == 0 ? emc->sector() : 7 - emc->sector();
+                event_container->FillEmcalMapHist(sector,emc->iypos(),emc->izpos(),emc->ecore());
+            }
         }
     }
     
