@@ -460,7 +460,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
       //if (mytrk.GetMcId()%10<6 ||
-      if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
+      if ( mytrk.GetMcId()<10 || (event->GetCentrality()<40 && mytrk.GetMcId()<100) || (event->GetCentrality()<20 && mytrk.GetMcId()<100) || mytrk.GetProb()<0.1 || 
          ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
       {
           event->RemoveTrackEntry(itrk);
