@@ -1090,7 +1090,7 @@ namespace MyDileptonAnalysis
             TH3D *dphi_the0_corr_hist[nvtx_layers], *dthe_phi0_corr_hist[nvtx_layers]; 
             TH3D *d_dphi_hist[N_centr], *d_dthe_hist[N_centr], *DCA_hist[N_centr];
             TH3D *sd_dphi_hist[N_centr], *sd_dthe_hist[N_centr], *sDCA_hist[N_centr];
-            TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist;
+            TH3D *temc, *ttof, *n0_hist, *ep_hist, *prob_hist, *disp_hist, *chi2npe0_hist, *stof_hist;
             TH3D *DCA_2D_hist[N_centr], *sDCA_2D_hist[N_centr];
             TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el, *rich_prob1, *rich_prob2, *rich_prob3;
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
@@ -1129,12 +1129,12 @@ namespace MyDileptonAnalysis
                   hist_bz = nullptr;
                   tree = nullptr;
                   event_hist = nullptr; centr_hist = nullptr;
-                  temc = nullptr; ttof = nullptr; n0_hist = nullptr; ep_hist=nullptr; prob_hist=nullptr; disp_hist=nullptr; chi2npe0_hist=nullptr;
+                  temc = nullptr; ttof = nullptr; n0_hist = nullptr; ep_hist=nullptr; prob_hist=nullptr; disp_hist=nullptr; chi2npe0_hist=nullptr; stof_hist=nullptr;
                   emc_dphi_el = nullptr; emc_dz_el = nullptr; n0_hist_el = nullptr; ep_hist_el=nullptr; prob_hist_el=nullptr; disp_hist_el=nullptr; chi2npe0_hist_el=nullptr;
                   rich_prob1 = nullptr; rich_prob2 = nullptr; rich_prob3 = nullptr;
                   el_had_dphi = nullptr, el_had_dz = nullptr, el_had_dr = nullptr;
                   DCPT_ReconPT = nullptr, sDCPT_ReconPT = nullptr, charge_hist = nullptr, phi_hist = nullptr, the_hist = nullptr, pt_corr = nullptr;
-                  couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr, veto_type_hist = nullptr;
+                  couter_veto_hist = nullptr; counter_assoc_eff_hist = nullptr;counter_assoc_ghost_hist=nullptr; veto_type_hist = nullptr;
                   truehithist = nullptr; truehitsigmahist = nullptr;charge_recover_hist=nullptr;
                   v2_BBC_hist = nullptr; v2_FVTX_hist = nullptr; 
                   BBC_psi_hist = nullptr; FVTX_psi_hist = nullptr; cos_BBC_hist = nullptr; cos_FVTX_hist = nullptr;
@@ -1286,6 +1286,7 @@ namespace MyDileptonAnalysis
             void CorrectVTXOffset(int keff = 1);
             void CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity = 0);
             void FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight = 1.0);
+            void SigmalizedToF(const int verbosity = 0, const int is_sim = 0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

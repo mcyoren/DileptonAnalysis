@@ -3922,10 +3922,13 @@ namespace MyDileptonAnalysis
 
             if (electron->GetMcId()>0 && electron->GetMcId()%10>5)///figuring out how bdt actually works
             {
+                const float m_emc = electron->GetEmcTOF() < -9000 ? -9999 : electron->GetEmcTOF()    > 3.4 ? 3.4 : electron->GetEmcTOF()    < -1.4 ? -1.4 : electron->GetEmcTOF();
+                const float m_tof = electron->GetTOFE() < -900000 ? -9999 : electron->GetTOFE()*0.01 > 3.4 ? 3.4 : electron->GetTOFE()*0.01 < -1.4 ? -1.4 : electron->GetTOFE()*0.01;
+                //std::cout << "m_tof: " << m_tof << "  m_emc: " << m_emc << " etof " <<  electron->GetEmcTOF() << " tof " <<  electron->GetTOFE()*0.01 << std::endl;
 
-                temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin, weight);
-                ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin, weight);
-
+                temc->Fill(m_emc,electron->GetPtPrime(),charge_centr_bin, weight);
+                ttof->Fill(m_tof,electron->GetPtPrime(),charge_centr_bin, weight);
+                
                 ep_hist_el->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetProb(),electron->GetPtPrime(), weight);
                 n0_hist_el->Fill(electron->GetN0(),electron->GetDisp(),event->GetCentrality(), weight);
                 prob_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetDisp(),event->GetCentrality(), weight);
@@ -3968,8 +3971,11 @@ namespace MyDileptonAnalysis
 
             if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 || fabs(electron->GetEmcdphi())>0.05 || fabs(electron->GetEmcdz())>25 || electron->GetCrkphi()<-99) continue;
 
-            temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin+200, weight);
-            ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin+200, weight);
+            const float m_emc = electron->GetEmcTOF() < -9000 ? -9999 : electron->GetEmcTOF()    > 3.4 ? 3.4 : electron->GetEmcTOF()    < -1.4 ? -1.4 : electron->GetEmcTOF();
+            const float m_tof = electron->GetTOFE() < -900000 ? -9999 : electron->GetTOFE()*0.01 > 3.4 ? 3.4 : electron->GetTOFE()*0.01 < -1.4 ? -1.4 : electron->GetTOFE()*0.01;
+
+            temc->Fill(m_emc,electron->GetPtPrime(),charge_centr_bin+200, weight);
+            ttof->Fill(m_tof,electron->GetPtPrime(),charge_centr_bin+200, weight);
 
             if (electron->GetN0()>= 4 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.1 && electron->GetChi2()>0) 
                 ep_hist->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(), charge_centr_bin, weight);
@@ -3988,8 +3994,8 @@ namespace MyDileptonAnalysis
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
-            temc->Fill(electron->GetEmcTOF(),electron->GetPtPrime(),charge_centr_bin, weight);
-            ttof->Fill(electron->GetTOFE()*0.01,electron->GetPtPrime(),charge_centr_bin, weight);
+            temc->Fill(m_emc,electron->GetPtPrime(),charge_centr_bin, weight);
+            ttof->Fill(m_tof,electron->GetPtPrime(),charge_centr_bin, weight);
 
             const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
             el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin, weight);
@@ -4276,8 +4282,9 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dphi, 100, -0.1, 0.1, 50, 0.0, 5.0, 30, 0, 600);
             INIT_HIST(3, el_had_dz, 100, -50, 50, 50, 0.0, 5.0, 30, 0, 600);
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 30, 0, 600);
-            INIT_HIST(3, temc, 1000, -0.5, 1.5, 200, 0., 10, 30, 0, 600);
-            INIT_HIST(3, ttof, 1000, -0.5, 1.5, 50, 0., 5, 30, 0, 600);
+            INIT_HIST(3, temc, 1000, -1.5, 3.5, 200, 0., 10, 30, 0, 600);
+            INIT_HIST(3, ttof, 1000, -1.5, 3.5, 50, 0., 5, 30, 0, 600);
+            INIT_HIST(3, stof_hist, 200, -10, 10, 50, 0., 5, 18, 0, 18);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
             INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
@@ -4436,6 +4443,36 @@ namespace MyDileptonAnalysis
         (ecore < 5.0) ? 4 : 5;
         emcal_hist[isec]->Fill(iz,iy,icore,weight);
         wemcal_hist[isec]->Fill(iz,iy,icore,ecore*weight);
+    }
+
+    void MyEventContainer::SigmalizedToF(const int verbosity, const int is_sim)
+    {
+        const int nleptons = event->GetNtrack();
+        for (int itrk = 0; itrk < nleptons; itrk++)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            if(mytrk->GetEmcTOF()>-9000)
+            {
+                const float pt = mytrk->GetPtPrime();
+                const float emc_sigma = -0.00718+0.0285*pt+0.0661*pt*pt;
+                const float emc_mean = 0.0284-0.115*pt+0.0537*pt*pt;
+                if(verbosity==1) std::cout<<" new value " << (mytrk->GetEmcTOF()-emc_mean)/emc_sigma <<" emc_sigma = "<<emc_sigma<<" for tof of " <<mytrk->GetEmcTOF() << " for pt of "<<pt<<std::endl;
+                mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma);
+                if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF(),pt, mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
+            }
+            if (mytrk->GetTOFE()>-900000)
+            {
+                const float pt = mytrk->GetPtPrime();
+                const float tof_sigma = 0.00209-0.00294*pt+0.019*pt*pt;
+                if(verbosity==1) std::cout<<" new value " << (mytrk->GetTOFE()*0.01)/tof_sigma <<" tof_sigma = "<<tof_sigma<<" for tof of " <<mytrk->GetTOFE()*0.01 << " for pt of "<<pt<<std::endl;
+                mytrk->SetTOFE((mytrk->GetTOFE()*0.01)/tof_sigma);
+                if (verbosity==2) stof_hist->Fill(mytrk->GetTOFE(),pt, 16 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
+            }
+            else
+            {
+                mytrk->SetTOFE(-9999);
+            }
+        }
     }
 
     /// @yoren no longer in use
