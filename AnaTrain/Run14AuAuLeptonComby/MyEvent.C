@@ -187,7 +187,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
 
             mytrk->SetMcId(0);
-            if (mytrk->GetEcore()/mytrk->GetPtot()<0.6 || mytrk->GetN0()<0 ) continue;
+            if (mytrk->GetEcore()/mytrk->GetPtot()<0.1 || mytrk->GetN0()<0 ) continue;
             mytrk->SetDCAX(mytrk->GetPhi0());//////podgon
         
             if ( mytrk->GetEcore()/mytrk->GetPtot() > 0.7 && mytrk->GetN0()>=2 && mytrk->GetDisp()<5 )  mytrk->SetMcId(mytrk->GetMcId()+1);
@@ -195,10 +195,11 @@ namespace MyDileptonAnalysis
                 mytrk->GetN0()>=3 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
                  mytrk->GetProb()>0.1 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
-            const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
+            double treshlods[4] = {0.1,  0.25,  0.5, 0.65};
+            /*
             double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
+            const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
             if (mytrk->GetPtPrime()<0.4) for (int i = 0; i < 4; i++) treshlods[i] = treshlods[i] + (0.4 - pt) / 20;
-
             double new_ep = mytrk->GetEcore()/mytrk->GetPtot();
             if (is_sim == 0)
             {
@@ -218,22 +219,25 @@ namespace MyDileptonAnalysis
                 event->GetCentrality()/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs(new_ep-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
+            */
+           const float pt = mytrk->GetPtPrime();
+            double sector = mytrk->GetArm() == 1 ? mytrk->GetSect() : 7 - mytrk->GetSect();
+            const double input_x[15]=////['centrality', 'pt', 'ecore', 'n0', 'disp', 'npe0', 'sector', 'prob', 'emcdphi', 'emcdz', 'Q', 'e/p', 'chi2/npe0', 'disp2', 'centr+pt']
+            {
+                event->GetCentrality(), pt, mytrk->GetEcore(), (double) mytrk->GetN0(), mytrk->GetDisp(), (double)  mytrk->GetNpe0(),sector,mytrk->GetProb(),
+                TMath::Abs(mytrk->GetEmcdphi()) < 0.02 ? 1. : 0., TMath::Abs(mytrk->GetEmcdz()-1) < 8 ? 1. : 0., 
+                (double)mytrk->GetChargePrime(), mytrk->GetEcore()/mytrk->GetPtot(), (mytrk->GetChi2()/(mytrk->GetNpe0()+0.001) < 10) ? 1. : 0.,
+                mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(pt)
+            };
             //mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
-            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));
+            //std::cout<<MyML::GeteID(input_x, treshlods,0.2,10)<<std::endl;
+            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods,0.2,10));
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
             
             if(false) if (mytrk->GetMcId()>10 && mytrk->GetCrkphi()<-99 && mytrk->GetPtPrime()>0.4 ) std::cout<<MyML::GetProb(input_x)<<" "<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<" "<<mytrk->GetCrkphi()<<" "<<mytrk->GetEmcdz()<<std::endl;
-            
-            //const double input_x[11]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2/npe0', 'prob', 'emcdphi', 'emcdz', 'disp2', 'centr+pt']
-            //{
-            //    event->GetCentrality(), pt, new_ep, (double) mytrk->GetN0(), mytrk->GetDisp(), 
-            //    TMath::Abs(mytrk->GetChi2()/(mytrk->GetNpe0()+0.001))<10 ? 1. : 0., 
-            //    TMath::Abs(mytrk->GetEmcdphi()) < 0.02 ? 1. : 0., TMath::Abs(mytrk->GetEmcdz()-1) < 8 ? 1. : 0., 
-            //    mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(pt)
-            //};
         }    
     }
 
@@ -3871,7 +3875,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime());
 
-            if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 ) continue;
+            if (electron->GetEcore()/electron->GetPtot()<0.1 || electron->GetN0()<0 ) continue;
             //if ( electron->GetEcore()/electron->GetPtot() < 0.5 || electron->GetN0() < 0 )
             //    continue;
             //if (fabs(electron->GetEmcTOF())>5 && mc_id != -99) continue; 
@@ -3969,7 +3973,7 @@ namespace MyDileptonAnalysis
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
             int charge_centr_bin = event->GetCentrality() + 50 * (1 - electron->GetChargePrime())+200;
 
-            if (electron->GetEcore()/electron->GetPtot()<0.6 || electron->GetN0()<0 || fabs(electron->GetEmcdphi())>0.05 || fabs(electron->GetEmcdz())>25 || electron->GetCrkphi()<-99) continue;
+            if (electron->GetEcore()/electron->GetPtot()<0.1 || electron->GetN0()<0 || fabs(electron->GetEmcdphi())>0.05 || fabs(electron->GetEmcdz())>25 || electron->GetCrkphi()<-99) continue;
 
             const float m_emc = electron->GetEmcTOF() < -9000 ? -9999 : electron->GetEmcTOF()    > 3.4 ? 3.4 : electron->GetEmcTOF()    < -1.4 ? -1.4 : electron->GetEmcTOF();
             const float m_tof = electron->GetTOFE() < -900000 ? -9999 : electron->GetTOFE()*0.01 > 3.4 ? 3.4 : electron->GetTOFE()*0.01 < -1.4 ? -1.4 : electron->GetTOFE()*0.01;

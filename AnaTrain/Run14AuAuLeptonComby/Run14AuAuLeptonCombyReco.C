@@ -426,7 +426,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         if (mytrk.GetCrkphi()<-99)
           skip = true;
-        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.6)
+        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.1)
           skip = true;
         if (mytrk.GetN0() < 0 )
           skip = true;
@@ -485,18 +485,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
-      if ( mytrk->GetPtPrime() > 4.4 && mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 && 
-           mytrk->GetEcore()/mytrk->GetPtot()<1.4 && TMath::Abs(mytrk->GetEmcdphi())<0.005*3 && TMath::Abs(mytrk->GetEmcdz())<10
-        && mytrk->GetN0()>1 && mytrk->GetDisp()<5)
-            mytrk->SetMcId(10000); // 1000 is the electron id
+      if(mytrk->GetPtPrime() > 4.6 && (mytrk->GetEcore()/mytrk->GetPtot()<0.5 || TMath::Abs(mytrk->GetEmcdz()-1) > 8 ) ) mytrk->SetMcId(0);
+      //if ( mytrk->GetPtPrime() > 4.4 && mytrk->GetProb() < 0.5 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 && 
+      //     mytrk->GetEcore()/mytrk->GetPtot()<1.4 && TMath::Abs(mytrk->GetEmcdphi())<0.005*3 && TMath::Abs(mytrk->GetEmcdz())<10
+      //  && mytrk->GetN0()>1 && mytrk->GetDisp()<5)
+      //      mytrk->SetMcId(10000); // 1000 is the electron id
     }
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
      
-      //if (mytrk.GetMcId()%10<6 ||
-      if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
-         ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
+      if (mytrk.GetMcId()<100)
+      //if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
+      //   ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
       {
           event->RemoveTrackEntry(itrk);
           //event->AddElecCand(&mytrk);
@@ -549,9 +550,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( (pt <= 0.4 && (mytrk->GetHitCounter(2) > 0  && mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;  
-        const float emc_sigma = -0.00718+0.0285*pt+0.0661*pt*pt;
-        const float emc_mean = 0.0284-0.115*pt+0.0537*pt*pt;
-        if (  TMath::Abs((mytrk->GetEmcTOF()-emc_mean)/emc_sigma) > 5 ) continue; //podgon
+        //const float emc_sigma = -0.00718+0.0285*pt+0.0661*pt*pt;
+        //const float emc_mean = 0.0284-0.115*pt+0.0537*pt*pt;
+        //if (  TMath::Abs((mytrk->GetEmcTOF()-emc_mean)/emc_sigma) > 5 ) continue; //podgon
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
@@ -705,7 +706,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(true) 
     { 
         event_container->SigmalizedToF(2);///podgon
-        n_electrons = event->GetNtrack();
+        n_electrons = event->GetNtrack()*0;
         for (int itrk = 0; itrk < n_electrons; itrk++)
         {
           MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
@@ -778,6 +779,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                    (TMath::Abs(mytrk->GetMinsDphi(1))<4.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
                    (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
         }
+        //podgon
+        if (hit_assocaition<100) continue;
+        hit_assocaition=0;
+        if(mytrk->GetMcId()>900) hit_assocaition=100;
+        if(mytrk->GetMcId()>9000) hit_assocaition=10000;
+        
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
         if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
