@@ -170,6 +170,7 @@ protected:
     std::string outfilename;
 
     float vtx_mean_x, vtx_mean_y;
+    float pt_trans;
 
     // emc map
     int EMCMAP[8][48][96];

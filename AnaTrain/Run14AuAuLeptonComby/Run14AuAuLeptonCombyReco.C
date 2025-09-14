@@ -33,6 +33,7 @@ Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const ch
     vtx_mean_y = 0;
     do_reco_vertex = 0;
     do_conv_dalitz_finder = 0;
+    pt_trans = 0.5;
 
     ul = nullptr;
     event_container = nullptr;
@@ -519,7 +520,6 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         } 
         event_container->Associate_Hits_to_Leptons(5.,5.,5,1,2,3.0,5.0);
         event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
-        event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
     }
     
     //if(do_electron_QA) event_container->FillQAHistPreAssoc();
@@ -546,8 +546,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         const float pt = mytrk->GetPtPrime();
         if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;////podgon
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
-        if ( (pt >  0.4 && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
-        if ( (pt <= 0.4 && (mytrk->GetHitCounter(2) > 0  && mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
+        if ( (pt >  pt_trans && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
+        if ( (pt <= pt_trans && (mytrk->GetHitCounter(2) > 0  && mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
 
         if ( conv_rejection == 0 ) continue;  
         //const float emc_sigma = -0.00718+0.0285*pt+0.0661*pt*pt;
@@ -606,8 +606,31 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
         if(true) event_container->CorrectVTXOffset(1);
         if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
+        if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
         if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, 0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.,5);
+        if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, -1);
+        if(false)
+        {
+            n_electrons = event->GetNtrack();
+            for (int itrk = 0; itrk < n_electrons; itrk++)
+            {
+              MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+              if(mytrk->GetPtPrime() > 4.6 && (mytrk->GetEcore()/mytrk->GetPtot()<0.5 || TMath::Abs(mytrk->GetEmcdz()-1) > 8 ) ) mytrk->SetMcId(0);
+            }
+            event_container->IdenElectrons();
+            for (int itrk = 0; itrk < n_electrons; itrk++)
+            {
+              MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
+              if (mytrk.GetMcId()<100)
+              {
+                  event->RemoveTrackEntry(itrk);
+                  n_electrons--;
+                  itrk--;
+                  continue;
+              }
+            }
+        }
         if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
 
         if(fill_ddphi_hadron) 
@@ -634,7 +657,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
          (mytrk.GetHitCounter(2) < 1 && mytrk.GetHitCounter(3) < 1))
             do_reshuf = true;
 
-      if ( mytrk.GetPtPrime()<0.4 && 
+      if ( mytrk.GetPtPrime()< pt_trans && 
          ( mytrk.GetHitCounter(0) < 1 || mytrk.GetHitCounter(1) < 1 || 
            mytrk.GetHitCounter(2) < 1 || mytrk.GetHitCounter(3) < 1 ) )
             do_reshuf = true;
@@ -760,7 +783,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //int conv_reject = mytrk->GetTOFDPHI();//mytrk->GetMcId();
         //int hit_assocaition = mytrk->GetNHits();
         int hit_assocaition = 0;
-        if (mytrk->GetPtPrime() > 0.4){    
+        if (mytrk->GetPtPrime() > pt_trans){    
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<4.0) && 
@@ -792,7 +815,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_reject==1000 && ( mytrk->GetEmcTOF() > -2 && mytrk->GetEmcTOF() < 2 ) && ( (mytrk->GetTOFE() > -2 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -9990 )  ) conv_reject=10000; ///podgon
 
         //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime()<< " " <<mytrk->GetEmcdphi_e() << " " <<mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<<std::endl;
-        //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime() << " phi0 "<<mytrk->GetPhi0()<< " " <<mytrk->GetPhi0Prime() << " phiDC "<<mytrk->GetPhiDC()
+        //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime() << " phi0 "<<mytrk->GetPhi0()<< " " <<mytrk->GetChargePrime() << " phiDC "<<mytrk->GetPhiDC()<<std::endl;
         //<< " the0 "<<mytrk->GetThe0Prime()<< " hit_assocaition "<< hit_assocaition <<
         //" conv_reject " << conv_reject << " hadron_reject " << hadron_reject<<std::endl;
         //if ( ((int)mytrk->GetEmcdphi_e())%10 ==0 ) conv_reject=10;

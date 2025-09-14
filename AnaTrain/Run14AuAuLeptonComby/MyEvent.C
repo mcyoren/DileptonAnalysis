@@ -1200,6 +1200,7 @@ namespace MyDileptonAnalysis
         //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << " " << 0-0.03*mytrk->GetAlphaPrime() << 
         //    " dphi2 "<< phi0_new_method1-mytrk->GetPhi0Prime() <<" "<<final_charge<< " "<< mytrk->GetChargePrime() <<std::endl;
         if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
+        //if(true)mytrk->SetPhi0Prime(phi0_new_method1);
         mytrk->SetDCAY(phi0_new_method1);
         mytrk->SetQ(final_charge);
         return;
@@ -1513,7 +1514,7 @@ namespace MyDileptonAnalysis
             }
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
-
+            sDCPT_ReconPT->Fill(pt-mytrk->GetPt(),mytrk->GetPt(),event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
 
             int hit_assocaition = 0;
             if (mytrk->GetPtPrime() > 0.4){    
@@ -2194,8 +2195,11 @@ namespace MyDileptonAnalysis
             }
 
 
-            if(false)
+            if(true)
             {
+                if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
+                   (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
+
                 const float dcax = electron->GetDCAX2();
                 const float dcay = electron->GetDCAY2();
                 const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
@@ -2203,25 +2207,37 @@ namespace MyDileptonAnalysis
                 const float dphi = electron->GetDCAY() - electron->GetDCAX();
                 const float alpha_phi_offset = dphi * ( electron->GetAlphaPrime() / ( electron->GetDCAX() - electron->GetPhiDC() ) );
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
+                if(verbosity == -1)
+                {
+                    if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
+                    {
+                        //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
+                        electron->SetHitCounter(0,0);
+                    }//else std::cout <<"\033[32m" << "OK: dphi is consistent at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv()<<"\033[0m" << std::endl;
+                    continue;
+                }
+                electron->SetPhiConv(dphi);
 
-                if(alpha_offset*electron->GetAlphaPrime()<0) continue;
-                if (electron->GetPtPrime()>1.99 && electron->GetPtPrime()<2.01) 
-                    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) << " "<<
-                    electron->GetDCAY() << " " << electron->GetDCAX()<<" "<<electron->GetPhiDC() <<" "<<
-                    electron->GetAlphaPrime() <<" " <<alpha_offset  << std::endl;
+                //if(alpha_offset*electron->GetAlphaPrime()<0) continue;
+                //if (electron->GetPtPrime()>0.) 
+                //    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) << " "<<
+                //    electron->GetDCAY() << " " << electron->GetDCAX()<<" "<<electron->GetPhiDC() <<" "<<
+                //    electron->GetAlphaPrime() <<" " <<alpha_offset  << std::endl;
 
 
                 electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
 
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     std::cout << "\033[31m" << "WARNING: charge was flipped!! at pt = " << electron->GetPtPrime() << "" << "\033[0m"<<std::endl;
-
+                
+                electron->SetPt(electron->GetPtPrime());
                 electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
 
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                {
+                    electron->SetHitCounter(0,0);
                     electron->SetQPrime(-electron->GetChargePrime());
-
-
+                }
             }
         }
     }
@@ -4325,6 +4341,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, myvtx_hist, N_centr, 50, 0, 1, 50, -0.5 ,0.5, 20, -10 ,10);
 
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 200);
+            INIT_HIST(3, sDCPT_ReconPT, 50, -0.25, 0.25, 50,  0,  5, 10, 0, 200);
             INIT_HISTOS(3, dcphi0_truephi0_hist, N_centr, 200, -0.1, 0.1, 30, -1.5, 4.5, 50, -2.5, 2.5);
 
             INIT_HISTOS(3, DCA12_hist, N_centr, 50, -500, 500, 100, -5, 5, 160, 0, 160);
