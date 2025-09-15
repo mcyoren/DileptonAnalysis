@@ -107,7 +107,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
-  fcn_3Dz.push_back(get_pt_V0);
+  fcn_3Dz.push_back(get_pt_V32);
   fcn_3D_weight.push_back(set_weight_1);
   
   Master3D.push_back(new TH3D("mass_DCA1_DCA2_v0" , "mass_DCA1_DCA2_v0;m_{ee} [GeV];DCA_{e} [#mum];DCA_{e} [#mum]" , 90, 0, 4.5, 20, -500, 500, 20, -500, 500));
@@ -1783,16 +1783,6 @@ float Run14AuAuLeptonCombyHistos::get_pt_V32(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-
-  if ( conv_reject1 > -10 || conv_reject2 > -10 ) return -999;
-  
-  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
-
-  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
-
   const double px = p1->get_px() + p2->get_px();
   const double py = p1->get_py() + p2->get_py();
 

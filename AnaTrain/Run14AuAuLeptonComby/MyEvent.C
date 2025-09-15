@@ -195,7 +195,7 @@ namespace MyDileptonAnalysis
                 mytrk->GetN0()>=3 + mytrk->GetDisp()*mytrk->GetDisp() / 8. &&  mytrk->GetChi2()/(mytrk->GetNpe0()+0.1)<10 &&
                  mytrk->GetProb()>0.1 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
-            double treshlods[4] = {0.1,  0.25,  0.5, 0.65};
+            double treshlods[4] = {0.1,  0.35,  0.5, 0.70};
             /*
             double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
             const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
@@ -226,12 +226,12 @@ namespace MyDileptonAnalysis
             {
                 event->GetCentrality(), pt, mytrk->GetEcore(), (double) mytrk->GetN0(), mytrk->GetDisp(), (double)  mytrk->GetNpe0(),sector,mytrk->GetProb(),
                 TMath::Abs(mytrk->GetEmcdphi()) < 0.02 ? 1. : 0., TMath::Abs(mytrk->GetEmcdz()-1) < 8 ? 1. : 0., 
-                (double)mytrk->GetChargePrime(), mytrk->GetEcore()/mytrk->GetPtot(), (mytrk->GetChi2()/(mytrk->GetNpe0()+0.001) < 10) ? 1. : 0.,
+                (double)mytrk->GetChargePrime(), (double) Discretize_EP(mytrk->GetEcore()/mytrk->GetPtot()), (mytrk->GetChi2()/(mytrk->GetNpe0()+0.001) < 10) ? 1. : 0.,
                 mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(pt)
             };
             //mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
             //std::cout<<MyML::GeteID(input_x, treshlods,0.2,10)<<std::endl;
-            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods,0.2,10));
+            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods,0.2,15));
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
@@ -1192,14 +1192,18 @@ namespace MyDileptonAnalysis
         const float b1 = (yy1-yy2)*(xx3+xx2)/(xx1-xx2)/(xx3-xx1)-(yy2-yy3)*(xx1+xx2)/(xx2-xx3)/(xx3-xx1);
         //const float c1 = yy1-b1*xx1-a1*xx1*xx1;
         const float slope1 = b1 + 2*a1*xx1;
-        float phi0_new_method1 = TMath::ATan(slope1) - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
+        float phi0_new_method1 = TMath::ATan(slope1);
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
+        if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
+        const int arm = mytrk->GetArm();
+        phi0_new_method1 += phi0_DC_VTX_offset_params[arm][0] + phi0_DC_VTX_offset_params[arm][1]*phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;
+        //std::cout<<"arm "<<arm<< " phi0 " << phi0_new_method1 << " dphi " << phi0_DC_VTX_offset_params[arm][0] + phi0_DC_VTX_offset_params[arm][1]*phi0_new_method1<<std::endl;
         //if(TMath::Abs(phi0_new_method1-mytrk->GetPhi0())>0.001)
         //    std::cout<<"pt " << mytrk->GetPtPrime() << " phi0_new_method1 = "<<phi0_new_method1<<" phi old = "<<mytrk->GetPhi0() << " phidc " << mytrk->GetPhiDC() + 2.0195*mytrk->GetAlphaPrime()
         //    << " phiprime "<< mytrk->GetPhi0Prime() << " dphi1 " <<phi0_new_method1-mytrk->GetPhi0() << " " << 0-0.03*mytrk->GetAlphaPrime() << 
         //    " dphi2 "<< phi0_new_method1-mytrk->GetPhi0Prime() <<" "<<final_charge<< " "<< mytrk->GetChargePrime() <<std::endl;
-        if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
+        //if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
         //if(true)mytrk->SetPhi0Prime(phi0_new_method1);
         mytrk->SetDCAY(phi0_new_method1);
         mytrk->SetQ(final_charge);
@@ -1514,7 +1518,7 @@ namespace MyDileptonAnalysis
             }
 
             DCPT_ReconPT->Fill(mytrk->GetReconPT(),pt,event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
-            sDCPT_ReconPT->Fill(pt-mytrk->GetPt(),mytrk->GetPt(),event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
+            sDCPT_ReconPT->Fill((pt-mytrk->GetPt())/mytrk->GetPt(),mytrk->GetPt(),event->GetCentrality()+100*( mytrk->GetChargePrime() > 0 ? 0 : 1));
 
             int hit_assocaition = 0;
             if (mytrk->GetPtPrime() > 0.4){    
@@ -1569,9 +1573,8 @@ namespace MyDileptonAnalysis
             else
                 sDCA2_hist[central_bin]->Fill(mytrk->GetsDCA(),pt,hist_in,weight);
             ///std::cout<<"filling "<<mytrk->GetDCAY()<<" "<<mytrk->GetPhi0()<<" "<<pt<<" "<<hist_in<<" "<<weight<<std::endl;
-            if (mytrk->GetHitCounter(0)&&hit_assocaition>2&&conv_reject>9)
+            if (mytrk->GetHitCounter(0)&&hit_assocaition>2)//&&conv_reject>9) podgon
                 dcphi0_truephi0_hist[central_bin]->Fill(mytrk->GetDCAX()-mytrk->GetDCAY(),mytrk->GetPhi0Prime(),pt*mytrk->GetChargePrime(),weight);//////podgon
-            
         }
     }
 
@@ -2200,6 +2203,8 @@ namespace MyDileptonAnalysis
                 if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                    (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
 
+                if(verbosity==0) electron->SetEmcdz_e(0);
+                
                 const float dcax = electron->GetDCAX2();
                 const float dcay = electron->GetDCAY2();
                 const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
@@ -2212,7 +2217,8 @@ namespace MyDileptonAnalysis
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
                         //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
-                        electron->SetHitCounter(0,0);
+                        electron->SetEmcdz_e(10);
+                        //electron->SetHitCounter(0,0);
                     }//else std::cout <<"\033[32m" << "OK: dphi is consistent at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv()<<"\033[0m" << std::endl;
                     continue;
                 }
@@ -2232,10 +2238,18 @@ namespace MyDileptonAnalysis
                 
                 electron->SetPt(electron->GetPtPrime());
                 electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
+                if (electron->GetPtPrime()<electron->GetPt()*0.92)
+                {
+                    //std::cout << "\033[31m" << "WARNING: pt is too low after correction!! at pt = " << electron->GetPtPrime() 
+                    //<< " " << electron->GetEmcdphi_e() << "" << "\033[0m"<<std::endl;
+                    electron->SetEmcdz_e(1);
+                    //electron->SetHitCounter(0,0);
+                }
 
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                 {
-                    electron->SetHitCounter(0,0);
+                    electron->SetEmcdz_e(100);
+                    //electron->SetHitCounter(0,0);
                     electron->SetQPrime(-electron->GetChargePrime());
                 }
             }
@@ -4493,6 +4507,42 @@ namespace MyDileptonAnalysis
             {
                 mytrk->SetTOFE(-9999);
             }
+        }
+    }
+
+    int MyEventContainer::Discretize_EP(double ep)
+    {
+        if (ep < 0.4)
+        {
+            return 0;
+        }
+        else if (ep >= 0.4 && ep < 0.5)
+        {
+            return 1;
+        }
+        else if (ep >= 0.5 && ep < 0.6)
+        {
+            return 2;
+        }
+        else if (ep > 0.6 && ep < 1.1)
+        {
+            return 6;
+        }
+        else if (ep > 0.6 && ep < 1.2)
+        {
+            return 5;
+        }
+        else if (ep > 0.6 && ep < 1.4)
+        {
+            return 4;
+        }
+        else if (ep >= 0.6) // general catch-all
+        {
+            return 3;
+        }
+        else
+        {
+            return -1; // default case
         }
     }
 

@@ -1827,5 +1827,10 @@ const float offsets_DC_sim[1][8][2][11] = {
     },
 };
 
+const float phi0_DC_VTX_offset_params[2][2] = {
+    {-0.014386, 0.004592},
+    {0.000134, 0.002113},
+};
+
 
 #endif

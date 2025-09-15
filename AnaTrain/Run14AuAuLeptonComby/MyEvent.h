@@ -1287,6 +1287,7 @@ namespace MyDileptonAnalysis
             void CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity = 0);
             void FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight = 1.0);
             void SigmalizedToF(const int verbosity = 0, const int is_sim = 0);
+            int Discretize_EP(double ep);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };
