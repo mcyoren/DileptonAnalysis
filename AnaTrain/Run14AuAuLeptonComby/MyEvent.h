@@ -1095,7 +1095,7 @@ namespace MyDileptonAnalysis
             TH3D *emc_dphi_el, *emc_dz_el, *n0_hist_el, *ep_hist_el, *prob_hist_el, *disp_hist_el, *chi2npe0_hist_el, *rich_prob1, *rich_prob2, *rich_prob3;
             TH3D *el_had_dphi, *el_had_dz, *el_had_dr;
             TH3D *DCA2_hist[N_centr], *sDCA2_hist[N_centr], *DCA2_2D_hist[N_centr], *sDCA2_2D_hist[N_centr], *DCA12_hist[N_centr];
-            TH3D *DCPT_ReconPT, *sDCPT_ReconPT,  *charge_hist, *phi_hist, *the_hist, *pt_corr, *dcphi0_truephi0_hist[N_centr];
+            TH3D *DCPT_ReconPT, *sDCPT_ReconPT,  *charge_hist, *phi_hist, *the_hist, *pt_corr, *dcphi0_truephi0_hist[N_centr], *conv_dalitz_new_hist[N_centr];
             TH3D *veto_phi_hist[N_centr], *veto_the_hist[N_centr], *veto_phi_phi_hist[N_centr], *veto_the_the_hist[N_centr];
             TH3D *veto_sphi_phi_hist[N_centr*4], *veto_sthe_the_hist[N_centr*4], *veto_sphi_sphi_hist[N_centr*5], *veto_sthe_sthe_hist[N_centr*5];
             TH3D *couter_veto_hist, *counter_assoc_eff_hist, *counter_assoc_ghost_hist, *veto_type_hist;
@@ -1191,7 +1191,7 @@ namespace MyDileptonAnalysis
                         DCA12_hist[i]  = nullptr;
                         veto_phi_hist[i] = nullptr, veto_the_hist[i] = nullptr, veto_phi_phi_hist[i] = nullptr, veto_the_the_hist[i] = nullptr;
                         hist_is_dalitz_conv[i] = nullptr; hist_is_ml_conv[i] = nullptr; sdphi_conv_hist[i] = nullptr; sdphi_real_conv_hist[i] = nullptr;
-                        dcphi0_truephi0_hist[i] = nullptr;
+                        dcphi0_truephi0_hist[i] = nullptr; conv_dalitz_new_hist[i] = nullptr;
                   }
 
                   for (int i = 0; i < N_centr*2; i++)  el_pt_hist[i] = nullptr;

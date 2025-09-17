@@ -1575,6 +1575,9 @@ namespace MyDileptonAnalysis
             ///std::cout<<"filling "<<mytrk->GetDCAY()<<" "<<mytrk->GetPhi0()<<" "<<pt<<" "<<hist_in<<" "<<weight<<std::endl;
             if (mytrk->GetHitCounter(0)&&hit_assocaition>2)//&&conv_reject>9) podgon
                 dcphi0_truephi0_hist[central_bin]->Fill(mytrk->GetDCAX()-mytrk->GetDCAY(),mytrk->GetPhi0Prime(),pt*mytrk->GetChargePrime(),weight);//////podgon
+            
+            const int pt_var = mytrk->GetEmcdz_e()>0 ? TMath::Log10(mytrk->GetEmcdz_e())+1 : 0;
+            conv_dalitz_new_hist[central_bin]->Fill(pt_var, conv_reject/5, pt*mytrk->GetChargePrime(), weight);
         }
     }
 
@@ -2182,7 +2185,7 @@ namespace MyDileptonAnalysis
         for (int i = 0; i < n_elec; i++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(i);
-            if(true)
+            if(verbosity!=-1)
             {
                 if (verbosity>1) std::cout << "before: " << electron->GetPtPrime() << " " << electron->GetChargePrime() << std::endl;
                 const float alpha_offset = - ( event->GetPreciseX() - beam_average_x ) / 220. * TMath::Sin(electron->GetPhiDC()) 
@@ -2203,7 +2206,7 @@ namespace MyDileptonAnalysis
                 if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                    (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
 
-                if(verbosity==0) electron->SetEmcdz_e(0);
+                if(verbosity!=-1) electron->SetEmcdz_e(0);
                 
                 const float dcax = electron->GetDCAX2();
                 const float dcay = electron->GetDCAY2();
@@ -2236,9 +2239,10 @@ namespace MyDileptonAnalysis
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     std::cout << "\033[31m" << "WARNING: charge was flipped!! at pt = " << electron->GetPtPrime() << "" << "\033[0m"<<std::endl;
                 
+                const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
-                if (electron->GetPtPrime()<electron->GetPt()*0.92)
+                electron->SetPtPrime(electron->GetPtPrime() * 1.00618);//mscale);
+                if (mscale<0.92 || mscale > 1.08)
                 {
                     //std::cout << "\033[31m" << "WARNING: pt is too low after correction!! at pt = " << electron->GetPtPrime() 
                     //<< " " << electron->GetEmcdphi_e() << "" << "\033[0m"<<std::endl;
@@ -4357,6 +4361,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, DCPT_ReconPT, 50, 0, 5, 50,  0,  5, 10, 0, 200);
             INIT_HIST(3, sDCPT_ReconPT, 50, -0.25, 0.25, 50,  0,  5, 10, 0, 200);
             INIT_HISTOS(3, dcphi0_truephi0_hist, N_centr, 200, -0.1, 0.1, 30, -1.5, 4.5, 50, -2.5, 2.5);
+            INIT_HISTOS(3, conv_dalitz_new_hist, N_centr, 4, 0, 4, 5, 0, 5, 100, -5, 5);
 
             INIT_HISTOS(3, DCA12_hist, N_centr, 50, -500, 500, 100, -5, 5, 160, 0, 160);
             INIT_HISTOS(3, DCA2_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
