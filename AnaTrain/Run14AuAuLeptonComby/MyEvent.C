@@ -2203,11 +2203,11 @@ namespace MyDileptonAnalysis
 
             if(true)
             {
+                if(verbosity!=-1) electron->SetEmcdz_e(0);
+
                 if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                    (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
 
-                if(verbosity!=-1) electron->SetEmcdz_e(0);
-                
                 const float dcax = electron->GetDCAX2();
                 const float dcay = electron->GetDCAY2();
                 const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
@@ -2229,9 +2229,9 @@ namespace MyDileptonAnalysis
 
                 //if(alpha_offset*electron->GetAlphaPrime()<0) continue;
                 //if (electron->GetPtPrime()>0.) 
-                //    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) << " "<<
+                //    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() ) / ( electron->GetAlphaPrime() -alpha_offset )) << " "<<
                 //    electron->GetDCAY() << " " << electron->GetDCAX()<<" "<<electron->GetPhiDC() <<" "<<
-                //    electron->GetAlphaPrime() <<" " <<alpha_offset  << std::endl;
+                //    electron->GetAlphaPrime() <<" " <<alpha_offset << " " << alpha_phi_offset << std::endl;
 
 
                 electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
@@ -2241,8 +2241,8 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                electron->SetPtPrime(electron->GetPtPrime() * 1.00618);//mscale);
-                if (mscale<0.92 || mscale > 1.08)
+                if (mscale>1) electron->SetPtPrime(electron->GetPtPrime() * mscale);//mscale);
+                if (mscale<0.92)
                 {
                     //std::cout << "\033[31m" << "WARNING: pt is too low after correction!! at pt = " << electron->GetPtPrime() 
                     //<< " " << electron->GetEmcdphi_e() << "" << "\033[0m"<<std::endl;
