@@ -1115,6 +1115,7 @@ namespace MyDileptonAnalysis
             TH3D *hist_daltz_phi_phi[12], *hist_daltz_the_the[12];
             TH3D *hist_is_dalitz_conv[N_centr], *hist_is_ml_conv[N_centr], *sdphi_conv_hist[N_centr], *sdphi_real_conv_hist[N_centr];
             TH3D *emcal_hist[8], *wemcal_hist[8];
+            TH3D *hist_bremstrahlung_e, *hist_bremstrahlung_phi, *hist_bremstrahlung_the;
 
             int is_fill_hsits, is_fill_hadron_hsits, is_fill_tree, is_fill_dphi_hist, is_fill_DCA_hist, is_fill_track_QA, 
             is_fill_flow, is_fill_DCA2_hist, is_check_veto, is_fill_inv_mass, do_vertex_reco;
@@ -1144,7 +1145,8 @@ namespace MyDileptonAnalysis
                   phi_the_pt_hist = nullptr; hist_vtx_delta_x = nullptr; hist_vtx_delta_y = nullptr; conv_photon_mass_hist = nullptr; pi0_mass_hist = nullptr;
                   hits_vtx_ntracks = nullptr;  hits_vtx_ntracks_ofnotusedhits = nullptr;
                   hist_vtx_z = nullptr; hist_vtx_grid_xy = nullptr; hist_vtx_delta_x_reuse = nullptr; hist_vtx_delta_y_reuse = nullptr; hist_vtx_delta_x_pion = nullptr; hist_vtx_delta_y_pion = nullptr;
-
+                  hist_bremstrahlung_e = nullptr; hist_bremstrahlung_phi = nullptr; hist_bremstrahlung_the = nullptr;
+                  
                   for (int i = 0; i < N_dynamic; i++)
                   {
                         dphi_hist_el_dynamic[i] = nullptr;
@@ -1288,6 +1290,7 @@ namespace MyDileptonAnalysis
             void FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight = 1.0);
             void SigmalizedToF(const int verbosity = 0, const int is_sim = 0);
             int Discretize_EP(double ep);
+            void Find_Bremsstrahlung(const float x, const float y, const float z, const float ecore, const float weight = 1.0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

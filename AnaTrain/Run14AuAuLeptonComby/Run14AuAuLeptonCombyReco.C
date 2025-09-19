@@ -308,9 +308,12 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     const int run_group_beamoffset = event->GetRunGroup(run_number);// what is this???? <8?event->GetRunGroup(run_number):7;
     const int n_tracks = particleCNT->get_npart();
     
+    std::vector<char> used_clusters((int) emccont->size(), 0);
     for (int itrk_reco = 0; itrk_reco < n_tracks; ++itrk_reco)
     {
         const int itype = applySingleTrackCut(particleCNT, itrk_reco, precise_z, centrality, run_number);
+        if (itype >-999 && particleCNT->get_emcid(itrk_reco) > -1 && particleCNT->get_emcid(itrk_reco) < (int) emccont->size()) used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
+        //if (itype > 0 && fabs(particleCNT->get_emcdphi(itrk_reco))<0.05 && fabs(particleCNT->get_emcdz(itrk_reco))<25 )used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
         MyDileptonAnalysis::MyElectron newElectron;// = new MyDileptonAnalysis::MyElectron();
         MyDileptonAnalysis::MyHadron newHadron;// = new MyDileptonAnalysis::MyHadron();
         switch (itype)
@@ -374,6 +377,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         default:
             continue;
         }
+
     }
 
     if(event->GetNtrack()<1) return 0;
@@ -702,6 +706,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
                 if(!emc) continue;
 	            mytrk->SetEmcTOF(emc->tofcorr());  
             } 
+        }
+    }
+    if (do_electron_QA==3)
+    {
+        for (int icluster = 0; icluster <  (int) emccont->size(); icluster++)
+        {
+            emcClusterContent* emc = emccont->getCluster(icluster);
+            if(!emc) continue;
+            if(emc->ecore()<0.3) continue;
+            if(emc->prob_photon()<0.1) continue;
+            if( used_clusters[icluster] ) continue;
+            if (isEMCDead(emc) > 1) continue;
+            event_container->Find_Bremsstrahlung(emc->x(),emc->y(),emc->z(),emc->ecore());
         }
     }
     
