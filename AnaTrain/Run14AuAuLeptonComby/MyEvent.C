@@ -2242,7 +2242,8 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                if (mscale>1) electron->SetPtPrime(electron->GetPtPrime() * mscale);//mscale);
+                if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
+                else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
                 if (mscale<0.92)
                 {
                     //std::cout << "\033[31m" << "WARNING: pt is too low after correction!! at pt = " << electron->GetPtPrime() 
@@ -4346,8 +4347,8 @@ namespace MyDileptonAnalysis
         if(fill_track_QA==3)
         {
             INIT_HIST(3, hist_bremstrahlung_e, 100, 0, 1, 100, 0, 10.0, 10, 0, 100);
-            INIT_HIST(3, hist_bremstrahlung_phi, 100, -0.03, 0.03, 100, 0, 10.0, 10, 0, 100);
-            INIT_HIST(3, hist_bremstrahlung_the, 100, -0.03, 0.03, 100, 0, 10.0, 10, 0, 100);
+            INIT_HIST(3, hist_bremstrahlung_phi, 100, -0.03, 0.03, 100, 0, 10.0, 20, 0, 200);
+            INIT_HIST(3, hist_bremstrahlung_the, 100, -0.03, 0.03, 100, 0, 10.0, 20, 0, 200);
         }
         if(fill_flow)
         {
@@ -4604,12 +4605,25 @@ namespace MyDileptonAnalysis
                 {
                     continue;
                 }
-                if (TMath::Abs(dthe_min-0.001) < 0.01) hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality(), weight);
-                if (TMath::Abs(dphi_min+0.0005) < 0.01) hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality(), weight);
-                if (TMath::Abs(dthe_min-0.001) < 0.01 && TMath::Abs(dphi_min+0.0005) < 0.01) 
+                if (electron->GetMcId()>9999 && TMath::Abs(dthe_min+0.001) < 0.01) 
+                {
+                    hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality(), weight);
+                    if(electron->GetPtPrime()>electron->GetPt()*1.08) 
+                        hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality()+100, weight);
+                }
+                if (electron->GetMcId()>9999 && TMath::Abs(dphi_min) < 0.005) 
+                {
+                    hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality(), weight);
+                    if(electron->GetPtPrime()>electron->GetPt()*1.08) 
+                        hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality()+100, weight);
+                }
+                if (TMath::Abs(dthe_min+0.001) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
                 {
                     hist_bremstrahlung_e->Fill(ecore/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
-                    if(electron->GetPtPrime()<1.0) continue;
+                    if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
+                    if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
+                    if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
                     electron->SetEcore(ecore + electron->GetEcore());
                     electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore));
                     if(true) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore)<<" for centrality of "<<event->GetCentrality()<<std::endl;
