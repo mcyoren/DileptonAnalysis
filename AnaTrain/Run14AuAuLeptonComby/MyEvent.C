@@ -2242,8 +2242,9 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
-                else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                //if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
+                //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                if (mscale > 1.0 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
                 if (mscale<0.92)
                 {
                     //std::cout << "\033[31m" << "WARNING: pt is too low after correction!! at pt = " << electron->GetPtPrime() 
@@ -4620,13 +4621,13 @@ namespace MyDileptonAnalysis
                 if (TMath::Abs(dthe_min+0.001) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
                 {
                     hist_bremstrahlung_e->Fill(ecore/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
-                    if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
-                    if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
-                    if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
-                    if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
+                    //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    //if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
+                    //if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
+                    //if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
                     electron->SetEcore(ecore + electron->GetEcore());
                     electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore));
-                    if(true) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore)<<" for centrality of "<<event->GetCentrality()<<std::endl;
+                    if(false) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore)<<" for centrality of "<<event->GetCentrality()<<std::endl;
                     is_cluster_used = 1;
                 }
             }
