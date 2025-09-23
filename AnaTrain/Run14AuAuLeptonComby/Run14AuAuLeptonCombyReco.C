@@ -312,8 +312,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk_reco = 0; itrk_reco < n_tracks; ++itrk_reco)
     {
         const int itype = applySingleTrackCut(particleCNT, itrk_reco, precise_z, centrality, run_number);
-        if (itype >-999 && particleCNT->get_emcid(itrk_reco) > -1 && particleCNT->get_emcid(itrk_reco) < (int) emccont->size()) used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
-        //if (itype > 0 && fabs(particleCNT->get_emcdphi(itrk_reco))<0.05 && fabs(particleCNT->get_emcdz(itrk_reco))<25 )used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
+        //if (itype >-999 && particleCNT->get_emcid(itrk_reco) > -1 && particleCNT->get_emcid(itrk_reco) < (int) emccont->size()) used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
+        if (itype > 0  && particleCNT->get_emcid(itrk_reco) > -1 && particleCNT->get_emcid(itrk_reco) < (int) emccont->size() 
+                && fabs(particleCNT->get_emcdphi(itrk_reco))<0.05 && fabs(particleCNT->get_emcdz(itrk_reco))<25 )used_clusters[(int) particleCNT->get_emcid(itrk_reco)] = 1;
         MyDileptonAnalysis::MyElectron newElectron;// = new MyDileptonAnalysis::MyElectron();
         MyDileptonAnalysis::MyHadron newHadron;// = new MyDileptonAnalysis::MyHadron();
         switch (itype)
@@ -765,7 +766,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
 
     //if(event_container->isGhostEvent()) std::cout<<"yolo"<<std::endl;  //removing ghost
 
-    if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();//needs check for hadrons
+    //if(event_container->GetNGoodElectrons()>1) event_container->ResetRecoverFGVars();//needs check for hadrons
     if(check_veto) event_container->CheckVeto();
     
     //event->ReshuffleElectrons();

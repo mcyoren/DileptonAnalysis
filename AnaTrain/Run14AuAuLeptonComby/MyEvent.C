@@ -4348,8 +4348,8 @@ namespace MyDileptonAnalysis
         if(fill_track_QA==3)
         {
             INIT_HIST(3, hist_bremstrahlung_e, 100, 0, 1, 100, 0, 10.0, 10, 0, 100);
-            INIT_HIST(3, hist_bremstrahlung_phi, 100, -0.03, 0.03, 100, 0, 10.0, 20, 0, 200);
-            INIT_HIST(3, hist_bremstrahlung_the, 100, -0.03, 0.03, 100, 0, 10.0, 20, 0, 200);
+            INIT_HIST(3, hist_bremstrahlung_phi, 100, -0.03, 0.03, 50, 0, 5.0, 160, 0, 160);
+            INIT_HIST(3, hist_bremstrahlung_the, 100, -0.03, 0.03, 50, 0, 5.0, 160, 0, 160);
         }
         if(fill_flow)
         {
@@ -4560,7 +4560,7 @@ namespace MyDileptonAnalysis
         }
     }
     
-    void MyEventContainer::Find_Bremsstrahlung(const float x, const float y, const float z, const float ecore, const float weight)
+    int MyEventContainer::Find_Bremsstrahlung(const float x, const float y, const float z, const float ecore, const float temc, const float weight)
     {
         const int n_electrons = event->GetNtrack();
         int is_cluster_used = 0;
@@ -4591,7 +4591,8 @@ namespace MyDileptonAnalysis
                     const float phi_electron = phi0 + 2*(vtxhit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY()) - phi0);
                     float dphi = phi_cluster - phi_electron;
                     dphi = (dphi > TMath::Pi()) ? dphi - 2 * TMath::Pi() : (dphi < -TMath::Pi()) ? dphi + 2 * TMath::Pi() : dphi;
-                    const float dthe = atan2(dr, dz) - electron->GetThe0Prime();
+                    const float dthe = atan2(dr, dz) - (electron->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(electron->GetThe0()));
+                    //if(TMath::Abs(dphi) < 0.01 and TMath::Abs(dthe) < 0.02) std::cout<< "new dthe "<< dthe <<" old dthe = "<<atan2(dr, dz) - electron->GetThe0Prime()<<" dphi = "<<dphi<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<< " " <<z<<" "<<electron->GetDep()<<std::endl;
                     //std::cout<<"dphi = "<<dphi<<" dthe = "<<dthe<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<<std::endl;
                     if (TMath::Abs(dphi) < TMath::Abs(dphi_min))
                         dphi_min = dphi;
@@ -4600,25 +4601,29 @@ namespace MyDileptonAnalysis
                 }
             }
 
-            if (TMath::Abs(dphi_min+0.001) < 0.03 && TMath::Abs(dthe_min-0.001) < 0.03 && ecore/electron->GetEcore()<0.8)
+            if (TMath::Abs(dphi_min+0.001) < 0.03 && TMath::Abs(dthe_min) < 0.03 && ecore/electron->GetEcore()<0.8)
             {
                 if(is_cluster_used)
                 {
                     continue;
                 }
-                if (electron->GetMcId()>9999 && TMath::Abs(dthe_min+0.001) < 0.01) 
+                if (TMath::Abs(dthe_min) < 0.01 && ((int)electron->GetEmcdphi_e())%10==0) 
                 {
-                    hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality(), weight);
-                    if(electron->GetPtPrime()>electron->GetPt()*1.08) 
-                        hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality()+100, weight);
+                    const int sector = electron->GetArm() == 1 ? electron->GetSect() : 7 - electron->GetSect();
+                    const int third_bin = ((int)(event->GetCentrality()/20))*16 + 2*sector + (electron->GetChargePrime() == 1 ? 0 : 1);
+                    hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), third_bin, weight);
+                    if(electron->GetMcId()>9000) 
+                        hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality()+80, weight);
                 }
-                if (electron->GetMcId()>9999 && TMath::Abs(dphi_min) < 0.005) 
+                if (TMath::Abs(dphi_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0 ) 
                 {
-                    hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality(), weight);
-                    if(electron->GetPtPrime()>electron->GetPt()*1.08) 
-                        hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality()+100, weight);
+                    const int sector = electron->GetArm() == 1 ? electron->GetSect() : 7 - electron->GetSect();
+                    const int third_bin = ((int)(event->GetCentrality()/20))*16 + 2*sector + (electron->GetChargePrime() == 1 ? 0 : 1);
+                    hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), third_bin, weight);
+                    if(electron->GetMcId()>9000) 
+                        hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), event->GetCentrality()+80, weight);
                 }
-                if (TMath::Abs(dthe_min+0.001) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
+                if (TMath::Abs(dthe_min) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
                 {
                     hist_bremstrahlung_e->Fill(ecore/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
@@ -4629,9 +4634,11 @@ namespace MyDileptonAnalysis
                     electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore));
                     if(false) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore)<<" for centrality of "<<event->GetCentrality()<<std::endl;
                     is_cluster_used = 1;
+                    return is_cluster_used;
                 }
             }
         }
+        return is_cluster_used;
     }
 
     /// @yoren no longer in use
