@@ -1832,5 +1832,7 @@ const float phi0_DC_VTX_offset_params[2][2] = {
     {0.000134, 0.002113},
 };
 
+const float theta_emcal_sector_offsets[8] = {-0.0037, -0.0036, -0.0035, -0.004, -0.0002, 0.0004, 0.0, 0.0002};
+
 
 #endif

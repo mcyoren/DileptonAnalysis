@@ -1290,7 +1290,8 @@ namespace MyDileptonAnalysis
             void FillEmcalMapHist(const int isec, const int iy, const int iz, const float ecore, const float weight = 1.0);
             void SigmalizedToF(const int verbosity = 0, const int is_sim = 0);
             int Discretize_EP(double ep);
-            int Find_Bremsstrahlung(const float x, const float y, const float z, const float ecore, const float temc = 0.0, const float weight = 1.0);
+
+            int Find_Bremsstrahlung(std::vector<std::vector<float> > &clusters, const float weight = 1.0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };

@@ -4560,10 +4560,11 @@ namespace MyDileptonAnalysis
         }
     }
     
-    int MyEventContainer::Find_Bremsstrahlung(const float x, const float y, const float z, const float ecore, const float temc, const float weight)
+    int MyEventContainer::Find_Bremsstrahlung(std::vector<std::vector<float> > &clusters, const float weight)
     {
         const int n_electrons = event->GetNtrack();
-        int is_cluster_used = 0;
+        const int cluster_size = clusters.size();
+        std::vector<char> used_clusters((int) cluster_size, 0);
         for (int iel = 0; iel < n_electrons; iel++)
         {
             MyDileptonAnalysis::MyElectron *electron = event->GetEntry(iel);
@@ -4573,7 +4574,8 @@ namespace MyDileptonAnalysis
             if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
 
-            float dphi_min = 999, dthe_min = 999;
+
+            MyDileptonAnalysis::MyVTXHit *vtxhits[4] = {nullptr, nullptr, nullptr, nullptr};
             for (int ilayer = 0; ilayer < 4; ilayer++)
             {
                 if(electron->GetHitCounter(ilayer))
@@ -4581,43 +4583,111 @@ namespace MyDileptonAnalysis
                     MyVTXHit *vtxhit = event->GetVTXHitEntry(electron->GetHitIndex(ilayer));
                     if (!vtxhit)
                         continue;
-                    //std::cout<<"x = "<<x<<" y = "<<y<<" z = "<<z<<" ecore = "<<ecore<<std::endl;
-                    const float dx = x - vtxhit->GetXHit();
-                    const float dy = y - vtxhit->GetYHit();
-                    const float dz = z - vtxhit->GetZHit();
-                    const float dr = sqrt(dx * dx + dy * dy);
-                    const float phi_cluster = atan2(dy, dx);
-                    const float phi0 = TMath::Abs(weight-1.0) < 0.001 ? electron->GetDCAY() : electron->GetPhi0();
-                    const float phi_electron = phi0 + 2*(vtxhit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY()) - phi0);
-                    float dphi = phi_cluster - phi_electron;
-                    dphi = (dphi > TMath::Pi()) ? dphi - 2 * TMath::Pi() : (dphi < -TMath::Pi()) ? dphi + 2 * TMath::Pi() : dphi;
-                    const float dthe = atan2(dr, dz) - (electron->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(electron->GetThe0()));
-                    //if(TMath::Abs(dphi) < 0.01 and TMath::Abs(dthe) < 0.02) std::cout<< "new dthe "<< dthe <<" old dthe = "<<atan2(dr, dz) - electron->GetThe0Prime()<<" dphi = "<<dphi<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<< " " <<z<<" "<<electron->GetDep()<<std::endl;
-                    //std::cout<<"dphi = "<<dphi<<" dthe = "<<dthe<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<<std::endl;
-                    if (TMath::Abs(dphi) < TMath::Abs(dphi_min))
-                        dphi_min = dphi;
-                    if (TMath::Abs(dthe) < TMath::Abs(dthe_min))
-                        dthe_min = dthe;
+                    vtxhits[ilayer] = vtxhit;
                 }
             }
-
-            if (TMath::Abs(dphi_min+0.001) < 0.03 && TMath::Abs(dthe_min) < 0.03 && ecore/electron->GetEcore()<0.8)
+            if(!vtxhits[0] || !vtxhits[1] || (!vtxhits[2] && !vtxhits[3])) continue;
+            // Local temporaries for synthesized hits (no heap, no delete needed)
+            MyVTXHit tmp2, tmp3;
+            if(electron->GetHitCounter(2) == 0) 
             {
-                if(is_cluster_used)
-                {
+                const float phi1 = vtxhits[1]->GetPhiHit(event->GetPreciseX(), event->GetPreciseY());
+                const float phi3 = vtxhits[3]->GetPhiHit(event->GetPreciseX(), event->GetPreciseY());
+                const float r1 = sqrt(vtxhits[1]->GetXHit()*vtxhits[1]->GetXHit() + vtxhits[1]->GetYHit()*vtxhits[1]->GetYHit());
+                const float r3 = sqrt(vtxhits[1]->GetXHit()*vtxhits[1]->GetXHit() + vtxhits[1]->GetYHit()*vtxhits[1]->GetYHit());
+                const float r2 = (r1 + r3)/2;
+                const float z1 = vtxhits[1]->GetZHit();
+                const float z3 = vtxhits[3]->GetZHit();
+                const float z2 = (z1 + z3)/2;
+                const float phi2 = (phi1 + phi3)/2;
+                MyVTXHit localhit = MyVTXHit();
+                tmp2.SetXHit(r2*std::cos(phi2));
+                tmp2.SetYHit(r2*std::sin(phi2));
+                tmp2.SetZHit(z2);
+                vtxhits[2] = &tmp2;
+
+            }
+            if(electron->GetHitCounter(3) == 0) 
+            {
+                const float phi1 = vtxhits[1]->GetPhiHit(event->GetPreciseX(), event->GetPreciseY());
+                const float phi2 = vtxhits[2]->GetPhiHit(event->GetPreciseX(), event->GetPreciseY());
+                const float r1 = sqrt(vtxhits[1]->GetXHit()*vtxhits[1]->GetXHit() + vtxhits[1]->GetYHit()*vtxhits[1]->GetYHit());
+                const float r2 = sqrt(vtxhits[2]->GetXHit()*vtxhits[2]->GetXHit() + vtxhits[2]->GetYHit()*vtxhits[2]->GetYHit());
+                const float z1 = vtxhits[1]->GetZHit();
+                const float z2 = vtxhits[2]->GetZHit();
+                const float z3 = z2 + (z2 - z1);
+                const float r3 = r2 + (r2 - r1);
+                const float phi3 = phi2 + (phi2 - phi1);
+                tmp3.SetXHit(r3*std::cos(phi3));
+                tmp3.SetYHit(r3*std::sin(phi3));
+                tmp3.SetZHit(z3);
+                vtxhits[3] = &tmp3;
+            }
+            
+
+            float dphi_min = 999, dthe_min = 999, sdr_min=999, ecore_brem = 0;
+            int cluster_id = -1, sector_choosen =  -1;
+            for (int icl = 0; icl < cluster_size; icl++)
+            {
+                if(used_clusters[icl]) continue;
+                const float x = clusters[icl][0];
+                const float y = clusters[icl][1];
+                const float z = clusters[icl][2];
+                const float ecore = clusters[icl][3];
+                const int sector = clusters[icl][4];
+                if (ecore < 0.3 || ecore > 0.8 * electron->GetEcore())///podgon
                     continue;
-                }
-                if (TMath::Abs(dthe_min) < 0.01 && ((int)electron->GetEmcdphi_e())%10==0) 
+                
+                // Check distance to each layer hit
+                for (int ilayer = 0; ilayer < 4; ilayer++)
                 {
-                    const int sector = electron->GetArm() == 1 ? electron->GetSect() : 7 - electron->GetSect();
+                    if(vtxhits[ilayer])
+                    {
+                        MyVTXHit *vtxhit = vtxhits[ilayer];
+                        //std::cout<<"x = "<<x<<" y = "<<y<<" z = "<<z<<" ecore = "<<ecore<<std::endl;
+                        const float dx = x - vtxhit->GetXHit();
+                        const float dy = y - vtxhit->GetYHit();
+                        const float dz = z - vtxhit->GetZHit();
+                        const float dr = sqrt(dx * dx + dy * dy);
+                        const float phi_cluster = atan2(dy, dx);
+                        const float phi0 = TMath::Abs(weight-1.0) < 0.001 ? electron->GetDCAY() : electron->GetPhi0();
+                        const float phi_electron = phi0 + 2*(vtxhit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY()) - phi0);
+                        float dphi = phi_cluster - phi_electron;
+                        dphi = (dphi > TMath::Pi()) ? dphi - 2 * TMath::Pi() : (dphi < -TMath::Pi()) ? dphi + 2 * TMath::Pi() : dphi;
+                        float dthe = atan2(dr, dz) - (electron->GetThe0() - ((event->GetVtxZ() - event->GetPreciseZ()) / 220) * TMath::Sin(electron->GetThe0()));
+                        if(TMath::Abs(weight-1.0) < 0.001) dthe -= theta_emcal_sector_offsets[sector];
+                        //if(TMath::Abs(dphi) < 0.01 and TMath::Abs(dthe) < 0.02) std::cout<< "new dthe "<< dthe <<" old dthe = "<<atan2(dr, dz) - electron->GetThe0Prime()<<" dphi = "<<dphi<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<< " " <<z<<" "<<electron->GetDep()<<std::endl;
+                        //std::cout<<"dphi = "<<dphi<<" dthe = "<<dthe<<" ecore = "<<ecore<<" ecore/electron->GetEcore() = "<<ecore/electron->GetEcore()<<std::endl;
+                        const float sdr = sqrt(dphi*dphi + dthe*dthe);
+                        if (sdr < sdr_min)
+                        {
+                            dphi_min = dphi;
+                            dthe_min = dthe;
+                            sdr_min = sdr;
+                            cluster_id = icl;
+                            ecore_brem = ecore;
+                            sector_choosen = sector;
+                        }
+                    }
+                }
+            }
+            if (cluster_id < 0)
+                continue;
+            else used_clusters[cluster_id] = 1;
+
+            if (TMath::Abs(dphi_min) < 0.03 && TMath::Abs(dthe_min) < 0.03)// && ecore_brem/electron->GetEcore()<0.8)
+            {
+                if (TMath::Abs(dthe_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0) 
+                {
+                    const int sector = sector_choosen;
                     const int third_bin = ((int)(event->GetCentrality()/20))*16 + 2*sector + (electron->GetChargePrime() == 1 ? 0 : 1);
-                    hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), third_bin, weight);
+                    hist_bremstrahlung_phi->Fill(dphi_min*electron->GetChargePrime(), electron->GetPtPrime(), third_bin, weight);
                     if(electron->GetMcId()>9000) 
-                        hist_bremstrahlung_phi->Fill(dphi_min, electron->GetPtPrime(), event->GetCentrality()+80, weight);
+                        hist_bremstrahlung_phi->Fill(dphi_min*electron->GetChargePrime(), electron->GetPtPrime(), event->GetCentrality()+80, weight);
                 }
                 if (TMath::Abs(dphi_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0 ) 
                 {
-                    const int sector = electron->GetArm() == 1 ? electron->GetSect() : 7 - electron->GetSect();
+                    const int sector = sector_choosen;
                     const int third_bin = ((int)(event->GetCentrality()/20))*16 + 2*sector + (electron->GetChargePrime() == 1 ? 0 : 1);
                     hist_bremstrahlung_the->Fill(dthe_min, electron->GetPtPrime(), third_bin, weight);
                     if(electron->GetMcId()>9000) 
@@ -4625,20 +4695,18 @@ namespace MyDileptonAnalysis
                 }
                 if (TMath::Abs(dthe_min) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
                 {
-                    hist_bremstrahlung_e->Fill(ecore/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
+                    hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
                     //if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
                     //if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
-                    electron->SetEcore(ecore + electron->GetEcore());
-                    electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore));
-                    if(false) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore)<<" for centrality of "<<event->GetCentrality()<<std::endl;
-                    is_cluster_used = 1;
-                    return is_cluster_used;
+                    electron->SetEcore(ecore_brem + electron->GetEcore());
+                    electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore_brem));
+                    if(false) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore_brem)<<" for centrality of "<<event->GetCentrality()<<std::endl;\
                 }
             }
         }
-        return is_cluster_used;
+        return 1;
     }
 
     /// @yoren no longer in use

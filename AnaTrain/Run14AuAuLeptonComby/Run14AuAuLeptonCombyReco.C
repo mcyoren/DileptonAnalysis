@@ -711,6 +711,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     }
     if (do_electron_QA==3)
     {
+        std::vector<std::vector<float> > clusters;
         for (int icluster = 0; icluster <  (int) emccont->size(); icluster++)
         {
             emcClusterContent* emc = emccont->getCluster(icluster);
@@ -719,8 +720,16 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             if(emc->prob_photon()<0.1) continue;
             if( used_clusters[icluster] ) continue;
             if (isEMCDead(emc) > 1) continue;
-            event_container->Find_Bremsstrahlung(emc->x(),emc->y(),emc->z(),emc->ecore());
+            const float sector = emc->arm() == 0 ? emc->sector() : 7 - emc->sector();
+            std::vector<float> tmp(5,0);
+            tmp[0] = emc->x();
+            tmp[1] = emc->y();
+            tmp[2] = emc->z();
+            tmp[3] = emc->ecore();
+            tmp[4] = sector;
+            clusters.push_back(tmp);
         }
+        event_container->Find_Bremsstrahlung(clusters);
     }
     
     if(do_electron_QA) event_container->FillQAHist();
