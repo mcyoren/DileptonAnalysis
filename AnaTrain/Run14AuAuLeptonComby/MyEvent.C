@@ -1183,19 +1183,19 @@ namespace MyDileptonAnalysis
             std::cout<<"no parabola"<<std::endl;
             return;
         }
-        //const float xx1 = this->GetPreciseX();
-        //const float yy1 = this->GetPreciseY();
-        //const float xx2 = x1;
-        //const float yy2 = y1;
-        //const float xx3 = x2;
-        //const float yy3 = y2;
-        //const float a1 = 1./(xx1-xx3)*((yy1-yy2)/(xx1-xx2)-(yy2-yy3)/(xx2-xx3));
-        //const float b1 = (yy1-yy2)*(xx3+xx2)/(xx1-xx2)/(xx3-xx1)-(yy2-yy3)*(xx1+xx2)/(xx2-xx3)/(xx3-xx1);
-        ////const float c1 = yy1-b1*xx1-a1*xx1*xx1;
-        //const float slope1 = b1 + 2*a1*xx1;
-        //float phi0_new_method1 = TMath::ATan(slope1);
-        //if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
-        float phi0_new_method1 = mytrk->GetPhi0Prime() - (mytrk->GetMinDphi(0) + mytrk->GetMinDphi(1)) / 2 * mytrk->GetChargePrime();
+        const float xx1 = this->GetPreciseX() + X_circle * dca / L / 10000.;
+        const float yy1 = this->GetPreciseY() + Y_circle * dca / L / 10000.;
+        const float xx2 = x1;
+        const float yy2 = y1;
+        const float xx3 = x2;
+        const float yy3 = y2;
+        const float a1 = 1./(xx1-xx3)*((yy1-yy2)/(xx1-xx2)-(yy2-yy3)/(xx2-xx3));
+        const float b1 = (yy1-yy2)*(xx3+xx2)/(xx1-xx2)/(xx3-xx1)-(yy2-yy3)*(xx1+xx2)/(xx2-xx3)/(xx3-xx1);
+        //const float c1 = yy1-b1*xx1-a1*xx1*xx1;
+        const float slope1 = b1 + 2*a1*xx1;
+        float phi0_new_method1 = TMath::ATan(slope1);
+        //float phi0_new_method1 = mytrk->GetPhi0Prime() - (mytrk->GetMinDphi(0) + mytrk->GetMinDphi(1)) / 2 * mytrk->GetChargePrime();
+        if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
         if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
         const int arm = mytrk->GetArm();
         phi0_new_method1 += phi0_DC_VTX_offset_params[arm][0] + phi0_DC_VTX_offset_params[arm][1]*phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
@@ -2194,7 +2194,7 @@ namespace MyDileptonAnalysis
                                            - ( event->GetPreciseY() - beam_average_y ) / 220. * TMath::Cos(electron->GetPhiDC());
                 electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
 
-                electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) * 1.00618 );
+                electron->SetPtPrime(electron->GetPtPrime() * TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime()) );
 
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     electron->SetQPrime(-electron->GetChargePrime());
@@ -2210,16 +2210,13 @@ namespace MyDileptonAnalysis
                 if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                    (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
 
-                //const float dcax = electron->GetDCAX2();
-                //const float dcay = electron->GetDCAY2();
-                //const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
+                const float dcax = electron->GetDCAX2();
+                const float dcay = electron->GetDCAY2();
+                const float alpha_dca_offset = - (dcax / 220 / 10000) * TMath::Sin(electron->GetPhi0Prime()) - (dcay / 220 / 10000) * TMath::Cos(electron->GetPhi0Prime());
 
                 const float dphi = electron->GetDCAY() - electron->GetDCAX();
-                //const float prime = electron->GetPhi0Prime() - electron->GetDCAX();
-                //std::cout << "dphi calc: " << dphi << " " << prime-electron->GetMinDphi(0)*electron->GetChargePrime() << " " << prime-electron->GetMinDphi(1)*electron->GetChargePrime() 
-                //<< " " << prime-electron->GetMinDphi(2)*electron->GetChargePrime() << " " << prime-electron->GetMinDphi(3)*electron->GetChargePrime() << std::endl;
                 const float alpha_phi_offset = dphi * ( electron->GetAlphaPrime() / ( electron->GetDCAX() - electron->GetPhiDC() ) );
-                const float alpha_offset = 0. - alpha_phi_offset;//alpha_dca_offset
+                const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity == -1)
                 {
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
@@ -2246,20 +2243,20 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                //if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
-                //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
-                //if (mscale > 1.0 && event->GetCentrality() > 40 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
-                if( TMath::Abs(electron->GetsDCA())<200 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction 
-                if (mscale<0.92 )
+                if(event->GetCentrality()>39)
+                {   
+                    if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
+                    else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                }
+                //if (mscale > 1.0 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                if (mscale<0.92)
                 {
                     electron->SetEmcdz_e(1);
                 }
-                //if (event->GetCentrality() < 40 && mscale > 1.08) electron->SetEmcdz_e(1);
 
                 if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                 {
                     electron->SetEmcdz_e(100);
-                    //electron->SetHitCounter(0,0);
                     electron->SetQPrime(-electron->GetChargePrime());
                 }
             }
@@ -4700,6 +4697,8 @@ namespace MyDileptonAnalysis
                 {
                     hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
                     if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dthe_min)>0.005) continue;
+                    if(event->GetCentrality()<20 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
                     //if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
                     //if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
