@@ -549,6 +549,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         int hit_association = -1;
         int conv_rejection = 0;
         const float pt = mytrk->GetPtPrime();
+        if(pt<0.3) continue;
         if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;////podgon
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
         if ( (pt >  pt_trans && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
@@ -794,6 +795,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            
+        if(mytrk->GetPtPrime()<0.3) continue;
            //if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
            
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
@@ -842,7 +844,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_reject==100 && mytrk->GetPtPrime()< 0.5 && 
            ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
              mytrk->GetHitCounter(2) < 1 || mytrk->GetHitCounter(3) < 1 ) ) conv_reject=10;
-        if ( conv_reject==100  && mytrk->GetEmcdz_e()==0) conv_reject=1000;
+        if ( conv_reject==100  && mytrk->GetEmcdz_e()==0 && 
+            ( ( (mytrk->GetEmcTOF() > -3 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -3 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) )   
+            ) conv_reject=1000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
         //if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
         //if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)) conv_reject=1000;
@@ -1056,6 +1060,13 @@ void Run14AuAuLeptonCombyReco::set_track(track *newTrack, const PHCentralTrack *
     newTrack->SetPrimes(bbcz, svxz, rg_beamoffset);
     newTrack->ResetPrimes(bbcz, svxz, rg_beamoffset);
     newTrack->SetTOFE((trk->get_m2tof(itrk_reco))*100);
+
+    if (false) 
+    {
+        const float m2_tofw = trk->get_mom(itrk_reco)*trk->get_mom(itrk_reco)*(trk->get_ttofw(itrk_reco)*trk->get_ttofw(itrk_reco)*900/trk->get_pltofw(itrk_reco)/trk->get_pltofw(itrk_reco)-1);
+        newTrack->SetTOFE(m2_tofw*100);
+        std::cout<<" m2_tofw "<<m2_tofw<<std::endl;
+    }
     newTrack->SetEmcTOF(trk->get_temc(itrk_reco));
 	if(trk->get_emcid(itrk_reco) >= 0)
     {

@@ -4325,7 +4325,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 30, 0, 600);
             INIT_HIST(3, temc, 1000, -1.5, 3.5, 200, 0., 10, 30, 0, 600);
             INIT_HIST(3, ttof, 1000, -1.5, 3.5, 50, 0., 5, 30, 0, 600);
-            INIT_HIST(3, stof_hist, 200, -10, 10, 50, 0., 5, 18, 0, 18);
+            INIT_HIST(3, stof_hist, 200, -10, 10, 100, 0., 5, 18, 0, 18);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
             INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
@@ -4347,7 +4347,7 @@ namespace MyDileptonAnalysis
         }
         if(fill_track_QA==3)
         {
-            INIT_HIST(3, hist_bremstrahlung_e, 100, 0, 1, 100, 0, 10.0, 10, 0, 100);
+            INIT_HIST(3, hist_bremstrahlung_e, 100, 0, 1, 20, -5, 5, 500, 0, 50);
             INIT_HIST(3, hist_bremstrahlung_phi, 100, -0.03, 0.03, 50, 0, 5.0, 160, 0, 160);
             INIT_HIST(3, hist_bremstrahlung_the, 100, -0.03, 0.03, 50, 0, 5.0, 160, 0, 160);
         }
@@ -4505,9 +4505,17 @@ namespace MyDileptonAnalysis
                 const float pt = mytrk->GetPtPrime();
                 const float emc_sigma = -0.00718+0.0285*pt+0.0661*pt*pt;
                 const float emc_mean = 0.0284-0.115*pt+0.0537*pt*pt;
-                if(verbosity==1) std::cout<<" new value " << (mytrk->GetEmcTOF()-emc_mean)/emc_sigma <<" emc_sigma = "<<emc_sigma<<" for tof of " <<mytrk->GetEmcTOF() << " for pt of "<<pt<<std::endl;
-                mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma);
+                const int isec = mytrk->GetSect()+4*mytrk->GetArm();
+                float emc_smean = tof_sigma_means[isec][0];
+                if (isec < 2) emc_smean += tof_sigma_means[isec][1] * pt + tof_sigma_means[isec][2] * pt * pt;
+                if(verbosity==1) std::cout<<" new value " << (mytrk->GetEmcTOF()-emc_mean)/emc_sigma - emc_smean<<" emc_sigma = "<<emc_sigma<<" for tof of " <<mytrk->GetEmcTOF() << " for pt of "<<pt<<std::endl;
+                mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma-emc_smean);
                 if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF(),pt, mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
+            }
+            else
+            {
+                mytrk->SetEmcTOF(-9999);
+                if (verbosity==2) stof_hist->Fill(-9.9,mytrk->GetPtPrime(), mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
             }
             if (mytrk->GetTOFE()>-900000)
             {
@@ -4573,6 +4581,8 @@ namespace MyDileptonAnalysis
             
             if(electron->GetHitCounter(0)<1 || electron->GetHitCounter(1)<1 ||
                (electron->GetHitCounter(2)<1 && electron->GetHitCounter(3)<1) ) continue;
+            
+            electron->SetDep(0);
 
 
             MyDileptonAnalysis::MyVTXHit *vtxhits[4] = {nullptr, nullptr, nullptr, nullptr};
@@ -4695,13 +4705,19 @@ namespace MyDileptonAnalysis
                 }
                 if (TMath::Abs(dthe_min) < 0.01 && TMath::Abs(dphi_min) < 0.01) 
                 {
-                    hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetPtPrime(), event->GetCentrality(), weight);
-                    if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
-                    if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dthe_min)>0.005) continue;
-                    if(event->GetCentrality()<20 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
+                    const float third_bin = ((int)(event->GetCentrality()/20))*10 + electron->GetPt();
+                    if (TMath::Abs(dphi_min) < 0.005 && TMath::Abs(dthe_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0 && electron->GetMcId()>900 ) 
+                    hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetMinsDphi(1)+electron->GetMinsDphi(0), third_bin, weight);
+                    if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.5 && event->GetCentrality()<20) continue;
+                    //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>1 && electron->GetPt()<2.0 && event->GetCentrality()<20) continue;
+                    //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    //if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dthe_min)>0.005) continue;
+                    //if(event->GetCentrality()<20 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<60 && electron->GetPtPrime()<electron->GetPt()*1.08) continue;
                     //if(event->GetCentrality()<20 && TMath::Abs(dphi_min)>0.005) continue;
                     //if(event->GetCentrality()<40 && electron->GetPt()<2 && TMath::Abs(dphi_min)>0.005) continue;
+                    electron->SetDep(1);
                     electron->SetEcore(ecore_brem + electron->GetEcore());
                     electron->SetPtPrime(electron->GetPt()*electron->GetEcore()/(electron->GetEcore()-ecore_brem));
                     if(false) std::cout<<" Bremsstrahlung found for electron with new pt of "<<electron->GetPtPrime()<<" with keff of "<<electron->GetEcore()/(electron->GetEcore()-ecore_brem)<<" for centrality of "<<event->GetCentrality()<<std::endl;\
