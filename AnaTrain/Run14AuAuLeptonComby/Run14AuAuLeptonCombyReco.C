@@ -432,7 +432,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
           skip = true;
         if (mytrk.GetCrkphi()<-99)
           skip = true;
-        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.1)
+        if (mytrk.GetEcore()/mytrk.GetPtot() < 0.6)
           skip = true;
         if (mytrk.GetN0() < 0 )
           skip = true;
@@ -549,7 +549,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         int hit_association = -1;
         int conv_rejection = 0;
         const float pt = mytrk->GetPtPrime();
-        if(pt<0.3) continue;
+        //if(pt<0.3) continue;
         if ( mytrk->GetNHits() == 0 && mytrk->GetTOFDPHI( )== 0 ) hit_association = -10;////podgon
         if ( mytrk->GetHitCounter(0) == 0 && mytrk->GetHitCounter(1) == 0 ) conv_rejection = -1;
         if ( (pt >  pt_trans && (mytrk->GetHitCounter(2) > 0  || mytrk->GetHitCounter(3) > 0 ) ) && conv_rejection < 0 ) conv_rejection = -10;
@@ -795,7 +795,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            
-        if(mytrk->GetPtPrime()<0.3) continue;
+        //if(mytrk->GetPtPrime()<0.3) continue;
            //if ( mytrk->GetMcId()<1000 || (event->GetCentrality()<20 && mytrk->GetMcId()<10000) ) continue;
            
         //if ( mytrk->GetPtPrime() > 4.4 && !( mytrk->GetProb() > 0.8 && mytrk->GetEcore()/mytrk->GetPtot()>0.8 &&
@@ -844,13 +844,13 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_reject==100 && mytrk->GetPtPrime()< 0.5 && 
            ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
              mytrk->GetHitCounter(2) < 1 || mytrk->GetHitCounter(3) < 1 ) ) conv_reject=10;
-        if ( conv_reject==100  && mytrk->GetEmcdz_e()==0 && 
-            ( ( (mytrk->GetEmcTOF() > -3 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -3 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) )   
-            ) conv_reject=1000;
+        if ( conv_reject==100  && mytrk->GetEmcdz_e()==0 ) conv_reject=1000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
         //if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0)) conv_reject=100;
         //if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)) conv_reject=1000;
-        if ( conv_reject==1000 && ( mytrk->GetEmcTOF() > -2 && mytrk->GetEmcTOF() < 2 ) && ( (mytrk->GetTOFE() > -2 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -9990 )  ) conv_reject=10000; ///podgon
+        if ( conv_reject==1000 && 
+            ( ( (mytrk->GetEmcTOF() > -3 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -3 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) )
+                conv_reject=10000; ///podgon
 
         //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime()<< " " <<mytrk->GetEmcdphi_e() << " " <<mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<<std::endl;
         //std::cout<<ncalls<<" centrality: "<<event->GetCentrality()<< " pt: "<<mytrk->GetPtPrime() << " phi0 "<<mytrk->GetPhi0()<< " " <<mytrk->GetChargePrime() << " phiDC "<<mytrk->GetPhiDC()<<std::endl;
