@@ -2248,17 +2248,17 @@ namespace MyDileptonAnalysis
                 {   
                     if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
                     else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+
+                    if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
+                    {
+                        electron->SetEmcdz_e(100);
+                        electron->SetQPrime(-electron->GetChargePrime());
+                    }
                 }
                 //if (mscale > 1.0 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
                 if (mscale<0.92)
                 {
                     electron->SetEmcdz_e(1);
-                }
-
-                if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
-                {
-                    electron->SetEmcdz_e(100);
-                    electron->SetQPrime(-electron->GetChargePrime());
                 }
             }
         }
@@ -4710,6 +4710,7 @@ namespace MyDileptonAnalysis
                     if (TMath::Abs(dphi_min) < 0.005 && TMath::Abs(dthe_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0 && electron->GetMcId()>900 ) 
                     hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetMinsDphi(1)+electron->GetMinsDphi(0), third_bin, weight);
                     if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
+                    if ( event->GetCentrality()<40) continue;
                     //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.5 && event->GetCentrality()<20) continue;
                     //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>1 && electron->GetPt()<2.0 && event->GetCentrality()<20) continue;
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
