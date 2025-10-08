@@ -1197,7 +1197,7 @@ namespace MyDileptonAnalysis
         float phi0_new_method1 = TMath::ATan(slope1);
         //float phi0_new_method1 = mytrk->GetPhi0Prime() - (mytrk->GetMinDphi(0) + mytrk->GetMinDphi(1)) / 2 * mytrk->GetChargePrime();
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
-        if(true)mytrk->SetPhi0(phi0_new_method1);//////podgon
+        if(true)mytrk->SetPhi0(phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1) );//////podgon
         const int arm = mytrk->GetArm();
         phi0_new_method1 += phi0_DC_VTX_offset_params[arm][0] + phi0_DC_VTX_offset_params[arm][1]*phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;
@@ -4710,7 +4710,7 @@ namespace MyDileptonAnalysis
                     if (TMath::Abs(dphi_min) < 0.005 && TMath::Abs(dthe_min) < 0.005 && ((int)electron->GetEmcdphi_e())%10==0 && electron->GetMcId()>900 ) 
                     hist_bremstrahlung_e->Fill(ecore_brem/electron->GetEcore(),electron->GetMinsDphi(1)+electron->GetMinsDphi(0), third_bin, weight);
                     if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
-                    if ( event->GetCentrality()<40) continue;
+                    //if ( event->GetCentrality()<40) continue;
                     //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>0 && electron->GetPt()<1.5 && event->GetCentrality()<20) continue;
                     //if ( (electron->GetMinsDphi(1)+electron->GetMinsDphi(0))>1 && electron->GetPt()<2.0 && event->GetCentrality()<20) continue;
                     //if(electron->GetPt()<1.0 && event->GetCentrality()<40) continue;
