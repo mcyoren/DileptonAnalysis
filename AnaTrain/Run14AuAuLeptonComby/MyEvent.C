@@ -1197,7 +1197,7 @@ namespace MyDileptonAnalysis
         float phi0_new_method1 = TMath::ATan(slope1);
         //float phi0_new_method1 = mytrk->GetPhi0Prime() - (mytrk->GetMinDphi(0) + mytrk->GetMinDphi(1)) / 2 * mytrk->GetChargePrime();
         if((x1 < 0 && y1 > 0) || (x1<0 && y1<0)) phi0_new_method1 += pi;
-        if(true)mytrk->SetPhi0(phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1) );//////podgon
+        if(true)mytrk->SetPhi0(phi0_new_method1);//  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1) );//////podgon
         const int arm = mytrk->GetArm();
         phi0_new_method1 += phi0_DC_VTX_offset_params[arm][0] + phi0_DC_VTX_offset_params[arm][1]*phi0_new_method1  - 0.005*(mytrk->GetArm() == 0 ? 1 : -1);
         const int final_charge = (phi3 - phi0_new_method1)  > 0 ? 1: -1;

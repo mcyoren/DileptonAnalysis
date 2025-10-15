@@ -842,10 +842,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         //if(mytrk->GetMcId()>9000) hit_assocaition=10000;
         
         int conv_reject = 0;
-        if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3 ) conv_reject=10;
+        if ( ((int)mytrk->GetEmcdphi_e())%10==0 ) conv_reject=10;
         if ( conv_reject==10   && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && mytrk->GetEmcdz_e()==0) conv_reject=100;
         if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)) conv_reject=1000;
-        if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-1)) conv_reject=10000;
+        if ( conv_reject==1000 && ((int)mytrk->GetEmcdphi_e())/100<3) conv_reject=10000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3  && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2) ) conv_reject=100;
         //if ( conv_reject==100 && mytrk->GetPtPrime()< 0.5 && 
         //   ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
