@@ -3781,7 +3781,83 @@ namespace MyDileptonAnalysis
             for (int ihit0 = 0; ihit0 < event->GetNVTXhit(); ihit0++)
             {
                 MyDileptonAnalysis::MyVTXHit *layer0_hit2 = event->GetVTXHitEntry(ihit0);
-                if (layer0_hit2->GetLayer() == 3)
+                if (layer0_hit2->GetLayer() != 0)
+                    continue;
+                if ((layer0_hit2->GetLadder()>24&&layer0_hit2->GetLadder()<48)) continue;
+                const int inner_layer = layer0_hit2->GetLayer();
+                const float phi1 = layer0_hit2->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                const float the1 = layer0_hit2->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                const float dphi = phi1 - phi00; ///dphi = |f(R,pt)|*charge => dphi*charge -> positive for track but negative for second tracks
+                const float cdphi = charge*dphi;
+                const float dthe = the1 - the0;
+                if (cdphi < -0.002 && cdphi > -0.1 && TMath::Abs(dthe) < 0.03 )
+                {
+                    for (int ihit1 = 0; ihit1 < event->GetNVTXhit(); ihit1++)
+                    {
+                        MyDileptonAnalysis::MyVTXHit *layer1_hit = event->GetVTXHitEntry(ihit1);
+                        if (layer1_hit->GetLayer() != 1)
+                            continue;
+                        if ((layer1_hit->GetLadder()>24&&layer1_hit->GetLadder()<48)) continue;
+                        const float phi2 = layer1_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                        const float dphi1 = phi2 - phi00;
+                        if(dphi1*charge>-0.002||(phi2-phi1)*charge>-0.002) continue;
+                        const float the2 = layer1_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                        const float r10 = sqrt(SQR(layer0_hit2->GetXHit()-event->GetPreciseX()) + SQR(layer0_hit2->GetYHit()-event->GetPreciseY()));
+                        const float r20 = sqrt(SQR(layer1_hit ->GetXHit()-event->GetPreciseX()) + SQR(layer1_hit ->GetYHit()-event->GetPreciseY()));
+                        const float dphi1hh = phi2 - (phi00 + dphi_dr*r20);
+                        if(TMath::Abs(dphi1hh) < 0.005) continue;
+                        const float dphi2 = dphi1 - dphi * r20 / r10;
+                        const float dthe2 = the2 - the1;
+                        if (fill_hist)
+                        {
+                            const int layer_bin = (central_bin>2 ? 6:0);//0
+                            if(TMath::Abs(dthe2) < 0.01) hist_daltz_phi_phi[layer_bin]->Fill(dphi2, dphi, pt, weight);
+                            if(TMath::Abs(dphi2) < 0.10) hist_daltz_the_the[layer_bin]->Fill(dthe2, dthe, pt, weight);
+                        }
+                        if ( TMath::Abs(dphi2) < 0.04  && TMath::Abs(dthe2) < 0.02 )//sthe of 0.2 is better
+                        {
+                            for (int ihit1 = 0; ihit1 < event->GetNVTXhit(); ihit1++)
+                            {
+                                MyDileptonAnalysis::MyVTXHit *layer2_hit = event->GetVTXHitEntry(ihit1);
+                                if (layer2_hit->GetLayer() < 2)
+                                    continue;
+                                if ((layer2_hit->GetLadder()>24&&layer2_hit->GetLadder()<48)) continue;
+                                const float phi3 = layer2_hit->GetPhiHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                                const float dphi3 = phi3 - phi00;
+                                if(dphi3*charge>-0.002||(phi3-phi2)*charge>-0.002) continue;
+                                const float the3 = layer2_hit->GetTheHit(event->GetPreciseX(), event->GetPreciseY(), event->GetPreciseZ());
+                                const float r30 = sqrt(SQR(layer2_hit ->GetXHit()-event->GetPreciseX()) + SQR(layer2_hit ->GetYHit()-event->GetPreciseY()));
+                                const float dphi2hh = phi3 - (phi00 + dphi_dr*r30);
+                                if(TMath::Abs(dphi2hh) < 0.005) continue;
+                                //const float dphi4 = dphi3 - dphi * r30 / r10;
+                                const float dthe4 = the3 - the2;
+                                const float dphi21 = phi2 - phi1;
+                                const float dphi31 = phi3 - phi1;
+                                const float ddphi = dphi31 - dphi21 * (r30-r10) / (r20 - r10);
+                                if (fill_hist)
+                                {
+                                    const int layer_bin = (layer2_hit->GetLayer()-1) + (central_bin>2 ? 6:0);
+                                    if(TMath::Abs(dthe4) < 0.01) hist_daltz_phi_phi[layer_bin]->Fill(ddphi, dphi2, pt, weight);
+                                    if(TMath::Abs(ddphi) < 0.10) hist_daltz_the_the[layer_bin]->Fill(dthe4, dthe2, pt, weight);
+                                }
+                                if ( TMath::Abs(ddphi) < 0.02  && TMath::Abs(dthe4) < 0.02 )//sthe of 0.2 is better
+                                {
+                                    is_dalitz++;
+                                    if (verbosity)
+                                    {
+                                        std::cout << "\033[32mFound Dalitz\033[0m" << std::endl;
+                                        std::cout << "\033[32m" << dphi << " " << dphi2 << " " << dthe2 << " " << inner_layer << " " << layer1_hit->GetLayer() << " " << mytrk->GetPtPrime() << " " << mytrk->GetTOFDPHI() << "\033[0m" << std::endl;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (int ihit0 = 0; ihit0 < event->GetNVTXhit()*0; ihit0++)
+            {
+                MyDileptonAnalysis::MyVTXHit *layer0_hit2 = event->GetVTXHitEntry(ihit0);
+                if (layer0_hit2->GetLayer() != 0)
                     continue;
                 if ((layer0_hit2->GetLadder()>24&&layer0_hit2->GetLadder()<48)) continue;
                 const int inner_layer = layer0_hit2->GetLayer();
@@ -3814,7 +3890,7 @@ namespace MyDileptonAnalysis
                             if(TMath::Abs(dthe2) < 0.01) hist_daltz_phi_phi[layer_bin]->Fill(dphi2, dphi, pt, weight);
                             if(TMath::Abs(dphi2) < 0.10) hist_daltz_the_the[layer_bin]->Fill(dthe2, dthe, pt, weight);
                         }
-                        if ( TMath::Abs(dphi2) < 0.02 && TMath::Abs(dthe2) < 0.01 )
+                        if ( TMath::Abs(dphi2) < layer1_hit->GetLayer()*0.01+0.01  && TMath::Abs(dthe2) < 0.01 )//sthe of 0.2 is better
                         {
                             is_dalitz++;
                             if (verbosity)
@@ -3826,7 +3902,7 @@ namespace MyDileptonAnalysis
                     }
                 }
             }
-            for (int ihit0 = 0; ihit0 < event->GetNVTXhit(); ihit0++)
+            for (int ihit0 = 0; ihit0 < event->GetNVTXhit()*0; ihit0++)
             {
                 MyDileptonAnalysis::MyVTXHit *layer0_hit2 = event->GetVTXHitEntry(ihit0);
                 if (layer0_hit2->GetLayer() != 0)
@@ -3899,7 +3975,7 @@ namespace MyDileptonAnalysis
                 sdphi_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt, weight);
                 if (is_conversion%10>2) 
                     sdphi_real_conv_hist[central_bin]->Fill(mytrk->GetMinsDphi(0)+mytrk->GetMinsDphi(1), mytrk->GetMinsDphi(0), pt, weight);
-                hist_is_dalitz_conv[central_bin]->Fill(is_conversion, is_dalitz, pt);
+                hist_is_dalitz_conv[central_bin]->Fill(is_conversion, is_dalitz, pt, weight);
                 hist_is_ml_conv[central_bin]->Fill(is_conversion, TMath::Log10 ( mytrk->GetTOFDPHI()>1 ?  mytrk->GetTOFDPHI() : 1 ), pt, weight);
             }
         }
