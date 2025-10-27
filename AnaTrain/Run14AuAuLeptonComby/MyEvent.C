@@ -4402,7 +4402,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, el_had_dr, 100, 0, 20, 50, 0., 5.0, 30, 0, 600);
             INIT_HIST(3, temc, 1000, -1.5, 3.5, 200, 0., 10, 30, 0, 600);
             INIT_HIST(3, ttof, 1000, -1.5, 3.5, 50, 0., 5, 30, 0, 600);
-            INIT_HIST(3, stof_hist, 200, -10, 10, 100, 0., 5, 18, 0, 18);
+            INIT_HIST(3, stof_hist, 200, -10, 10, 100, 0., 5, 36, 0, 36);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
             INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
@@ -4577,6 +4577,13 @@ namespace MyDileptonAnalysis
         for (int itrk = 0; itrk < nleptons; itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            if(verbosity==3)
+            {
+                if(mytrk->GetHitCounter(0)<1 || mytrk->GetHitCounter(1)<1 ||
+                   (mytrk->GetHitCounter(2)<1 && mytrk->GetHitCounter(3)<1) ) continue;
+                stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),mytrk->GetPtPrime(),18 + mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
+                continue;
+            }
             if(mytrk->GetEmcTOF()>-9000)
             {
                 const float pt = mytrk->GetPtPrime();
@@ -4587,7 +4594,7 @@ namespace MyDileptonAnalysis
                 if (isec < 2) emc_smean += tof_sigma_means[isec][1] * pt + tof_sigma_means[isec][2] * pt * pt;
                 if(verbosity==1) std::cout<<" new value " << (mytrk->GetEmcTOF()-emc_mean)/emc_sigma - emc_smean<<" emc_sigma = "<<emc_sigma<<" for tof of " <<mytrk->GetEmcTOF() << " for pt of "<<pt<<std::endl;
                 mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma-emc_smean);
-                if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF(),pt, mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
+                if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),pt, mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
             }
             else
             {
@@ -4600,7 +4607,7 @@ namespace MyDileptonAnalysis
                 const float tof_sigma = 0.00209-0.00294*pt+0.019*pt*pt;
                 if(verbosity==1) std::cout<<" new value " << (mytrk->GetTOFE()*0.01)/tof_sigma <<" tof_sigma = "<<tof_sigma<<" for tof of " <<mytrk->GetTOFE()*0.01 << " for pt of "<<pt<<std::endl;
                 mytrk->SetTOFE((mytrk->GetTOFE()*0.01)/tof_sigma);
-                if (verbosity==2) stof_hist->Fill(mytrk->GetTOFE(),pt, 16 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
+                if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),pt, 16 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
             }
             else
             {
