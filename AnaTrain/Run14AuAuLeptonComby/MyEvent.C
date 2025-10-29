@@ -3814,7 +3814,7 @@ namespace MyDileptonAnalysis
                             if(TMath::Abs(dthe2) < 0.01) hist_daltz_phi_phi[layer_bin]->Fill(dphi2, dphi, pt, weight);
                             if(TMath::Abs(dphi2) < 0.10) hist_daltz_the_the[layer_bin]->Fill(dthe2, dthe, pt, weight);
                         }
-                        if ( TMath::Abs(dphi2) < 0.04  && TMath::Abs(dthe2) < 0.02 )//sthe of 0.2 is better
+                        if ( TMath::Abs(dphi2) < 0.04  && TMath::Abs(dthe2) < 0.02 )//reduce for most central podgon
                         {
                             for (int ihit1 = 0; ihit1 < event->GetNVTXhit(); ihit1++)
                             {
@@ -4591,9 +4591,14 @@ namespace MyDileptonAnalysis
                 const float emc_mean = 0.0284-0.115*pt+0.0537*pt*pt;
                 const int isec = mytrk->GetSect()+4*mytrk->GetArm();
                 float emc_smean = tof_sigma_means[isec][0];
+                float mean_shift = 0;
+                for (int i = 0; i < N_RUNS_TOF; ++i)
+                {
+                  if (run_number[i] == event->GetRunNumber())  mean_shift = tof_mean[mytrk->GetSect()+4*mytrk->GetArm()][i];
+                }
                 if (isec < 2) emc_smean += tof_sigma_means[isec][1] * pt + tof_sigma_means[isec][2] * pt * pt;
                 if(verbosity==1) std::cout<<" new value " << (mytrk->GetEmcTOF()-emc_mean)/emc_sigma - emc_smean<<" emc_sigma = "<<emc_sigma<<" for tof of " <<mytrk->GetEmcTOF() << " for pt of "<<pt<<std::endl;
-                mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma-emc_smean);
+                mytrk->SetEmcTOF((mytrk->GetEmcTOF()-emc_mean)/emc_sigma-emc_smean - mean_shift);
                 if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),pt, mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
             }
             else

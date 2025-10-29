@@ -1197,10 +1197,10 @@ float Run14AuAuLeptonCombyHistos::get_pt_V19(PHParticle *Type1, const unsigned i
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
 
-  const float pt1 = TMath::Sqrt(p1->get_px()*p1->get_px() + p1->get_py()*p1->get_py());
-  const float pt2 = TMath::Sqrt(p2->get_px()*p2->get_px() + p2->get_py()*p2->get_py());
+  const int centrality1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
+  const int centrality2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CENTRALITY);
 
-  if ( pt1 < 0.5 || pt2 < 0.5 ) return -999;
+  if ( centrality1 < 10 || centrality2 < 10 ) return -999;
   
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
