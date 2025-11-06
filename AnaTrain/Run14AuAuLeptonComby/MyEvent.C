@@ -2220,6 +2220,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity == -1)
                 {
+                    electron->SetPtPrime(electron->GetPtPrime() / 0.985); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
                         //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
@@ -4038,6 +4039,10 @@ namespace MyDileptonAnalysis
             rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10)), weight);
 
+            if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ(), weight);
+            rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
+            rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
+
             if (electron->GetMcId()>0 && electron->GetMcId()%10>5)///figuring out how bdt actually works
             {
                 const float m_emc = electron->GetEmcTOF()    > 3.4 ? 3.4 : electron->GetEmcTOF()    < -1.4 ? -1.4 : electron->GetEmcTOF();
@@ -4053,8 +4058,8 @@ namespace MyDileptonAnalysis
                 disp_hist_el->Fill(electron->GetDisp(),electron->GetNpe0(),event->GetCentrality(), weight);
                 chi2npe0_hist_el->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetNpe0(),event->GetCentrality(), weight);
                 //rich_prob1->Fill(electron->GetChi2()/electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
-                rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
-                rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality(), weight);
+                //rich_prob2->Fill(electron->GetNpe0(),electron->GetN0()-1*electron->GetDisp(),event->GetCentrality(), weight);
+                //rich_prob3->Fill(electron->GetEmcdphi(),electron->GetEmcdz(),event->GetCentrality(), weight);
 
                 const float Rghost = sqrt(SQR(electron->GetEmcdphi())+SQR(electron->GetEmcdz()));
                 el_had_dr->Fill(Rghost,electron->GetPtPrime(),charge_centr_bin, weight);
@@ -4109,6 +4114,10 @@ namespace MyDileptonAnalysis
             if (electron->GetN0()>= 4 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.1 && electron->GetChi2()>0) 
                 rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10))+160, weight);
+
+            if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ()+20, weight);
+            rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
+            rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
@@ -4405,7 +4414,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, stof_hist, 200, -10, 10, 100, 0., 5, 36, 0, 36);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
-            INIT_HIST(3, BDT_eID_hist, 1000, 0, 1, 50, 0, 5.0, 40, 0, 400);
+            INIT_HIST(3, BDT_eID_hist, 100, 0, 10, 60, -1.5, 4.5, 40, -10, 30);
 
             INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
@@ -4413,8 +4422,8 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, disp_hist_el, 50, 0, 10, 30, 0, 30, 10, 0., 100);
             INIT_HIST(3, chi2npe0_hist_el, 50, 0, 20, 30, 0, 30, 10, 0., 100);
             INIT_HIST(3, rich_prob1, 50, 0, 1.5, 50, 0, 5.0, 320, 0, 320);
-            INIT_HIST(3, rich_prob2, 30, 0, 30, 50, -10, 10, 10, 0., 100);
-            INIT_HIST(3, rich_prob3, 100, -0.05, 0.05, 100, -25, 25, 10, 0., 100);
+            INIT_HIST(3, rich_prob2, 88, -0.6, 3.8, 100, -280, -130, 11, 0, 11);
+            INIT_HIST(3, rich_prob3, 88, -0.6, 3.8, 100, 130, 280, 11, 0., 11);
             is_fill_track_QA = 1;
         }
         if(fill_track_QA==2)
@@ -4582,6 +4591,7 @@ namespace MyDileptonAnalysis
                 if(mytrk->GetHitCounter(0)<1 || mytrk->GetHitCounter(1)<1 ||
                    (mytrk->GetHitCounter(2)<1 && mytrk->GetHitCounter(3)<1) ) continue;
                 stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),mytrk->GetPtPrime(),18 + mytrk->GetSect()+4*mytrk->GetArm() + 8 * (mytrk->GetChargePrime() == 1 ? 0 : 1));
+                stof_hist->Fill(mytrk->GetTOFE()>9.9?9.9:mytrk->GetTOFE()<-9.8?-9.8:mytrk->GetTOFE(),mytrk->GetPtPrime(), 34 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
                 continue;
             }
             if(mytrk->GetEmcTOF()>-9000)
@@ -4612,7 +4622,7 @@ namespace MyDileptonAnalysis
                 const float tof_sigma = 0.00209-0.00294*pt+0.019*pt*pt;
                 if(verbosity==1) std::cout<<" new value " << (mytrk->GetTOFE()*0.01)/tof_sigma <<" tof_sigma = "<<tof_sigma<<" for tof of " <<mytrk->GetTOFE()*0.01 << " for pt of "<<pt<<std::endl;
                 mytrk->SetTOFE((mytrk->GetTOFE()*0.01)/tof_sigma);
-                if (verbosity==2) stof_hist->Fill(mytrk->GetEmcTOF()>9.9?9.9:mytrk->GetEmcTOF()<-9.8?-9.8:mytrk->GetEmcTOF(),pt, 16 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
+                if (verbosity==2) stof_hist->Fill(mytrk->GetTOFE()>9.9?9.9:mytrk->GetTOFE()<-9.8?-9.8:mytrk->GetTOFE(),pt, 16 + (mytrk->GetChargePrime() == 1 ? 0 : 1) );
             }
             else
             {
