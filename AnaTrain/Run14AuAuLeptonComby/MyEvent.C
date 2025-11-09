@@ -209,7 +209,8 @@ namespace MyDileptonAnalysis
                 const double sig_sim  = 0.0734371;
                 
                 const double scale = sig_sim / sig_data;
-                new_ep = mu_sim + scale * (mytrk->GetEcore()/mytrk->GetPtot() - mu_data);
+                const double additive = event->GetCentrality() > 40 ? 0. : event->GetCentrality() > 20 ? 0.025 : 0.05;//////podgon
+                new_ep = mu_sim + scale * (mytrk->GetEcore()/mytrk->GetPtot() - mu_data)+additive;
             }
 
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
@@ -2220,7 +2221,8 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity == -1)
                 {
-                    electron->SetPtPrime(electron->GetPtPrime() / 0.985); //reverse std mom scale correction in central events
+                    const float mscale_arm = electron->GetArm() == 1 ? 0.98 : 1.0;
+                    electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
                         //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
@@ -4040,8 +4042,8 @@ namespace MyDileptonAnalysis
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10)), weight);
 
             if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ(), weight);
-            rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
-            rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
+            if(event->GetCentrality()>60)rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
+            if(event->GetCentrality()>60)rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
 
             if (electron->GetMcId()>0 && electron->GetMcId()%10>5)///figuring out how bdt actually works
             {
@@ -4116,8 +4118,8 @@ namespace MyDileptonAnalysis
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10))+160, weight);
 
             if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ()+20, weight);
-            rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
-            rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
+            if(event->GetCentrality()>60) rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
+            if(event->GetCentrality()>60) rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
 
             if (electron->GetMcId()<1000 || electron->GetProb()<0.1) continue;///figuring out how bdt actually works
 
