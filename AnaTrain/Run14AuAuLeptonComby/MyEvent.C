@@ -2022,14 +2022,7 @@ namespace MyDileptonAnalysis
                     if ( ((int)newTrack2->GetEmcdphi_e())%10==0 && ((int)newTrack2->GetEmcdphi_e())/100<3) conv_reject2=100;
                     if ( ((int)newTrack2->GetEmcdphi_e())%10==0 && ((int)newTrack2->GetEmcdphi_e())/100<2) conv_reject2=1000;
                     if ( ((int)newTrack2->GetEmcdphi_e())%100==0 && ((int)newTrack2->GetEmcdphi_e())/100<2) conv_reject2=10000;
-
-                    if (!(newTrack1->GetMcId()>90&&newTrack2->GetMcId()>90))
-                        continue;
-                    if (event->GetCentrality()<40 && !(newTrack1->GetMcId()>900&&newTrack2->GetMcId()>900))
-                        continue;
-                    if (event->GetCentrality()<20 && !(newTrack1->GetMcId()>9000&&newTrack2->GetMcId()>9000))
-                        continue;
-    
+                    
                     if ( TMath::Abs(phi11-phi21)<0.002 && TMath::Abs(the11-the21)<0.02 ) continue;
                     if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.01 ) continue;
                     if ( TMath::Abs(phi13-phi23)<0.001 && TMath::Abs(the13-the23)<0.01 ) continue;
@@ -2221,7 +2214,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity == -1)
                 {
-                    const float mscale_arm = electron->GetArm() == 1 ? 0.98 : 1.0;
+                    const float mscale_arm = 0.985;
                     electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
