@@ -196,6 +196,7 @@ namespace MyDileptonAnalysis
                  mytrk->GetProb()>0.1 && mytrk->GetDisp() < 4)  mytrk->SetMcId(mytrk->GetMcId()+6);
                  
             //double treshlods[4] = {0.1,  0.35,  0.5, 0.70};
+            const float centrality = event->GetCentrality();// >= 40 ? event->GetCentrality() : event->GetCentrality() + 20;
             
             double treshlods[4] = {0.017808128514646658,  0.0229414147041921,  0.03, 0.04501756860704552};
             const float pt = mytrk->GetPtPrime()>0.4?mytrk->GetPtPrime():0.405;
@@ -209,15 +210,15 @@ namespace MyDileptonAnalysis
                 const double sig_sim  = 0.0734371;
                 
                 const double scale = sig_sim / sig_data;
-                const double additive = event->GetCentrality() > 40 ? 0. : event->GetCentrality() > 20 ? 0.025 : 0.05;//////podgon
+                const double additive = 0;//event->GetCentrality() > 40 ? 0. : event->GetCentrality() > 20 ? 0.025 : 0.05;//////podgon
                 new_ep = mu_sim + scale * (mytrk->GetEcore()/mytrk->GetPtot() - mu_data)+additive;
             }
 
             const double input_x[13]=////['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
             {
-                event->GetCentrality(), pt, new_ep, (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
+                centrality, pt, new_ep, (double) mytrk->GetN0(), mytrk->GetDisp(), mytrk->GetChi2(), 
                 (double) mytrk->GetNpe0(), mytrk->GetProb(), mytrk->GetN0()-SQR(mytrk->GetDisp()), mytrk->GetChi2()/(mytrk->GetNpe0()+0.001), 
-                event->GetCentrality()/20.+pt*2, mytrk->GetN0()+4*pt, 
+                centrality/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs(new_ep-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
             /*
