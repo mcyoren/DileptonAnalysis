@@ -2216,7 +2216,7 @@ namespace MyDileptonAnalysis
                 if(verbosity == -1)
                 {
                     const float mscale_arm = 0.985;
-                    electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
+                    electron->SetPtPrime(electron->GetPtPrime() * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
                         //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
@@ -4299,8 +4299,8 @@ namespace MyDileptonAnalysis
 
         if (fill_ell)
         {   
-            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 100, -0.05, 0.05, 100, -0.05, 0.05, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el_dynamic,  N_dynamic, 20, -0.05, 0.05, 20, -0.05, 0.05, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el_dynamic,  N_dynamic, 20, -0.05, 0.05, 20, -0.05, 0.05, 50, 0, 5);
             INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 50,  -5,  5, 50,  -5,  5, 50, 0, 5);
             INIT_HISTOS(3, sdthe_hist_el_dynamic, N_dynamic, 50,  -5,  5, 50,  -5,  5, 50, 0, 5);
             //INIT_HISTOS(3, sdphi_hist_el_dynamic, N_dynamic, 100,  -10,  10, 100,  -10,  10, 50, 0, 5);
@@ -4315,10 +4315,10 @@ namespace MyDileptonAnalysis
             //INIT_HISTOS(3, dthe_hist_el,  1, 50, -0.1, 0.1, 128, 0, 8, 50, 0, 5);
             //INIT_HISTOS(3, sdphi_hist_el, 1, 50, -10, 10,   128, 0, 8, 50, 0, 5);
             //INIT_HISTOS(3, sdthe_hist_el, 1, 50, -10, 10,   128, 0, 8, 50, 0, 5);
-            INIT_HISTOS(3, dphi_hist_el,  N_centr, 50, -0.1, 0.1, 128, 0, 128, 50, 0, 5);
-            INIT_HISTOS(3, dthe_hist_el,  N_centr, 50, -0.1, 0.1, 128, 0, 128, 50, 0, 5);
-            INIT_HISTOS(3, sdphi_hist_el, N_centr, 50, -10, 10,   128, 0, 128, 50, 0, 5);
-            INIT_HISTOS(3, sdthe_hist_el, N_centr, 50, -10, 10,   128, 0, 128, 50, 0, 5);
+            INIT_HISTOS(3, dphi_hist_el,  N_centr, 25, -0.1, 0.1, 128, 0, 128, 50, 0, 5);
+            INIT_HISTOS(3, dthe_hist_el,  N_centr, 25, -0.1, 0.1, 128, 0, 128, 50, 0, 5);
+            INIT_HISTOS(3, sdphi_hist_el, N_centr, 25, -10, 10,   128, 0, 128, 50, 0, 5);
+            INIT_HISTOS(3, sdthe_hist_el, N_centr, 25, -10, 10,   128, 0, 128, 50, 0, 5);
             INIT_HIST  (3, truehithist,      10, 0, 10, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, truehitsigmahist, 50, 0, 50, 50, 0, 5, 10, 0, 100);
             INIT_HIST  (3, charge_recover_hist, 2, -2, 2, 16, 0, 16, 50, 0, 5);
@@ -4460,6 +4460,9 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3,  DCA_2D_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
             INIT_HISTOS(3, sDCA_2D_hist, N_centr, 200, -4000, 4000, 50, 0, 5, 25, 0, 25);
 
+            INIT_HIST(3, vtx_accaptance_hist, 30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
+            INIT_HIST(3, vtx_deadmaps_hist,   30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
+
             is_fill_DCA2_hist = 1;
         }
         if(check_veto)
@@ -4543,9 +4546,6 @@ namespace MyDileptonAnalysis
             INIT_HISTOS(3, hist_is_ml_conv,      N_centr, 20, 0, 20, 10, 0, 10, 50, 0, 5); 
             INIT_HISTOS(3, sdphi_conv_hist,      N_centr,  50,  -10,  10, 50, -5.0, 5.0, 50, 0, 5); 
             INIT_HISTOS(3, sdphi_real_conv_hist, N_centr,  50,  -10,  10, 50, -5.0, 5.0, 50, 0, 5);
-
-            INIT_HIST(3, vtx_accaptance_hist, 30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
-            INIT_HIST(3, vtx_deadmaps_hist,   30, -1.5, 4.5, 24 , -12, 12, 8, 0 ,8 );
         }
     }
     
