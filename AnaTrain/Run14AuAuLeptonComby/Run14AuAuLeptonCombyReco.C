@@ -502,7 +502,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
-      if ( mytrk.GetMcId()<100 || ( event->GetCentrality()<40 && mytrk.GetMcId()<1000 && mytrk.GetProb()<0.1 ) )
+      if ( mytrk.GetMcId()<100 || ( event->GetCentrality()<40 && ( mytrk.GetMcId()<100 || mytrk.GetProb()<0.1 ) ) || 
+         ( event->GetCentrality()<10  && mytrk.GetMcId()<10000 ) )
       //if (mytrk.GetMcId()<100)
       //if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
       //   ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
@@ -612,12 +613,11 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     {
      
         //if(fill_ddphi_hadron) event_container->Associate_Hits_to_Hadrons_Dynamic(5., -999,-999);
-        //if(true) event_container->CorrectVTXOffset(1);
-        //if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
+        if(true) event_container->CorrectVTXOffset(1);
+        if(do_reco_vertex) event_container->VertexXYScan(vtx_mean_x, vtx_mean_y, (do_reco_vertex == 2),0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
         //if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
-        //if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, 0);
-        event_container->CorrectPtForEventOffset(event->GetPreciseX(), event->GetPreciseY(), 0);
+        if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, 0);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.,5);
         if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, -1);
         if(false)
@@ -844,11 +844,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         int conv_reject = 0;
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && mytrk->GetEmcdz_e()==0 && ((int)mytrk->GetEmcdphi_e())/100<1 ) conv_reject=10;
-        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-4)  ) conv_reject=100;
-        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-3)  ) conv_reject=1000;
-        if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=10000;
-        //if ( conv_reject==10  &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=100;
-        //if ( conv_reject==1000 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=10000;
+        if ( conv_reject==10  &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=100;
+        if ( conv_reject==100 && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=1000;
+        if ( conv_reject==1000 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=10000;
         //if ( ((int)mytrk->GetEmcdphi_e())%10==0 && ((int)mytrk->GetEmcdphi_e())/100<3  && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2) ) conv_reject=100;
         //if ( conv_reject==100 && mytrk->GetPtPrime()< 0.5 && 
         //   ( mytrk->GetHitCounter(0) < 1 || mytrk->GetHitCounter(1) < 1 || 
