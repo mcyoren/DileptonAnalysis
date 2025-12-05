@@ -391,10 +391,10 @@ float Run14AuAuLeptonCombyHistos::get_pt_V4(PHParticle *Type1, const unsigned in
   UltraLightTrack *p1 = ct1->GetTrack(i1);
   UltraLightTrack *p2 = ct2->GetTrack(i2);
   
-  const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
-  const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( conv_reject1 < 10000 || conv_reject2 < 10000 ) return -999;
+  if ( hit_assoc1 < 100 || hit_assoc2 < 100 ) return -999;
 
   const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
   const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);

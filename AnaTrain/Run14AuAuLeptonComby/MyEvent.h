@@ -221,7 +221,7 @@ namespace MyDileptonAnalysis
             void SetTrkId(int strkid) { trkid = strkid; };
             void SetTrkQuality(int strk_quality) { trk_quality = strk_quality; };
             void SetArm(int sarm) { arm = sarm; };
-            void SetTrkInfo(int sarm, int sdcside, int ssect) { trkinfo = short(ssect + 10 * sdcside + 100 * sarm); };
+            void SetTrkInfo(int strkinfo) { trkinfo = strkinfo; };
             void SetDCSide(int sdcside) { dcside = sdcside; };
             void SetSect(int ssect) { sect = ssect; };
             void SetPt(float spt) { pt = spt; pt_prime = spt; };
@@ -1307,6 +1307,9 @@ namespace MyML
       double GetTreeValue(const double x[13], const int iestim = 0);   
       double GetProb(const double x[13], const double LearingRate=0.2, const int n_estim = 20);
       int GeteID(const double x[13], const double y[3], const double LearingRate=0.2, const int n_estim = 20);//double mytree['centrality', 'pt', 'e/p', 'n0', 'disp', 'chi2', 'npe0', 'prob', 'disp2', 'chi2/npe0', 'centr+pt', 'e/p*pt', 'n0*pt']
+      double GetTreeValue_new(const double x[13], const int iestim = 0);   
+      double GetProb_new(const double x[13], const double LearingRate=0.2, const int n_estim = 20);
+      int GeteID_new(const double x[13], const double y[3], const double LearingRate=0.2, const int n_estim = 20);
       double GetHitBDTValue(const double x[24], const int iestim);
       double GetConvBDTValue(const double x[38], const int iestim);
       double GetHitBDTProb(const double x[24], const double LearingRate = 0.2, const int n_estim = 24);

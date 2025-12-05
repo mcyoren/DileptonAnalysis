@@ -221,20 +221,22 @@ namespace MyDileptonAnalysis
                 centrality/20.+pt*2, mytrk->GetN0()+4*pt, 
                 1./(TMath::Abs(new_ep-0.9)+0.25)/(1.25-mytrk->GetProb())+4*mytrk->GetPtPrime()
             };
-            /*
-           const float pt = mytrk->GetPtPrime();
+
+            if(mytrk->GetEcore()/mytrk->GetPtot()>0.6) mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));//,0.2,15));
+            
             double sector = mytrk->GetArm() == 1 ? mytrk->GetSect() : 7 - mytrk->GetSect();
-            const double input_x[15]=////['centrality', 'pt', 'ecore', 'n0', 'disp', 'npe0', 'sector', 'prob', 'emcdphi', 'emcdz', 'Q', 'e/p', 'chi2/npe0', 'disp2', 'centr+pt']
+            const double input_x_new[15]=////['centrality', 'pt', 'ecore', 'n0', 'disp', 'npe0', 'sector', 'prob', 'emcdphi', 'emcdz', 'Q', 'e/p', 'chi2/npe0', 'disp2', 'centr+pt']
             {
-                event->GetCentrality(), pt, mytrk->GetEcore(), (double) mytrk->GetN0(), mytrk->GetDisp(), (double)  mytrk->GetNpe0(),sector,mytrk->GetProb(),
+                event->GetCentrality(), mytrk->GetPtPrime(), mytrk->GetEcore(), (double) mytrk->GetN0(), mytrk->GetDisp(), (double)  mytrk->GetNpe0(),sector,mytrk->GetProb(),
                 TMath::Abs(mytrk->GetEmcdphi()) < 0.02 ? 1. : 0., TMath::Abs(mytrk->GetEmcdz()-1) < 8 ? 1. : 0., 
                 (double)mytrk->GetChargePrime(), (double) Discretize_EP(mytrk->GetEcore()/mytrk->GetPtot()), (mytrk->GetChi2()/(mytrk->GetNpe0()+0.001) < 10) ? 1. : 0.,
-                mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(pt)
+                mytrk->GetN0()-SQR(mytrk->GetDisp())/8., event->GetCentrality()/20. + SQR(mytrk->GetPtPrime())
             };
-            */
+            double treshlods_new[4] = {0.1,  0.35,  0.5, 0.70};
+            mytrk->SetTrkInfo(mytrk->GetMcId()%10 + MyML::GeteID_new(input_x_new, treshlods_new,0.2,15));
+            
             //mytrk->SetEmcdphi_e(MyML::GetProb(input_x));
             //std::cout<<MyML::GeteID(input_x, treshlods,0.2,10)<<std::endl;
-            mytrk->SetMcId(mytrk->GetMcId() + MyML::GeteID(input_x, treshlods));//,0.2,15));
             //if (mytrk->GetMcId()<100 && event->GetCentrality()>20) mytrk->SetMcId(mytrk->GetMcId()+90);
             if (false) std::cout<<mytrk->GetMcId()<<" "<<event->GetCentrality()<<" "<<mytrk->GetPtPrime()<<" "<<mytrk->GetEcore()/mytrk->GetPtot()
                         <<" "<<mytrk->GetN0()<<" "<<mytrk->GetDisp()<<" "<<mytrk->GetChi2()<<" "<<mytrk->GetNpe0()<<std::endl;
@@ -4035,7 +4037,7 @@ namespace MyDileptonAnalysis
             rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10)), weight);
 
-            if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ(), weight);
+            BDT_eID_hist->Fill(TMath::Log10(electron->GetTrkInfo()+1), TMath::Log10(electron->GetMcId()+1), electron->GetPtPrime()+10*(electron->GetChargePrime()==1?1:0)+20*central_bin, weight);
             if(event->GetCentrality()>60)rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
             if(event->GetCentrality()>60)rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId())+5, weight);
 
@@ -4111,7 +4113,8 @@ namespace MyDileptonAnalysis
                 rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10))+160, weight);
 
-            if ( TMath::Abs(event->GetPreciseZ()) < 10 ) BDT_eID_hist->Fill(electron->GetPtPrime(),electron->GetPhi0(),event->GetPreciseZ()+20, weight);
+            int central_bin = (int) event->GetCentrality() / 20;
+            BDT_eID_hist->Fill(TMath::Log10(electron->GetTrkInfo()+1), TMath::Log10(electron->GetMcId()+1), electron->GetPtPrime()+10*(electron->GetChargePrime()==1?1:0)+20*central_bin+100, weight);
             if(event->GetCentrality()>60) rich_prob2->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
             if(event->GetCentrality()>60) rich_prob3->Fill(electron->GetCrkphi(),electron->GetCrkz(),TMath::Log10(electron->GetMcId()), weight);
 
@@ -4410,7 +4413,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, stof_hist, 200, -10, 10, 100, 0., 5, 36, 0, 36);
 
             INIT_HISTOS(3, el_pt_hist, N_centr*2, 100, 0, 10, 5, 0, 5, 25, 0, 25);
-            INIT_HIST(3, BDT_eID_hist, 100, 0, 10, 60, -1.5, 4.5, 40, -10, 30);
+            INIT_HIST(3, BDT_eID_hist, 5, 0, 5, 5, 0, 5, 2000, 0,200);
 
             INIT_HIST(3, ep_hist_el, 30, 0, 1.5,  100, 0, 1, 50, 0., 5.0);
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
