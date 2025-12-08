@@ -502,7 +502,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
-      if ( mytrk.GetMcId()<100 && mytrk.GetTrkInfo()<100 )
+      if ( (event->GetCentrality()<40 && mytrk.GetMcId() + mytrk.GetTrkInfo() < 10000) || (event->GetCentrality()>=40 && mytrk.GetTrkInfo() < 100) )
+      //if ( mytrk.GetMcId()<100 && mytrk.GetTrkInfo()<100 )
       //if (mytrk.GetMcId()<100)
       //if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
       //   ( mytrk.GetPtPrime() < 0.4 && ( fabs(mytrk.GetEmcdphi())>0.02 || fabs(mytrk.GetEmcdz())>8 || mytrk.GetDisp()>3 || mytrk.GetMcId()%10<6 ) ) ) //adding regualr electron cuts|| mytrk.GetEcore()<0.3 || mytrk.GetEcore()/mytrk.GetPtot()<0.8 
@@ -835,9 +836,19 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=100;
         if ( conv_reject==100  && hit_assocaition>99  ) conv_reject=1000;
         if ( conv_reject==1000 &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=10000;
+        //if ( conv_reject==100  &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=1000;
+        //if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-1)  ) conv_reject=10000;
         //if ( conv_reject==1000 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=10000;
 
-        hit_assocaition = (mytrk->GetMcId() + mytrk->GetTrkInfo() < 1000) ? 0 : ( (mytrk->GetMcId() + mytrk->GetTrkInfo() < 10000) ? 100 : 10000);
+        hit_assocaition = 0;
+        if (event->GetCentrality()<40)
+        {
+            if (mytrk->GetMcId()>=100 && mytrk->GetTrkInfo()>=100 ) hit_assocaition=100;
+            if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
+        }else{
+            if (mytrk->GetMcId()>=10 && mytrk->GetTrkInfo()>=10 ) hit_assocaition=100;
+            if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
+        }
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
