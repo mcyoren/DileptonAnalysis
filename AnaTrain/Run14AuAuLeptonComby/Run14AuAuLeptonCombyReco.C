@@ -799,8 +799,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
            ( mytrk->GetHitCounter(2) < 1 && mytrk->GetHitCounter(3) < 1 )) continue;
            
         int hadron_reject = mytrk->GetMcId();
-        if ( (mytrk->GetEmcTOF() > - 1 && mytrk->GetEmcTOF() < 0.4 && mytrk->GetTOFE() < -100) 
-            || mytrk->GetMcId()%10 > 5 || TMath::Abs(mytrk->GetTOFE()*0.01) < 0.6 ) hadron_reject+=10;
+        if ( mytrk->GetMcId()%10 > 5 ) hadron_reject+=10;
         if ( mytrk->GetProb()>0.1  ) hadron_reject+=50;
 
         MyDileptonAnalysis::MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
@@ -820,7 +819,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) ||
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<4.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -5 &&  TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
+                   (mytrk->GetMinsDphi(0)> -5 &&  TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=1000;
         }else{
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5) ) && 
@@ -829,26 +828,29 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
             if ( (((TMath::Abs(mytrk->GetMinsDphi(3))<2.5 && TMath::Abs(mytrk->GetMinsDthe(3))<2) &&
                    (TMath::Abs(mytrk->GetMinsDphi(2))<2.5 && TMath::Abs(mytrk->GetMinsDthe(2))<2) ) && 
                    (TMath::Abs(mytrk->GetMinsDphi(1))<4.0 && TMath::Abs(mytrk->GetMinsDthe(1))<2) && 
-                   (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=10000;
+                   (mytrk->GetMinsDphi(0)> -5 && TMath::Abs(mytrk->GetMinsDthe(0))<2) )) hit_assocaition=1000;
         }
+        if ( hit_assocaition>99 && ( mytrk->GetPtPrime() > 0.5 || 
+             ( mytrk->GetHitCounter(0) > 0 && mytrk->GetHitCounter(1) > 0 && 
+               mytrk->GetHitCounter(2) > 0 && mytrk->GetHitCounter(3) > 0 ) ) ) hit_assocaition=10000;
         
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && mytrk->GetEmcdz_e()==0 && ((int)mytrk->GetEmcdphi_e())/100<1 ) conv_reject=10;
-        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=100;
-        if ( conv_reject==100  && hit_assocaition>99  ) conv_reject=1000;
-        if ( conv_reject==1000 &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=10000;
-        //if ( conv_reject==100  &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=1000;
-        //if ( conv_reject==1000 && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-1)  ) conv_reject=10000;
-        //if ( conv_reject==1000 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) && ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=10000;
+        if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-3)  ) conv_reject=100;
+        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=1000;
+        if ( conv_reject==1000 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) || ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=10000;
+        //if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=100;
+        //if ( conv_reject==100  && hit_assocaition>99  ) conv_reject=1000;
+        //if ( conv_reject==1000 &&  ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 4) || mytrk->GetEmcTOF() < -99) ) conv_reject=10000;
 
-        hit_assocaition = 0;
-        if (event->GetCentrality()<40)
-        {
-            if (mytrk->GetMcId()>=100 && mytrk->GetTrkInfo()>=100 ) hit_assocaition=100;
-            if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
-        }else{
-            if (mytrk->GetMcId()>=10 && mytrk->GetTrkInfo()>=10 ) hit_assocaition=100;
-            if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
-        }
+        //hit_assocaition = 0;
+        //if (event->GetCentrality()<40)
+        //{
+        //    if (mytrk->GetMcId()>=100 && mytrk->GetTrkInfo()>=100 ) hit_assocaition=100;
+        //    if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
+        //}else{
+        //    if (mytrk->GetMcId()>=10 && mytrk->GetTrkInfo()>=10 ) hit_assocaition=100;
+        //    if (hit_assocaition>90 && mytrk->GetProb()>0.1 ) hit_assocaition=10000;
+        //}
 
         const int ptype = 1 + (1 - mytrk->GetChargePrime()) / 2;
 
