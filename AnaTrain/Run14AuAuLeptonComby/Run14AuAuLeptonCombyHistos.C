@@ -21,7 +21,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3D_weight.clear();
 
   for (int i = 0; i < 24; ++i) {
-    Master3D.push_back(new TH3D(Form("inv_mass_ee_DCA_V%d", i), Form("inv_mass_ee_DCA_V%d;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]", i), 180, 0, 4.5, 40, 0, 1000, 12, 0, 4.8));
+    Master3D.push_back(new TH3D(Form("inv_mass_ee_DCA_V%d", i), Form("inv_mass_ee_DCA_V%d;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]", i), 180, 0, 4.5, 40, -500, 500, 12, 0, 4.8));
     fcn_3Dx.push_back(get_mass_ee);
     if (i<20 && i!=3) fcn_3Dy.push_back(get_DCA);
     else fcn_3Dy.push_back(get_DCA_BG);
@@ -116,52 +116,52 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
   fcn_3Dz.push_back(get_DCA2);
   fcn_3D_weight.push_back(set_weight_1);
 
-  Master3D.push_back(new TH3D("mass_dalitz_v0" , "mass_dalitz_v0;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v0" , "mass_dalitz_v0;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V11);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v1" , "mass_dalitz_v1;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v1" , "mass_dalitz_v1;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V15);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v2" , "mass_dalitz_v2;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v2" , "mass_dalitz_v2;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V7);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v3" , "mass_dalitz_v3;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v3" , "mass_dalitz_v3;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V9);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v4" , "mass_dalitz_v4;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v4" , "mass_dalitz_v4;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V10);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v5" , "mass_dalitz_v5;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v5" , "mass_dalitz_v5;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V12);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v6" , "mass_dalitz_v6;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v6" , "mass_dalitz_v6;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V17);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v7" , "mass_dalitz_v7;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v7" , "mass_dalitz_v7;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V2);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v8" , "mass_dalitz_v8;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v8" , "mass_dalitz_v8;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA_BG);
   fcn_3Dz.push_back(get_pt_V20);
   fcn_3D_weight.push_back(set_weight_1);
-  Master3D.push_back(new TH3D("mass_dalitz_v9" , "mass_dalitz_v9;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, 0, 1000, 10, 0, 5));
+  Master3D.push_back(new TH3D("mass_dalitz_v9" , "mass_dalitz_v9;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]" , 200, 0, 0.5, 40, -500, 500, 10, 0, 5));
   fcn_3Dx.push_back(get_mass_ee);
   fcn_3Dy.push_back(get_DCA);
   fcn_3Dz.push_back(get_pt_V18);
@@ -185,9 +185,13 @@ float Run14AuAuLeptonCombyHistos::get_DCA(PHParticle *Type1, const unsigned int 
   //const double DCA = TMath::Sqrt( (DCA_X_pip-DCA_X_pim)*(DCA_X_pip-DCA_X_pim) + (DCA_Y_pip-DCA_Y_pim)*(DCA_Y_pip-DCA_Y_pim) );
   const double DCA1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAX);
   const double DCA2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAX);
-  const double DCA = TMath::Sqrt( TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
-  if (DCA > 1000) return 995;
+  //const double DCA = TMath::Sqrt( TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
+  //if (DCA > 1000) return 995;
   //if (DCA < -3000) return -3000;
+  double sign = (DCA1 + DCA2 >= 0 ? 1.0 : -1.0);
+  const double DCA = sign * TMath::Sqrt( 0.5 * TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 )  );
+  if (DCA > 490 ) return 490;
+  if (DCA < -490 ) return -490;
   
   return DCA;
 }
@@ -234,9 +238,13 @@ float Run14AuAuLeptonCombyHistos::get_DCA_BG(PHParticle *Type1, const unsigned i
   if (DCA1 > 4999 ) DCA1 = 0;
   if (DCA2 > 4999 ) DCA2 = 0;
   
-  const double DCA = TMath::Sqrt( TMath::Abs ( 2*DCA1 * DCA1 + 2*DCA2 * DCA2 ) );
-  if (DCA > 3000) return 3000;
+  //const double DCA = TMath::Sqrt( TMath::Abs ( 2*DCA1 * DCA1 + 2*DCA2 * DCA2 ) );
+  //if (DCA > 3000) return 3000;
   //if (DCA < -3000) return -3000;
+  double sign = (DCA1 + DCA2 >= 0 ? 1.0 : -1.0);
+  const double DCA = sign * TMath::Sqrt( 0.5 * TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
+  if (DCA > 490 ) return 490;
+  if (DCA < -490 ) return -490;
   
   return DCA;
 }
