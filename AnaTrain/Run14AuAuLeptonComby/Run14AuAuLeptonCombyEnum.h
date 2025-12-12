@@ -20,6 +20,7 @@ public:
       THE1,
       THE2,
       THE3,
+      WEIGHT,
       LAST_DOUBLE  // special...always use this
     };
 

@@ -29,6 +29,7 @@
 #include "stdio.h"
 #include "TGraph.h"
 #include "TF1.h"
+#include "TRandom3.h"
 
 class TDirectory;
 
@@ -1292,6 +1293,7 @@ namespace MyDileptonAnalysis
             int Discretize_EP(double ep);
 
             int Find_Bremsstrahlung(std::vector<std::vector<float> > &clusters, const float weight = 1.0);
+            int Adjust_BG_Sample(const int verbosity = 0);
 
             void AddBDTHit(const MyBDTrack *newBDTrack) { BDTracklist.push_back(*newBDTrack); };
             Long64_t GetNBDThit() { return BDTracklist.size(); };
@@ -1300,6 +1302,7 @@ namespace MyDileptonAnalysis
 
             ClassDef(MyEventContainer, 1) // MyEvent structure
       };
+      
 }
 
 namespace MyML
