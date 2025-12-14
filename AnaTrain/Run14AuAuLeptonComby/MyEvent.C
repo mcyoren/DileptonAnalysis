@@ -4988,6 +4988,110 @@ namespace MyDileptonAnalysis
 
         return 0;
     }
+    int MyEventContainer::Adjust_LS_BG_Sample(const int verbosity)
+    {
+        const int centr_bin = (int)(event->GetCentrality() / 20.0f); // you said it's already safe
+
+        const int nleptons = event->GetNtrack();
+
+        for (int itrk = 0; itrk < nleptons; ++itrk)
+        {
+            MyDileptonAnalysis::MyElectron *mytrk = event->GetEntry(itrk);
+            if (!mytrk)
+                continue;
+            mytrk->SetDep(1.);
+
+            const float pt = (float)mytrk->GetPtPrime();
+            const float dca = (float)mytrk->GetsDCA(); // measured DCA
+            const int charge = (mytrk->GetChargePrime() >= 0) ? +1 : -1;
+
+            // ---- find pT bin for DCA ratio tables ----
+            int ipt = 0;
+            if (pt <= DcaDcaRatioNodes_cent10to14_pt_edges[0])
+                ipt = 0;
+            else if (pt >= DcaDcaRatioNodes_cent10to14_pt_edges[DcaDcaRatioNodes_cent10to14_NPT])
+                ipt = DcaDcaRatioNodes_cent10to14_NPT - 1;
+            else
+            {
+                for (int i = 0; i < DcaDcaRatioNodes_cent10to14_NPT; ++i)
+                {
+                    const float lo = DcaDcaRatioNodes_cent10to14_pt_edges[i];
+                    const float hi = DcaDcaRatioNodes_cent10to14_pt_edges[i + 1];
+                    if (pt >= lo && pt < hi)
+                    {
+                        ipt = i;
+                        break;
+                    }
+                }
+            }
+
+            // ---- evaluate w_dca(dca) ----
+            const float *xnodes = 0;
+            const float *wnodes = 0;
+
+            if (charge > 0)
+            {
+                xnodes = &(DcaDcaRatioNodes_cent10to14_x_pos[centr_bin][ipt][0]);
+                wnodes = &(DcaDcaRatioNodes_cent10to14_w_pos[centr_bin][ipt][0]);
+            }
+            else
+            {
+                xnodes = &(DcaDcaRatioNodes_cent10to14_x_neg[centr_bin][ipt][0]);
+                wnodes = &(DcaDcaRatioNodes_cent10to14_w_neg[centr_bin][ipt][0]);
+            }
+
+            float w_dca = 1.0f;
+
+            if (dca <= xnodes[0])
+                w_dca = wnodes[0];
+            else if (dca >= xnodes[DcaDcaRatioNodes_cent10to14_K - 1])
+                w_dca = wnodes[DcaDcaRatioNodes_cent10to14_K - 1];
+            else
+            {
+                int lo = 0;
+                int hi = DcaDcaRatioNodes_cent10to14_K - 1;
+
+                while (hi - lo > 1)
+                {
+                    const int mid = (lo + hi) >> 1;
+                    if (xnodes[mid] >= dca)
+                        hi = mid;
+                    else
+                        lo = mid;
+                }
+
+                const float x0 = xnodes[lo];
+                const float x1 = xnodes[hi];
+                const float w0 = wnodes[lo];
+                const float w1 = wnodes[hi];
+
+                const float t = (x1 > x0) ? (dca - x0) / (x1 - x0) : 0.0f;
+                w_dca = w0 + t * (w1 - w0);
+            }
+
+            // inline safety clamp (optional but recommended)
+            if (w_dca < 0.01f)
+                w_dca = 0.01f;
+            if (w_dca > 1.0f)
+                w_dca = 1.0f;
+
+            mytrk->SetDep(w_dca);
+
+            if (verbosity > 5)
+            {
+                std::cout << "[Adjust_LS_BG_Sample] itrk=" << itrk
+                          << " centr_bin=" << centr_bin
+                          << " pt=" << pt
+                          << " ipt=" << ipt
+                          << " q=" << charge
+                          << " dca=" << dca
+                          << " w_dca=" << w_dca
+                          << std::endl;
+            }
+        }
+
+        return 0;
+    }
 
     /// @yoren no longer in use
 

@@ -67,6 +67,7 @@ public:
 
       static float get_phi_V_ee(const UltraLightTrack *p1, const UltraLightTrack *p2);
       static float set_weight_1 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
+      static float set_weight_2 (PHParticle *, const unsigned int,PHParticle *, const unsigned int);
 
 };
 

@@ -60,7 +60,8 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
       case 31: fcn_3Dz.push_back(get_pt_V31); break;
       default: fcn_3Dz.push_back(get_pt_V0); break;
     }
-    fcn_3D_weight.push_back(set_weight_1);
+    if (i>3)fcn_3D_weight.push_back(set_weight_1);
+    else    fcn_3D_weight.push_back(set_weight_2);
   }
   for (int i = 0; i < 24; ++i) {
     Master3D.push_back(new TH3D(Form("delt_phi_ee_DCA_V%d", i), Form("delt_phi_ee_DCA_V%d;#Delta#phi_{ee} [rad];m_{ee} [GeV];p_{T} [GeV]", i), 32, 0, 3.2, 45, 0, 4.5,  12, 0, 4.8));
@@ -1946,4 +1947,28 @@ float Run14AuAuLeptonCombyHistos::set_weight_1(PHParticle *Type1, const unsigned
   const double weigth2 = p2->get_double(Run14AuAuLeptonCombyEnum::WEIGHT);
 
   return weigth1*weigth2;
+}
+
+float Run14AuAuLeptonCombyHistos::set_weight_2(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
+{
+  UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
+  UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
+
+  UltraLightTrack *p1 = ct1->GetTrack(i1);
+  UltraLightTrack *p2 = ct2->GetTrack(i2);
+
+  if(p1->get_integer(Run14AuAuLeptonCombyEnum::PTYPE) != p2->get_integer(Run14AuAuLeptonCombyEnum::PTYPE))
+  {
+    const double weigth1 = p1->get_double(Run14AuAuLeptonCombyEnum::WEIGHT);
+    const double weigth2 = p2->get_double(Run14AuAuLeptonCombyEnum::WEIGHT);
+
+    return weigth1*weigth2;
+  }
+
+  const double weigth1 = p1->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+  const double weigth2 = p2->get_double(Run14AuAuLeptonCombyEnum::DCAY);
+
+  return weigth1*weigth2;
+  
+  
 }

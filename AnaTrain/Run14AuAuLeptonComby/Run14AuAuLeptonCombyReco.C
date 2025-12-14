@@ -790,6 +790,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(fill_flow_hists) event_container->FillFlow(psi2_BBCS, psi2_BBCN, psi2_FVTXS, psi2_FVTXN);
     if(do_reveal_hadron) event_container->Reveal_Hadron();
     if(fill_TTree) event_container->FillTree();
+    event_container->Adjust_LS_BG_Sample();
     if((fill_inv_mass==2)&&!fill_QA_lepton_hists&&!fill_flow_hists) event_container->fill_inv_mass();
 
     for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
@@ -870,7 +871,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetsDCA());
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDCAY2());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetDep());
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
 
