@@ -11,8 +11,8 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <TH2D.h>
-#include <TH3D.h>
+#include <TH2.h>
+#include <TH3.h>
 #include "TMath.h"
 #include "TVector3.h"
 
@@ -95,8 +95,29 @@ const float DCA_bins[N_DCA + 1] = {
   900, 1100, 1300, 1500,
   1900, 2300, 2700, 3100      
 };
-const int N_phi_bins = 32;
-const float phi_bins[N_phi_bins+1]= {0.0,0.126,0.251,0.377,0.503,0.628,0.754,0.88,1.005,1.131,1.194,1.257,1.319,1.382,1.445,1.508,1.571,1.634,1.696,1.759,1.822,1.885,1.948,2.011,2.136,2.262,2.388,2.513,2.639,2.765,2.89,3.016,3.142};
+
+const int N_phi_bins = 100;
+const double phi_bins[N_phi_bins+1]= {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100};
+const int N_dca_bins = 17;
+const double new_DCA_bins[N_dca_bins+1] = {0.,25,50,75,100,125,150,175,200,225,250,275,300,400,500,750,1000,2000};
+const int N_pt_bins = 10;
+const double new_pt_bins[N_pt_bins+1] = {0.0,0.3,0.6,0.9,1.2,1.6,2.0,2.5,3.0,5.0,10.0};
+// --- your edges (Double_t) ---
+const float mass_edges[] = {
+  0.,0.025,0.05,0.075,0.1,0.15,0.25,0.35,0.45,0.55,0.65,0.7,0.75,0.8,0.9,0.95,1.0,1.05,
+  1.15,1.3,1.5,1.75,2.0,2.25,2.5,2.75,2.9,3.0,3.05,3.1,3.15,3.2,3.3,3.45,
+  3.55,3.65,3.75,3.85,4.5
+};
+const int nMassBins = sizeof(mass_edges)/sizeof(mass_edges[0]) - 1;
+
+// --- example: 3D THnF: mass, DCA, pT ---
+const int myndim = 4;
+//Int_t    nbins[ndim] = { nMassBins, 40, 12, 6 };
+//Double_t xmin [ndim] = { mass_edges[0], 0.0, 0.0, 0.0 };
+//Double_t xmax [ndim] = { mass_edges[nMassBins], 1000.0, 4.8, 3.1415926535 };
+const int    mynbins[myndim] = { nMassBins, N_DCA, N_pt_bins, N_phi_bins };
+const double myxmin [myndim] = { mass_edges[0], new_DCA_bins[0], new_pt_bins[0], phi_bins[0] };
+const double myxmax [myndim] = { mass_edges[nMassBins], new_DCA_bins[N_dca_bins], new_pt_bins[N_pt_bins], phi_bins[N_phi_bins] };
 
 #endif
 

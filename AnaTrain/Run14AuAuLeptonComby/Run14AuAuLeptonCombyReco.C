@@ -580,7 +580,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         ult.set_double(Run14AuAuLeptonCombyEnum::CRKZED, mytrk->GetCrkz());
         
         ult.set_double(Run14AuAuLeptonCombyEnum::DCAX,  mytrk->GetDCA());
-        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  mytrk->GetsDCA());
+        ult.set_double(Run14AuAuLeptonCombyEnum::DCAY,  1.0);
 
         ult.set_double(Run14AuAuLeptonCombyEnum::ZVTX, event->GetPreciseZ());
 
