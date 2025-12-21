@@ -60,8 +60,9 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
       case 31: fcn_3Dz.push_back(get_pt_V31); break;
       default: fcn_3Dz.push_back(get_pt_V0); break;
     }
-    if (i<5||i==21||i==22)fcn_3D_weight.push_back(set_weight_2);
-    else    fcn_3D_weight.push_back(set_weight_1);
+    fcn_3D_weight.push_back(set_weight_1);
+    //if (i<5||i==21||i==22)fcn_3D_weight.push_back(set_weight_2);
+    //else    fcn_3D_weight.push_back(set_weight_1);
   }
   for (int i = 0; i < 24; ++i) {
     Master3D.push_back(new TH3D(Form("delt_phi_ee_DCA_V%d", i), Form("delt_phi_ee_DCA_V%d;#Delta#phi_{ee} [rad];m_{ee} [GeV];p_{T} [GeV]", i), 32, 0, 3.2, 45, 0, 4.5,  24, 0, 4.8));
@@ -102,8 +103,9 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
       case 31: fcn_3Dz.push_back(get_pt_V31); break;
       default: fcn_3Dz.push_back(get_pt_V0); break;
     }
-    if (i<5||i==21||i==22)fcn_3D_weight.push_back(set_weight_2);
-    else    fcn_3D_weight.push_back(set_weight_1);
+    fcn_3D_weight.push_back(set_weight_1);
+    //if (i<5||i==21||i==22)fcn_3D_weight.push_back(set_weight_2);
+    //else    fcn_3D_weight.push_back(set_weight_1);
   }
 
   Master3D.push_back(new TH3D("mass_dca_pt_upsilon", "mass_dca_pt_upsilon;m_{ee} [GeV];DCA_{ee} [#mum];p_{T} [GeV]",  100, 8, 12, 10, 0, 1000, 10, 0, 10));
@@ -1392,7 +1394,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V22(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   
-  if (! ( (conv_reject1 == -10 && conv_reject2 > 9) || (conv_reject2 == -10 && conv_reject1 > 9) ) ) return -999;
+  if ( conv_reject1 != -10 || conv_reject2 != -10 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -1441,7 +1443,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V23(PHParticle *Type1, const unsigned i
   const int conv_reject1 = p1->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
-  if ( (conv_reject1 != -10 && conv_reject1 < 999) || (conv_reject2 != -10 && conv_reject2 < 999) ) return -999;
+  if ( (conv_reject1 != -10 && conv_reject1 < 9) || (conv_reject2 != -10 && conv_reject2 < 9) ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -1938,6 +1940,9 @@ float Run14AuAuLeptonCombyHistos::get_DCA2(PHParticle *Type1, const unsigned int
 
 float Run14AuAuLeptonCombyHistos::set_weight_1(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
 {
+
+  return 1.;
+  /*
   UltraLight *ct1 = dynamic_cast<UltraLight *>(Type1);
   UltraLight *ct2 = dynamic_cast<UltraLight *>(Type2);
 
@@ -1947,7 +1952,7 @@ float Run14AuAuLeptonCombyHistos::set_weight_1(PHParticle *Type1, const unsigned
   const double weigth1 = p1->get_double(Run14AuAuLeptonCombyEnum::WEIGHT);
   const double weigth2 = p2->get_double(Run14AuAuLeptonCombyEnum::WEIGHT);
 
-  return weigth1*weigth2;
+  return weigth1*weigth2;*/
 }
 
 float Run14AuAuLeptonCombyHistos::set_weight_2(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
