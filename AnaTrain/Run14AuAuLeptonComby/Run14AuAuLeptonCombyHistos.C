@@ -65,7 +65,7 @@ Run14AuAuLeptonCombyHistos::Run14AuAuLeptonCombyHistos()
     //else    fcn_3D_weight.push_back(set_weight_1);
   }
   for (int i = 0; i < 24; ++i) {
-    Master3D.push_back(new TH3D(Form("delt_phi_ee_DCA_V%d", i), Form("delt_phi_ee_DCA_V%d;#Delta#phi_{ee} [rad];m_{ee} [GeV];p_{T} [GeV]", i), 32, 0, 3.2, 45, 0, 4.5,  24, 0, 4.8));
+    Master3D.push_back(new TH3D(Form("delt_phi_ee_DCA_V%d", i), Form("delt_phi_ee_DCA_V%d;#Delta#phi_{ee} [rad];m_{ee} [GeV];p_{T} [GeV]", i), 32, 0, 3.2, 45, 0, 4.5,  12, 0, 4.8));
     fcn_3Dx.push_back(get_phi_ee);
     fcn_3Dy.push_back(get_mass_ee);
     switch(i) {

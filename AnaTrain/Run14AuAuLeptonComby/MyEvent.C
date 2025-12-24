@@ -273,11 +273,11 @@ namespace MyDileptonAnalysis
 
             float phi0_trk_proj = mytrk->GetPhi0Prime();
             float the0_trk_proj = mytrk->GetThe0Prime();
-            const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime));
+            const float pz = mytrk->GetPtPrime() * (TMath::Cos(thetaprime)) / (TMath::Sin(thetaprime)); 
 
-            float rp = sqrt(event->GetPreciseX() * event->GetPreciseX() + event->GetPreciseY() * event->GetPreciseY());
-            float xp = event->GetPreciseX();
-            float yp = event->GetPreciseY();
+            float rp = sqrt(SQR(event->GetPreciseX() + (recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0)) + SQR(event->GetPreciseY() + (recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0)));
+            float xp = event->GetPreciseX() + (recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0);
+            float yp = event->GetPreciseY() + (recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0);
             float zp = event->GetPreciseZ();
 
             float phi_now = phi0_trk_proj;
@@ -386,8 +386,8 @@ namespace MyDileptonAnalysis
                         if (ilayer < 0)
                             continue;
 
-                        const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
-                        const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        const float phi_hit = vtxhit->GetPhiHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
+                        const float theta_hit = vtxhit->GetTheHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
                         
                         const float dphi = (dilep_phi_projection[ilayer] - phi_hit) + 
                             (dilep_phi_projection[ilayer<7?ilayer+1:6] - dilep_phi_projection[ilayer])*(sqrt(SQR(vtxhit->GetXHit())+SQR(vtxhit->GetYHit()))-radii[ilayer])/(radii[ilayer<7?ilayer+1:6] - radii[ilayer]);
@@ -575,8 +575,8 @@ namespace MyDileptonAnalysis
                         if(inum2>=0)newBDTHit.Setsdthe(2,mytrk->GetsdThe(2, inum2) * mytrk->GetChargePrime());
                         if(inum3>=0)newBDTHit.Setsdthe(3,mytrk->GetsdThe(3, inum3) * mytrk->GetChargePrime());
 
-                        const float phi_0layer = vtxhits[0]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
-                        const float the_0layer = vtxhits[0]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                        const float phi_0layer = vtxhits[0]->GetPhiHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
+                        const float the_0layer = vtxhits[0]->GetTheHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
 
                         float r_first_min[4][2] = {{99,99},{99,99},{99,99},{99,99}};
                         float r_second_min[4][2] = {{99,99},{99,99},{99,99},{99,99}};
@@ -604,8 +604,8 @@ namespace MyDileptonAnalysis
                             }
                             const int secondhit_layer = secondvtxhit->GetLayer(); 
 
-                            const float phi_second_hit = secondvtxhit->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
-                            const float the_second_hit = secondvtxhit->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                            const float phi_second_hit = secondvtxhit->GetPhiHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
+                            const float the_second_hit = secondvtxhit->GetTheHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX2() / 10000. : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY2() / 10000. : 0),event->GetPreciseZ());
 
                             const int secondhit_ilayer = secondvtxhit->GetiLayer(); 
                             const float dphi0 = (dilep_phi_projection[secondhit_ilayer] - phi_second_hit) + 
@@ -647,8 +647,8 @@ namespace MyDileptonAnalysis
                             {
                                 if(secondhit_layer == vtxhits[jlayer]->GetLayer()) 
                                 {
-                                    const float phi_loc_layer = vtxhits[jlayer]->GetPhiHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
-                                    const float the_loc_layer = vtxhits[jlayer]->GetTheHit(event->GetPreciseX(),event->GetPreciseY(),event->GetPreciseZ());
+                                    const float phi_loc_layer = vtxhits[jlayer]->GetPhiHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX() : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY() : 0),event->GetPreciseZ());
+                                    const float the_loc_layer = vtxhits[jlayer]->GetTheHit(event->GetPreciseX()+(recover_fg == 0 ? mytrk->GetDCAX() : 0),event->GetPreciseY()+(recover_fg == 0 ? mytrk->GetDCAY() : 0),event->GetPreciseZ());
                                     const float sdphi_first_hit = ((phi_loc_layer - phi_second_hit) + 
                                         (dilep_phi_projection[secondhit_ilayer<7?secondhit_ilayer+1:6] - dilep_phi_projection[secondhit_ilayer])
                                         *(sqrt(SQR(vtxhits[jlayer]->GetXHit())+SQR(vtxhits[jlayer]->GetYHit()))-sqrt(SQR(secondvtxhit->GetXHit())+SQR(secondvtxhit->GetYHit())))
@@ -781,6 +781,8 @@ namespace MyDileptonAnalysis
                 //event->SetDCA(itrk, 1);//////podgon
                 if (mytrk->GetHitCounter(3)>0)  event->SetDCA2(itrk, 3);
                 if (mytrk->GetHitCounter(2)>0)  event->SetDCA2(itrk, 2);
+                if (mytrk->GetHitCounter(3)>0)  event->SetDCA(itrk, 3);
+                if (mytrk->GetHitCounter(2)>0)  event->SetDCA(itrk, 2);
 
                 ////////////////////////////////cheking hit assoc effinceincy in sim////////////////////////
                 MyVTXHit *vtxhit0 = event->GetVTXHitEntry(mytrk->GetHitIndex(0));
@@ -5146,8 +5148,8 @@ namespace MyDileptonAnalysis
         //const float sdca = dca / (sigma_DCA[0][0][layer2 - 1][0] + sigma_DCA[0][0][layer2 - 1][1] * exp(sigma_DCA[0][0][layer2 - 1][2] * mytrk->GetPtPrime()));
         //mytrk->SetsDCA(sdca);
 
-        mytrk->SetDCAX(X_circle * dca / L);
-        mytrk->SetDCAY(Y_circle * dca / L);
+        mytrk->SetDCAX2(X_circle * dca / L);
+        mytrk->SetDCAY2(Y_circle * dca / L);
     }
 
     void MyEventContainer::FillDphiHists()
