@@ -286,6 +286,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V1(PHParticle *Type1, const unsigned in
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
   if ( hit_assoc1 < 0 || hit_assoc2 < 0 ) return -999;
+  
+  const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+  const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
+
+  if ( ghost1 > 0 || ghost2 > 0 ) return -999;
 
   const float phi11 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI1);
   const float phi12 = p1->get_double(Run14AuAuLeptonCombyEnum::PHI2);
@@ -315,7 +320,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V1(PHParticle *Type1, const unsigned in
 
   const double pt = TMath::Sqrt(px*px + py*py);
   
-  return pt < 4.7 ? pt : 4.7; // Limit pt to 5 GeV/c
+  return pt < 4.7 ? pt : 4.7;
 }
 
 float Run14AuAuLeptonCombyHistos::get_pt_V2(PHParticle *Type1, const unsigned int i1, PHParticle *Type2, const unsigned int i2)
@@ -329,7 +334,7 @@ float Run14AuAuLeptonCombyHistos::get_pt_V2(PHParticle *Type1, const unsigned in
   const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
   const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
 
-  if ( hit_assoc1 < 0 || hit_assoc2 < 0 ) return -999;
+  if ( hit_assoc1 < 1 || hit_assoc2 < 1 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -477,6 +482,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V5(PHParticle *Type1, const unsigned in
 
   if ( conv_reject1 < 10 || conv_reject2 < 10 ) return -999;
   
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 1 || hit_assoc2 < 1 ) return -999;
+  
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
@@ -525,6 +535,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V6(PHParticle *Type1, const unsigned in
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
   if ( conv_reject1 < 100 || conv_reject2 < 100 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 1 || hit_assoc2 < 1 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
@@ -575,6 +590,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V7(PHParticle *Type1, const unsigned in
 
   if ( conv_reject1 < 1000 || conv_reject2 < 1000 ) return -999;
   
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 1 || hit_assoc2 < 1 ) return -999;
+  
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
 
@@ -623,6 +643,11 @@ float Run14AuAuLeptonCombyHistos::get_pt_V8(PHParticle *Type1, const unsigned in
   const int conv_reject2 = p2->get_integer(Run14AuAuLeptonCombyEnum::CONV_REJECT);
 
   if ( conv_reject1 < 10000 || conv_reject2 < 10000 ) return -999;
+  
+  const int hit_assoc1 = p1->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+  const int hit_assoc2 = p2->get_integer(Run14AuAuLeptonCombyEnum::HIT_ASSOC);
+
+  if ( hit_assoc1 < 1 || hit_assoc2 < 1 ) return -999;
   
   const int ghost1 = p1->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
   const int ghost2 = p2->get_integer(Run14AuAuLeptonCombyEnum::GHOST);
