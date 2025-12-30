@@ -710,7 +710,7 @@ namespace MyDileptonAnalysis
                         //const double probsConv[4] = {0.16655781590812105,0.20684925395539883, 0.2773192065090052, 0.3935912730094734};
                         const double probsConv[4] = {0.059511564980906206,0.0672349245703329, 0.07958121918163912, 0.10254988100220457};
                         float kek = 1.;
-                        if ( mytrk->GetPtPrime()<0.4 && !(newBDTHit.Getsdthe(2)>-5 && newBDTHit.Getsdthe(3)>-5)) kek = 1000;
+                        if ( mytrk->GetPtPrime()<0.4 && !(newBDTHit.Getsdthe(2)>-5 && newBDTHit.Getsdthe(3)>-5)) kek = 1000; //podgon
                         const double BDTHIT_prob = MyML::GetHitBDTProb(BDTHitInput)/kek;
                         const double BDTConv_prob = MyML::GetConvBDTProb(BDTConvInput);
                         //const double check_conv[38] = {1.1865234375, 0.03924144270263441, 8.0, -1.0, 0.00905609130859375, -0.30126953125, -43.8125, -99.0, 18.1875, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -99.0, -21.0625, 45.40625, 7.8828125, 14.8203125, -21.0625, 61.25, 19.09375, 18.296875, -25.203125, -99.0, 20.765625, -99.0, -48.875, -99.0, -8.578125, -99.0};
@@ -725,12 +725,13 @@ namespace MyDileptonAnalysis
                         chi2 = (1-BDTHIT_prob)*3.0/(1-probsHIT[1])*2;
                         chi2 /= ( hit_in_graph > 3 ) ? 4.0 : 3.0;
                         //chi2 /= ( hit_in_graph > 3 && TMath::Abs(newBDTHit.Getsdphi(2)) < 2.5) ? 3.0 : 1.0;
+                        const float conv_chi2 = sqrt(BDTConv_prob)*10;
                         if(chi2<min_chi2) 
                         {
                             if (recover_fg) mytrk->SetNHits(newBDTHit.GetIsTrue(0));
-                            if (recover_fg) mytrk->SetTOFDPHI(newBDTHit.GetIsTrue(1) );
+                            if (recover_fg) mytrk->SetTOFDPHI(conv_chi2);
                             if (!recover_fg) mytrk->SetPC3SDZ(newBDTHit.GetIsTrue(0));
-                            if (!recover_fg) mytrk->SetPC3SDPHI(newBDTHit.GetIsTrue(1));
+                            if (!recover_fg) mytrk->SetPC3SDPHI(conv_chi2);
                             newBDTrack.SetReconPt(mytrk->GetReconPT());
                             newBDTrack.SetReconPhi0(mytrk->GetPhi0());
                             newBDTrack.SetReconThe0(mytrk->GetThe0());
@@ -813,7 +814,7 @@ namespace MyDileptonAnalysis
                     if(vtxhits[i]->GetSensor() == 0) istruehitcounter++;
                 }        
                 if(is_fill_hsits) truehithist->Fill(istruehitcounter,mytrk->GetPtPrime(),event->GetCentrality());
-                if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 10+istruehitcounter, pt);
+                //if(is_fill_hsits) chi2_ndf[central_bin]->Fill(min_chi2, 10+istruehitcounter, pt);
                 if(is_fill_hsits&&true) 
                                         truehitsigmahist->Fill(istruehitcounter+(sigma-2)*10,mytrk->GetPtPrime(),event->GetCentrality());
                 if(is_fill_hsits)
@@ -1578,11 +1579,15 @@ namespace MyDileptonAnalysis
             if ( conv_reject==15 && ( ( (mytrk->GetEmcTOF() > -4 && mytrk->GetEmcTOF() < 2) || mytrk->GetEmcTOF() < -999) || ( (mytrk->GetTOFE() > -4 && mytrk->GetTOFE() < 2) || mytrk->GetTOFE() < -999 ) ) ) conv_reject=20;
 
             const int hist_in = hit_assocaition + conv_reject;
-
+            int hist_in2 = mytrk->GetTOFDPHI() > 2.8 ? 80 :
+                           mytrk->GetTOFDPHI() > 2.6 ? 60 :
+                           mytrk->GetTOFDPHI() > 2.4 ? 40 :
+                           mytrk->GetTOFDPHI() > 2.2 ? 20 : 0;
+            hist_in2 += mytrk->GetGhost()/5;
             if (mytrk->GetChargePrime()>0)
-                DCA_2D_hist[central_bin] ->Fill(mytrk->GetsDCA(),pt,mytrk->GetGhost(),weight);
+                DCA_2D_hist[central_bin] ->Fill(mytrk->GetsDCA(),pt,hist_in2,weight);
             else
-                sDCA_2D_hist[central_bin]->Fill(mytrk->GetsDCA(),pt,mytrk->GetGhost(),weight);
+                sDCA_2D_hist[central_bin]->Fill(mytrk->GetsDCA(),pt,hist_in2,weight);
             if (mytrk->GetChargePrime()>0)
                 DCA2_hist[central_bin] ->Fill(mytrk->GetsDCA(),pt,hist_in,weight);
             else
@@ -4075,7 +4080,7 @@ namespace MyDileptonAnalysis
             n0_hist->Fill(electron->GetN0(),electron->GetPtPrime(), charge_centr_bin, weight);
             prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin, weight);
             disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin, weight);
-            //chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
+            chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
 
             rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
                 electron->GetSect()+4*electron->GetArm()+8*(electron->GetChargePrime()==1?1:0)+16*((int)(event->GetCentrality()/10)), weight);
@@ -4143,7 +4148,11 @@ namespace MyDileptonAnalysis
             int z_bin =  ( (int) ((event->GetPreciseZ()+12)/3) )*20 + ( (int) ((electron->GetPhi0Prime() + 1.5) / 0.3) ); 
             rich_prob2->Fill(pt, z_bin, charge_centr_bin+200);
             if (hit_assocaition) rich_prob3->Fill(pt, electron->GetPhi0Prime(), charge_centr_bin+400+conv_reject);
-            if (hit_assocaition && conv_reject>300) chi2npe0_hist_el->Fill(electron->GetsDCA(), electron->GetPtPrime(), electron->GetPhi0Prime());
+            //if (hit_assocaition && conv_reject>300) chi2npe0_hist_el->Fill(electron->GetsDCA(), electron->GetPtPrime(), electron->GetPhi0Prime());
+            float third_bin = eConv;
+            while (third_bin>14) third_bin -=5;
+            if(third_bin>9) third_bin += ( electron->GetGhost()>20 ? 0 : (electron->GetGhost()>10 ? 5 : 10) );
+            chi2npe0_hist_el->Fill(electron->GetTOFDPHI(), electron->GetPtPrime(), third_bin + 25 * ( (int) (event->GetCentrality() / 20) ), weight );
         }
     }
 
@@ -4172,8 +4181,8 @@ namespace MyDileptonAnalysis
                 prob_hist->Fill(electron->GetProb(),electron->GetPtPrime(), charge_centr_bin, weight);
             if (electron->GetN0()>= 4. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
                 disp_hist->Fill(electron->GetDisp(),electron->GetPtPrime(), charge_centr_bin, weight);
-            //if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
-            //    chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
+            if (electron->GetN0()>= 2 +SQR(electron->GetDisp())/8. && electron->GetEcore()/electron->GetPtot()>0.8 && electron->GetDisp()<4 && electron->GetProb()>0.01 && electron->GetChi2()>0) 
+                chi2npe0_hist->Fill(electron->GetChi2()/(electron->GetNpe0()+0.1),electron->GetPtPrime(), charge_centr_bin, weight);
             
             if (electron->GetN0()>= 4 +SQR(electron->GetDisp())/8. && electron->GetDisp()<4 && electron->GetChi2()/(electron->GetNpe0()+0.1)<10 && electron->GetProb()>0.1 && electron->GetChi2()>0) 
                 rich_prob1->Fill(electron->GetEcore()/electron->GetPtot(),electron->GetPtPrime(),
@@ -4503,7 +4512,7 @@ namespace MyDileptonAnalysis
             INIT_HIST(3, n0_hist_el, 10, 0, 10, 50, 0, 10, 10, 0., 100);
             INIT_HIST(3, prob_hist_el, 20, 0, 20, 50, 0, 10, 10, 0., 100);
             INIT_HIST(3, disp_hist_el, 50, 0, 10, 30, 0, 30, 10, 0., 100);
-            INIT_HIST(3, chi2npe0_hist_el, 100, -1000, 1000, 50, 0, 5, 20, -1.5, 4.5);
+            INIT_HIST(3, chi2npe0_hist_el, 50, 0, 10, 50, 0, 5, 125, 0, 125);
             INIT_HIST(3, rich_prob1, 50, 0, 1.5, 50, 0, 5.0, 320, 0, 320);
             INIT_HIST(3, rich_prob2, 50, 0, 5, 160, 0, 160,   20, 0, 400);
             INIT_HIST(3, rich_prob3, 50, 0, 5, 60, -1.5, 4.5, 50, 0, 1000);
