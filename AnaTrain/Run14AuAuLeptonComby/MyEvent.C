@@ -1809,14 +1809,14 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack1->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack1->GetMinsDthe(1))<2) && 
                            (newTrack1->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack1->GetMinsDthe(0))<2) )) hit_assocaition1=1000;
                 }
-                if ( hit_assocaition1>99 && ( newTrack1->GetPtPrime() > 0.5 || 
-                     ( newTrack1->GetHitCounter(0) > 0 && newTrack1->GetHitCounter(1) > 0 && 
-                       newTrack1->GetHitCounter(2) > 0 && newTrack1->GetHitCounter(3) > 0 ) ) ) hit_assocaition1=10000;
+                //if ( hit_assocaition1>99 && ( newTrack1->GetPtPrime() > 0.5 || 
+                //     ( newTrack1->GetHitCounter(0) > 0 && newTrack1->GetHitCounter(1) > 0 && 
+                //       newTrack1->GetHitCounter(2) > 0 && newTrack1->GetHitCounter(3) > 0 ) ) ) hit_assocaition1=10000;
                 int conv_reject1 = 0;
                 if ( ((int)newTrack1->GetEmcdphi_e())%10==0 && !(newTrack1->GetMinsDphi(0)<-2 && newTrack1->GetMinsDphi(1)>0) && ((int)newTrack1->GetEmcdphi_e())/100<1 ) conv_reject1=10;
-                if ( conv_reject1==10   && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-3)) conv_reject1=100;
-                if ( conv_reject1==100  && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-2)) conv_reject1=1000;
-                if ( conv_reject1==1000 && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-1)) conv_reject1=10000;
+                if ( conv_reject1 == 10  && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-2)) conv_reject1=100;
+                if ( conv_reject1 == 100  && newTrack1->GetGhost()<20) conv_reject1 = 1000;
+                if ( conv_reject1 == 1000 && newTrack1->GetGhost()<10 && newTrack1->GetTOFDPHI()>2.4 ) conv_reject1 = 10000;
 
 
                 int hit_assocaition2 = 0;
@@ -1840,14 +1840,14 @@ namespace MyDileptonAnalysis
                            (TMath::Abs(newTrack2->GetMinsDphi(1))<4.0 && TMath::Abs(newTrack2->GetMinsDthe(1))<2) && 
                            (newTrack2->GetMinsDphi(0)> -5 &&  TMath::Abs(newTrack2->GetMinsDthe(0))<2) )) hit_assocaition2=1000;
                 }
-                if ( hit_assocaition2>99 && ( newTrack2->GetPtPrime() > 0.5 || 
-                     ( newTrack2->GetHitCounter(0) > 0 && newTrack2->GetHitCounter(1) > 0 && 
-                       newTrack2->GetHitCounter(2) > 0 && newTrack2->GetHitCounter(3) > 0 ) ) ) hit_assocaition2=10000;
+                //if ( hit_assocaition2>99 && ( newTrack2->GetPtPrime() > 0.5 || 
+                //     ( newTrack2->GetHitCounter(0) > 0 && newTrack2->GetHitCounter(1) > 0 && 
+                //       newTrack2->GetHitCounter(2) > 0 && newTrack2->GetHitCounter(3) > 0 ) ) ) hit_assocaition2=10000;
                 int conv_reject2 = 0;
                 if ( ((int)newTrack2->GetEmcdphi_e())%10==0 && !(newTrack2->GetMinsDphi(0)<-2 && newTrack2->GetMinsDphi(1)>0) && ((int)newTrack2->GetEmcdphi_e())/100<1 ) conv_reject2=10;
-                if ( conv_reject2==10   && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-3)) conv_reject2=100;
-                if ( conv_reject2==100  && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-2)) conv_reject2=1000;
-                if ( conv_reject2==1000 && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-1)) conv_reject2=10000;
+                if ( conv_reject2==10  && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-2)) conv_reject2=100;
+                if(conv_reject2 == 100  && newTrack2->GetGhost()<20) conv_reject2 = 1000;
+                if(conv_reject2 == 1000 && newTrack2->GetGhost()<10 && newTrack2->GetTOFDPHI()>2.4 ) conv_reject2 = 10000;
 
                 //if (!(newTrack1->GetMcId()>90&&newTrack2->GetMcId()>90))
                 //    continue;
@@ -1860,23 +1860,20 @@ namespace MyDileptonAnalysis
                 if ( TMath::Abs(phi12-phi22)<0.001 && TMath::Abs(the12-the22)<0.0085 ) continue;
                 if ( TMath::Abs(phi13-phi23)<0.0008 && TMath::Abs(the13-the23)<0.01 ) continue;
 
-                inv_mass_dca_fg0[in_hist]->Fill(dca, invm, pair_pt, weight);
-                delt_phi_dca_fg0[in_hist]->Fill(invm, dphi, pair_pt, weight);
-
                 if(conv_reject1<10 || conv_reject2<10) continue;
 
                 if (hit_assocaition1>99 && hit_assocaition2>99) 
                 { 
-                    inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
-                    delt_phi_dca_fg1[in_hist]->Fill(invm, dphi, pair_pt, weight);
+                    inv_mass_dca_fg0[in_hist]->Fill(dca, invm, pair_pt, weight);
+                    delt_phi_dca_fg0[in_hist]->Fill(invm, dphi, pair_pt, weight);
                 }
 
-                if(conv_reject1<1000 || conv_reject2<1000) continue;
+                if(conv_reject1<100 || conv_reject2<100) continue;
 
                 if (hit_assocaition1<100 || hit_assocaition2<100) continue;
 
-                inv_mass_dca_fg2[in_hist]->Fill(dca, invm, pair_pt, weight);
-                delt_phi_dca_fg2[in_hist]->Fill(invm, dphi, pair_pt, weight);
+                inv_mass_dca_fg1[in_hist]->Fill(dca, invm, pair_pt, weight);    
+                delt_phi_dca_fg1[in_hist]->Fill(invm, dphi, pair_pt, weight);
 
                 if( newTrack1->GetMcId()%10 > 5 && newTrack2->GetMcId()%10 > 5 ) 
                 {
@@ -1884,7 +1881,12 @@ namespace MyDileptonAnalysis
                     delt_phi_dca_fg3[in_hist]->Fill(invm, dphi, pair_pt, weight);
                 }
 
-                if (hit_assocaition1<10000 || hit_assocaition2<10000) continue;
+                if(conv_reject1<1000 || conv_reject2<1000) continue;
+
+                inv_mass_dca_fg2[in_hist]->Fill(dca, invm, pair_pt, weight);
+                delt_phi_dca_fg2[in_hist]->Fill(invm, dphi, pair_pt, weight);
+
+                if(conv_reject1<10000 || conv_reject2<10000) continue;
 
                 inv_mass_dca_fg4[in_hist]->Fill(dca, invm, pair_pt, weight);
                 delt_phi_dca_fg4[in_hist]->Fill(invm, dphi, pair_pt, weight);

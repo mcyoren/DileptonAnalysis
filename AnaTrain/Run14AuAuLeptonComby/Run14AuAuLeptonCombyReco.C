@@ -838,9 +838,10 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         
         if ( ((int)mytrk->GetEmcdphi_e())%10==0 && !(mytrk->GetMinsDphi(0)<-2 && mytrk->GetMinsDphi(1)>0) && mytrk->GetEmcdz_e()==0 && ((int)mytrk->GetEmcdphi_e())/100<1 ) conv_reject=1;
         if ( conv_reject==1    && hit_assocaition>99  ) conv_reject=10;
-        if ( conv_reject==10   && mytrk->GetTOFDPHI()>2.4  ) conv_reject=100;
-        if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=1000;
-        if ( conv_reject==1000 && mytrk->GetTOFDPHI()>2.8  ) conv_reject=10000;
+        if ( conv_reject==10   && mytrk->GetTOFDPHI()>2.6  ) conv_reject=100;//2.4
+        //if ( conv_reject==100  && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=1000;
+        if ( conv_reject==100  && mytrk->GetTOFDPHI()>2.8  ) conv_reject=1000;
+        if ( conv_reject==1000 && mytrk->GetTOFDPHI()>3.2  ) conv_reject=10000;
         //if ( conv_reject==1000  && hit_assocaition%10==1  ) conv_reject=10000;
         //if ( conv_reject==10   && !(mytrk->GetMinsDphi(0) + mytrk->GetMinsDphi(1)<-2)  ) conv_reject=100;
         //if ( conv_reject==100  && TMath::Abs(mytrk->GetMinsDphi(1))<4.0  ) conv_reject=1000;
