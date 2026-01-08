@@ -193,7 +193,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA(PHParticle *Type1, const unsigned int 
   //if (DCA > 1000) return 995;
   //if (DCA < -3000) return -3000;
   //double sign = (DCA1 + DCA2 >= 0 ? 1.0 : -1.0);
-  const double DCA = TMath::Sqrt( /*0.5**/  TMath::Abs ( DCA1 * DCA1 - DCA2 * DCA2 ) );
+  const double DCA = TMath::Sqrt( /*0.5**/  TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
   if (DCA > 990 ) return 990;
   //if (DCA < -490 ) return -490;
   
@@ -243,7 +243,7 @@ float Run14AuAuLeptonCombyHistos::get_DCA_BG(PHParticle *Type1, const unsigned i
   //if (DCA > 3000) return 3000;
   //if (DCA < -3000) return -3000;
   //double sign = (DCA1 + DCA2 >= 0 ? 1.0 : -1.0);
-  const double DCA = TMath::Sqrt( /*0.5**/  TMath::Abs ( DCA1 * DCA1 - DCA2 * DCA2 ) );
+  const double DCA = TMath::Sqrt( /*0.5**/  TMath::Abs ( DCA1 * DCA1 + DCA2 * DCA2 ) );
   if (DCA > 990 ) return 990;
   //if (DCA < -490 ) return -490;
   
