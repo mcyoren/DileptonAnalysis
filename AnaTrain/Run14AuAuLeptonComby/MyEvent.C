@@ -1814,9 +1814,10 @@ namespace MyDileptonAnalysis
                 //       newTrack1->GetHitCounter(2) > 0 && newTrack1->GetHitCounter(3) > 0 ) ) ) hit_assocaition1=10000;
                 int conv_reject1 = 0;
                 if ( ((int)newTrack1->GetEmcdphi_e())%10==0 && !(newTrack1->GetMinsDphi(0)<-2 && newTrack1->GetMinsDphi(1)>0) && ((int)newTrack1->GetEmcdphi_e())/100<1 ) conv_reject1=10;
-                if ( conv_reject1 == 10  && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-2)) conv_reject1=100;
-                if ( conv_reject1 == 100  && newTrack1->GetGhost()<20) conv_reject1 = 1000;
-                if ( conv_reject1 == 1000 && newTrack1->GetGhost()<10 && newTrack1->GetTOFDPHI()>2.4 ) conv_reject1 = 10000;
+                //if ( conv_reject1 == 10  && !(newTrack1->GetMinsDphi(0) + newTrack1->GetMinsDphi(1)<-2)) conv_reject1=100;
+                if(conv_reject1 == 10   && newTrack1->GetGhost()<20 && newTrack1->GetTOFDPHI()>2.8) conv_reject1 = 100;
+                if(conv_reject1 == 100  && newTrack1->GetGhost()<10 && newTrack1->GetTOFDPHI()>2.8) conv_reject1 = 1000;
+                if(conv_reject1 == 1000 && newTrack1->GetGhost()<10 && newTrack1->GetTOFDPHI()>3.2 ) conv_reject1 = 10000;
 
 
                 int hit_assocaition2 = 0;
@@ -1845,9 +1846,10 @@ namespace MyDileptonAnalysis
                 //       newTrack2->GetHitCounter(2) > 0 && newTrack2->GetHitCounter(3) > 0 ) ) ) hit_assocaition2=10000;
                 int conv_reject2 = 0;
                 if ( ((int)newTrack2->GetEmcdphi_e())%10==0 && !(newTrack2->GetMinsDphi(0)<-2 && newTrack2->GetMinsDphi(1)>0) && ((int)newTrack2->GetEmcdphi_e())/100<1 ) conv_reject2=10;
-                if ( conv_reject2==10  && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-2)) conv_reject2=100;
-                if(conv_reject2 == 100  && newTrack2->GetGhost()<20) conv_reject2 = 1000;
-                if(conv_reject2 == 1000 && newTrack2->GetGhost()<10 && newTrack2->GetTOFDPHI()>2.4 ) conv_reject2 = 10000;
+                //if ( conv_reject2==10  && !(newTrack2->GetMinsDphi(0) + newTrack2->GetMinsDphi(1)<-2)) conv_reject2=100;
+                if(conv_reject2 == 10   && newTrack2->GetGhost()<20 && newTrack2->GetTOFDPHI()>2.8) conv_reject2 = 100;
+                if(conv_reject2 == 100  && newTrack2->GetGhost()<10 && newTrack2->GetTOFDPHI()>2.8) conv_reject2 = 1000;
+                if(conv_reject2 == 1000 && newTrack2->GetGhost()<10 && newTrack2->GetTOFDPHI()>3.2 ) conv_reject2 = 10000;
 
                 //if (!(newTrack1->GetMcId()>90&&newTrack2->GetMcId()>90))
                 //    continue;
@@ -2246,7 +2248,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity < 0)
                 {
-                    const float mscale_arm = 0.985;
+                    const float mscale_arm = 0.99;////prodgon 0.985
                     if (verbosity == -1) electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
@@ -2272,7 +2274,7 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                if(event->GetCentrality()>39)
+                if(event->GetCentrality()>-1)////podgon for AuAu central events
                 {   
                     if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
                     else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
