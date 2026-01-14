@@ -2248,7 +2248,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity < 0)
                 {
-                    const float mscale_arm = 0.99;////prodgon 0.985
+                    const float mscale_arm = 0.985;////prodgon 0.985
                     if (verbosity == -1) electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
@@ -2277,7 +2277,7 @@ namespace MyDileptonAnalysis
                 if(event->GetCentrality()>-1)////podgon for AuAu central events
                 {   
                     if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
-                    else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                    //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
 
                     if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     {
