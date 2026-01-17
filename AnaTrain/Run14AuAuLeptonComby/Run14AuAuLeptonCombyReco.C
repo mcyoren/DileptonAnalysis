@@ -619,6 +619,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.0,5.0);
         //if(do_conv_dalitz_finder) event_container->ConversionFinder((int) (do_conv_dalitz_finder==2),0,0);
         if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, 0);
+        if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,1,1,3.,5);
         if(event_container->GetNGoodElectrons()>=1) event_container->Associate_Hits_to_Leptons(5.,5.,5,!fill_QA_lepton_hists,0,3.,5);
         if(do_reco_vertex) event_container->CorrectPtForEventOffset(vtx_mean_x, vtx_mean_y, -1);
         if(false)

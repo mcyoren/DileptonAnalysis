@@ -2248,7 +2248,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity < 0)
                 {
-                    const float mscale_arm = 0.985;////prodgon 0.985
+                    const float mscale_arm = 0.999;////prodgon 0.985
                     if (verbosity == -1) electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
@@ -4349,6 +4349,13 @@ namespace MyDileptonAnalysis
 
     void MyEventContainer::ResetRecoverFGVars()
     {   
+
+        //for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
+        //{
+        //    MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
+        //    mytrk1->SetTOFDPHI(mytrk1->GetPC3SDPHI());
+        //    mytrk1->SetNHits(mytrk1->GetPC3SDZ());
+        //}
         for (int itrk = 0; itrk < event->GetNtrack(); itrk++)
         {
             MyDileptonAnalysis::MyElectron *mytrk1 = event->GetEntry(itrk);
