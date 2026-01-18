@@ -2274,7 +2274,7 @@ namespace MyDileptonAnalysis
                 
                 const double mscale = TMath::Abs( (electron->GetAlphaPrime() + alpha_offset) / electron->GetAlphaPrime());
                 electron->SetPt(electron->GetPtPrime());
-                if(event->GetCentrality()>-1)////podgon for AuAu central events
+                if(event->GetCentrality()>99)////podgon for AuAu central events
                 {   
                     if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.));//mscale); //averge between no correction and full correction
                     //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
