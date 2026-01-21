@@ -2276,8 +2276,32 @@ namespace MyDileptonAnalysis
                 electron->SetPt(electron->GetPtPrime());
                 if(event->GetCentrality()>-1)////podgon for AuAu central events
                 {   
-                    if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//mscale); //averge between no correction and full correction
-                    else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                    const double pt_dc = electron->GetPtPrime();
+                    const double pt_vtx = electron->GetPtPrime() * mscale;// inputs: pt_dc, pt_vtx  (both in GeV/c)
+
+                    // rel sigma models: sigma(pt)/pt = sqrt(a^2 + (b*pt)^2)
+                    const double a1 = 0.008, b1 = 0.02;   // 0.8% ⊕ 2.0% * pT
+                    const double a2 = 0.024, b2 = 0.012;  // 2.4% ⊕ 1.2% * pT
+
+                    const double r1 = std::sqrt(a1*a1 + (b1*pt_dc )*(b1*pt_dc ));   // relative
+                    const double r2 = std::sqrt(a2*a2 + (b2*pt_vtx)*(b2*pt_vtx));   // relative
+
+                    const double s1 = r1 * pt_dc;   // absolute sigma(pt)
+                    const double s2 = r2 * pt_vtx;
+
+                    const double w1 = 1.0/(s1*s1);
+                    const double w2 = 1.0/(s2*s2);
+
+                    // combined pT (best linear unbiased estimator if errors independent)
+                    const double pt_comb = (w1*pt_dc + w2*pt_vtx)/(w1 + w2);
+
+                    // (optional) combined uncertainty
+                    //const double sigma_pt_comb = std::sqrt(1.0/(w1 + w2));
+                    //const double rel_sigma_comb = sigma_pt_comb / pt_comb;
+
+                    electron->SetPtPrime(pt_comb);
+                    //if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//mscale); //averge between no correction and full correction
+                    //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
 
                     if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     {
