@@ -2248,7 +2248,7 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity < 0)
                 {
-                    const float mscale_arm = 0.999;////prodgon 0.985
+                    const float mscale_arm = 0.985;////prodgon 0.985
                     if (verbosity == -1) electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
