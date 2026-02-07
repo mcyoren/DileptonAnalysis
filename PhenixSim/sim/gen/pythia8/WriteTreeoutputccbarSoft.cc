@@ -1,28 +1,32 @@
-// charm_softqcd_hook_pairs.cc
+// WriteTreeoutputccbarSoft.cc
 //
-// Build a charm-only (no-bottom) SoftQCD sample using a UserHook,
-// write a TTree in your vector-branch format,
-// BUT only write the tree (and OSCAR block) when there are at least 2 electrons
-// passing: |y| < 0.5 and pT > 0.2.
+// SoftQCD + charm-only (no bottom) via UserHook
+// Force charm hadrons -> e channels only
+// For each event: pick one OS ee pair in gate (|y|<0.5, pT>0.2)
+// Replicate event N times where N ~ BR(H1)*BR(H2)/BR(D0)^2 using unbiased smart rounding
+// Write TTree ONLY when gate has >=2 electrons and replication count > 0
 //
-// Also writes several mee histograms for different selections + single-e pT histos,
-// plus bookkeeping counters and sigmaGen.
+// Extra QA requested:
+// - histogram of all BRs used (per PDG, bin labels)
+// - mee_int: integer round-up scheme: 1 for D0D0 else ceil(wpair)
+// - mee_wpair: weighted by wpair = BRprod/BRD0^2
+// - mee_brprod: weighted by BRprod = BR(H1)*BR(H2)
 //
-// Compile (example):
-//   g++ -O2 -std=c++17 charm_softqcd_hook_pairs.cc $(pythia8-config --cxxflags --libs) \
-//       $(root-config --cflags --libs) -o charm_softqcd_hook_pairs
+// Build:
+//   g++ -O2 -std=c++17 WriteTreeoutputccbarSoft.cc -o WriteTreeoutputccbarSoft \
+//     $(root-config --cflags --libs) $(pythia8-config --cxxflags --libs)
 //
 // Run:
-//   ./charm_softqcd_hook_pairs 12345 5000
-//
+//   ./WriteTreeoutputccbarSoft <seed> <tree_entries_to_write>
 
 #include <iostream>
-#include <fstream>
 #include <iomanip>
 #include <vector>
 #include <string>
 #include <cmath>
 #include <algorithm>
+#include <map>
+#include <set>
 #include <chrono>
 
 #include <TFile.h>
@@ -30,13 +34,15 @@
 #include <TH1D.h>
 #include <TMath.h>
 #include <TLorentzVector.h>
+#include <TRandom3.h>
+#include <TParameter.h>
 
 #include "Pythia8/Pythia.h"
 
 using namespace Pythia8;
 
 // -----------------------------
-// Data container for TTree (your format)
+// TTree container (your vector format)
 // -----------------------------
 struct MyEvent {
   int ntracks = 0;
@@ -52,135 +58,137 @@ struct MyEvent {
 
   void set_to_null() {
     ntracks = 0;
-    pid.clear();
-    mass.clear();
-    energy.clear();
-    px.clear();
-    py.clear();
-    pz.clear();
-    vx.clear();
-    vy.clear();
-    vz.clear();
+    pid.clear(); mass.clear(); energy.clear();
+    px.clear(); py.clear(); pz.clear();
+    vx.clear(); vy.clear(); vz.clear();
   }
 };
 
 // -----------------------------
-// UserHook: keep events with charm and veto any bottom
+// UserHook: keep events with charm, veto any bottom
 // -----------------------------
 class CharmOnlyNoBottomHook : public UserHooks {
 public:
+  long long nCalls = 0;
+  long long nVeto  = 0;
+
   bool canVetoPartonLevel() override { return true; }
 
   bool doVetoPartonLevel(const Event& event) override {
+    ++nCalls;
+
     bool hasCharm  = false;
     bool hasBottom = false;
 
     for (int i = 0; i < event.size(); ++i) {
-      const int id = std::abs(event[i].id());
+      int id = std::abs(event[i].id());
       if (id == 4) hasCharm = true;
       if (id == 5) hasBottom = true;
       if (hasCharm && hasBottom) break;
     }
 
-    // veto if no charm OR any bottom is present
-    if (!hasCharm) return true;
-    if (hasBottom) return true;
-    return false;
+    const bool veto = (!hasCharm) || hasBottom;
+    if (veto) ++nVeto;
+    return veto;
   }
 };
+
 
 // -----------------------------
 // Helpers
 // -----------------------------
 static inline bool isElectron(int pdg) { return (pdg == 11 || pdg == -11); }
-static inline int chargeFromPdg(int pdg) { return (pdg > 0) ? -1 : +1; } // e-:11 -> -1; e+:-11 -> +1
+static inline int chargeFromPdg(int pdg) { return (pdg > 0) ? -1 : +1; } // e-:11 -> -1 ; e+:-11 -> +1
 
-static inline double wrapToPhiRange(double phi) {
-  // match your snippet: keep in [-pi/2, 3pi/2)
-  const double PI = TMath::Pi();
-  while (phi < -PI/2) phi += 2.0*PI;
-  while (phi >= 3.0*PI/2) phi -= 2.0*PI;
-  return phi;
-}
-static inline bool inArm(double phi,
-                         double phi_west_low, double phi_west_up,
-                         double phi_east_low, double phi_east_up) {
-  return ( (phi > phi_west_low && phi < phi_west_up) ||
-           (phi > phi_east_low && phi < phi_east_up) );
-}
-
-struct ETrack {
+struct CandE {
+  int idx = -1;      // index in pythia.event
   int pdg = 0;
   int q = 0;
+  int parent = 0;    // charm parent PDG id (abs)
   TLorentzVector p4;
   double pt = 0;
+  double y  = 0;
   double eta = 0;
-  double y = 0;
 };
 
-static inline bool passTreeGate(const ETrack& t) {
-  // REQUIRED by user for writing the tree:
-  // at least 2 electrons must satisfy |y|<0.5 and pT>0.2
-  return (t.pt > 0.2 && std::fabs(t.y) < 0.5);
-}
-static inline bool passSTAR(const ETrack& t) {
-  return (t.pt > 0.2 && std::fabs(t.y) < 1.0);
-}
-static inline bool passPHENIX_simEta(const ETrack& t) {
-  return (t.pt > 0.2 && std::fabs(t.eta) < 0.5);
-}
-static inline bool passPHENIX_y035(const ETrack& t) {
-  return (t.pt > 0.2 && std::fabs(t.y) < 0.35);
-}
-static inline bool passPHENIX_phiDC_RICH(const ETrack& t) {
-  // your constants
-  const float phi_west_low = -3*TMath::Pi()/16, phi_west_up = 5*TMath::Pi()/16;
-  const float phi_east_low = 11*TMath::Pi()/16, phi_east_up = 19*TMath::Pi()/16;
-  const float k_DC   = 0.206f; // rad GeV/c
-  const float k_RICH = 0.309f; // rad GeV/c
-
-  const float phi = TMath::ATan2((float)t.p4.Py(), (float)t.p4.Px());
-  const float pt  = (float)t.pt;
-  const int   q   = t.q;
-
-  // Use k_RICH for RICH and k_DC for DC
-  float phi_rich = phi + q * k_RICH / pt;
-  float phi_dc   = phi + q * k_DC   / pt;
-
-  phi_rich = (float)wrapToPhiRange(phi_rich);
-  phi_dc   = (float)wrapToPhiRange(phi_dc);
-
-  if (!inArm(phi_rich, phi_west_low, phi_west_up, phi_east_low, phi_east_up)) return false;
-  if (!inArm(phi_dc,   phi_west_low, phi_west_up, phi_east_low, phi_east_up)) return false;
-
-  return true;
+static inline bool passGateY05Pt02(const CandE& e) {
+  return (e.pt > 0.2 && std::fabs(e.y) < 0.5);
 }
 
-static inline void fillOSPairsMass(const std::vector<ETrack>& v, TH1D* h) {
-  for (size_t i = 0; i < v.size(); ++i) {
-    for (size_t j = i + 1; j < v.size(); ++j) {
-      if (v[i].q * v[j].q >= 0) continue; // unlike-sign only
-      h->Fill((v[i].p4 + v[j].p4).M());
-    }
+// climb mothers until you hit an allowed charm parent, or stop
+static int findCharmParent(const Event& ev, int idx,
+                           const std::set<int>& charmHadronSet,
+                           int maxSteps = 60)
+{
+  int cur = idx;
+  for (int step = 0; step < maxSteps; ++step) {
+    if (cur <= 0 || cur >= ev.size()) return 0;
+    const int m1 = ev[cur].mother1();
+    const int m2 = ev[cur].mother2();
+    const int mom = (m1 > 0 ? m1 : (m2 > 0 ? m2 : 0));
+    if (mom <= 0 || mom >= ev.size()) return 0;
+
+    const int idAbs = std::abs(ev[mom].id());
+    if (charmHadronSet.count(idAbs)) return idAbs;
+
+    cur = mom;
   }
+  return 0;
 }
 
-int main(int argc, char* argv[]) {
+// choose ONE OS pair: pick highest-pt e then best opposite-sign partner by pt
+static bool pickBestOSPair(const std::vector<CandE>& v, int& iBest, int& jBest)
+{
+  iBest = -1; jBest = -1;
+  if (v.size() < 2) return false;
 
+  std::vector<int> idx(v.size());
+  for (size_t i = 0; i < v.size(); ++i) idx[i] = (int)i;
+
+  std::sort(idx.begin(), idx.end(),
+            [&](int a, int b){ return v[a].pt > v[b].pt; });
+
+  for (size_t ia = 0; ia < idx.size(); ++ia) {
+    const int i = idx[ia];
+    int bestj = -1;
+    double bestpt = -1;
+
+    for (size_t jb = ia + 1; jb < idx.size(); ++jb) {
+      const int j = idx[jb];
+      if (v[i].q * v[j].q >= 0) continue;
+      if (v[j].pt > bestpt) { bestpt = v[j].pt; bestj = j; }
+    }
+
+    if (bestj >= 0) { iBest = i; jBest = bestj; return true; }
+  }
+  return false;
+}
+
+// unbiased "smart rounding": floor(w) + Bernoulli(frac)
+static int smartRound(double w, TRandom3& rng)
+{
+  if (w <= 0) return 0;
+  const int n = (int)std::floor(w);
+  const double frac = w - n;
+  int out = n;
+  if (rng.Uniform() < frac) out += 1;
+  return out;
+}
+
+int main(int argc, char* argv[])
+{
   if (argc < 3) {
-    std::cerr << "Usage: " << argv[0] << " <seed> <nevents_to_write>\n";
+    std::cerr << "Usage: " << argv[0] << " <seed> <tree_entries_to_write>\n";
     return 1;
   }
 
-  const std::string str_seed = argv[1];
-  const int nevents_to_write = std::stoi(argv[2]);
+  const int seed = std::stoi(argv[1]);
+  const int targetTreeEntries = std::stoi(argv[2]);
 
-  const bool IsWriteOscar = true;
-  const int  nevt_max_try = 400000; // attempts cap (SoftQCD + charm-only hook can be sparse)
-  const double pi = TMath::ACos(-1.0);
+  std::cout << "seed=" << seed << " targetTreeEntries=" << targetTreeEntries << "\n";
+  auto t0 = std::chrono::high_resolution_clock::now();
 
-  std::cout << "lets begin\n";
-  auto start = std::chrono::high_resolution_clock::now();
+  TRandom3 rng(seed + 12345);
 
   // ----------------------------
   // Pythia setup
@@ -190,12 +198,10 @@ int main(int argc, char* argv[]) {
   pythia.readString("Beams:idA = 2212");
   pythia.readString("Beams:idB = 2212");
   pythia.readString("Beams:eCM = 200");
-
-  // As requested: SoftQCD
   pythia.readString("SoftQCD:inelastic = on");
 
   pythia.readString("Random:setSeed = on");
-  pythia.readString("Random:seed = " + str_seed);
+  pythia.readString("Random:seed = " + std::to_string(seed));
   pythia.readString("Next:numberCount = 100000000");
 
   // STAR-like tune bits you had
@@ -208,17 +214,64 @@ int main(int argc, char* argv[]) {
   pythia.readString("MultipartonInteractions:coreFraction = 0.78");
   pythia.readString("ColourReconnection:range = 5.4");
 
-  // Charm-only hook (veto bottom)
   std::shared_ptr<CharmOnlyNoBottomHook> hook = std::make_shared<CharmOnlyNoBottomHook>();
   pythia.setUserHooksPtr(hook);
 
+  // ----------------------------
+  // Charm parents to force into e± channels
+  // Keep 421 (D0) as reference!
+  // ----------------------------
+  const std::vector<int> charmParents = {
+    421, 411, 431, 4122,            // D0, D+, Ds, Lambda_c
+    10421,10411, 423,413,           // excited D
+    10423,10413, 20423,20413,
+    425,415,
+    10431,433,10433,20433,435
+  };
+
+  std::set<int> charmParentSet;
+  for (int id : charmParents) charmParentSet.insert(std::abs(id));
+
+  for (int pdgID : charmParents) {
+    const int idAbs = std::abs(pdgID);
+    pythia.readString(std::to_string(idAbs) + ":onMode = off");
+    pythia.readString(std::to_string(idAbs) + ":onIfAny = 11 -11");
+  }
+
   pythia.init();
-  std::cout << "pythia initialized (SoftQCD inelastic + charm-only hook)\n";
+
+  // Compute BR(H->e±+X) for each forced parent
+  std::map<int,double> brE;
+  for (int pdgID : charmParents) {
+    const int idAbs = std::abs(pdgID);
+    double totalBR = 0.0;
+
+    auto entryPtr = pythia.particleData.particleDataEntryPtr(idAbs);
+    if (entryPtr) {
+      for (int i = 0; i < entryPtr->sizeChannels(); ++i) {
+        if (entryPtr->channel(i).onMode()) totalBR += entryPtr->channel(i).bRatio();
+      }
+    }
+    brE[idAbs] = totalBR;
+  }
+
+  const double brD0 = (brE.count(421) ? brE[421] : 0.0);
+  if (brD0 <= 0) {
+    std::cerr << "ERROR: BR(D0->e) computed as " << brD0 << " (<=0)\n";
+    return 2;
+  }
+  const double brD0sq = brD0 * brD0;
+
+  std::cout << "BR(D0->e) = " << std::setprecision(10) << brD0
+            << "  BR(D0)^2 = " << brD0sq << "\n";
 
   // ----------------------------
-  // ROOT output
+  // Output ROOT
   // ----------------------------
-  TTree* tree = new TTree("T", "RECREATE");
+  TFile* fout = new TFile("tree_out.root", "RECREATE");
+
+  // Tree
+  TTree* tree = new TTree("T","RECREATE");
   MyEvent myevent;
 
   tree->Branch("ntracks", &myevent.ntracks, "ntracks/I");
@@ -232,64 +285,111 @@ int main(int argc, char* argv[]) {
   tree->Branch("vy",     &myevent.vy);
   tree->Branch("vz",     &myevent.vz);
 
-  // -----------------------------
-  // Histograms
-  // -----------------------------
-  TH1D* hPtAllCharmE = new TH1D("pt_all", "e^{#pm} p_{T} (all charm e);p_{T} (GeV/c);counts", 100, 0, 10);
-
-  TH1D* hMee_exact2        = new TH1D("mee_exact2",        "m_{ee} (OS), exactly 2 charm e (tree gate not required);m_{ee} (GeV/c^{2});counts", 300, 0, 6);
-  TH1D* hMee_star          = new TH1D("mee_star",          "m_{ee} (OS), STAR |y|<1 pT>0.2;m_{ee};counts",                                     300, 0, 6);
-  TH1D* hMee_phenix_eta05  = new TH1D("mee_phenix_eta05",  "m_{ee} (OS), PHENIX sim |#eta|<0.5 pT>0.2;m_{ee};counts",                           300, 0, 6);
-  TH1D* hMee_phenix_y035   = new TH1D("mee_phenix_y035",   "m_{ee} (OS), PHENIX |y|<0.35 pT>0.2;m_{ee};counts",                                 300, 0, 6);
-  TH1D* hMee_phenix_phiacc = new TH1D("mee_phenix_phiacc", "m_{ee} (OS), PHENIX |y|<0.35 pT>0.2 + DC/RICH #phi cuts;m_{ee};counts",             300, 0, 6);
-
-  TH1D* hPt_star        = new TH1D("pt_star",        "e^{#pm} p_{T} (STAR |y|<1);p_{T};counts",                  100, 0, 10);
-  TH1D* hPt_phenix_eta  = new TH1D("pt_phenix_eta",  "e^{#pm} p_{T} (PHENIX sim |#eta|<0.5);p_{T};counts",       100, 0, 10);
-  TH1D* hPt_phenix_y    = new TH1D("pt_phenix_y",    "e^{#pm} p_{T} (PHENIX |y|<0.35);p_{T};counts",             100, 0, 10);
-  TH1D* hPt_phenix_phi  = new TH1D("pt_phenix_phi",  "e^{#pm} p_{T} (PHENIX |y|<0.35 + DC/RICH #phi cuts);p_{T};counts", 100, 0, 10);
-
-  TH1D* hPTHat = new TH1D("pTHat", "pTHat Distribution;#hat{p}_{T} (GeV/c);counts", 100, 0, 10);
-  TH1D* hNorm  = new TH1D("norm",  "Event counter;bin;counts", 4, -0.5, 3.5);
-  // bin0: tried (pythia.next success)
-  // bin1: passed tree gate (>=2 e with |y|<0.5 pT>0.2)
-  // bin2: written (tree filled)
-  // bin3: reserved
-
-  TH1D* hSigmaGen = new TH1D("sigmaGen_mb", "Pythia sigmaGen; ; mb", 1, 0, 1);
-
-  // ----------------------------
-  // OSCAR output (optional)
-  // ----------------------------
-  std::ofstream file;
-  if (IsWriteOscar) {
-    file.open("oscar.particles.dat");
-    file << "# OSC1999A\n";
-    file << "# final_id_p_x\n";
-    file << "# SimName 1.0\n";
-    file << "#\n";
-    file << "# Some comments...\n";
+  // BR histogram (bin labels = PDG)
+  TH1D* hBR = new TH1D("br_used", "BR(H#rightarrow e^{#pm}+X) used;parent PDG;BR",
+                       (int)charmParents.size(), 0.5, (double)charmParents.size() + 0.5);
+  for (size_t i = 0; i < charmParents.size(); ++i) {
+    const int idAbs = std::abs(charmParents[i]);
+    hBR->GetXaxis()->SetBinLabel((int)i+1, std::to_string(idAbs).c_str());
+    hBR->SetBinContent((int)i+1, brE[idAbs]);
   }
 
+  // Mass spectra QA
+  TH1D* hMee_int    = new TH1D("mee_int",
+    "m_{ee} with integer round-up: 1 for D0D0 else ceil(BRprod/BRD0^{2});m_{ee} (GeV/c^{2});counts", 300, 0, 6);
+
+  TH1D* hMee_wpair  = new TH1D("mee_wpair",
+    "m_{ee} weighted by wpair=BRprod/BRD0^{2};m_{ee};weighted counts", 300, 0, 6);
+
+  TH1D* hMee_brprod = new TH1D("mee_brprod",
+    "m_{ee} weighted by BRprod=BR(H1)BR(H2);m_{ee};weighted counts", 300, 0, 6);
+
+  // This is what your replicated tree represents (smart rounding)
+  TH1D* hMee_tree   = new TH1D("mee_tree",
+    "m_{ee} from replicated TTree entries (smart rounding);m_{ee};counts", 300, 0, 6);
+
+  TH1D* hWpair = new TH1D("w_pair",
+    "w_{pair}=BRprod/BRD0^{2};w_{pair};counts", 200, 0, 5);
+
+  // Counters
+  TH1D* hCounts = new TH1D("counts", "Counters;bin;value", 6, -0.5, 5.5);
+  // 0 tried (pythia.next success)
+  // 1 events with >=2 gated electrons
+  // 2 events with OS pair found
+  // 3 sum_nrep_smart (accumulated)
+  // 4 tree entries written
+  // 5 reserved
+
+  // Parent ID frequency for selected OS pair (2 fills per accepted pair)
+  // --- parent category map: PDG -> bin index (1..N), plus OTHER bin
+  std::vector<int> parentCats = charmParents;         // same list you force
+  std::sort(parentCats.begin(), parentCats.end());
+  parentCats.erase(std::unique(parentCats.begin(), parentCats.end()), parentCats.end());
+
+  std::map<int,int> parentToBin;
+  for (size_t i = 0; i < parentCats.size(); ++i) parentToBin[parentCats[i]] = (int)i + 1;
+
+  const int BIN_OTHER = (int)parentCats.size() + 1;
+
+  TH1D* hParentPair = new TH1D("parent_pdg_pair",
+  "Charm parent (selected ee pair); category; counts",
+  BIN_OTHER, 0.5, BIN_OTHER + 0.5);
+
+  TH1D* hParentAll = new TH1D("parent_pdg_all",
+    "Charm parent (all gated electrons); category; counts",
+    BIN_OTHER, 0.5, BIN_OTHER + 0.5);
+
+  // set bin labels
+  for (size_t i = 0; i < parentCats.size(); ++i) {
+    hParentPair->GetXaxis()->SetBinLabel((int)i+1, std::to_string(parentCats[i]).c_str());
+    hParentAll ->GetXaxis()->SetBinLabel((int)i+1, std::to_string(parentCats[i]).c_str());
+  }
+  hParentPair->GetXaxis()->SetBinLabel(BIN_OTHER, "OTHER");
+  hParentAll ->GetXaxis()->SetBinLabel(BIN_OTHER, "OTHER");
+
+  // nicer look
+  hParentPair->LabelsOption("v","X");
+  hParentAll ->LabelsOption("v","X");
+
+  auto fillParent = [&](TH1D* h, int pdgAbs) {
+  auto it = parentToBin.find(pdgAbs);
+  if (it != parentToBin.end()) h->Fill(it->second);
+  else h->Fill(BIN_OTHER);
+  };
+
+
+
+  // store constants too
+  TParameter<double>* pBRD0   = new TParameter<double>("BRD0", brD0);
+  TParameter<double>* pBRD0sq = new TParameter<double>("BRD0sq", brD0sq);
+
   // ----------------------------
-  // Event loop
+  // Generation loop: keep going until tree entries == targetTreeEntries
   // ----------------------------
-  int written = 0;
+  long long tried = 0;
+  long long overall = 0;
+  long long writtenEntries = 0;
+  long long sumNrepSmart = 0;
 
-  for (int iev = 0; iev < nevt_max_try; ++iev) {
+  // also track how well the “int round-up” compares:
+  long long sumIntWeight = 0;
+  double sumWpair = 0.0;
+  double sumBRprod = 0.0;
 
-    if (written >= nevents_to_write) break;
+  while (writtenEntries < targetTreeEntries) {
 
+    overall++;
     if (!pythia.next()) continue;
-    hNorm->Fill(0);
+    ++tried;
+    hCounts->Fill(0);
 
     const int nparticles = pythia.event.size();
 
-    // Collect all final-state charm electrons (mother in D-family list)
-    std::vector<ETrack> allE;
-    allE.reserve(16);
+    std::vector<CandE> gated;
+    gated.reserve(8);
 
+    // collect gated electrons from allowed charm parents
     for (int j = 0; j < nparticles; ++j) {
-
       if (!pythia.event[j].isFinal()) continue;
 
       const int pdg = pythia.event[j].id();
@@ -302,200 +402,183 @@ int main(int argc, char* argv[]) {
 
       TLorentzVector p4(Px, Py, Pz, E);
       const double pt = p4.Pt();
-      if (pt <= 0.0) continue; // protect k_DC/pt etc
-
-      // Basic pt cut (common baseline)
       if (pt < 0.2) continue;
 
-      // Mother safety
-      const int mother_index = pythia.event[j].mother1();
-      if (mother_index <= 0 || mother_index >= nparticles) continue;
-      const int mother_id = std::abs(pythia.event[mother_index].id());
+      CandE c;
+      c.idx = j;
+      c.pdg = pdg;
+      c.q   = chargeFromPdg(pdg);
+      c.p4  = p4;
+      c.pt  = pt;
+      c.y   = p4.Rapidity();
+      c.eta = p4.Eta();
 
-      // D-family list (same as your original)
-      const bool mother_D_meson =
-          mother_id == 411   || mother_id == 421   || mother_id == 10411 || mother_id == 10421 ||
-          mother_id == 413   || mother_id == 423   || mother_id == 10413 || mother_id == 10423 ||
-          mother_id == 20413 || mother_id == 20423 || mother_id == 415   || mother_id == 425   ||
-          mother_id == 431   || mother_id == 10431 || mother_id == 433   || mother_id == 10433 ||
-          mother_id == 20433 || mother_id == 435;
+      if (!passGateY05Pt02(c)) continue;
 
-      if (!mother_D_meson) continue;
+      const int parent = findCharmParent(pythia.event, j, charmParentSet);
+      if (parent == 0) continue;
+      fillParent(hParentAll, std::abs(parent));
 
-      ETrack t;
-      t.pdg = pdg;
-      t.q   = chargeFromPdg(pdg);
-      t.p4  = p4;
-      t.pt  = pt;
-      t.eta = p4.Eta();
-      t.y   = p4.Rapidity();
-
-      allE.push_back(t);
-
-      // single-e pT (all charm e passing pt>0.2)
-      hPtAllCharmE->Fill(t.pt);
+      c.parent = parent;
+      gated.push_back(c);
     }
 
-    // Fill "exact2" mee (OS only) independent of tree gate
-    if (allE.size() == 2 && allE[0].q * allE[1].q < 0) {
-      hMee_exact2->Fill((allE[0].p4 + allE[1].p4).M());
-    }
+    if ((int)gated.size() < 2) continue;
+    hCounts->Fill(1);
 
-    // Build selection lists for pair+single histos
-    std::vector<ETrack> vSTAR, vPHX_eta, vPHX_y, vPHX_phi;
-    vSTAR.reserve(allE.size());
-    vPHX_eta.reserve(allE.size());
-    vPHX_y.reserve(allE.size());
-    vPHX_phi.reserve(allE.size());
+    // pick best OS pair
+    int ia=-1, ib=-1;
+    if (!pickBestOSPair(gated, ia, ib)) continue;
+    hCounts->Fill(2);
 
-    for (const auto& t : allE) {
-      if (passSTAR(t)) { vSTAR.push_back(t); hPt_star->Fill(t.pt); }
-      if (passPHENIX_simEta(t)) { vPHX_eta.push_back(t); hPt_phenix_eta->Fill(t.pt); }
-      if (passPHENIX_y035(t)) { vPHX_y.push_back(t); hPt_phenix_y->Fill(t.pt); }
-      if (passPHENIX_y035(t) && passPHENIX_phiDC_RICH(t)) { vPHX_phi.push_back(t); hPt_phenix_phi->Fill(t.pt); }
-    }
+    const CandE& e1 = gated[ia];
+    const CandE& e2 = gated[ib];
+    const double mee = (e1.p4 + e2.p4).M();
 
-    fillOSPairsMass(vSTAR,   hMee_star);
-    fillOSPairsMass(vPHX_eta,hMee_phenix_eta05);
-    fillOSPairsMass(vPHX_y,  hMee_phenix_y035);
-    fillOSPairsMass(vPHX_phi,hMee_phenix_phiacc);
+    const int H1 = e1.parent;
+    const int H2 = e2.parent;
 
-    // ----------------------------
-    // TREE GATE: write tree ONLY if at least 2 electrons satisfy |y|<0.5, pT>0.2
-    // ----------------------------
-    int n_gate = 0;
-    for (const auto& t : allE) if (passTreeGate(t)) ++n_gate;
+    const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+    const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+    if (br1 <= 0 || br2 <= 0) continue;
 
-    if (n_gate < 2) continue;
-    hNorm->Fill(1);
+    fillParent(hParentPair, H1);
+    fillParent(hParentPair, H2);
 
-    // Fill tree with ONLY the gated electrons (|y|<0.5, pT>0.2) to match the requirement
+    const double brprod = br1 * br2;
+    const double wpair  = brprod / brD0sq;
+
+    sumWpair  += wpair;
+    sumBRprod += brprod;
+
+    hWpair->Fill(wpair);
+    hMee_wpair->Fill(mee, wpair);
+    hMee_brprod->Fill(mee, brprod);
+
+    // ---- integer round-up scheme for QA (as you requested)
+    int wInt = 0;
+    if (H1 == 421 && H2 == 421) wInt = 1;               // D0D0 exactly -> 1
+    else                        wInt = (int)std::ceil(wpair); // other -> ceil
+    if (wInt < 0) wInt = 0;
+
+    sumIntWeight += wInt;
+    for (int k = 0; k < wInt; ++k) hMee_int->Fill(mee);
+
+    // ---- smart rounding replication for actual unweighted tree production
+    const int nrep = smartRound(wpair, rng);
+    sumNrepSmart += nrep;
+
+    // update counter with accumulated nrep
+    // (use SetBinContent since Fill would add 1, not nrep)
+    hCounts->SetBinContent(4, (double)sumNrepSmart);
+
+    if (nrep <= 0) continue; // accept–reject equivalent
+
+    // prepare tree event with exactly the two electrons of the selected pair
     myevent.set_to_null();
-    for (int j = 0; j < nparticles; ++j) {
+    myevent.ntracks = 2;
 
-      if (!pythia.event[j].isFinal()) continue;
-
-      const int pdg = pythia.event[j].id();
-      if (!isElectron(pdg)) continue;
-
-      const double Px = pythia.event[j].px();
-      const double Py = pythia.event[j].py();
-      const double Pz = pythia.event[j].pz();
-      const double E  = pythia.event[j].e();
-
-      TLorentzVector p4(Px, Py, Pz, E);
-      const double pt = p4.Pt();
-      if (pt < 0.2) continue;
-
-      const double y = p4.Rapidity();
-      if (std::fabs(y) >= 0.5) continue;
-
-      // Mother safety
-      const int mother_index = pythia.event[j].mother1();
-      if (mother_index <= 0 || mother_index >= nparticles) continue;
-      const int mother_id = std::abs(pythia.event[mother_index].id());
-
-      const bool mother_D_meson =
-          mother_id == 411   || mother_id == 421   || mother_id == 10411 || mother_id == 10421 ||
-          mother_id == 413   || mother_id == 423   || mother_id == 10413 || mother_id == 10423 ||
-          mother_id == 20413 || mother_id == 20423 || mother_id == 415   || mother_id == 425   ||
-          mother_id == 431   || mother_id == 10431 || mother_id == 433   || mother_id == 10433 ||
-          mother_id == 20433 || mother_id == 435;
-
-      if (!mother_D_meson) continue;
-
-      myevent.pid.push_back(pdg);
+    auto pushTrack = [&](const CandE& e) {
+      myevent.pid.push_back(e.pdg);
       myevent.mass.push_back(0.000511);
-      myevent.energy.push_back(E);
-      myevent.px.push_back(Px);
-      myevent.py.push_back(Py);
-      myevent.pz.push_back(Pz);
-      myevent.vx.push_back(pythia.event[j].xProd());
-      myevent.vy.push_back(pythia.event[j].yProd());
-      myevent.vz.push_back(pythia.event[j].zProd());
+      myevent.energy.push_back(e.p4.E());
+      myevent.px.push_back(e.p4.Px());
+      myevent.py.push_back(e.p4.Py());
+      myevent.pz.push_back(e.p4.Pz());
+      myevent.vx.push_back(pythia.event[e.idx].xProd());
+      myevent.vy.push_back(pythia.event[e.idx].yProd());
+      myevent.vz.push_back(pythia.event[e.idx].zProd());
+    };
+
+    pushTrack(e1);
+    pushTrack(e2);
+
+    // replicate fills
+    for (int r = 0; r < nrep; ++r) {
+      if (writtenEntries >= targetTreeEntries) break;
+      tree->Fill();
+      hMee_tree->Fill(mee);
+      ++writtenEntries;
     }
 
-    myevent.ntracks = (int)myevent.pid.size();
-    if (myevent.ntracks < 2) continue; // just in case (should not happen)
+    // store written entries counter in bin at x=4 (bin index 5)
+    hCounts->SetBinContent(5, (double)writtenEntries);
 
-    hPTHat->Fill(pythia.info.pTHat());
-
-    tree->Fill();
-    hNorm->Fill(2);
-
-    if (IsWriteOscar && myevent.ntracks > 0) {
-      file << 0 << "\t" << myevent.ntracks << "\n";
-      for (int i = 0; i < myevent.ntracks; ++i) {
-        file << (i+1) << "\t"
-             << myevent.pid[i] << "\t"
-             << 0 << "\t"
-             << myevent.px[i] << "\t"
-             << myevent.py[i] << "\t"
-             << myevent.pz[i] << "\t"
-             << myevent.energy[i] << "\t"
-             << myevent.mass[i] << "\t"
-             << myevent.vx[i]*std::pow(10,12) << "\t"
-             << myevent.vy[i]*std::pow(10,12) << "\t"
-             << myevent.vz[i]*std::pow(10,12) << "\t"
-             << 0 << "\n";
-      }
-      file << 0 << "\t" << 0 << "\n";
+    if (writtenEntries % 10 == 0) {
+      std::cout << "written=" << writtenEntries
+                << " tried=" << tried
+                << " <wpair>~" << (sumWpair / std::max(1LL, (long long)hCounts->GetBinContent(3)))
+                << "\n";
     }
-
-    ++written;
-    if (written % 1 == 0) std::cout << written << "\tCompleted\n";
   }
+
+  // store tried as parameter
+  TParameter<long long>* pTried = new TParameter<long long>("Ntried_pythiaNextOK", tried);
+  TParameter<long long>* pOverall = new TParameter<long long>("Noverall_pythiaNextOK", hook->nCalls);
+
+  // additional bookkeeping parameters
+  TParameter<double>* pSumWpair   = new TParameter<double>("sum_wpair", sumWpair);
+  TParameter<double>* pSumBRprod  = new TParameter<double>("sum_BRprod", sumBRprod);
+  TParameter<long long>* pSumInt  = new TParameter<long long>("sum_intWeight", sumIntWeight);
+  TParameter<long long>* pSumNrep = new TParameter<long long>("sum_nrepSmart", sumNrepSmart);
+
+  // “total norm” you mentioned: Nev / BRD0^2
+  // Here Nev = writtenEntries (tree entries), but you can also use tried or events-with-pair.
+  TParameter<double>* pNormEntriesOverBRD0sq =
+    new TParameter<double>("Ntree_over_BRD0sq", (double)writtenEntries / brD0sq);
 
   // cross section
-  hSigmaGen->SetBinContent(1, pythia.info.sigmaGen()); // mb
-  std::cout << std::setprecision(6) << pythia.info.sigmaGen() << "\n";
+  TParameter<double>* pSigmaGen = new TParameter<double>("sigmaGen_mb", pythia.info.sigmaGen());
 
-  // (Optional) convert hPtAllCharmE to invariant-yield-like (1/(2π pT dpT) dN/dpT)
-  TH1D* pt_spectra = (TH1D*)hPtAllCharmE->Clone("pt_spectra");
-  pt_spectra->Reset("ICESM");
-  const int nb = hPtAllCharmE->GetNbinsX();
-  for (int ib = 1; ib <= nb; ++ib) {
-    const double c = hPtAllCharmE->GetBinContent(ib);
-    const double e = hPtAllCharmE->GetBinError(ib);
-    const double w = hPtAllCharmE->GetBinWidth(ib);
-    const double x = hPtAllCharmE->GetBinCenter(ib);
-    const double denom = 2.0 * pi * w * x;
-    if (denom > 0) {
-      pt_spectra->SetBinContent(ib, c / denom);
-      pt_spectra->SetBinError(ib,   e / denom);
-    }
-  }
-
-  // Write output
-  TFile* fout = new TFile("tree_out.root", "RECREATE");
+  // Write everything
   fout->cd();
-
   tree->Write();
-  hPtAllCharmE->Write();
-  pt_spectra->Write();
 
-  hMee_exact2->Write();
-  hMee_star->Write();
-  hMee_phenix_eta05->Write();
-  hMee_phenix_y035->Write();
-  hMee_phenix_phiacc->Write();
+  hBR->Write();
+  hWpair->Write();
 
-  hPt_star->Write();
-  hPt_phenix_eta->Write();
-  hPt_phenix_y->Write();
-  hPt_phenix_phi->Write();
+  hMee_int->Write();
+  hMee_wpair->Write();
+  hMee_brprod->Write();
+  hMee_tree->Write();
 
-  hPTHat->Write();
-  hNorm->Write();
-  hSigmaGen->Write();
+  hCounts->Write();
+  hParentAll->Write();
+  hParentPair->Write();
+
+  pBRD0->Write();
+  pBRD0sq->Write();
+  pOverall->Write();
+  pTried->Write();
+  pSumWpair->Write();
+  pSumBRprod->Write();
+  pSumInt->Write();
+  pSumNrep->Write();
+  pNormEntriesOverBRD0sq->Write();
+  pSigmaGen->Write();
 
   fout->Close();
 
-  if (IsWriteOscar) file.close();
+  std::cout << "Done.\n";
+  std::cout << "overall=" << hook->nCalls<< " "<< overall << "\n";
+  std::cout << "tried=" << tried << "\n";
+  std::cout << "treeEntries=" << writtenEntries << "\n";
+  std::cout << "BRD0=" << std::setprecision(10) << brD0 << "  BRD0^2=" << brD0sq << "\n";
+  std::cout << "sum_wpair=" << std::setprecision(10) << sumWpair << "\n";
+  std::cout << "sum_BRprod=" << std::setprecision(10) << sumBRprod << "\n";
+  std::cout << "sum_intWeight=" << sumIntWeight << "\n";
+  std::cout << "sum_nrepSmart=" << sumNrepSmart << "\n";
+  std::cout << "sigmaGen(mb)=" << std::setprecision(8) << pythia.info.sigmaGen() << "\n";
 
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-  std::cout << duration.count() << "\n";
+  auto t1 = std::chrono::high_resolution_clock::now();
+  auto dt = std::chrono::duration_cast<std::chrono::seconds>(t1 - t0).count();
+  std::cout << "runtime(s)=" << dt << "\n";
+
+  std::cout << "Hook calls = " << hook->nCalls
+          << " vetoes = " << hook->nVeto
+          << " accept = " << (hook->nCalls - hook->nVeto)
+          << std::endl;
+
 
   return 0;
 }
