@@ -175,6 +175,46 @@ static int smartRound(double w, TRandom3& rng)
   return out;
 }
 
+static inline double wrapPhi(double a) {
+  const double PI = TMath::Pi();
+  const double TWOPI = 2.0*PI;
+  while (a <= -PI) a += TWOPI;
+  while (a >   PI) a -= TWOPI;
+  return a;
+}
+
+static inline bool inPhenixArm(double phi) {
+  const double PI = TMath::Pi();
+  const double phi_west_low = -3*PI/16.0, phi_west_up = 5*PI/16.0;
+  const double phi_east_low = 11*PI/16.0, phi_east_up = 19*PI/16.0;
+
+  // your code shifts to [-pi/2, 3pi/2)
+  if (phi < -PI/2.0) phi += 2.0*PI;
+
+  const bool west = (phi > phi_west_low && phi < phi_west_up);
+  const bool east = (phi > phi_east_low && phi < phi_east_up);
+  return (west || east);
+}
+
+static inline bool passPhenixPhiAcc(double px, double py, int q, double pt) {
+  if (pt <= 0) return false;
+
+  const double PI = TMath::Pi();
+  const double k_DC   = 0.206; // rad GeV/c
+  const double k_RICH = 0.309; // rad GeV/c
+
+  double phi = std::atan2(py, px);
+
+  double phi_rich = phi + q * k_RICH / pt;
+  double phi_dc   = phi + q * k_DC   / pt;
+
+  if (phi_rich < -PI/2.0) phi_rich += 2.0*PI;
+  if (phi_dc   < -PI/2.0) phi_dc   += 2.0*PI;
+
+  return (inPhenixArm(phi_rich) && inPhenixArm(phi_dc));
+}
+
+
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
@@ -357,6 +397,39 @@ int main(int argc, char* argv[])
   else h->Fill(BIN_OTHER);
   };
 
+  TH1D* hPtAllCharmE = new TH1D("pt_all",
+    "e^{#pm} p_{T} (all charm e);p_{T} (GeV/c);counts", 100, 0, 10);
+
+  TH1D* hMee_exact2        = new TH1D("mee_exact2",
+    "m_{ee} (OS), exactly 2 charm e (no acceptance);m_{ee} (GeV/c^{2});counts", 300, 0, 6);
+
+  TH1D* hMee_star          = new TH1D("mee_star",
+    "m_{ee} (OS), STAR |y|<1 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
+
+  TH1D* hMee_phenix_eta05  = new TH1D("mee_phenix_eta05",
+    "m_{ee} (OS), PHENIX sim |#eta|<0.5 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
+
+  TH1D* hMee_phenix_y035   = new TH1D("mee_phenix_y035",
+    "m_{ee} (OS), PHENIX |y|<0.35 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
+
+  TH1D* hMee_phenix_phiacc = new TH1D("mee_phenix_phiacc",
+    "m_{ee} (OS), PHENIX |y|<0.35 p_{T}>0.2 + DC/RICH #phi cuts;m_{ee};counts", 300, 0, 6);
+
+  TH1D* hPt_star        = new TH1D("pt_star",
+    "e^{#pm} p_{T} (STAR |y|<1);p_{T};counts", 100, 0, 10);
+
+  TH1D* hPt_phenix_eta  = new TH1D("pt_phenix_eta",
+    "e^{#pm} p_{T} (PHENIX sim |#eta|<0.5);p_{T};counts", 100, 0, 10);
+
+  TH1D* hPt_phenix_y    = new TH1D("pt_phenix_y",
+    "e^{#pm} p_{T} (PHENIX |y|<0.35);p_{T};counts", 100, 0, 10);
+
+  TH1D* hPt_phenix_phi  = new TH1D("pt_phenix_phi",
+    "e^{#pm} p_{T} (PHENIX |y|<0.35 + DC/RICH #phi cuts);p_{T};counts", 100, 0, 10);
+
+  TH1D* hPTHat = new TH1D("pTHat",
+    "pTHat Distribution;#hat{p}_{T} (GeV/c);counts", 100, 0, 10);
+
 
 
   // store constants too
@@ -385,25 +458,32 @@ int main(int argc, char* argv[])
 
     const int nparticles = pythia.event.size();
 
-    std::vector<CandE> gated;
-    gated.reserve(8);
+    hPTHat->Fill(pythia.info.pTHat());
+
+    std::vector<CandE> allCharm;  allCharm.reserve(16);
+    std::vector<CandE> star;      star.reserve(16);
+    std::vector<CandE> phen_eta;  phen_eta.reserve(16);
+    std::vector<CandE> phen_y;    phen_y.reserve(16);
+    std::vector<CandE> phen_phi;  phen_phi.reserve(16);
 
     // collect gated electrons from allowed charm parents
+    std::vector<CandE> gated; // this is the TREE/BR gate: |y|<0.5, pT>0.2
+    gated.reserve(8);
+
     for (int j = 0; j < nparticles; ++j) {
       if (!pythia.event[j].isFinal()) continue;
-
+    
       const int pdg = pythia.event[j].id();
       if (!isElectron(pdg)) continue;
-
+    
       const double Px = pythia.event[j].px();
       const double Py = pythia.event[j].py();
       const double Pz = pythia.event[j].pz();
       const double E  = pythia.event[j].e();
-
+    
       TLorentzVector p4(Px, Py, Pz, E);
       const double pt = p4.Pt();
-      if (pt < 0.2) continue;
-
+    
       CandE c;
       c.idx = j;
       c.pdg = pdg;
@@ -412,16 +492,154 @@ int main(int argc, char* argv[])
       c.pt  = pt;
       c.y   = p4.Rapidity();
       c.eta = p4.Eta();
-
-      if (!passGateY05Pt02(c)) continue;
-
+    
+      // parent finding (your existing one)
       const int parent = findCharmParent(pythia.event, j, charmParentSet);
       if (parent == 0) continue;
-      fillParent(hParentAll, std::abs(parent));
-
+    
       c.parent = parent;
-      gated.push_back(c);
+    
+      // ---- "all charm electrons" QA
+      allCharm.push_back(c);
+      hPtAllCharmE->Fill(pt);
+      if (pt < 0.2) continue;
+      fillParent(hParentAll, std::abs(parent));
+    
+      // ---- STAR-like
+      if (std::fabs(c.y) < 1.0) {
+        star.push_back(c);
+        hPt_star->Fill(pt);
+      }
+    
+      // ---- PHENIX sim acceptance (eta)
+      if (std::fabs(c.eta) < 0.5) {
+        phen_eta.push_back(c);
+        hPt_phenix_eta->Fill(pt);
+      }
+    
+      // ---- PHENIX physics acceptance (y)
+      if (std::fabs(c.y) < 0.35) {
+        phen_y.push_back(c);
+        hPt_phenix_y->Fill(pt);
+      
+        // ---- PHENIX phi acceptance (DC+RICH bending)
+        if (passPhenixPhiAcc(Px, Py, c.q, pt)) {
+          phen_phi.push_back(c);
+          hPt_phenix_phi->Fill(pt);
+        }
+      }
+    
+      // ---- TREE/BR gate (your request)
+      if (std::fabs(c.y) < 0.5) {
+        gated.push_back(c);
+      }
     }
+
+    // exactly 2 charm electrons (no further acc), OS pair
+    if ((int)allCharm.size() == 2) {
+      int ia=-1, ib=-1;
+      if (pickBestOSPair(allCharm, ia, ib)) {
+        const CandE& e1 = allCharm[ia];
+        const CandE& e2 = allCharm[ib];
+        const double mee = (e1.p4 + e2.p4).M();
+
+        const int H1 = e1.parent;
+        const int H2 = e2.parent;
+
+        const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+        const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+        if (br1 <= 0 || br2 <= 0) continue;
+
+        const double brprod = br1 * br2;
+        const double wpair  = brprod / brD0sq;
+        hMee_exact2->Fill(mee, wpair);
+      }
+    }
+
+    // STAR
+    {
+      int ia=-1, ib=-1;
+      if (pickBestOSPair(star, ia, ib)) {
+        const CandE& e1 = star[ia];
+        const CandE& e2 = star[ib];
+        const double mee = (e1.p4 + e2.p4).M();
+
+        const int H1 = e1.parent;
+        const int H2 = e2.parent;
+
+        const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+        const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+        if (br1 <= 0 || br2 <= 0) continue;
+
+        const double brprod = br1 * br2;
+        const double wpair  = brprod / brD0sq;
+        hMee_star->Fill(mee, wpair);
+      }
+    }
+
+    // PHENIX sim eta
+    {
+      int ia=-1, ib=-1;
+      if (pickBestOSPair(phen_eta, ia, ib)) {
+        const CandE& e1 = phen_eta[ia];
+        const CandE& e2 = phen_eta[ib];
+        const double mee = (e1.p4 + e2.p4).M();
+
+        const int H1 = e1.parent;
+        const int H2 = e2.parent;
+
+        const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+        const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+        if (br1 <= 0 || br2 <= 0) continue;
+
+        const double brprod = br1 * br2;
+        const double wpair  = brprod / brD0sq;
+        hMee_phenix_eta05->Fill(mee, wpair);
+      }
+    }
+
+    // PHENIX y
+    {
+      int ia=-1, ib=-1;
+      if (pickBestOSPair(phen_y, ia, ib)) {
+        const CandE& e1 = phen_y[ia];
+        const CandE& e2 = phen_y[ib];
+        const double mee = (e1.p4 + e2.p4).M();
+
+        const int H1 = e1.parent;
+        const int H2 = e2.parent;
+
+        const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+        const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+        if (br1 <= 0 || br2 <= 0) continue;
+
+        const double brprod = br1 * br2;
+        const double wpair  = brprod / brD0sq;
+        hMee_phenix_y035->Fill(mee, wpair);
+      }
+    }
+
+    // PHENIX phi-acc
+    {
+      int ia=-1, ib=-1;
+      if (pickBestOSPair(phen_phi, ia, ib)) {
+        const CandE& e1 = phen_phi[ia];
+        const CandE& e2 = phen_phi[ib];
+        const double mee = (e1.p4 + e2.p4).M();
+
+        const int H1 = e1.parent;
+        const int H2 = e2.parent;
+
+        const double br1 = brE.count(H1) ? brE[H1] : 0.0;
+        const double br2 = brE.count(H2) ? brE[H2] : 0.0;
+        if (br1 <= 0 || br2 <= 0) continue;
+
+        const double brprod = br1 * br2;
+        const double wpair  = brprod / brD0sq;
+        hMee_phenix_phiacc->Fill(mee, wpair);
+      }
+    }
+
 
     if ((int)gated.size() < 2) continue;
     hCounts->Fill(1);
@@ -545,6 +763,22 @@ int main(int argc, char* argv[])
   hCounts->Write();
   hParentAll->Write();
   hParentPair->Write();
+
+  hPtAllCharmE->Write();
+
+  hMee_exact2->Write();
+  hMee_star->Write();
+  hMee_phenix_eta05->Write();
+  hMee_phenix_y035->Write();
+  hMee_phenix_phiacc->Write();
+  
+  hPt_star->Write();
+  hPt_phenix_eta->Write();
+  hPt_phenix_y->Write();
+  hPt_phenix_phi->Write();
+  
+  hPTHat->Write();
+
 
   pBRD0->Write();
   pBRD0sq->Write();
