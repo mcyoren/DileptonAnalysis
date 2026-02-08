@@ -140,7 +140,7 @@ set macroname   = make_single.C
 set thermalmacroname   = make_thermal.C
 set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
-set ptmin = 0.2
+set ptmin = 0.0
 set ptmax = 10.0
 set n     = 0 #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = $selected_paticle #0,1,2,3,4,5,6-pi0,pi+,pi-,e-,e+,p,antip################helios jpsi and phi####pythia ccbar bbar
