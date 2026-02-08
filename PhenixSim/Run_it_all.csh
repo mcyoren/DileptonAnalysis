@@ -140,9 +140,9 @@ set macroname   = make_single.C
 set thermalmacroname   = make_thermal.C
 set outsingle   = $DATADIR/output_single/single
 set tmpdir      = "/phenix/plhf/${USER}/tmp/job_single_$INPUT"
-set ptmin = 0.0
+set ptmin = 0.2
 set ptmax = 10.0
-set n     = -1 #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
+set n     = 0 #n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 set id    = $selected_paticle #0,1,2,3,4,5,6-pi0,pi+,pi-,e-,e+,p,antip################helios jpsi and phi####pythia ccbar bbar
 
 echo "${Green}jobno            $jobno            ${Color_Off}"
@@ -226,6 +226,12 @@ if( $selected_paticle == 9) then
 endif
 if( $selected_paticle == 10) then
  set inputhelios = $DATADIR/output_single/helios/helios_omega_pi0ee_0_10_10M.root
+endif
+if( $selected_paticle == 11) then
+ set inputhelios = $DATADIR/output_single/helios/helios_virtualgamma_ee_0_10_100M.root
+endif
+if( $selected_paticle == 12) then
+ set inputhelios = $DATADIR/output_single/helios/helios_pi0_gee_10_25_15M.root
 endif
 set scriptdir   = $DATADIR/sim/gen/HELIOS/work
 set scriptname  = Convert_HELIOS.csh
