@@ -414,20 +414,28 @@ static bool findGluonSplittingPair(const Event& ev,
                                   int& outG, int& outC, int& outCbar)
 {
   outG = outC = outCbar = -1;
+
   for (int g = 0; g < ev.size(); ++g) {
     if (ev[g].id() != 21) continue;
+
     int foundC = -1, foundCb = -1;
     for (int ch : kids[g]) {
       int id = ev[ch].id();
       if (id != 4 && id != -4) continue;
       int st = ev[ch].status();
-      if (st == -21 || st == -22) continue; // reject incoming
-      if (id == 4) foundC = ch;
+      if (st == -21 || st == -22) continue;
+      if (id == 4)  foundC  = ch;
       if (id == -4) foundCb = ch;
+    }
+
+    if (foundC >= 0 && foundCb >= 0) {
+      outG = g; outC = foundC; outCbar = foundCb;
+      return true;
     }
   }
   return false;
 }
+
 
 // Find a c and cbar that share the same two mothers (unordered) and return them
 static bool findPairSameTwoMothers(const Event& ev, int& outC, int& outCbar, int& m1, int& m2)
@@ -567,9 +575,15 @@ static int classifyEventCcSource(const Pythia& pythia)
     }
     if (hardHasOneCharm && hardHasG) return SRC_FLAVOR_EXCITATION;
   }
-  // ---- (c') FE from ISR excitation: g -> ccbar where exactly one charm is a beam leg
-  auto isBeamLegCharm = [&](int st){
-    return (st == -31 || st == -33);
+  // ---- FE/GS from g -> ccbar in the record (spacelike vs timelike legs)
+  //
+  // In your prints:
+  //   FE-like "excitation"/ISR bookkeeping uses charm statuses like -31/-33 and also -41..-49
+  //   GS-like timelike shower splitting typically gives both c and cbar status -51
+  //
+  auto isSpaceLikeCharm = [&](int st){
+    // cover the ones you actually see in your debug: -31, -33, and -41..-49
+    return (st == -31 || st == -33 || (st <= -41 && st >= -49));
   };
 
   for (int g = 0; g < ev.size(); ++g) {
@@ -579,11 +593,18 @@ static int classifyEventCcSource(const Pythia& pythia)
     int c=-1, cb=-1;
     if (!hasDirectCCbarKids(ev, kids, g, c, cb)) continue;
 
-    const bool cBeam  = isBeamLegCharm(ev[c].status());
-    const bool cbBeam = isBeamLegCharm(ev[cb].status());
+    const int stC  = ev[c].status();
+    const int stCb = ev[cb].status();
 
-    // XOR: exactly one is beam-leg charm => excitation
-    if (cBeam ^ cbBeam) return SRC_FLAVOR_EXCITATION;
+    // If either charm leg is spacelike/ISR-ish => FE
+    if (isSpaceLikeCharm(stC) || isSpaceLikeCharm(stCb))
+      return SRC_FLAVOR_EXCITATION;
+
+    // Otherwise, if both are timelike shower legs => GS
+    if (stC == -51 && stCb == -51)
+      return SRC_GLUON_SPLITTING;
+
+    // If it's g->cc but doesn't match either pattern, leave it for later classification
   }
 
   // ---- (d') GS from shower: g -> ccbar where both charm legs are timelike (common: -51)
