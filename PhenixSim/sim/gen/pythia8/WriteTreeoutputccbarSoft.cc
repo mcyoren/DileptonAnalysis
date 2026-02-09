@@ -6,11 +6,17 @@
 // Replicate event N times where N ~ BR(H1)*BR(H2)/BR(D0)^2 using unbiased smart rounding
 // Write TTree ONLY when gate has >=2 electrons and replication count > 0
 //
-// Extra QA requested:
-// - histogram of all BRs used (per PDG, bin labels)
-// - mee_int: integer round-up scheme: 1 for D0D0 else ceil(wpair)
-// - mee_wpair: weighted by wpair = BRprod/BRD0^2
-// - mee_brprod: weighted by BRprod = BR(H1)*BR(H2)
+// ADDITION:
+// - classify ccbar "source" into 5 bins (event-level tag, computed once per event):
+//     (a) s-channel Flavor Creation      : qqbar -> ccbar
+//     (b) t-channel Flavor Creation      : gg -> ccbar
+//     (c) Flavor Excitation (your def)   : gg -> ccbar + g  (cc and extra g share same 2 mothers = incoming gg)
+//     (d) Gluon Splitting                : g -> ccbar (a gluon has both c and cbar as daughters)
+//     (e) OTHER
+//
+// - ALL mass & pT histograms become 2D: (observable vs source).
+// - STAR/PHENIX single-e pT are weighted by BR(parent)/BR(D0) (and by pythia event weight).
+// - Pair observables (m_ee, pT_ee) are weighted by wpair=BR(H1)BR(H2)/BR(D0)^2 (and by event weight).
 //
 // Build:
 //   g++ -O2 -std=c++17 WriteTreeoutputccbarSoft.cc -o WriteTreeoutputccbarSoft \
@@ -32,6 +38,7 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TMath.h>
 #include <TLorentzVector.h>
 #include <TRandom3.h>
@@ -93,10 +100,14 @@ public:
   }
 };
 
-
 // -----------------------------
 // Helpers
 // -----------------------------
+
+
+
+static inline void sort2(int& a, int& b) { if (a > b) std::swap(a,b); }
+
 static inline bool isElectron(int pdg) { return (pdg == 11 || pdg == -11); }
 static inline int chargeFromPdg(int pdg) { return (pdg > 0) ? -1 : +1; } // e-:11 -> -1 ; e+:-11 -> +1
 
@@ -110,10 +121,6 @@ struct CandE {
   double y  = 0;
   double eta = 0;
 };
-
-static inline bool passGateY05Pt02(const CandE& e) {
-  return (e.pt > 0.2 && std::fabs(e.y) < 0.5);
-}
 
 // climb mothers until you hit an allowed charm parent, or stop
 static int findCharmParent(const Event& ev, int idx,
@@ -175,20 +182,11 @@ static int smartRound(double w, TRandom3& rng)
   return out;
 }
 
-static inline double wrapPhi(double a) {
-  const double PI = TMath::Pi();
-  const double TWOPI = 2.0*PI;
-  while (a <= -PI) a += TWOPI;
-  while (a >   PI) a -= TWOPI;
-  return a;
-}
-
 static inline bool inPhenixArm(double phi) {
   const double PI = TMath::Pi();
   const double phi_west_low = -3*PI/16.0, phi_west_up = 5*PI/16.0;
   const double phi_east_low = 11*PI/16.0, phi_east_up = 19*PI/16.0;
 
-  // your code shifts to [-pi/2, 3pi/2)
   if (phi < -PI/2.0) phi += 2.0*PI;
 
   const bool west = (phi > phi_west_low && phi < phi_west_up);
@@ -213,8 +211,399 @@ static inline bool passPhenixPhiAcc(double px, double py, int q, double pt) {
 
   return (inPhenixArm(phi_rich) && inPhenixArm(phi_dc));
 }
+// ---- helpers to iterate daughters of a particle i ----
+static std::vector<int> getDaughters(const Event& ev, int i)
+{
+  std::vector<int> out;
+  int d1 = ev[i].daughter1();
+  int d2 = ev[i].daughter2();
+
+  // Pythia convention: 0 means none
+  if (d1 <= 0 || d2 <= 0) return out;
+
+  // IMPORTANT: if d1 > d2 it's not a contiguous daughter range.
+  // Do NOT swap. Treat as unusable for simple "range daughter" logic.
+  if (d1 > d2) return out;
+
+  out.reserve(d2 - d1 + 1);
+  for (int d = d1; d <= d2; ++d) out.push_back(d);
+  return out;
+}
 
 
+static bool getIncomingPartonsIdx(const Event& ev, int& iA, int& iB)
+{
+  iA = -1; iB = -1;
+  for (int i = 0; i < ev.size(); ++i) {
+    int st = ev[i].status();
+    if (st == -21 || st == -22) {
+      if (iA < 0) iA = i;
+      else { iB = i; return true; }
+    }
+  }
+  return false;
+}
+
+static bool hasDirectCCbarKids(const Event& ev,
+                                      const std::vector<std::vector<int>>& kids,
+                                      int g, int& cIdx, int& cbIdx)
+{
+  cIdx = -1; cbIdx = -1;
+
+  for (int ch : kids[g]) {
+    const int id = ev[ch].id();
+    if (id != 4 && id != -4) continue;
+
+    // reject incoming legs (PDF history can make incoming charm look like a "daughter")
+    const int st = ev[ch].status();
+    if (st == -21 || st == -22) continue;
+
+    if (id == 4)  cIdx  = ch;
+    if (id == -4) cbIdx = ch;
+
+    if (cIdx >= 0 && cbIdx >= 0) return true;
+  }
+  return false;
+}
+
+static inline bool mothersAreIncomingPair(const Event& ev, int i, int in1, int in2)
+{
+  int a = ev[i].mother1();
+  int b = ev[i].mother2();
+  if (a <= 0 || b <= 0) return false;
+  sort2(a,b);
+  int x=in1, y=in2; sort2(x,y);
+  return (a==x && b==y);
+}
+
+static void getHardOutgoing(const Event& ev, int in1, int in2, std::vector<int>& out)
+{
+  out.clear();
+  for (int i=0;i<ev.size();++i) {
+    if (ev[i].status() != -23) continue;
+    if (!mothersAreIncomingPair(ev, i, in1, in2)) continue;
+    out.push_back(i);
+  }
+}
+
+
+static void printParticleOneLine(const Event& ev, int i, const char* tag="")
+{
+  std::cout
+    << tag
+    << " idx=" << i
+    << " id=" << ev[i].id()
+    << " st=" << ev[i].status()
+    << " m=(" << ev[i].mother1() << "," << ev[i].mother2() << ")"
+    << " d=(" << ev[i].daughter1() << "," << ev[i].daughter2() << ")"
+    << " pT=" << std::fixed << std::setprecision(3) << ev[i].pT()
+    << " y="  << std::fixed << std::setprecision(3) << ev[i].y()
+    << "\n";
+}
+
+
+// Build mother -> children list (for event record indices)
+static void buildChildrenMap(const Event& ev, std::vector<std::vector<int>>& kids)
+{
+  kids.assign(ev.size(), std::vector<int>());
+  for (int i = 0; i < ev.size(); ++i) {
+    int m1 = ev[i].mother1();
+    int m2 = ev[i].mother2();
+    if (m1 > 0 && m1 < ev.size()) kids[m1].push_back(i);
+    if (m2 > 0 && m2 < ev.size() && m2 != m1) kids[m2].push_back(i);
+  }
+}
+
+static void debugPrintIncomingAndCharmTopology(const Pythia& pythia, int iev, int maxPrintEvents=100)
+{
+  if (iev >= maxPrintEvents) return;
+
+  const Event& ev = pythia.event;
+
+  int in1=-1, in2=-1;
+  if (!getIncomingPartonsIdx(ev, in1, in2)) return;
+
+  std::cout << "\n================ EVENT " << iev
+            << "  weight=" << pythia.info.weight()
+            << "  pTHat=" << pythia.info.pTHat()
+            << " ================\n";
+
+  std::cout << "Incoming partons:\n";
+  printParticleOneLine(ev, in1, "  [IN] ");
+  printParticleOneLine(ev, in2, "  [IN] ");
+
+  // Build child map once (robust; does not rely on daughter1..daughter2 ranges)
+  std::vector<std::vector<int>> kids;
+  buildChildrenMap(ev, kids);
+
+  // Print hard outgoing legs: status -23 and mothers are the incoming pair
+  std::cout << "Hard outgoing (-23, mothers=incoming pair):\n";
+  std::vector<int> hard;
+  getHardOutgoing(ev, in1, in2, hard);
+  if (hard.empty()) std::cout << "  (none)\n";
+  for (int i : hard) printParticleOneLine(ev, i, "  [H] ");
+
+  // Print ONLY hard gluons that directly split to c+cbar (true GS candidates)
+  std::cout << "Hard gluons with direct (c,cbar) kids (GS candidates):\n";
+  bool found = false;
+  for (int i : hard) {
+    if (ev[i].id() != 21) continue;          // only gluons
+    int c=-1, cb=-1;
+    if (!hasDirectCCbarKids(ev, kids, i, c, cb)) continue; // kids-based direct test
+    found = true;
+    printParticleOneLine(ev, i, "  [gH] ");
+    printParticleOneLine(ev, c,  "     ");
+    printParticleOneLine(ev, cb, "     ");
+  }
+  if (!found) std::cout << "  (none)\n";
+
+  // (Optional) If you still want to see ISR radiator "fake splitters", print them separately:
+  std::cout << "Non-hard non-incoming gluons with direct (c,cbar) kids (often ISR bookkeeping):\n";
+  found = false;
+  for (int i = 0; i < ev.size(); ++i) {
+    if (ev[i].id() != 21) continue;
+    if (i == in1 || i == in2) continue;
+    if (ev[i].status() == -23) continue;    // skip hard; already printed above
+    int c=-1, cb=-1;
+    if (!hasDirectCCbarKids(ev, kids, i, c, cb)) continue;
+    found = true;
+    printParticleOneLine(ev, i, "  [gISR] ");
+    printParticleOneLine(ev, c,  "        ");
+    printParticleOneLine(ev, cb, "        ");
+  }
+  std::cout << "Any non-incoming gluon with strict direct (c,cbar) kids (shower GS candidates):\n";
+  for (int i=0;i<ev.size();++i) {
+    if (ev[i].id()!=21) continue;
+    if (ev[i].status()==-21 || ev[i].status()==-22) continue; // not incoming
+    int c=-1, cb=-1;
+    if (!hasDirectCCbarKids(ev, kids, i, c, cb)) continue;
+    found = true;
+    printParticleOneLine(ev, i, "  [gSplit] ");
+    printParticleOneLine(ev, c,  "     ");
+    printParticleOneLine(ev, cb, "     ");
+  }
+  if (!found) std::cout << "  (none)\n";
+  
+}
+
+// ----------------------------------------------------------------------
+// ccbar source classification (5 bins)
+// ----------------------------------------------------------------------
+enum CcSource {
+  SRC_S_FLAVOR_CREATION = 0, // (a) qqbar -> cc
+  SRC_T_FLAVOR_CREATION = 1, // (b) gg -> cc
+  SRC_FLAVOR_EXCITATION = 2, // (c) gg -> cc + g  (your requested def)
+  SRC_GLUON_SPLITTING   = 3, // (d) g -> cc
+  SRC_OTHER             = 4  // (e)
+};
+
+static inline const char* srcName(int s) {
+  switch(s) {
+    case SRC_S_FLAVOR_CREATION: return "S_FC (qqbar->cc)";
+    case SRC_T_FLAVOR_CREATION: return "T_FC (gg->cc)";
+    case SRC_FLAVOR_EXCITATION: return "FE (gg->ccg)";
+    case SRC_GLUON_SPLITTING:   return "GS (g->cc)";
+    case SRC_OTHER:             return "OTHER";
+    default:                    return "UNKNOWN";
+  }
+}
+
+// Check if a gluon has both c and cbar as daughters (g -> c cbar) in the record
+static bool findGluonSplittingPair(const Event& ev,
+                                  const std::vector<std::vector<int>>& kids,
+                                  int& outG, int& outC, int& outCbar)
+{
+  outG = outC = outCbar = -1;
+  for (int g = 0; g < ev.size(); ++g) {
+    if (ev[g].id() != 21) continue;
+    int foundC = -1, foundCb = -1;
+    for (int ch : kids[g]) {
+      int id = ev[ch].id();
+      if (id != 4 && id != -4) continue;
+      int st = ev[ch].status();
+      if (st == -21 || st == -22) continue; // reject incoming
+      if (id == 4) foundC = ch;
+      if (id == -4) foundCb = ch;
+    }
+  }
+  return false;
+}
+
+// Find a c and cbar that share the same two mothers (unordered) and return them
+static bool findPairSameTwoMothers(const Event& ev, int& outC, int& outCbar, int& m1, int& m2)
+{
+  outC = outCbar = -1;
+  m1 = m2 = -1;
+
+  // store c candidates by their (sorted) mother pair
+  struct Key { int a,b; };
+  struct KeyLess { bool operator()(const Key& x, const Key& y) const {
+    if (x.a != y.a) return x.a < y.a;
+    return x.b < y.b;
+  }};
+
+  std::map<Key, std::vector<int>, KeyLess> cByMoms;
+  std::map<Key, std::vector<int>, KeyLess> cbByMoms;
+
+  for (int i = 0; i < ev.size(); ++i) {
+    const int id = ev[i].id();
+    if (id != 4 && id != -4) continue;
+    int a = ev[i].mother1();
+    int b = ev[i].mother2();
+    if (a <= 0 || b <= 0) continue;
+    sort2(a,b);
+    Key k{a,b};
+    if (id == 4)  cByMoms[k].push_back(i);
+    if (id == -4) cbByMoms[k].push_back(i);
+  }
+
+  // prefer pairs whose mothers are incoming partons
+  int inA=-1, inB=-1;
+  const bool hasIn = getIncomingPartonsIdx(ev, inA, inB);
+  int siA=inA, siB=inB;
+  if (hasIn) sort2(siA, siB);
+
+  if (hasIn) {
+    Key kin{siA, siB};
+    auto itc  = cByMoms.find(kin);
+    auto itcb = cbByMoms.find(kin);
+    if (itc != cByMoms.end() && itcb != cbByMoms.end() &&
+        !itc->second.empty() && !itcb->second.empty()) {
+      outC    = itc->second.front();
+      outCbar = itcb->second.front();
+      m1 = kin.a; m2 = kin.b;
+      return true;
+    }
+  }
+
+  // otherwise take any available mother-pair match
+  for (auto& kv : cByMoms) {
+    auto itcb = cbByMoms.find(kv.first);
+    if (itcb == cbByMoms.end()) continue;
+    if (kv.second.empty() || itcb->second.empty()) continue;
+
+    outC    = kv.second.front();
+    outCbar = itcb->second.front();
+    m1 = kv.first.a; m2 = kv.first.b;
+    return true;
+  }
+
+  return false;
+}
+
+// FE check: existence of extra gluon with the same two mothers as the ccbar pair mothers
+static bool hasExtraGluonSameMothers(const Event& ev, int mom1, int mom2, int cIdx, int cbIdx)
+{
+  int a = mom1, b = mom2;
+  sort2(a,b);
+  for (int i = 0; i < ev.size(); ++i) {
+    if (i == cIdx || i == cbIdx) continue;
+    if (ev[i].id() != 21) continue;
+    int m1 = ev[i].mother1();
+    int m2 = ev[i].mother2();
+    if (m1 <= 0 || m2 <= 0) continue;
+    sort2(m1,m2);
+    if (m1 == a && m2 == b) return true;
+  }
+  return false;
+}
+
+// Event-level classification: compute once per event.
+static int classifyEventCcSource(const Pythia& pythia)
+{
+  const Event& ev = pythia.event;
+
+  int in1=-1, in2=-1;
+  if (!getIncomingPartonsIdx(ev, in1, in2)) return SRC_OTHER;
+
+  const int idIn1 = ev[in1].id();
+  const int idIn2 = ev[in2].id();
+  const int aIn1  = std::abs(idIn1);
+  const int aIn2  = std::abs(idIn2);
+
+  // (c) Flavor excitation: incoming charm present (cg -> cg, cq -> cq, etc.)
+  // This matches what your debug print shows for many events.
+  if (aIn1 == 4 || aIn2 == 4) return SRC_FLAVOR_EXCITATION;
+
+  // Build child map once
+  std::vector<std::vector<int>> kids;
+  buildChildrenMap(ev, kids);
+
+  // Hard outgoing legs
+  std::vector<int> hard;
+  getHardOutgoing(ev, in1, in2, hard);
+
+  // ---- (a)/(b) Flavor Creation: hard outgoing contains BOTH c and cbar
+  bool hardHasC = false, hardHasCb = false;
+  for (int i : hard) {
+    if (ev[i].id() == 4)  hardHasC  = true;
+    if (ev[i].id() == -4) hardHasCb = true;
+  }
+  if (hardHasC && hardHasCb) {
+    // qqbar -> ccbar
+    if (idIn1 == -idIn2 && (aIn1>=1 && aIn1<=5)) return SRC_S_FLAVOR_CREATION;
+    // gg -> ccbar
+    if (aIn1 == 21 && aIn2 == 21) return SRC_T_FLAVOR_CREATION;
+    return SRC_OTHER;
+  }
+
+  // ---- (d) Gluon splitting: a HARD outgoing gluon (-23) has direct ccbar kids
+  for (int i : hard) {
+    if (ev[i].id() != 21) continue;
+    int c=-1, cb=-1;
+    if (hasDirectCCbarKids(ev, kids, i, c, cb)) {
+      return SRC_GLUON_SPLITTING;
+    }
+  }
+
+  // Optional: if you still want a "gg -> ccbar + g" category,
+  // you need a hard 2->3 record (rare in this soft setup). You can attempt:
+  // If incoming gg AND hard contains a charm OR anticharm AND a hard gluon, call FE.
+  if (aIn1 == 21 && aIn2 == 21) {
+    bool hardHasOneCharm = false, hardHasG = false;
+    for (int i : hard) {
+      if (std::abs(ev[i].id()) == 4) hardHasOneCharm = true;
+      if (ev[i].id() == 21)          hardHasG = true;
+    }
+    if (hardHasOneCharm && hardHasG) return SRC_FLAVOR_EXCITATION;
+  }
+  // ---- (c') FE from ISR excitation: g -> ccbar where exactly one charm is a beam leg
+  auto isBeamLegCharm = [&](int st){
+    return (st == -31 || st == -33);
+  };
+
+  for (int g = 0; g < ev.size(); ++g) {
+    if (ev[g].id() != 21) continue;
+    if (ev[g].status() == -21 || ev[g].status() == -22) continue; // skip incoming gluons
+
+    int c=-1, cb=-1;
+    if (!hasDirectCCbarKids(ev, kids, g, c, cb)) continue;
+
+    const bool cBeam  = isBeamLegCharm(ev[c].status());
+    const bool cbBeam = isBeamLegCharm(ev[cb].status());
+
+    // XOR: exactly one is beam-leg charm => excitation
+    if (cBeam ^ cbBeam) return SRC_FLAVOR_EXCITATION;
+  }
+
+  // ---- (d') GS from shower: g -> ccbar where both charm legs are timelike (common: -51)
+  for (int g = 0; g < ev.size(); ++g) {
+    if (ev[g].id() != 21) continue;
+    if (ev[g].status() == -21 || ev[g].status() == -22) continue;
+
+    int c=-1, cb=-1;
+    if (!hasDirectCCbarKids(ev, kids, g, c, cb)) continue;
+
+    if (ev[c].status() == -51 && ev[cb].status() == -51)
+      return SRC_GLUON_SPLITTING;
+  }
+
+  return SRC_OTHER;
+}
+
+// -----------------------------
+// main
+// -----------------------------
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
@@ -244,16 +633,6 @@ int main(int argc, char* argv[])
   pythia.readString("Random:seed = " + std::to_string(seed));
   pythia.readString("Next:numberCount = 100000000");
 
-  // STAR-like tune bits you had
-  pythia.readString("PDF:pSet = 17");
-  pythia.readString("MultipartonInteractions:ecmRef = 200");
-  pythia.readString("MultipartonInteractions:bprofile = 2");
-  pythia.readString("MultipartonInteractions:pT0Ref = 1.40");
-  pythia.readString("MultipartonInteractions:ecmPow = 0.135");
-  pythia.readString("MultipartonInteractions:coreRadius = 0.56");
-  pythia.readString("MultipartonInteractions:coreFraction = 0.78");
-  pythia.readString("ColourReconnection:range = 5.4");
-
   std::shared_ptr<CharmOnlyNoBottomHook> hook = std::make_shared<CharmOnlyNoBottomHook>();
   pythia.setUserHooksPtr(hook);
 
@@ -262,8 +641,8 @@ int main(int argc, char* argv[])
   // Keep 421 (D0) as reference!
   // ----------------------------
   const std::vector<int> charmParents = {
-    421, 411, 431, 4122,            // D0, D+, Ds, Lambda_c
-    10421,10411, 423,413,           // excited D
+    421, 411, 431, 4122,
+    10421,10411, 423,413,
     10423,10413, 20423,20413,
     425,415,
     10431,433,10433,20433,435
@@ -334,120 +713,63 @@ int main(int argc, char* argv[])
     hBR->SetBinContent((int)i+1, brE[idAbs]);
   }
 
-  // Mass spectra QA
-  TH1D* hMee_int    = new TH1D("mee_int",
-    "m_{ee} with integer round-up: 1 for D0D0 else ceil(BRprod/BRD0^{2});m_{ee} (GeV/c^{2});counts", 300, 0, 6);
-
-  TH1D* hMee_wpair  = new TH1D("mee_wpair",
-    "m_{ee} weighted by wpair=BRprod/BRD0^{2};m_{ee};weighted counts", 300, 0, 6);
-
-  TH1D* hMee_brprod = new TH1D("mee_brprod",
-    "m_{ee} weighted by BRprod=BR(H1)BR(H2);m_{ee};weighted counts", 300, 0, 6);
-
-  // This is what your replicated tree represents (smart rounding)
-  TH1D* hMee_tree   = new TH1D("mee_tree",
-    "m_{ee} from replicated TTree entries (smart rounding);m_{ee};counts", 300, 0, 6);
-
-  TH1D* hWpair = new TH1D("w_pair",
-    "w_{pair}=BRprod/BRD0^{2};w_{pair};counts", 200, 0, 5);
-
   // Counters
   TH1D* hCounts = new TH1D("counts", "Counters;bin;value", 6, -0.5, 5.5);
-  // 0 tried (pythia.next success)
-  // 1 events with >=2 gated electrons
-  // 2 events with OS pair found
-  // 3 sum_nrep_smart (accumulated)
-  // 4 tree entries written
-  // 5 reserved
+  // 0 tried, 1 >=2 gated e, 2 OS pair, 3 sum_nrep, 4 written, 5 reserved
 
-  // Parent ID frequency for selected OS pair (2 fills per accepted pair)
-  // --- parent category map: PDG -> bin index (1..N), plus OTHER bin
-  std::vector<int> parentCats = charmParents;         // same list you force
-  std::sort(parentCats.begin(), parentCats.end());
-  parentCats.erase(std::unique(parentCats.begin(), parentCats.end()), parentCats.end());
+  // Pair weight distribution
+  TH1D* hWpair = new TH1D("w_pair", "w_{pair}=BRprod/BRD0^{2};w_{pair};counts", 200, 0, 5);
 
-  std::map<int,int> parentToBin;
-  for (size_t i = 0; i < parentCats.size(); ++i) parentToBin[parentCats[i]] = (int)i + 1;
+  // Event source counts (sanity!)
+  TH1D* hSrcCount = new TH1D("src_count", "Event source tag;source;events", 5, -0.5, 4.5);
+  for (int b=1;b<=5;++b) hSrcCount->GetXaxis()->SetBinLabel(b, srcName(b-1));
+  hSrcCount->LabelsOption("v","X");
 
-  const int BIN_OTHER = (int)parentCats.size() + 1;
-
-  TH1D* hParentPair = new TH1D("parent_pdg_pair",
-  "Charm parent (selected ee pair); category; counts",
-  BIN_OTHER, 0.5, BIN_OTHER + 0.5);
-
-  TH1D* hParentAll = new TH1D("parent_pdg_all",
-    "Charm parent (all gated electrons); category; counts",
-    BIN_OTHER, 0.5, BIN_OTHER + 0.5);
-
-  // set bin labels
-  for (size_t i = 0; i < parentCats.size(); ++i) {
-    hParentPair->GetXaxis()->SetBinLabel((int)i+1, std::to_string(parentCats[i]).c_str());
-    hParentAll ->GetXaxis()->SetBinLabel((int)i+1, std::to_string(parentCats[i]).c_str());
-  }
-  hParentPair->GetXaxis()->SetBinLabel(BIN_OTHER, "OTHER");
-  hParentAll ->GetXaxis()->SetBinLabel(BIN_OTHER, "OTHER");
-
-  // nicer look
-  hParentPair->LabelsOption("v","X");
-  hParentAll ->LabelsOption("v","X");
-
-  auto fillParent = [&](TH1D* h, int pdgAbs) {
-  auto it = parentToBin.find(pdgAbs);
-  if (it != parentToBin.end()) h->Fill(it->second);
-  else h->Fill(BIN_OTHER);
+  // ----------------------------
+  // ALL physics histograms are 2D: x=observable, y=source
+  // ----------------------------
+  auto make2D = [&](const char* name, const char* title,
+                    int nx, double xlo, double xhi) -> TH2D* {
+    TH2D* h = new TH2D(name, title, nx, xlo, xhi, 5, -0.5, 4.5);
+    for (int b=1;b<=5;++b) h->GetYaxis()->SetBinLabel(b, srcName(b-1));
+    h->LabelsOption("v","Y");
+    return h;
   };
 
-  TH1D* hPtAllCharmE = new TH1D("pt_all",
-    "e^{#pm} p_{T} (all charm e);p_{T} (GeV/c);counts", 100, 0, 10);
+  // m_ee in various acceptances (weighted by wpair*eventWeight)
+  TH2D* hMee_exact2_src       = make2D("mee_exact2_src",       "m_{ee} (OS), exactly 2 charm e (no acc);m_{ee};source", 300,0,6);
+  TH2D* hMee_star_src         = make2D("mee_star_src",         "m_{ee} (OS), STAR |y|<1 p_{T}>0.2; m_{ee};source",     300,0,6);
+  TH2D* hMee_phenix_eta05_src = make2D("mee_phenix_eta05_src", "m_{ee} (OS), |#eta|<0.5 p_{T}>0.2; m_{ee};source",     300,0,6);
+  TH2D* hMee_phenix_y035_src  = make2D("mee_phenix_y035_src",  "m_{ee} (OS), |y|<0.35 p_{T}>0.2; m_{ee};source",        300,0,6);
+  TH2D* hMee_phenix_phiacc_src= make2D("mee_phenix_phiacc_src","m_{ee} (OS), |y|<0.35 p_{T}>0.2 + #phi acc; m_{ee};source",300,0,6);
 
-  TH1D* hMee_exact2        = new TH1D("mee_exact2",
-    "m_{ee} (OS), exactly 2 charm e (no acceptance);m_{ee} (GeV/c^{2});counts", 300, 0, 6);
+  // Main gate: mee, pair pT, and "tree replicated" mee
+  TH2D* hMee_gate_wpair_src = make2D("mee_gate_wpair_src", "m_{ee} (gate) weighted by wpair; m_{ee};source", 300,0,6);
+  TH2D* hMee_gate_tree_src  = make2D("mee_gate_tree_src",  "m_{ee} (gate) tree replications (unweighted); m_{ee};source", 300,0,6);
+  TH2D* hPairPt_gate_src    = make2D("pairpt_gate_src",    "p_{T}^{ee} (gate) weighted by wpair; p_{T}^{ee};source", 120,0,12);
 
-  TH1D* hMee_star          = new TH1D("mee_star",
-    "m_{ee} (OS), STAR |y|<1 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
+  // Single-e pT spectra (weighted by BR(parent)/BR(D0))
+  TH2D* hPt_star_src         = make2D("pt_star_src",         "e p_{T} (STAR |y|<1) weighted by BR/BR(D0); p_{T};source", 100,0,10);
+  TH2D* hPt_phenix_eta_src   = make2D("pt_phenix_eta_src",   "e p_{T} (|#eta|<0.5) weighted by BR/BR(D0); p_{T};source", 100,0,10);
+  TH2D* hPt_phenix_y_src     = make2D("pt_phenix_y_src",     "e p_{T} (|y|<0.35) weighted by BR/BR(D0); p_{T};source",   100,0,10);
+  TH2D* hPt_phenix_phi_src   = make2D("pt_phenix_phi_src",   "e p_{T} (|y|<0.35 + #phi acc) weighted by BR/BR(D0); p_{T};source",100,0,10);
 
-  TH1D* hMee_phenix_eta05  = new TH1D("mee_phenix_eta05",
-    "m_{ee} (OS), PHENIX sim |#eta|<0.5 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
+  // pTHat (2D too, just to be consistent)
+  TH2D* hPTHat_src = make2D("pTHat_src", "pTHat distribution;#hat{p}_{T};source", 100,0,10);
 
-  TH1D* hMee_phenix_y035   = new TH1D("mee_phenix_y035",
-    "m_{ee} (OS), PHENIX |y|<0.35 p_{T}>0.2;m_{ee};counts", 300, 0, 6);
-
-  TH1D* hMee_phenix_phiacc = new TH1D("mee_phenix_phiacc",
-    "m_{ee} (OS), PHENIX |y|<0.35 p_{T}>0.2 + DC/RICH #phi cuts;m_{ee};counts", 300, 0, 6);
-
-  TH1D* hPt_star        = new TH1D("pt_star",
-    "e^{#pm} p_{T} (STAR |y|<1);p_{T};counts", 100, 0, 10);
-
-  TH1D* hPt_phenix_eta  = new TH1D("pt_phenix_eta",
-    "e^{#pm} p_{T} (PHENIX sim |#eta|<0.5);p_{T};counts", 100, 0, 10);
-
-  TH1D* hPt_phenix_y    = new TH1D("pt_phenix_y",
-    "e^{#pm} p_{T} (PHENIX |y|<0.35);p_{T};counts", 100, 0, 10);
-
-  TH1D* hPt_phenix_phi  = new TH1D("pt_phenix_phi",
-    "e^{#pm} p_{T} (PHENIX |y|<0.35 + DC/RICH #phi cuts);p_{T};counts", 100, 0, 10);
-
-  TH1D* hPTHat = new TH1D("pTHat",
-    "pTHat Distribution;#hat{p}_{T} (GeV/c);counts", 100, 0, 10);
-
-
-
-  // store constants too
+  // store constants
   TParameter<double>* pBRD0   = new TParameter<double>("BRD0", brD0);
   TParameter<double>* pBRD0sq = new TParameter<double>("BRD0sq", brD0sq);
 
   // ----------------------------
-  // Generation loop: keep going until tree entries == targetTreeEntries
+  // Loop
   // ----------------------------
   long long tried = 0;
   long long overall = 0;
   long long writtenEntries = 0;
   long long sumNrepSmart = 0;
 
-  // also track how well the “int round-up” compares:
-  long long sumIntWeight = 0;
   double sumWpair = 0.0;
-  double sumBRprod = 0.0;
 
   while (writtenEntries < targetTreeEntries) {
 
@@ -456,34 +778,42 @@ int main(int argc, char* argv[])
     ++tried;
     hCounts->Fill(0);
 
-    const int nparticles = pythia.event.size();
+    const double wEvt = pythia.info.weight(); // "pp weight" safeguard
+    const int srcEvt = classifyEventCcSource(pythia);
+    hSrcCount->Fill(srcEvt, wEvt);
+    
+    static int iev_debug = 0;
+    debugPrintIncomingAndCharmTopology(pythia, iev_debug, 25);
+    if(iev_debug < 25) std::cout<<"EVENT CLASS IS "<<srcName(srcEvt)<<"\n";
+    ++iev_debug;
 
-    hPTHat->Fill(pythia.info.pTHat());
+
+    hPTHat_src->Fill(pythia.info.pTHat(), srcEvt, wEvt);
+
+    const int nparticles = pythia.event.size();
 
     std::vector<CandE> allCharm;  allCharm.reserve(16);
     std::vector<CandE> star;      star.reserve(16);
     std::vector<CandE> phen_eta;  phen_eta.reserve(16);
     std::vector<CandE> phen_y;    phen_y.reserve(16);
     std::vector<CandE> phen_phi;  phen_phi.reserve(16);
+    std::vector<CandE> gated;     gated.reserve(8);
 
-    // collect gated electrons from allowed charm parents
-    std::vector<CandE> gated; // this is the TREE/BR gate: |y|<0.5, pT>0.2
-    gated.reserve(8);
-
+    // Collect electrons from charm parents
     for (int j = 0; j < nparticles; ++j) {
       if (!pythia.event[j].isFinal()) continue;
-    
+
       const int pdg = pythia.event[j].id();
       if (!isElectron(pdg)) continue;
-    
+
       const double Px = pythia.event[j].px();
       const double Py = pythia.event[j].py();
       const double Pz = pythia.event[j].pz();
       const double E  = pythia.event[j].e();
-    
+
       TLorentzVector p4(Px, Py, Pz, E);
       const double pt = p4.Pt();
-    
+
       CandE c;
       c.idx = j;
       c.pdg = pdg;
@@ -492,159 +822,140 @@ int main(int argc, char* argv[])
       c.pt  = pt;
       c.y   = p4.Rapidity();
       c.eta = p4.Eta();
-    
-      // parent finding (your existing one)
+
       const int parent = findCharmParent(pythia.event, j, charmParentSet);
       if (parent == 0) continue;
-    
       c.parent = parent;
-    
-      // ---- "all charm electrons" QA
+
+      // For single-e pT spectra: weight by BR(parent)/BR(D0) and by event weight
+      const double br1 = brE.count(parent) ? brE[parent] : 0.0;
+      if (br1 <= 0) continue;
+      const double wSingle = wEvt * (br1 / brD0);
+
       allCharm.push_back(c);
-      hPtAllCharmE->Fill(pt);
+
+      // apply pT>0.2 for your acceptance lists (as before)
       if (pt < 0.2) continue;
-      fillParent(hParentAll, std::abs(parent));
-    
-      // ---- STAR-like
+
       if (std::fabs(c.y) < 1.0) {
         star.push_back(c);
-        hPt_star->Fill(pt);
+        hPt_star_src->Fill(pt, srcEvt, wSingle);
       }
-    
-      // ---- PHENIX sim acceptance (eta)
+
       if (std::fabs(c.eta) < 0.5) {
         phen_eta.push_back(c);
-        hPt_phenix_eta->Fill(pt);
+        hPt_phenix_eta_src->Fill(pt, srcEvt, wSingle);
       }
-    
-      // ---- PHENIX physics acceptance (y)
+
       if (std::fabs(c.y) < 0.35) {
         phen_y.push_back(c);
-        hPt_phenix_y->Fill(pt);
-      
-        // ---- PHENIX phi acceptance (DC+RICH bending)
+        hPt_phenix_y_src->Fill(pt, srcEvt, wSingle);
+
         if (passPhenixPhiAcc(Px, Py, c.q, pt)) {
           phen_phi.push_back(c);
-          hPt_phenix_phi->Fill(pt);
+          hPt_phenix_phi_src->Fill(pt, srcEvt, wSingle);
         }
       }
-    
-      // ---- TREE/BR gate (your request)
+
       if (std::fabs(c.y) < 0.5) {
         gated.push_back(c);
       }
     }
 
-    // exactly 2 charm electrons (no further acc), OS pair
+    // exactly 2 charm electrons (no acc), OS pair -> mee_exact2_src (pair weight)
     if ((int)allCharm.size() == 2) {
       int ia=-1, ib=-1;
       if (pickBestOSPair(allCharm, ia, ib)) {
         const CandE& e1 = allCharm[ia];
         const CandE& e2 = allCharm[ib];
         const double mee = (e1.p4 + e2.p4).M();
-
         const int H1 = e1.parent;
         const int H2 = e2.parent;
-
         const double br1 = brE.count(H1) ? brE[H1] : 0.0;
         const double br2 = brE.count(H2) ? brE[H2] : 0.0;
-        if (br1 <= 0 || br2 <= 0) continue;
-
-        const double brprod = br1 * br2;
-        const double wpair  = brprod / brD0sq;
-        hMee_exact2->Fill(mee, wpair);
+        if (br1 > 0 && br2 > 0) {
+          const double wpair = (br1*br2) / brD0sq;
+          hMee_exact2_src->Fill(mee, srcEvt, wEvt*wpair);
+        }
       }
     }
 
-    // STAR
+    // STAR mee
     {
       int ia=-1, ib=-1;
       if (pickBestOSPair(star, ia, ib)) {
         const CandE& e1 = star[ia];
         const CandE& e2 = star[ib];
         const double mee = (e1.p4 + e2.p4).M();
-
         const int H1 = e1.parent;
         const int H2 = e2.parent;
-
         const double br1 = brE.count(H1) ? brE[H1] : 0.0;
         const double br2 = brE.count(H2) ? brE[H2] : 0.0;
-        if (br1 <= 0 || br2 <= 0) continue;
-
-        const double brprod = br1 * br2;
-        const double wpair  = brprod / brD0sq;
-        hMee_star->Fill(mee, wpair);
+        if (br1 > 0 && br2 > 0) {
+          const double wpair = (br1*br2) / brD0sq;
+          hMee_star_src->Fill(mee, srcEvt, wEvt*wpair);
+        }
       }
     }
 
-    // PHENIX sim eta
+    // PHENIX eta mee
     {
       int ia=-1, ib=-1;
       if (pickBestOSPair(phen_eta, ia, ib)) {
         const CandE& e1 = phen_eta[ia];
         const CandE& e2 = phen_eta[ib];
         const double mee = (e1.p4 + e2.p4).M();
-
         const int H1 = e1.parent;
         const int H2 = e2.parent;
-
         const double br1 = brE.count(H1) ? brE[H1] : 0.0;
         const double br2 = brE.count(H2) ? brE[H2] : 0.0;
-        if (br1 <= 0 || br2 <= 0) continue;
-
-        const double brprod = br1 * br2;
-        const double wpair  = brprod / brD0sq;
-        hMee_phenix_eta05->Fill(mee, wpair);
+        if (br1 > 0 && br2 > 0) {
+          const double wpair = (br1*br2) / brD0sq;
+          hMee_phenix_eta05_src->Fill(mee, srcEvt, wEvt*wpair);
+        }
       }
     }
 
-    // PHENIX y
+    // PHENIX y mee
     {
       int ia=-1, ib=-1;
       if (pickBestOSPair(phen_y, ia, ib)) {
         const CandE& e1 = phen_y[ia];
         const CandE& e2 = phen_y[ib];
         const double mee = (e1.p4 + e2.p4).M();
-
         const int H1 = e1.parent;
         const int H2 = e2.parent;
-
         const double br1 = brE.count(H1) ? brE[H1] : 0.0;
         const double br2 = brE.count(H2) ? brE[H2] : 0.0;
-        if (br1 <= 0 || br2 <= 0) continue;
-
-        const double brprod = br1 * br2;
-        const double wpair  = brprod / brD0sq;
-        hMee_phenix_y035->Fill(mee, wpair);
+        if (br1 > 0 && br2 > 0) {
+          const double wpair = (br1*br2) / brD0sq;
+          hMee_phenix_y035_src->Fill(mee, srcEvt, wEvt*wpair);
+        }
       }
     }
 
-    // PHENIX phi-acc
+    // PHENIX phi mee
     {
       int ia=-1, ib=-1;
       if (pickBestOSPair(phen_phi, ia, ib)) {
         const CandE& e1 = phen_phi[ia];
         const CandE& e2 = phen_phi[ib];
         const double mee = (e1.p4 + e2.p4).M();
-
         const int H1 = e1.parent;
         const int H2 = e2.parent;
-
         const double br1 = brE.count(H1) ? brE[H1] : 0.0;
         const double br2 = brE.count(H2) ? brE[H2] : 0.0;
-        if (br1 <= 0 || br2 <= 0) continue;
-
-        const double brprod = br1 * br2;
-        const double wpair  = brprod / brD0sq;
-        hMee_phenix_phiacc->Fill(mee, wpair);
+        if (br1 > 0 && br2 > 0) {
+          const double wpair = (br1*br2) / brD0sq;
+          hMee_phenix_phiacc_src->Fill(mee, srcEvt, wEvt*wpair);
+        }
       }
     }
 
-
+    // MAIN gate for tree + dedicated gate histos
     if ((int)gated.size() < 2) continue;
     hCounts->Fill(1);
 
-    // pick best OS pair
     int ia=-1, ib=-1;
     if (!pickBestOSPair(gated, ia, ib)) continue;
     hCounts->Fill(2);
@@ -652,6 +963,7 @@ int main(int argc, char* argv[])
     const CandE& e1 = gated[ia];
     const CandE& e2 = gated[ib];
     const double mee = (e1.p4 + e2.p4).M();
+    const double pairPt = (e1.p4 + e2.p4).Pt();
 
     const int H1 = e1.parent;
     const int H2 = e2.parent;
@@ -660,37 +972,21 @@ int main(int argc, char* argv[])
     const double br2 = brE.count(H2) ? brE[H2] : 0.0;
     if (br1 <= 0 || br2 <= 0) continue;
 
-    fillParent(hParentPair, H1);
-    fillParent(hParentPair, H2);
-
     const double brprod = br1 * br2;
     const double wpair  = brprod / brD0sq;
 
-    sumWpair  += wpair;
-    sumBRprod += brprod;
+    hWpair->Fill(wpair, wEvt);
+    sumWpair += wpair;
 
-    hWpair->Fill(wpair);
-    hMee_wpair->Fill(mee, wpair);
-    hMee_brprod->Fill(mee, brprod);
+    hMee_gate_wpair_src->Fill(mee, srcEvt, wEvt*wpair);
+    hPairPt_gate_src->Fill(pairPt, srcEvt, wEvt*wpair);
 
-    // ---- integer round-up scheme for QA (as you requested)
-    int wInt = 0;
-    if (H1 == 421 && H2 == 421) wInt = 1;               // D0D0 exactly -> 1
-    else                        wInt = (int)std::ceil(wpair); // other -> ceil
-    if (wInt < 0) wInt = 0;
-
-    sumIntWeight += wInt;
-    for (int k = 0; k < wInt; ++k) hMee_int->Fill(mee);
-
-    // ---- smart rounding replication for actual unweighted tree production
+    // replicate according to wpair (BR scaling), include event weight only in hist weights (tree is unweighted)
     const int nrep = smartRound(wpair, rng);
     sumNrepSmart += nrep;
-
-    // update counter with accumulated nrep
-    // (use SetBinContent since Fill would add 1, not nrep)
     hCounts->SetBinContent(4, (double)sumNrepSmart);
 
-    if (nrep <= 0) continue; // accept–reject equivalent
+    if (nrep <= 0) continue;
 
     // prepare tree event with exactly the two electrons of the selected pair
     myevent.set_to_null();
@@ -711,96 +1007,72 @@ int main(int argc, char* argv[])
     pushTrack(e1);
     pushTrack(e2);
 
-    // replicate fills
     for (int r = 0; r < nrep; ++r) {
       if (writtenEntries >= targetTreeEntries) break;
       tree->Fill();
-      hMee_tree->Fill(mee);
+      hMee_gate_tree_src->Fill(mee, srcEvt, 1.0); // tree entries are unweighted counts
       ++writtenEntries;
     }
 
-    // store written entries counter in bin at x=4 (bin index 5)
     hCounts->SetBinContent(5, (double)writtenEntries);
 
-    if (writtenEntries % 10 == 0) {
+    if (writtenEntries % 50 == 0) {
       std::cout << "written=" << writtenEntries
                 << " tried=" << tried
-                << " <wpair>~" << (sumWpair / std::max(1LL, (long long)hCounts->GetBinContent(3)))
+                << " src=" << srcName(srcEvt)
                 << "\n";
     }
   }
 
-  // store tried as parameter
+  // Parameters
   TParameter<long long>* pTried = new TParameter<long long>("Ntried_pythiaNextOK", tried);
-  TParameter<long long>* pOverall = new TParameter<long long>("Noverall_pythiaNextOK", hook->nCalls);
-
-  // additional bookkeeping parameters
-  TParameter<double>* pSumWpair   = new TParameter<double>("sum_wpair", sumWpair);
-  TParameter<double>* pSumBRprod  = new TParameter<double>("sum_BRprod", sumBRprod);
-  TParameter<long long>* pSumInt  = new TParameter<long long>("sum_intWeight", sumIntWeight);
+  TParameter<long long>* pOverall = new TParameter<long long>("Noverall_hookCalls", hook->nCalls);
   TParameter<long long>* pSumNrep = new TParameter<long long>("sum_nrepSmart", sumNrepSmart);
+  TParameter<double>* pSumWpair   = new TParameter<double>("sum_wpair", sumWpair);
+  TParameter<double>* pSigmaGen   = new TParameter<double>("sigmaGen_mb", pythia.info.sigmaGen());
 
-  // “total norm” you mentioned: Nev / BRD0^2
-  // Here Nev = writtenEntries (tree entries), but you can also use tried or events-with-pair.
-  TParameter<double>* pNormEntriesOverBRD0sq =
-    new TParameter<double>("Ntree_over_BRD0sq", (double)writtenEntries / brD0sq);
-
-  // cross section
-  TParameter<double>* pSigmaGen = new TParameter<double>("sigmaGen_mb", pythia.info.sigmaGen());
-
-  // Write everything
+  // Write
   fout->cd();
   tree->Write();
 
   hBR->Write();
-  hWpair->Write();
-
-  hMee_int->Write();
-  hMee_wpair->Write();
-  hMee_brprod->Write();
-  hMee_tree->Write();
-
   hCounts->Write();
-  hParentAll->Write();
-  hParentPair->Write();
+  hWpair->Write();
+  hSrcCount->Write();
 
-  hPtAllCharmE->Write();
+  hMee_exact2_src->Write();
+  hMee_star_src->Write();
+  hMee_phenix_eta05_src->Write();
+  hMee_phenix_y035_src->Write();
+  hMee_phenix_phiacc_src->Write();
 
-  hMee_exact2->Write();
-  hMee_star->Write();
-  hMee_phenix_eta05->Write();
-  hMee_phenix_y035->Write();
-  hMee_phenix_phiacc->Write();
-  
-  hPt_star->Write();
-  hPt_phenix_eta->Write();
-  hPt_phenix_y->Write();
-  hPt_phenix_phi->Write();
-  
-  hPTHat->Write();
+  hMee_gate_wpair_src->Write();
+  hMee_gate_tree_src->Write();
+  hPairPt_gate_src->Write();
 
+  hPt_star_src->Write();
+  hPt_phenix_eta_src->Write();
+  hPt_phenix_y_src->Write();
+  hPt_phenix_phi_src->Write();
+
+  hPTHat_src->Write();
 
   pBRD0->Write();
   pBRD0sq->Write();
   pOverall->Write();
   pTried->Write();
-  pSumWpair->Write();
-  pSumBRprod->Write();
-  pSumInt->Write();
   pSumNrep->Write();
-  pNormEntriesOverBRD0sq->Write();
+  pSumWpair->Write();
   pSigmaGen->Write();
 
   fout->Close();
 
   std::cout << "Done.\n";
-  std::cout << "overall=" << hook->nCalls<< " "<< overall << "\n";
+  std::cout << "overall(hook calls)=" << hook->nCalls << " overall(loop)=" << overall << "\n";
   std::cout << "tried=" << tried << "\n";
   std::cout << "treeEntries=" << writtenEntries << "\n";
   std::cout << "BRD0=" << std::setprecision(10) << brD0 << "  BRD0^2=" << brD0sq << "\n";
   std::cout << "sum_wpair=" << std::setprecision(10) << sumWpair << "\n";
-  std::cout << "sum_BRprod=" << std::setprecision(10) << sumBRprod << "\n";
-  std::cout << "sum_intWeight=" << sumIntWeight << "\n";
   std::cout << "sum_nrepSmart=" << sumNrepSmart << "\n";
   std::cout << "sigmaGen(mb)=" << std::setprecision(8) << pythia.info.sigmaGen() << "\n";
 
@@ -809,10 +1081,9 @@ int main(int argc, char* argv[])
   std::cout << "runtime(s)=" << dt << "\n";
 
   std::cout << "Hook calls = " << hook->nCalls
-          << " vetoes = " << hook->nVeto
-          << " accept = " << (hook->nCalls - hook->nVeto)
-          << std::endl;
-
+            << " vetoes = " << hook->nVeto
+            << " accept = " << (hook->nCalls - hook->nVeto)
+            << std::endl;
 
   return 0;
 }
