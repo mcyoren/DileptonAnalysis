@@ -277,7 +277,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 2 ) then
 echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}============= PYTHIA TO OSCAR =================${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
-set inputpythia = $DATADIR/output_single/pythia8/ccbartree$DIR.root
+set inputpythia = $DATADIR/output_single/pythia8/ccbarSoftnewtree$DIR.root
 if( $selected_paticle == 2) then
  set inputpythia = $DATADIR/output_single/pythia8/bbbartree$DIR.root
 endif
