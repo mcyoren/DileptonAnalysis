@@ -974,6 +974,7 @@ int main(int argc, char* argv[])
     }
 
     // MAIN gate for tree + dedicated gate histos
+    if (srcEvt != SRC_FLAVOR_EXCITATION) continue; ///podgon
     if ((int)gated.size() < 2) continue;
     hCounts->Fill(1);
 
