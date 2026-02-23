@@ -13,7 +13,7 @@ echo "name:kek.root Nev:500 part:phi decay:phi-\>ee pt_min:0.2 pt_max:10."
 
 root -l -b << EOF
     .L ../source/HELIOSLibrary/WriteEvent.C+
-    .L WriteROOTOutput.C+
+    .L WriteROOTOutputStar.C+
 EOF
 
 if( $#argv != 0) then
@@ -21,7 +21,7 @@ if( $#argv != 0) then
  echo "running all standard params"
   root -l -b << EOF
     gSystem->Load("../source/HELIOSLibrary/WriteEvent_C.so")
-    .x WriteROOTOutput.C+
+    .x WriteROOTOutputStar.C+
 EOF
  endif
  if( $1 != 0) then
@@ -41,12 +41,12 @@ EOF
  echo "decayname    $decayname  "
  echo "ptmin        $ptmin      "
  echo "ptmax        $ptmax      "
- echo "running WriteROOTOutput("$outfile",$nev,"$partname","$decayname",$ptmin,$ptmax)"
+ echo "running WriteROOTOutputStar("$outfile",$nev,"$partname","$decayname",$ptmin,$ptmax)"
 
   root -l -b << EOF
     gSystem->Load("../source/HELIOSLibrary/WriteEvent_C.so")
-    gSystem->Load("WriteROOTOutput_C.so")
-    WriteROOTOutput("$outfile",$nev,"$partname","$decayname",$ptmin,$ptmax)
+    gSystem->Load("WriteROOTOutputStar_C.so")
+    WriteROOTOutputStar("$outfile",$nev,"$partname","$decayname",$ptmin,$ptmax)
 EOF
  endif
 endif

@@ -35,7 +35,21 @@ TF1 *vphoton = PromptPhotonYield("PromptPhotonYield", 25, 0.0);
 TF1 *InHagedorn[9] = {pi0Hagedorn, etaHagedorn, rho0Hagedorn, omegaHagedorn, etapHagedorn, phiHagedorn, jpsiHagedorn, psipHagedorn, vphoton};
 TString allpartnames[9]={"pi0","eta","rho0","omega","etap","phi","jpsi","psip","vphoton"};
 
-void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const TString part_name = "phi", const TString decay_name = "phi->ee", const double pt_min = 0.2, const double pt_max = 10.){
+void Particle::GeneratePRap(Double_t pt_low, Double_t pt_high, Bool_t rap, Double_t y_low, Double_t y_high) {
+   Double_t pt,phi,rapidity,eta; 
+   pt        = randy.Uniform(pt_low,pt_high);
+   phi       = randy.Uniform(0.,2*pi);
+   rapidity  = randy.Uniform(y_low,y_high);
+
+   eta       = rapidity;
+//   generate flat in rapidity rather than pseudorapidity
+   if (rap) eta = RapidityToEta(rapidity,pt,mass);
+   SetPtEtaPhiM(pt,eta,phi,mass);
+   GenerateVtx();
+  }
+ 
+
+void WriteROOTOutputStar(TString OutputName="kek.root", const int Nev = 5000, const TString part_name = "phi", const TString decay_name = "phi->ee", const double pt_min = 0.2, const double pt_max = 10.){
 
 	TRandom3 MyRandy = TRandom3(0);
 
@@ -46,7 +60,7 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 
 	TH2F* h_input = new TH2F("h_input", "PID vs decay", 2500, -0.5, 2499.5, 10, -0.5, 9.5);
 	TH1F* h_input_pt = new TH1F("h_input_pt", "pt profile of input", 500, 0., 10.0);
-	TH1F* h_input_eta = new TH1F("h_input_eta", "eta profile of input", 200, -1.0, 1.0);
+	TH1F* h_input_eta = new TH1F("h_input_eta", "eta profile of input", 200, -1.5, 1.5);
 	TH1F* h_input_phi = new TH1F("h_input_phi", "phi profile of input", 200, -10.0, 10.0);
 	TH1F* h_input_mass = new TH1F("h_input_mass", "mass profile of input", 200, 0, 0.5);
 
@@ -88,7 +102,7 @@ void WriteROOTOutput(TString OutputName="kek.root", const int Nev = 5000, const 
 		//const double pt_local = (InHagedorn[ipart]->GetRandom(pt_min, pt_max)); //in GeV/c
 	  	pi0.ResetP();                                                 	// reset
 	 	//pi0.GenerateP(pt_local,pt_local);  
-		pi0.GenerateP(pt_min, pt_max);                                 	// generate
+		pi0.GeneratePRap(pt_min, pt_max, kTRUE, -1.0, 1.0);                                 	// generate
 	 	double trk_wt = 1;
 
 		pi0.DecaySingleBranch(decay_name);
