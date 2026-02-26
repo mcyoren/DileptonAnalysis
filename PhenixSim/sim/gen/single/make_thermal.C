@@ -62,7 +62,7 @@ public:
     fourVec = new TLorentzVector();
     unif = new TRandom3(seed);
     fhagdorn = new TF1("fhagdorn", "[0]*x/(pow(exp(-[1]*x-[2]*x*x)+x/[3],[4]))", 0.0, 100.0);
-    fpow = new TF1("fpow", "pow(x,[0])", 0.0, 100.0);
+    fpow = new TF1("fpow", "exp(-x/[0])", 0.0, 100.0);
     pi = 3.14159;
   }
 
@@ -73,7 +73,7 @@ public:
   double GetPowLaw(double n, double lpt, double upt)
   {
     fpow->SetRange(lpt, upt);
-    fpow->SetParameter(0, -n);
+    fpow->SetParameter(0, n);
     return fpow->GetRandom();
   }
 
@@ -91,7 +91,14 @@ public:
       y = unif->Gaus(0, ySig);
     while (fabs(y) > rapwin);
     if (n > 0)
-      pt = GetPowLaw(n, lpt, upt);
+    {
+      double lmt = sqrt(m0 * m0 + lpt * lpt);
+      double umt = sqrt(m0 * m0 + upt * upt);
+      mt = GetPowLaw(n, lmt, umt);
+      if (mt>m0)
+        pt = sqrt(mt * mt - m0 * m0);
+      else std::cout << "Warning: mt < m0, using pt=0" << std::endl;
+    }
     else if (n == 0)
       pt = lpt + (upt - lpt) * Rndm();
     else
@@ -135,6 +142,7 @@ void make_thermal(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitra
                   TString fout = "oscar.particles.dat", const int nevt = 10000, const float pt_min = 0.5, const float pt_max = 5,
                   const double n = -1, const int id = 0)
 {
+  const float temp = 0.5;// Temperature in GeV
   // n: <0 hagdorn (mb HeAu), =0 flat, >0 power law
 
   // the only key part above is the
@@ -207,7 +215,7 @@ void make_thermal(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitra
   TH1D h1d_pt_daughter("h1d_pt_daughter", "", 50, 0, 5);
 
   TF1 *fThermal = new TF1("mythermalmass", "pow(x,1.5)*exp(-x/[0])", 0.5, 10);
-  fThermal->SetParameter(0, 0.3);
+  fThermal->SetParameter(0, temp);
 
   // Get Zvertex dist from data
   //TH1D *zvtx_dat;
@@ -226,7 +234,7 @@ void make_thermal(char filepath[200] = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitra
 
     //-------------------  PI0 --------------------
     TLorentzVector *thermal = new TLorentzVector();
-    thermal = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, n, pt_min, pt_max, fThermal->GetRandom());
+    thermal = myrand->GetFMomGaussYPowPT(rapwidth, rapwin, temp, pt_min, pt_max, fThermal->GetRandom());
     h1d_pt.Fill(thermal->Pt());
     h1d_mass.Fill(thermal->M());
 
