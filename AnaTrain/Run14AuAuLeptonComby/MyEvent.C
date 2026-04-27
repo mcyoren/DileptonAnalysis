@@ -2210,6 +2210,7 @@ namespace MyDileptonAnalysis
         }
     }
 
+
     void MyEventContainer::CorrectPtForEventOffset(const float beam_average_x, const float beam_average_y, const int verbosity)
     {
         const int n_elec = event->GetNtrack();
@@ -2248,24 +2249,15 @@ namespace MyDileptonAnalysis
                 const float alpha_offset = alpha_dca_offset - alpha_phi_offset;
                 if(verbosity < 0)
                 {
-                    const float mscale_arm = 0.985;////prodgon 0.985
+                    const float mscale_arm = 1.0; //no mscale
                     if (verbosity == -1) electron->SetPtPrime(electron->GetPtPrime() / 0.97 * mscale_arm); //reverse std mom scale correction in central events
                     if( TMath::Abs(dphi - electron->GetPhiConv()) > 0.001 )
                     {
-                        //std::cout <<"\033[31m" << "WARNING: dphi is differ significantly at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv() << "\033[0m" << std::endl;
                         electron->SetEmcdz_e(10);
-                        //electron->SetHitCounter(0,0);
-                    }//else std::cout <<"\033[32m" << "OK: dphi is consistent at pt = " << electron->GetPtPrime() << " " << electron->GetPt() << " " << dphi << " " << electron->GetPhiConv()<<"\033[0m" << std::endl;
+                    }
                     continue;
                 }
                 electron->SetPhiConv(dphi);
-
-                //if(alpha_offset*electron->GetAlphaPrime()<0) continue;
-                //if (electron->GetPtPrime()>0.) 
-                //    std::cout << electron->GetPtPrime() << " " << electron->GetChargePrime() << " " << TMath::Abs( (electron->GetAlphaPrime() ) / ( electron->GetAlphaPrime() -alpha_offset )) << " "<<
-                //    electron->GetDCAY() << " " << electron->GetDCAX()<<" "<<electron->GetPhiDC() <<" "<<
-                //    electron->GetAlphaPrime() <<" " <<alpha_offset << " " << alpha_phi_offset << std::endl;
-
 
                 electron->SetAlphaPrime(electron->GetAlphaPrime() - alpha_offset);
 
@@ -2276,32 +2268,7 @@ namespace MyDileptonAnalysis
                 electron->SetPt(electron->GetPtPrime());
                 if(event->GetCentrality()>-1)////podgon for AuAu central events
                 {   
-                    const double pt_dc = electron->GetPtPrime();
-                    const double pt_vtx = electron->GetPtPrime() * mscale;// inputs: pt_dc, pt_vtx  (both in GeV/c)
-
-                    // rel sigma models: sigma(pt)/pt = sqrt(a^2 + (b*pt)^2)
-                    const double a1 = 0.008, b1 = 0.02;   // 0.8% ⊕ 2.0% * pT
-                    const double a2 = 0.024, b2 = 0.012;  // 2.4% ⊕ 1.2% * pT
-
-                    const double r1 = std::sqrt(a1*a1 + (b1*pt_dc )*(b1*pt_dc ));   // relative
-                    const double r2 = std::sqrt(a2*a2 + (b2*pt_vtx)*(b2*pt_vtx));   // relative
-
-                    const double s1 = r1 * pt_dc;   // absolute sigma(pt)
-                    const double s2 = r2 * pt_vtx;
-
-                    const double w1 = 1.0/(s1*s1);
-                    const double w2 = 1.0/(s2*s2);
-
-                    // combined pT (best linear unbiased estimator if errors independent)
-                    const double pt_comb = (w1*pt_dc + w2*pt_vtx)/(w1 + w2);
-
-                    // (optional) combined uncertainty
-                    //const double sigma_pt_comb = std::sqrt(1.0/(w1 + w2));
-                    //const double rel_sigma_comb = sigma_pt_comb / pt_comb;
-
-                    electron->SetPtPrime(pt_comb);
-                    //if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//mscale); //averge between no correction and full correction
-                    //else if (mscale >= 1.08) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
+                    if (mscale > 0.92 && mscale < 1.08) electron->SetPtPrime(electron->GetPtPrime() * ( 1. + (mscale - 1.) / 2.)); //averge between no correction and full correction if both pt are within 8%
 
                     if ((electron->GetAlphaPrime() + alpha_offset) * electron->GetAlphaPrime() < 0)
                     {
@@ -2309,7 +2276,6 @@ namespace MyDileptonAnalysis
                         electron->SetQPrime(-electron->GetChargePrime());
                     }
                 }
-                //if (mscale > 1.0 ) electron->SetPtPrime(electron->GetPtPrime() * mscale);//full correction when bremsstranhlung seems to happened
                 if (mscale<0.92)
                 {
                     electron->SetEmcdz_e(1);
@@ -4638,7 +4604,7 @@ namespace MyDileptonAnalysis
             INIT_HISTOS( 3, delt_phi_dca_bg3, 3*N_centr, 200, 0, 0.5, 40, 0, 1000, 10, 0, 5);
             INIT_HISTOS( 3, delt_phi_dca_bg4, 3*N_centr, 200, 0, 0.5, 40, 0, 1000, 10, 0, 5);
 
-            INIT_HISTOS( 3, inv_mass_dca_gen, 3*N_centr, 80, 0, 2000, 90, 0, 4.50, 25, 0, 10);
+            INIT_HISTOS( 3, inv_mass_dca_gen, 3*N_centr, 80, 0, 2000, 180, 0, 4.50, 40, 0, 10);
             is_fill_inv_mass = 1;
         }
         if(fill_vertex_reco == 2)
