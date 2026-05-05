@@ -502,7 +502,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     for (int itrk = 0; itrk < n_electrons; itrk++)
     {
       MyDileptonAnalysis::MyElectron mytrk = *event->GetEntry(itrk);
-      if ( (event->GetCentrality()<40 && mytrk.GetMcId() + mytrk.GetTrkInfo() < 10000) || (event->GetCentrality()>=40 && mytrk.GetTrkInfo() < 100) )
+      if ( (event->GetCentrality()<40 && mytrk.GetMcId() + mytrk.GetTrkInfo() < 11000) || (event->GetCentrality()>=40 && mytrk.GetTrkInfo() < 100) )
       //if ( mytrk.GetMcId()<100 && mytrk.GetTrkInfo()<100 )
       //if (mytrk.GetMcId()<100)
       //if ( mytrk.GetMcId()<100 || (event->GetCentrality()<40 && mytrk.GetMcId()<1000) || (event->GetCentrality()<20 && mytrk.GetMcId()<1000) || mytrk.GetProb()<0.1 || 
