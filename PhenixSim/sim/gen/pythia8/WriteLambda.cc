@@ -109,22 +109,31 @@ int main(int argc, char* argv[])
   pythia.readString("Random:seed = " + std::to_string(seed));
   pythia.readString("Next:numberCount = 1000000");
 
+ 
+  //Pythia8 tune for STAR (2110.09447 )
+  pythia.readString("PDF:pSet = 17");
+  pythia.readString("MultipartonInteractions:ecmRef = 200");
+  pythia.readString("MultipartonInteractions:bprofile = 2");
+
+  pythia.readString("MultipartonInteractions:pT0Ref = 1.40"); //Gaussian kT term
+  pythia.readString("MultipartonInteractions:ecmPow = 0.135");
+  pythia.readString("MultipartonInteractions:coreRadius = 0.56");
+  pythia.readString("MultipartonInteractions:coreFraction = 0.78");
+  pythia.readString("ColourReconnection:range = 5.4");
+  
   // PYTHIA 8 Monash base
-pythia.readString("Tune:pp = 14");
-
-// QCD-based colour reconnection / CR-BLC Mode 2 style
-pythia.readString("BeamRemnants:remnantMode = 1");
-pythia.readString("ColourReconnection:reconnect = on");
-pythia.readString("ColourReconnection:mode = 1");
-
-pythia.readString("ColourReconnection:allowDoubleJunRem = off");
-pythia.readString("ColourReconnection:m0 = 0.3");
-pythia.readString("ColourReconnection:allowJunctions = on");
-pythia.readString("ColourReconnection:junctionCorrection = 1.20");
-
-// This is the important Mode-2 causality/time-dilation part
-pythia.readString("ColourReconnection:timeDilationMode = 2");
-pythia.readString("ColourReconnection:timeDilationPar = 0.18");
+//pythia.readString("Tune:pp = 14");
+//// QCD-based colour reconnection / CR-BLC Mode 2 style
+//pythia.readString("BeamRemnants:remnantMode = 1");
+//pythia.readString("ColourReconnection:reconnect = on");
+//pythia.readString("ColourReconnection:mode = 1");
+//pythia.readString("ColourReconnection:allowDoubleJunRem = off");
+//pythia.readString("ColourReconnection:m0 = 0.3");
+//pythia.readString("ColourReconnection:allowJunctions = on");
+//pythia.readString("ColourReconnection:junctionCorrection = 1.20");
+//// This is the important Mode-2 causality/time-dilation part
+//pythia.readString("ColourReconnection:timeDilationMode = 2");
+//pythia.readString("ColourReconnection:timeDilationPar = 0.18");
 
   pythia.init();
 
