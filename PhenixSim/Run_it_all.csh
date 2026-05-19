@@ -65,7 +65,7 @@ echo "${Green} is_me               $is_me              ${Color_Off}"
 
 setenv DATADIR $PWD
 
-source /opt/phenix/bin/phenix_setup.csh new
+source /opt/phenix/core/bin/phenix_setup.csh -n
 setenv LD_LIBRARY_PATH /gpfs/mnt/gpfs02/phenix/plhf/plhf3/nnovitzk/mazsi_Test/ccnt/source/emc-evaluation/build/.libs:$LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH $DATADIR/embedreco/install/lib:$LD_LIBRARY_PATH
 setenv LD_LIBRARY_PATH $DATADIR/embed/svx_cent_ana/install/lib:$LD_LIBRARY_PATH
@@ -277,7 +277,7 @@ if( ( $2 == 0 || $2 == 3 || $2 == 4 ) && $3 == 2 ) then
 echo "${Purple}===============================================${Color_Off}"
 echo "${Purple}============= PYTHIA TO OSCAR =================${Color_Off}"
 echo "${Purple}===============================================${Color_Off}"
-set inputpythia = $DATADIR/output_single/pythia8/ccbarSoftnewtree$DIR.root
+set inputpythia = $DATADIR/output_single/pythia8/ccbarSoft1newtree$DIR.root
 if( $selected_paticle == 2) then
  set inputpythia = $DATADIR/output_single/pythia8/bbbartree$DIR.root
 endif
@@ -286,6 +286,9 @@ if( $selected_paticle == 3) then
 endif
 if( $selected_paticle == 4) then
  set inputpythia = /phenix/plhf/vdoomra/standalone_pythia8/output_ccbar_bbbar_SoftQCD_inelastic_part1/HeavyFlavor_$DIR.root
+endif
+if( $selected_paticle == 5) then
+ set inputpythia = $DATADIR/output_single/pythia8/ccbarLambdanewtree$DIR.root
 endif
 set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh

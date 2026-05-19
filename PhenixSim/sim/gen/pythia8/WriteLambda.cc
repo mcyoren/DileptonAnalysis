@@ -120,6 +120,9 @@ int main(int argc, char* argv[])
   pythia.readString("MultipartonInteractions:coreRadius = 0.56");
   pythia.readString("MultipartonInteractions:coreFraction = 0.78");
   pythia.readString("ColourReconnection:range = 5.4");
+
+  //pythia.readString("ColourReconnection:reconnect = on");
+  //pythia.readString("ColourReconnection:mode = 1");
   
   // PYTHIA 8 Monash base
 //pythia.readString("Tune:pp = 14");

@@ -143,6 +143,14 @@ static int findCharmParent(const Event& ev, int idx,
   return 0;
 }
 
+static int getCharmParentBin(int parentId, const std::vector<int>& charmParents = {421, 411, 431, 4122})
+{
+  for (size_t i = 0; i < charmParents.size(); ++i) {
+    if (std::abs(parentId) == charmParents[i]) return (int)i + 1;
+  }
+  return (int)charmParents.size() + 1; // "other" bin
+}
+
 // choose ONE OS pair: pick highest-pt e then best opposite-sign partner by pt
 static bool pickBestOSPair(const std::vector<CandE>& v, int& iBest, int& jBest)
 {
@@ -654,6 +662,21 @@ int main(int argc, char* argv[])
   pythia.readString("Random:seed = " + std::to_string(seed));
   pythia.readString("Next:numberCount = 100000000");
 
+  //Pythia8 tune for STAR (2110.09447 )
+  pythia.readString("PDF:pSet = 17");
+  pythia.readString("MultipartonInteractions:ecmRef = 200");
+  pythia.readString("MultipartonInteractions:bprofile = 2");
+
+  pythia.readString("MultipartonInteractions:pT0Ref = 1.40"); //Gaussian kT term
+  pythia.readString("MultipartonInteractions:ecmPow = 0.135");
+  pythia.readString("MultipartonInteractions:coreRadius = 0.56");
+  pythia.readString("MultipartonInteractions:coreFraction = 0.78");
+  pythia.readString("ColourReconnection:range = 5.4");
+
+  //trying to include some CR effects, but not sure if this is the best option for charm hadrons
+  pythia.readString("ColourReconnection:reconnect = on");
+  pythia.readString("ColourReconnection:mode = 1");
+
   std::shared_ptr<CharmOnlyNoBottomHook> hook = std::make_shared<CharmOnlyNoBottomHook>();
   pythia.setUserHooksPtr(hook);
 
@@ -668,6 +691,13 @@ int main(int argc, char* argv[])
     425,415,
     10431,433,10433,20433,435
   };
+  const std::vector<std::string> charmParentNames = {
+    "D0", "D+", "Ds", "Lambda_c",
+    "D0*", "D+*", "D*0", "D*+",
+    "D0(2S)", "D+(2S)", "D*0(2S)", "D*+(2S)",
+    "D0(3S)", "D*", "D*0(3S)", "D*+(3S)", "D*2(3S)"
+  };
+
 
   std::set<int> charmParentSet;
   for (int id : charmParents) charmParentSet.insert(std::abs(id));
@@ -775,6 +805,16 @@ int main(int argc, char* argv[])
   TH2D* hPt_phenix_y_src     = make2D("pt_phenix_y_src",     "e p_{T} (|y|<0.35) weighted by BR/BR(D0); p_{T};source",   100,0,10);
   TH2D* hPt_phenix_phi_src   = make2D("pt_phenix_phi_src",   "e p_{T} (|y|<0.35 + #phi acc) weighted by BR/BR(D0); p_{T};source",100,0,10);
 
+
+  //2d hist of pt for lepton mother vs mother pid for D0, D+, Ds, Lambda_c, and others (all together, just to be consistent with the others)
+  TH2D* hPtMother_src = new TH2D("ptMother_src", "e p_{T} vs mother PID; p_{T}; mother PID (bin)", 100,0,10, 5,0.5,5.5);
+  TH2D* hPtMother_BRweight_src = new TH2D("ptMother_BRweight_src", "e p_{T} vs mother PID weighted by BR/BR(D0); p_{T}; mother PID (bin)", 100,0,10, 5,0.5,5.5);
+
+  for (int b=1;b<5;++b) {hPtMother_src->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());
+                            hPtMother_BRweight_src->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());}
+  hPtMother_src->GetYaxis()->SetBinLabel(5, "other");
+  hPtMother_BRweight_src->GetYaxis()->SetBinLabel(5, "other");
+
   // pTHat (2D too, just to be consistent)
   TH2D* hPTHat_src = make2D("pTHat_src", "pTHat distribution;#hat{p}_{T};source", 100,0,10);
 
@@ -852,6 +892,14 @@ int main(int argc, char* argv[])
       const double br1 = brE.count(parent) ? brE[parent] : 0.0;
       if (br1 <= 0) continue;
       const double wSingle = wEvt * (br1 / brD0);
+
+      // Fill pt vs parent PID for all accepted electrons (no extra pT cut here, to be consistent with the others)
+      const int parentBin = getCharmParentBin(parent);
+      hPtMother_src->Fill(pt, parentBin, wEvt*br1);
+      const unsigned int wSingleRounded = smartRound(wSingle, rng);
+      for (unsigned int irep=0; irep<wSingleRounded; ++irep) {
+        hPtMother_BRweight_src->Fill(pt, parentBin);
+      }
 
       allCharm.push_back(c);
 
@@ -1078,6 +1126,9 @@ int main(int argc, char* argv[])
   hPt_phenix_phi_src->Write();
 
   hPTHat_src->Write();
+
+  hPtMother_src->Write();
+  hPtMother_BRweight_src->Write();
 
   pBRD0->Write();
   pBRD0sq->Write();
