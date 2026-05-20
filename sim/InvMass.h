@@ -36,7 +36,7 @@ const double hith_pt_ratio[13] = {1.0,0.48,    1.0,     0.78,    0.78,   0.25,  
 const double pi0_high_pt_ratio[5] = {0.00623224,0.00228273,0.000667683,9.78082e-05,2.425e-05};
 const TString part_names[13] = {"pi0","eta","rho->ee","omega","omega->pi0ee","eta'->gamma ee","phi->ee","phi->etaee","jpsi","psi2s","ccbar","bbbar","qgp"};
 /////////////////////////////      0     1      2        3             4               5              6      7           8     9       10      11     12
-const double RAA_jpsi[5] = {0.2,0.3,0.7,0.8,0.8};
+const double RAA_jpsi[5] = {0.3,0.4,0.5,0.8,0.8};
 // #include "AnaTrain/MyEvent.C"
 bool ifcout = false;
 //const float me2 = 0.000510998918*0.000510998918;788

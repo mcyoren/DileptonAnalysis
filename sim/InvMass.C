@@ -106,6 +106,8 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   const int do_conv_dalitz_finder = 2;//2
   const int is_hagedorn = 0;
   const int do_pt_reco = 0;
+  const int do_ccbar_weight = 0;
+  const int do_in_phenix_acc_cut = 0;
 
   char outname[200];
   sprintf(outname,"kek_%d.root",itread);
@@ -130,9 +132,15 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
   TH3D *hist_sing_e = new TH3D("hist_sing_e","hist_sing_e",50,-0.5,0.5,100,0,10,5,0,100);
   TH3D *hist_sing_pt_reco = new TH3D("hist_sing_pt_reco","hist_sing_pt_reco",50,-0.5,0.5, 100, -10,10 , 50,0,5);
 
-  const double ccbar_yield_ratio_fit_params[4] = { 7.213072954495502 , -5.168881501393766 , 1.427529678167659 , -0.15216750641396687 };
-  TF1 *ccbar_yield_ratio_fit_pol3 = new TF1("ccbar_yield_ratio_fit_pol3", "pol3", 0, 4.5);
+  //const double ccbar_yield_ratio_fit_params[4] = { 7.213072954495502 , -5.168881501393766 , 1.427529678167659 , -0.15216750641396687 };
+  const double ccbar_yield_ratio_fit_params[4] =  { 3.132428506639309, -2.2348489745608093, 0.5540825257426513, -0.04583895183566079 };
+  //const double ccbar_yield_ratio_fit_params[4] =  { 1.66, -0.92, 0.142, 0.0  };
+  TF1 *ccbar_yield_ratio_fit_pol3 = new TF1("ccbar_yield_ratio_fit_pol3", "pol3", 0.4, 3.1);
   ccbar_yield_ratio_fit_pol3->SetParameters(ccbar_yield_ratio_fit_params);
+
+  const double new_ccbar_pt_params[2] = { 0.8068162417599091, 1.1593055140420894};
+  TF1 *new_ccbar_pt_func = new TF1("new_ccbar_pt_func", "[0]+[1]/x", 0, 10);
+  new_ccbar_pt_func->SetParameters(new_ccbar_pt_params);
 
   const float phi_west_min = -3*TMath::Pi()/16, phi_west_max = 5*TMath::Pi()/16;
   const float phi_east_min = 11*TMath::Pi()/16, phi_east_max = 19*TMath::Pi()/16;
@@ -161,7 +169,26 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
     if (ievent - beggin > N_max)
       break;
     //if (myevent->GetCentrality() > 30) continue;
-    if(false)
+
+    for (int itrk = 0; itrk < myevent->GetNgentrack(); itrk++)
+    {
+      MyDileptonAnalysis::MyGenTrack *mygentrk = myevent->GetGenTrack(itrk);
+      if (mygentrk->GetID()==22) continue;
+      if (do_ccbar_weight )
+      {
+        if (mygentrk->GetID()>0)
+          hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),0., new_ccbar_pt_func->Eval(mygentrk->GetPt()) );
+        else
+          hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),1., new_ccbar_pt_func->Eval(mygentrk->GetPt()) );
+      }
+      else{
+        if (mygentrk->GetID()>0)
+          hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),0);
+        else
+          hist_pt_orig->Fill(mygentrk->GetPt(),myevent->GetCentrality(),1);
+        }
+    }
+    if(do_in_phenix_acc_cut)
     {
       int not_in_acceptance = 0;
       for (int itrk = 0; itrk < myevent->GetNgentrack(); itrk++)
@@ -179,7 +206,9 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
           const double pt2 = mygentrk2->GetPt();
           if(pt1<0.2 || pt2<0.2) not_in_acceptance++;
           const double eta1 = 0.5 * log( ( sqrt(pt1*pt1 + mygentrk->GetPz()*mygentrk->GetPz()) + mygentrk->GetPz() ) / ( sqrt(pt1*pt1 + mygentrk->GetPz()*mygentrk->GetPz()) - mygentrk->GetPz() ) );
-          const double eta2 = 0.5 * log( ( sqrt(pt2*pt2 + mygentrk2->GetPz()*mygentrk2->GetPz()) + mygentrk2->GetPz() ) / ( sqrt(pt2*pt2 + mygentrk2->GetPz()*mygentrk2->GetPz()) - mygentrk2->GetPz() ) );
+          const double eta2 = 0.5 * log( ( sqrt(pt2*pt2 + mygentrk2->GetPz()*mygentrk2->GetPz()) + mygentrk2->GetPz() ) / ( sqrt(pt2*pt2 + mygentrk2->GetPz()*mygentrk2->GetPz()) - mygentrk2->GetPz() ) );;
+          if (TMath::Abs(eta1)>0.5 || TMath::Abs(eta2)>0.5) not_in_acceptance++;
+          if (do_in_phenix_acc_cut==2) continue;
           if (TMath::Abs(eta1)>0.35 || TMath::Abs(eta2)>0.35) not_in_acceptance++;
           int q1 = mygentrk->GetID()<0 ? 1 : -1;
           int q2 = mygentrk2->GetID()<0 ? 1 : -1;
@@ -226,16 +255,31 @@ void InvMass(const TString inname = inFile[0],  int itread = 0, int ntreads = 1,
       if ( part < 10) weight = hadron_yield[(int)myevent->GetCentrality()/20]->Eval(pt);
       if ( part == 0 && is_hagedorn) weight /= generated_spectrum->Eval(pt);
       weight *= trk_mult_centrality->Eval(myevent->GetCentrality()) / average_mult_per_centr[(int)myevent->GetCentrality()/20];
-      hist_pt_mother->Fill(pt,myevent->GetCentrality());
-      hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
-      if(true && part==10)
+      if(do_ccbar_weight==1 && part==10)
       {
-        const float E1 = sqrt(mygentrk1->GetPx()*mygentrk1->GetPx()+mygentrk1->GetPy()*mygentrk1->GetPy()+mygentrk1->GetPz()*mygentrk1->GetPz());
-        const float E2 = sqrt(mygentrk2->GetPx()*mygentrk2->GetPx()+mygentrk2->GetPy()*mygentrk2->GetPy()+mygentrk2->GetPz()*mygentrk2->GetPz());
+        const float E1 = sqrt(mygentrk1->GetPx()*mygentrk1->GetPx()+mygentrk1->GetPy()*mygentrk1->GetPy()+mygentrk1->GetPz()*mygentrk1->GetPz()+0.000511*0.000511);
+        const float E2 = sqrt(mygentrk2->GetPx()*mygentrk2->GetPx()+mygentrk2->GetPy()*mygentrk2->GetPy()+mygentrk2->GetPz()*mygentrk2->GetPz()+0.000511*0.000511);
         float mass = sqrt( (E1+E2)*(E1+E2) - (px*px+py*py+(mygentrk1->GetPz()+mygentrk2->GetPz())*(mygentrk1->GetPz()+mygentrk2->GetPz()) ) );
         mass = mass < 0.5 ? 0.5 : mass >3.0 ? 3.0 : mass;
+
+        if(std::isnan(ccbar_yield_ratio_fit_pol3->Eval(mass))) {
+          std::cout<<"\033[1;31m"<<"WTF!!!!!!!nan weight! event: "<<ievent<<" centrality: "<<myevent->GetCentrality()<<" pt: "<<pt<<" mass: "<<mass<< " E1: " << E1 << " E2: " << E2 <<"\033[0m"<<std::endl;
+          continue;
+        }
         weight *= ccbar_yield_ratio_fit_pol3->Eval(mass);
       }
+      if(do_ccbar_weight==2 && part==10)
+      {
+        const float pt1 = mygentrk1->GetPt();
+        const float pt2 = mygentrk2->GetPt();
+        weight *= new_ccbar_pt_func->Eval( pt1 ) * new_ccbar_pt_func->Eval( pt2 ) ;
+      }
+      if(std::isnan(weight)) {
+        std::cout<<"\033[1;31m"<<"nan weight! event: "<<ievent<<" centrality: "<<myevent->GetCentrality()<<" pt: "<<pt<<" part: "<<part<<"\033[0m"<<std::endl;
+        continue;
+      }
+      hist_pt_mother->Fill(pt,myevent->GetCentrality());
+      hist_pt_mother_weight->Fill(pt,myevent->GetCentrality(),weight);
     }
     if (myevent->GetNgentrack()==3)
     {
