@@ -1,20 +1,28 @@
 C=======================================================================
-C run_pythia6_mb_ccbar_dielectrons_forced.f
+C run_pythia6_mb_ccbar_dielectrons_forced_QA.f
 C
 C PYTHIA6 MB/all-QCD Tune A
 C Force weak open-charm hadrons to electron decay channels
-C Keep only accepted c-cbar dielectron pairs:
-C   OS e+e-, each from weak open charm, opposite-sign charm parents
-C   |y_e| < 0.5, pT_e > 0.2 GeV
-C Stop when TARGET_PAIRS is reached
+C
+C Production output:
+C   keep only PHENIX-perfect accepted c-cbar dielectron pairs:
+C     OS e+e-, each from weak open charm, opposite-sign charm parents
+C     |y_e| < 0.5, pT_e > 0.2 GeV
+C   stop when TARGET_PAIRS production pairs are reached
+C
+C QA output:
+C   write ALL open-HF OS dielectron pairs before acceptance cuts
+C   write ALL weak open-charm hadrons before pair acceptance cuts
 C
 C Outputs:
-C   pythia6_pairs.dat
-C   pythia6_tracks.dat
-C   pythia6_summary.dat
+C   pythia6_pairs.dat              production pair-level file
+C   pythia6_tracks.dat             production track-level file
+C   pythia6_summary.dat            normalization summary
+C   pythia6_qa_pairs.dat           all-pair QA flat file
+C   pythia6_qa_charmhadrons.dat    all weak open-charm hadron QA file
 C=======================================================================
 
-      PROGRAM RUN_PYTHIA6_MB_CCBAR_DIELECTRONS
+      PROGRAM RUN_PYTHIA6_MB_CCBAR_DIELECTRONS_QA
 
       IMPLICIT NONE
 
@@ -39,62 +47,67 @@ C----- PYTHIA decay table
       COMMON /PYDAT3/ MDCY(500,3), MDME(8000,2),
      &                BRAT(8000), KFDP(8000,5)
 
-C----- Settings
-      INTEGER TARGET_PAIRS, MAX_GEN
-      DOUBLE PRECISION SQRTS
-
-C----- Counters
-      INTEGER IGEN, IACC_EVT, IACC_PAIR
-      INTEGER I, J
-      INTEGER ISUB
-      INTEGER NELE
-      INTEGER ELE(4000)
-
-C----- Track/pair variables
-      INTEGER PDG1, PDG2
-      INTEGER MOM1, MOM2
-      INTEGER PARENT1, PARENT2
-      DOUBLE PRECISION BR1, BR2, WPAIR, WREL
-      DOUBLE PRECISION BRD0, BRD0SQ
-
-      DOUBLE PRECISION PT1, PT2, Y1, Y2, ETA1, ETA2, PHI1, PHI2
-      DOUBLE PRECISION PAIRPX, PAIRPY, PAIRPZ, PAIRE
-      DOUBLE PRECISION PAIRPT, PAIRM, PAIRY, MASS2
-
-      DOUBLE PRECISION SUM_WPAIR, SUM_WREL
-
-C----- Functions
-      INTEGER OPENCHARMMOTHER
-      DOUBLE PRECISION GETPT, GETY, GETETA, GETPHI
-      DOUBLE PRECISION FORCEELECTRONDECAYS, ELECTRONBR
-      DOUBLE PRECISION GETMASS
-      LOGICAL ISWEAKOPENCHARM
-
-C----- For runing in condor       
-      INTEGER NARG, IARGC
-      INTEGER JOBID
-      CHARACTER*128 ARG
-      
 C----- PYTHIA random number state
       INTEGER MRPY
       DOUBLE PRECISION RRPY
       COMMON /PYDATR/ MRPY(6), RRPY(100)
 
+C----- Settings
+      INTEGER TARGET_PAIRS, MAX_GEN
+      DOUBLE PRECISION SQRTS
+
+C----- Condor / command line
+      INTEGER NARG, IARGC
+      INTEGER JOBID
+      CHARACTER*128 ARG
+
+C----- Counters
+      INTEGER IGEN, IACC_PAIR, IQA_PAIR
+      INTEGER I, J
+      INTEGER ISUB, SRCBIN
+      INTEGER NELE
+      INTEGER ELE(4000)
+
+C----- Particle and parent variables
+      INTEGER PDG1, PDG2
+      INTEGER PARENT1, PARENT2
+      INTEGER MOMIDX1, MOMIDX2
+      INTEGER SPECIES
+      DOUBLE PRECISION BR1, BR2, BRI
+      DOUBLE PRECISION WPAIR, WREL
+      DOUBLE PRECISION BRD0, BRD0SQ
+
+C----- Electron and pair kinematics
+      DOUBLE PRECISION PT1, PT2, Y1, Y2, ETA1, ETA2, PHI1, PHI2
+      DOUBLE PRECISION PAIRPX, PAIRPY, PAIRPZ, PAIRE, PAIRP
+      DOUBLE PRECISION PAIRPT, PAIRM, PAIRY, PAIRETA, MASS2
+      DOUBLE PRECISION PTMOM1, PTMOM2, YMOM1, YMOM2
+
+C----- Acceptance flags
+      INTEGER PASS_PHENIX, PASS_STAR
+
+C----- Weights and normalization sums
+      DOUBLE PRECISION SUM_WPAIR, SUM_WREL
+      DOUBLE PRECISION SUM_QA_WPAIR, SUM_QA_WREL
+
+C----- Functions
+      INTEGER OPENCHARMMOTHERINDEX, GETPROCESSBIN, GETPARENTBIN
+      DOUBLE PRECISION GETPT, GETY, GETETA, GETPHI, GETMASS
+      DOUBLE PRECISION FORCEELECTRONDECAYS, ELECTRONBR
+      LOGICAL ISWEAKOPENCHARM
+
 C=======================================================================
-C User settings
+C User settings and command-line arguments
 C=======================================================================
-      
-      
+
       TARGET_PAIRS = 100
       MAX_GEN      = 200000000
       SQRTS        = 200.0D0
       JOBID        = 0
 
-C     Read command line:
-C       argument 1 = target number of accepted dielectron pairs
-C       argument 2 = job id / seed / condor process number
-
-
+C     Arguments:
+C       arg1 = target number of PHENIX-perfect accepted dielectron pairs
+C       arg2 = job id / seed / Condor process number
       NARG = IARGC()
 
       IF (NARG.GE.1) THEN
@@ -112,6 +125,8 @@ C       argument 2 = job id / seed / condor process number
 
       SUM_WPAIR = 0.0D0
       SUM_WREL  = 0.0D0
+      SUM_QA_WPAIR = 0.0D0
+      SUM_QA_WREL  = 0.0D0
 
 C=======================================================================
 C PYTHIA6 setup: MB/all-QCD Tune A
@@ -135,9 +150,8 @@ C----- Less verbose
       CALL PYGIVE('MSTU(11)=6')
       CALL PYGIVE('MSTU(12)=12345')
 
-C----- Random seed
-
-      MRPY(1) = 100000 + JOBID
+C----- Random seed. PYTHIA6 uses MRPY(1).
+      MRPY(1) = 100000 + 1000*JOBID
       MRPY(2) = 0
 
       CALL PYINIT('CMS','p','p',SQRTS)
@@ -147,7 +161,6 @@ C Force weak open-charm hadrons to electron channels
 C=======================================================================
 
       WRITE(*,*) 'Forcing weak open-charm hadrons to e channels'
-
       WRITE(*,*) 'D+       BR_e = ', FORCEELECTRONDECAYS(411)
       WRITE(*,*) 'D0       BR_e = ', FORCEELECTRONDECAYS(421)
       WRITE(*,*) 'Ds+      BR_e = ', FORCEELECTRONDECAYS(431)
@@ -176,22 +189,35 @@ C=======================================================================
       OPEN(10, FILE='pythia6_pairs.dat', STATUS='UNKNOWN')
       OPEN(11, FILE='pythia6_tracks.dat', STATUS='UNKNOWN')
       OPEN(12, FILE='pythia6_summary.dat', STATUS='UNKNOWN')
+      OPEN(13, FILE='pythia6_qa_pairs.dat', STATUS='UNKNOWN')
+      OPEN(14, FILE='pythia6_qa_charmhadrons.dat', STATUS='UNKNOWN')
 
-      WRITE(10,*) '# pair_id gen_event isub weight_br weight_rel',
-     &            ' parent1 parent2 pdg1 pdg2',
+      WRITE(10,*) '# pair_id gen_event isub srcbin weight_br',
+     &            ' weight_rel parent1 parent2 ptmom1 ptmom2',
+     &            ' ymom1 ymom2 pdg1 pdg2',
      &            ' pt1 pt2 y1 y2 eta1 eta2 phi1 phi2',
-     &            ' pair_mass pair_pt pair_y'
+     &            ' pair_mass pair_pt pair_y pair_eta'
 
       WRITE(11,*) '# pair_id itrack pid parent mass energy',
      &            ' px py pz vx vy vz'
+
+      WRITE(13,*) '# qa_pair_id gen_event isub srcbin weight_br',
+     &            ' weight_rel parent1 parent2 ptmom1 ptmom2',
+     &            ' ymom1 ymom2 pdg1 pdg2',
+     &            ' pt1 pt2 y1 y2 eta1 eta2 phi1 phi2',
+     &            ' pair_mass pair_pt pair_y pair_eta',
+     &            ' pass_phenix pass_star'
+
+      WRITE(14,*) '# gen_event isub srcbin pdg species br_e',
+     &            ' pt y eta phi px py pz e'
 
 C=======================================================================
 C Event loop
 C=======================================================================
 
       IGEN = 0
-      IACC_EVT = 0
       IACC_PAIR = 0
+      IQA_PAIR = 0
 
  1000 CONTINUE
 
@@ -202,15 +228,29 @@ C=======================================================================
 
       IF (MOD(IGEN,10000).EQ.0) THEN
         WRITE(*,*) 'Generated ', IGEN,
-     &             ' accepted pairs ', IACC_PAIR,
+     &             ' PHENIX pairs ', IACC_PAIR,
+     &             ' QA pairs ', IQA_PAIR,
      &             ' target ', TARGET_PAIRS
       ENDIF
 
       CALL PYEVNT
 
       ISUB = MSTI(1)
+      SRCBIN = GETPROCESSBIN(ISUB)
 
-C----- Collect accepted final-state electrons from weak open charm
+C----- Write weak open-charm hadrons for unbiased mother pT QA.
+      DO I = 1, N
+        IF (K(I,1).LT.20 .AND. ISWEAKOPENCHARM(K(I,2))) THEN
+          BRI = ELECTRONBR(K(I,2))
+          SPECIES = GETPARENTBIN(K(I,2))
+          WRITE(14,9400) IGEN, ISUB, SRCBIN, K(I,2), SPECIES, BRI,
+     &      GETPT(I), GETY(I), GETETA(I), GETPHI(I),
+     &      P(I,1), P(I,2), P(I,3), P(I,4)
+        ENDIF
+      ENDDO
+
+C----- Collect all final-state electrons from weak open-charm parents.
+C     No PHENIX/STAR cuts here: those are QA categories.
       NELE = 0
 
       DO I = 1, N
@@ -218,15 +258,10 @@ C----- Collect accepted final-state electrons from weak open charm
         IF (K(I,1).NE.1) GOTO 110
         IF (ABS(K(I,2)).NE.11) GOTO 110
 
-        PT1 = GETPT(I)
-        Y1  = GETY(I)
+        MOMIDX1 = OPENCHARMMOTHERINDEX(I)
+        IF (MOMIDX1.LE.0) GOTO 110
 
-        IF (PT1.LT.0.2D0) GOTO 110
-        IF (ABS(Y1).GT.0.5D0) GOTO 110
-
-        PARENT1 = OPENCHARMMOTHER(I)
-        IF (PARENT1.EQ.0) GOTO 110
-
+        PARENT1 = K(MOMIDX1,2)
         IF (.NOT.ISWEAKOPENCHARM(PARENT1)) GOTO 110
 
         NELE = NELE + 1
@@ -237,7 +272,7 @@ C----- Collect accepted final-state electrons from weak open charm
 
       IF (NELE.LT.2) GOTO 1000
 
-C----- Build accepted unlike-sign c-cbar pairs
+C----- Build all unlike-sign c-cbar dielectron pairs for QA.
       DO I = 1, NELE
         DO J = I+1, NELE
 
@@ -247,10 +282,13 @@ C----- Build accepted unlike-sign c-cbar pairs
 C--------- unlike-sign e+e-
           IF (PDG1*PDG2.GT.0) GOTO 220
 
-          PARENT1 = OPENCHARMMOTHER(ELE(I))
-          PARENT2 = OPENCHARMMOTHER(ELE(J))
+          MOMIDX1 = OPENCHARMMOTHERINDEX(ELE(I))
+          MOMIDX2 = OPENCHARMMOTHERINDEX(ELE(J))
 
-          IF (PARENT1.EQ.0 .OR. PARENT2.EQ.0) GOTO 220
+          IF (MOMIDX1.LE.0 .OR. MOMIDX2.LE.0) GOTO 220
+
+          PARENT1 = K(MOMIDX1,2)
+          PARENT2 = K(MOMIDX2,2)
 
 C--------- require one charm hadron and one anti-charm hadron
           IF (PARENT1*PARENT2.GT.0) GOTO 220
@@ -271,6 +309,11 @@ C--------- require one charm hadron and one anti-charm hadron
           ETA2 = GETETA(ELE(J))
           PHI1 = GETPHI(ELE(I))
           PHI2 = GETPHI(ELE(J))
+
+          PTMOM1 = GETPT(MOMIDX1)
+          PTMOM2 = GETPT(MOMIDX2)
+          YMOM1  = GETY(MOMIDX1)
+          YMOM2  = GETY(MOMIDX2)
 
           PAIRPX = P(ELE(I),1) + P(ELE(J),1)
           PAIRPY = P(ELE(I),2) + P(ELE(J),2)
@@ -297,27 +340,62 @@ C--------- require one charm hadron and one anti-charm hadron
             PAIRY = 999.0D0
           ENDIF
 
+          PAIRP = SQRT(PAIRPX*PAIRPX + PAIRPY*PAIRPY
+     &          + PAIRPZ*PAIRPZ)
+          IF ((PAIRP-PAIRPZ).GT.0.0D0 .AND.
+     &        (PAIRP+PAIRPZ).GT.0.0D0) THEN
+            PAIRETA = 0.5D0*LOG((PAIRP+PAIRPZ)/(PAIRP-PAIRPZ))
+          ELSE
+            PAIRETA = 999.0D0
+          ENDIF
+
+          PASS_PHENIX = 0
+          IF (PT1.GT.0.2D0 .AND. PT2.GT.0.2D0 .AND.
+     &        ABS(Y1).LT.0.5D0 .AND. ABS(Y2).LT.0.5D0) THEN
+            PASS_PHENIX = 1
+          ENDIF
+
+          PASS_STAR = 0
+          IF (PT1.GT.0.2D0 .AND. PT2.GT.0.2D0 .AND.
+     &        ABS(ETA1).LT.1.0D0 .AND. ABS(ETA2).LT.1.0D0) THEN
+            PASS_STAR = 1
+          ENDIF
+
+C--------- QA pair output before final production selection.
+          IQA_PAIR = IQA_PAIR + 1
+          SUM_QA_WPAIR = SUM_QA_WPAIR + WPAIR
+          SUM_QA_WREL  = SUM_QA_WREL  + WREL
+
+          WRITE(13,9300) IQA_PAIR, IGEN, ISUB, SRCBIN,
+     &      WPAIR, WREL,
+     &      PARENT1, PARENT2, PTMOM1, PTMOM2, YMOM1, YMOM2,
+     &      PDG1, PDG2,
+     &      PT1, PT2, Y1, Y2, ETA1, ETA2, PHI1, PHI2,
+     &      PAIRM, PAIRPT, PAIRY, PAIRETA,
+     &      PASS_PHENIX, PASS_STAR
+
+C--------- Production output only for PHENIX-perfect pairs.
+          IF (PASS_PHENIX.NE.1) GOTO 220
+
           IACC_PAIR = IACC_PAIR + 1
           SUM_WPAIR = SUM_WPAIR + WPAIR
           SUM_WREL  = SUM_WREL  + WREL
 
-          IF (IACC_PAIR.EQ.1) IACC_EVT = IACC_EVT + 1
-
-C--------- pair-level output
-          WRITE(10,9000) IACC_PAIR, IGEN, ISUB,
+          WRITE(10,9000) IACC_PAIR, IGEN, ISUB, SRCBIN,
      &      WPAIR, WREL,
-     &      PARENT1, PARENT2, PDG1, PDG2,
+     &      PARENT1, PARENT2, PTMOM1, PTMOM2, YMOM1, YMOM2,
+     &      PDG1, PDG2,
      &      PT1, PT2, Y1, Y2, ETA1, ETA2, PHI1, PHI2,
-     &      PAIRM, PAIRPT, PAIRY
+     &      PAIRM, PAIRPT, PAIRY, PAIRETA
 
-C--------- track-level output: track 1
+C--------- track-level production output: track 1
           WRITE(11,9100) IACC_PAIR, 1,
      &      K(ELE(I),2), PARENT1,
      &      GETMASS(ELE(I)), P(ELE(I),4),
      &      P(ELE(I),1), P(ELE(I),2), P(ELE(I),3),
      &      V(ELE(I),1), V(ELE(I),2), V(ELE(I),3)
 
-C--------- track-level output: track 2
+C--------- track-level production output: track 2
           WRITE(11,9100) IACC_PAIR, 2,
      &      K(ELE(J),2), PARENT2,
      &      GETMASS(ELE(J)), P(ELE(J),4),
@@ -338,51 +416,75 @@ C=======================================================================
 
  9999 CONTINUE
 
- 9000 FORMAT(I12,1X,I12,1X,I6,1X,
+ 9000 FORMAT(I12,1X,I12,1X,I6,1X,I6,1X,
      &       E16.8,1X,E16.8,1X,
-     &       I8,1X,I8,1X,I6,1X,I6,1X,
-     &       11(E16.8,1X))
+     &       I8,1X,I8,1X,
+     &       E16.8,1X,E16.8,1X,E16.8,1X,E16.8,1X,
+     &       I6,1X,I6,1X,
+     &       12(E16.8,1X))
 
  9100 FORMAT(I12,1X,I4,1X,I8,1X,I8,1X,
      &       8(E16.8,1X))
+
+ 9300 FORMAT(I12,1X,I12,1X,I6,1X,I6,1X,
+     &       E16.8,1X,E16.8,1X,
+     &       I8,1X,I8,1X,
+     &       E16.8,1X,E16.8,1X,E16.8,1X,E16.8,1X,
+     &       I6,1X,I6,1X,
+     &       12(E16.8,1X),I3,1X,I3)
+
+ 9400 FORMAT(I12,1X,I6,1X,I6,1X,I8,1X,I3,1X,
+     &       9(E16.8,1X))
 
       CALL PYSTAT(1)
 
 C----- Summary / normalization info
       WRITE(12,*) '# PYTHIA6 MB ccbar dielectron forced-e summary'
       WRITE(12,*) 'sqrt_s_GeV ', SQRTS
-      WRITE(12,*) 'target_pairs ', TARGET_PAIRS
+      WRITE(12,*) 'job_id ', JOBID
+      WRITE(12,*) 'target_phenix_pairs ', TARGET_PAIRS
       WRITE(12,*) 'generated_events ', IGEN
-      WRITE(12,*) 'accepted_pairs ', IACC_PAIR
-      WRITE(12,*) 'sum_pair_BR_weights ', SUM_WPAIR
-      WRITE(12,*) 'sum_relative_rep_weights ', SUM_WREL
+      WRITE(12,*) 'accepted_phenix_pairs ', IACC_PAIR
+      WRITE(12,*) 'qa_all_pairs ', IQA_PAIR
+      WRITE(12,*) 'sum_phenix_pair_BR_weights ', SUM_WPAIR
+      WRITE(12,*) 'sum_phenix_relative_rep_weights ', SUM_WREL
+      WRITE(12,*) 'sum_qa_pair_BR_weights ', SUM_QA_WPAIR
+      WRITE(12,*) 'sum_qa_relative_rep_weights ', SUM_QA_WREL
       WRITE(12,*) 'BRD0_to_e ', BRD0
       WRITE(12,*) 'BRD0_to_e_squared ', BRD0SQ
       WRITE(12,*) 'pythia_XSEC_0_3_mb ', XSEC(0,3)
       WRITE(12,*) 'pythia_XSEC_96_3_mb ', XSEC(96,3)
-      WRITE(12,*) 'estimated_pair_cross_section_mb ',
+      WRITE(12,*) 'estimated_phenix_pair_cross_section_mb ',
      &             XSEC(0,3) * SUM_WPAIR / DBLE(IGEN)
+      WRITE(12,*) 'estimated_all_qa_pair_cross_section_mb ',
+     &             XSEC(0,3) * SUM_QA_WPAIR / DBLE(IGEN)
 
       CLOSE(10)
       CLOSE(11)
       CLOSE(12)
+      CLOSE(13)
+      CLOSE(14)
 
       WRITE(*,*) 'Done.'
       WRITE(*,*) 'Generated events: ', IGEN
-      WRITE(*,*) 'Accepted pairs:   ', IACC_PAIR
-      WRITE(*,*) 'Sum BR weights:   ', SUM_WPAIR
-      WRITE(*,*) 'Sum rel weights:  ', SUM_WREL
-      WRITE(*,*) 'XSEC(0,3) mb:     ', XSEC(0,3)
-      WRITE(*,*) 'Pair xsec mb:     ', XSEC(0,3)*SUM_WPAIR/DBLE(IGEN)
+      WRITE(*,*) 'Accepted PHENIX pairs: ', IACC_PAIR
+      WRITE(*,*) 'QA all pairs: ', IQA_PAIR
+      WRITE(*,*) 'Sum PHENIX BR weights: ', SUM_WPAIR
+      WRITE(*,*) 'Sum QA BR weights: ', SUM_QA_WPAIR
+      WRITE(*,*) 'XSEC(0,3) mb: ', XSEC(0,3)
+      WRITE(*,*) 'PHENIX pair xsec mb: ',
+     &             XSEC(0,3)*SUM_WPAIR/DBLE(IGEN)
+      WRITE(*,*) 'All QA pair xsec mb: ',
+     &             XSEC(0,3)*SUM_QA_WPAIR/DBLE(IGEN)
 
       END
 
 
 C=======================================================================
-C Find weak open-charm mother PDG code
+C Find weak open-charm mother index of particle IPART
 C=======================================================================
 
-      INTEGER FUNCTION OPENCHARMMOTHER(IPART)
+      INTEGER FUNCTION OPENCHARMMOTHERINDEX(IPART)
 
       IMPLICIT NONE
 
@@ -395,7 +497,7 @@ C=======================================================================
       LOGICAL ISWEAKOPENCHARM
 
       CUR = IPART
-      OPENCHARMMOTHER = 0
+      OPENCHARMMOTHERINDEX = 0
 
       DO DEPTH = 1, 80
 
@@ -404,7 +506,7 @@ C=======================================================================
         PDG = K(CUR,2)
 
         IF (ISWEAKOPENCHARM(PDG)) THEN
-          OPENCHARMMOTHER = PDG
+          OPENCHARMMOTHERINDEX = CUR
           RETURN
         ENDIF
 
@@ -447,6 +549,70 @@ C=======================================================================
       END
 
 
+C=======================================================================
+C Parent species bin: D0, D+, Ds, Lambda_c, other weak charm
+C=======================================================================
+
+      INTEGER FUNCTION GETPARENTBIN(PDG)
+
+      IMPLICIT NONE
+
+      INTEGER PDG, APDG
+
+      APDG = ABS(PDG)
+
+      GETPARENTBIN = 5
+      IF (APDG.EQ.421)  GETPARENTBIN = 1
+      IF (APDG.EQ.411)  GETPARENTBIN = 2
+      IF (APDG.EQ.431)  GETPARENTBIN = 3
+      IF (APDG.EQ.4122) GETPARENTBIN = 4
+
+      RETURN
+      END
+
+
+C=======================================================================
+C Hard-subprocess grouping from PYTHIA6 ISUB.
+C This is NOT yet full HF source tagging.
+C It groups the hard process that PYTHIA reports through MSTI(1).
+C=======================================================================
+
+      INTEGER FUNCTION GETPROCESSBIN(ISUB)
+
+      IMPLICIT NONE
+
+      INTEGER ISUB
+
+C     1 = direct qqbar -> ccbar, massive HF pair creation
+C     2 = direct gg    -> ccbar, massive HF pair creation
+C     3 = qg -> qg
+C     4 = qq / qqbar scattering
+C     5 = gg -> qqbar
+C     6 = gg -> gg
+C     7 = semihard/MPI
+C     8 = other
+
+      GETPROCESSBIN = 8
+
+      IF (ISUB.EQ.81) GETPROCESSBIN = 1
+      IF (ISUB.EQ.82) GETPROCESSBIN = 2
+
+      IF (ISUB.EQ.28) GETPROCESSBIN = 3
+
+      IF (ISUB.EQ.11) GETPROCESSBIN = 4
+      IF (ISUB.EQ.12) GETPROCESSBIN = 4
+      IF (ISUB.EQ.13) GETPROCESSBIN = 4
+
+      IF (ISUB.EQ.53) GETPROCESSBIN = 5
+
+      IF (ISUB.EQ.68) GETPROCESSBIN = 6
+
+      IF (ISUB.EQ.96) GETPROCESSBIN = 7
+
+      RETURN
+      END
+
+      
 C=======================================================================
 C Force particle and antiparticle to electron decay channels
 C=======================================================================
@@ -516,7 +682,7 @@ C=======================================================================
 
 
 C=======================================================================
-C Return inclusive electron BR from original PYTHIA BRAT table
+C Return inclusive electron BR from PYTHIA BRAT table
 C=======================================================================
 
       DOUBLE PRECISION FUNCTION ELECTRONBR(KF)

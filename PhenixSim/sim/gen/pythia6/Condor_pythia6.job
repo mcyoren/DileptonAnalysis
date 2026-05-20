@@ -1,0 +1,15 @@
+Universe       = vanilla
+Notification   = Never
+Initialdir     = /gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/sim/gen/pythia6/
++Experiment     = "PHENIX"
++Job_Type       = "cas"
+Executable     = /bin/csh
+Log            = /dev/null
+Output         = /dev/null
+Error          = /dev/null
+
+PeriodicHold = (NumJobStarts>=1 && JobStatus == 1)
+
+Arguments      = Run_full_pythia6.csh 10 $(Process) 0
+
+Queue 25

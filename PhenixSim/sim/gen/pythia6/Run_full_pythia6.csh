@@ -12,7 +12,7 @@ set shift = $3
 set INPUT = `expr $shift + $2`
 echo $INPUT
 
-set tmpdir = "/home/tmp/${USER}_job_pythia6_$INPUT"
+set tmpdir = "/phenix/plhf/mitran/tmp/${USER}_job_pythia6_$INPUT"
 set sourcedir = /phenix/plhf/mitran/Simul/Dileptons/sim/gen/pythia6
 set outputdir = /phenix/plhf/mitran/Simul/Dileptons/output_single/pythia6
 set DIR = `printf "%05d" $INPUT`
