@@ -108,6 +108,36 @@ struct CharmHadronInfo {
   double e;
 };
 
+struct RunInfo {
+  int job_id;
+  long long target_pairs;
+  long long generated_events;
+  long long accepted_pairs;
+  double sqrt_s_GeV;
+  double sum_pair_BR_weights;
+  double sum_relative_rep_weights;
+  double br_d0_to_e;
+  double br_d0_to_e_squared;
+  double pythia_xsec_mb;
+  double pythia_xsec_96_mb;
+  double estimated_pair_xsec_mb;
+
+  RunInfo()
+    : job_id(-1),
+      target_pairs(0),
+      generated_events(0),
+      accepted_pairs(0),
+      sqrt_s_GeV(0.0),
+      sum_pair_BR_weights(0.0),
+      sum_relative_rep_weights(0.0),
+      br_d0_to_e(0.0),
+      br_d0_to_e_squared(0.0),
+      pythia_xsec_mb(0.0),
+      pythia_xsec_96_mb(0.0),
+      estimated_pair_xsec_mb(0.0)
+  {}
+};
+
 static int smartRound(double w, TRandom3& rng)
 {
   if (w <= 0.0) return 0;
@@ -125,6 +155,63 @@ static int parentBin(int pdg)
   if (a == 431)  return 3; // Ds
   if (a == 4122) return 4; // Lambda_c
   return 5;                // other weak charm
+}
+
+static bool isSTARGroundStateCharm(int pdg)
+{
+  // STAR Fig. 16 comparison: add ground-state charm hadrons
+  // D0, D+, Ds, Lambda_c in |y| < 1.
+  const int a = std::abs(pdg);
+  return (a == 421 || a == 411 || a == 431 || a == 4122);
+}
+
+static bool isD0ForSTAR(int pdg)
+{
+  // STAR data conversion: D0 and anti-D0 divided by c -> D0 = 0.565.
+  return std::abs(pdg) == 421;
+}
+
+static bool isDstarChargedForSTAR(int pdg)
+{
+  // STAR data conversion: D*+ and D*- divided by c -> D*+ = 0.224.
+  // PDG: D*+ = 413, D*- = -413.
+  return std::abs(pdg) == 413;
+}
+
+static TH1D* makeSTARStyleCcbarCrossSection(const TH1D* hCounts,
+                                            const char* name,
+                                            const char* title,
+                                            const RunInfo& runInfo,
+                                            double scaleExtra)
+{
+  TH1D* h = (TH1D*)hCounts->Clone(name);
+  h->SetTitle(title);
+  h->Reset();
+
+  const double twoPi = 2.0 * std::acos(-1.0);
+  const double deltaY = 2.0; // |y| < 1
+  const double sigmaMB = runInfo.pythia_xsec_mb;
+  const double nGen = (double)runInfo.generated_events;
+
+  for (int b = 1; b <= hCounts->GetNbinsX(); ++b) {
+    const double n = hCounts->GetBinContent(b);
+    const double pt = hCounts->GetBinCenter(b);
+    const double dpt = hCounts->GetBinWidth(b);
+
+    if (nGen <= 0.0 || pt <= 0.0 || dpt <= 0.0) continue;
+
+    // STAR-style invariant differential cross section:
+    // (1 / (2*pi*pT)) * d^2 sigma / (dpT dy)
+    // using generated PYTHIA MB cross section and generated-event count.
+    const double denom = twoPi * pt * dpt * deltaY;
+    const double val = scaleExtra * sigmaMB * n / nGen / denom;
+    const double err = scaleExtra * sigmaMB * std::sqrt(n) / nGen / denom;
+
+    h->SetBinContent(b, val);
+    h->SetBinError(b, err);
+  }
+
+  return h;
 }
 
 static const char* parentLabel(int b)
@@ -351,6 +438,164 @@ static void saveSummaryText(const char* filename)
   summary.Write();
 }
 
+
+static bool readSummaryInfo(const char* filename, RunInfo& info)
+{
+  std::ifstream in(filename);
+  if (!in) {
+    std::cerr << "Cannot open summary file: " << filename << std::endl;
+    return false;
+  }
+
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) continue;
+
+    std::istringstream ss(line);
+    std::string key;
+    double val = 0.0;
+
+    ss >> key;
+    if (!ss) continue;
+    if (key.size() > 0 && key[0] == '#') continue;
+
+    ss >> val;
+    if (!ss) continue;
+
+    if (key == "job_id") {
+      info.job_id = (int)val;
+    }
+    else if (key == "target_pairs") {
+      info.target_pairs = (long long)val;
+    }
+    else if (key == "generated_events") {
+      info.generated_events = (long long)val;
+    }
+    else if (key == "accepted_pairs") {
+      info.accepted_pairs = (long long)val;
+    }
+    else if (key == "sqrt_s_GeV") {
+      info.sqrt_s_GeV = val;
+    }
+    else if (key == "sum_pair_BR_weights") {
+      info.sum_pair_BR_weights = val;
+    }
+    else if (key == "sum_relative_rep_weights") {
+      info.sum_relative_rep_weights = val;
+    }
+    else if (key == "BRD0_to_e") {
+      info.br_d0_to_e = val;
+    }
+    else if (key == "BRD0_to_e_squared") {
+      info.br_d0_to_e_squared = val;
+    }
+    else if (key == "pythia_XSEC_0_3_mb") {
+      info.pythia_xsec_mb = val;
+    }
+    else if (key == "pythia_XSEC_96_3_mb") {
+      info.pythia_xsec_96_mb = val;
+    }
+    else if (key == "estimated_pair_cross_section_mb") {
+      info.estimated_pair_xsec_mb = val;
+    }
+  }
+
+  return true;
+}
+
+static void writeMergeableRunSummary(const RunInfo& runInfo,
+                                     long long nPairsRead,
+                                     long long nTreeEntries,
+                                     long long nQAPairs,
+                                     long long nQACharmHadrons,
+                                     double sumProductionWeightRel)
+{
+  // These TParameters are mergeable with hadd.
+  // After merging many jobs:
+  //   pythia_generated_events is the total generated events.
+  //   pythia_xsec_mb_sum / pythia_nfiles is the average PYTHIA xsec.
+  TParameter<Long64_t>("pythia_nfiles", 1).Write();
+  TParameter<Long64_t>("pythia_job_id_sum", (Long64_t)runInfo.job_id).Write();
+  TParameter<Long64_t>("pythia_target_pairs", (Long64_t)runInfo.target_pairs).Write();
+  TParameter<Long64_t>("pythia_generated_events", (Long64_t)runInfo.generated_events).Write();
+  TParameter<Long64_t>("pythia_accepted_pairs", (Long64_t)runInfo.accepted_pairs).Write();
+
+  TParameter<Long64_t>("n_production_pairs_read", (Long64_t)nPairsRead).Write();
+  TParameter<Long64_t>("n_tree_entries", (Long64_t)nTreeEntries).Write();
+  TParameter<Long64_t>("n_qa_pairs_read", (Long64_t)nQAPairs).Write();
+  TParameter<Long64_t>("n_qa_charm_hadrons_read", (Long64_t)nQACharmHadrons).Write();
+
+  TParameter<double>("pythia_sqrt_s_GeV_sum", runInfo.sqrt_s_GeV).Write();
+  TParameter<double>("pythia_sum_pair_BR_weights", runInfo.sum_pair_BR_weights).Write();
+  TParameter<double>("pythia_sum_relative_rep_weights", runInfo.sum_relative_rep_weights).Write();
+  TParameter<double>("sum_production_weight_rel", sumProductionWeightRel).Write();
+
+  TParameter<double>("pythia_xsec_mb_sum", runInfo.pythia_xsec_mb).Write();
+  TParameter<double>("pythia_xsec_96_mb_sum", runInfo.pythia_xsec_96_mb).Write();
+  TParameter<double>("pythia_estimated_pair_xsec_mb_sum", runInfo.estimated_pair_xsec_mb).Write();
+  TParameter<double>("pythia_brd0_to_e_sum", runInfo.br_d0_to_e).Write();
+  TParameter<double>("pythia_brd0_to_e_squared_sum", runInfo.br_d0_to_e_squared).Write();
+
+  // Browser-friendly histograms with the same information.
+  // These also merge by summing bins in hadd.
+  TH1D* hRunCounts = new TH1D(
+    "hRunSummaryCounts",
+    "Run summary counts;quantity;sum over files",
+    9, 0.5, 9.5
+  );
+
+  hRunCounts->GetXaxis()->SetBinLabel(1, "nfiles");
+  hRunCounts->GetXaxis()->SetBinLabel(2, "target_pairs");
+  hRunCounts->GetXaxis()->SetBinLabel(3, "generated_events");
+  hRunCounts->GetXaxis()->SetBinLabel(4, "accepted_pairs");
+  hRunCounts->GetXaxis()->SetBinLabel(5, "production_pairs_read");
+  hRunCounts->GetXaxis()->SetBinLabel(6, "tree_entries");
+  hRunCounts->GetXaxis()->SetBinLabel(7, "qa_pairs_read");
+  hRunCounts->GetXaxis()->SetBinLabel(8, "qa_charm_hadrons_read");
+  hRunCounts->GetXaxis()->SetBinLabel(9, "job_id_sum");
+
+  hRunCounts->SetBinContent(1, 1.0);
+  hRunCounts->SetBinContent(2, (double)runInfo.target_pairs);
+  hRunCounts->SetBinContent(3, (double)runInfo.generated_events);
+  hRunCounts->SetBinContent(4, (double)runInfo.accepted_pairs);
+  hRunCounts->SetBinContent(5, (double)nPairsRead);
+  hRunCounts->SetBinContent(6, (double)nTreeEntries);
+  hRunCounts->SetBinContent(7, (double)nQAPairs);
+  hRunCounts->SetBinContent(8, (double)nQACharmHadrons);
+  hRunCounts->SetBinContent(9, (double)runInfo.job_id);
+  hRunCounts->Write();
+
+  TH1D* hRunWeights = new TH1D(
+    "hRunSummaryWeights",
+    "Run summary weights and cross sections;quantity;sum over files",
+    9, 0.5, 9.5
+  );
+
+  hRunWeights->GetXaxis()->SetBinLabel(1, "sqrt_s_GeV_sum");
+  hRunWeights->GetXaxis()->SetBinLabel(2, "sum_pair_BR_weights");
+  hRunWeights->GetXaxis()->SetBinLabel(3, "sum_relative_rep_weights");
+  hRunWeights->GetXaxis()->SetBinLabel(4, "sum_production_weight_rel");
+  hRunWeights->GetXaxis()->SetBinLabel(5, "pythia_xsec_mb_sum");
+  hRunWeights->GetXaxis()->SetBinLabel(6, "pythia_xsec_96_mb_sum");
+  hRunWeights->GetXaxis()->SetBinLabel(7, "estimated_pair_xsec_mb_sum");
+  hRunWeights->GetXaxis()->SetBinLabel(8, "BRD0_to_e_sum");
+  hRunWeights->GetXaxis()->SetBinLabel(9, "BRD0_to_e_squared_sum");
+
+  hRunWeights->SetBinContent(1, runInfo.sqrt_s_GeV);
+  hRunWeights->SetBinContent(2, runInfo.sum_pair_BR_weights);
+  hRunWeights->SetBinContent(3, runInfo.sum_relative_rep_weights);
+  hRunWeights->SetBinContent(4, sumProductionWeightRel);
+  hRunWeights->SetBinContent(5, runInfo.pythia_xsec_mb);
+  hRunWeights->SetBinContent(6, runInfo.pythia_xsec_96_mb);
+  hRunWeights->SetBinContent(7, runInfo.estimated_pair_xsec_mb);
+  hRunWeights->SetBinContent(8, runInfo.br_d0_to_e);
+  hRunWeights->SetBinContent(9, runInfo.br_d0_to_e_squared);
+  hRunWeights->Write();
+
+  delete hRunCounts;
+  delete hRunWeights;
+}
+
 static void saveSummaryNumbers(const char* filename)
 {
   std::ifstream in(filename);
@@ -381,6 +626,9 @@ int main(int argc, char** argv)
   const char* qaPairFile   = "pythia6_qa_pairs.dat";
   const char* qaCharmFile  = "pythia6_qa_charmhadrons.dat";
   const char* summaryFile  = "pythia6_summary.dat";
+
+  RunInfo runInfo;
+  readSummaryInfo(summaryFile, runInfo);
 
   std::map<int, PairInfo> prodPairs;
   std::map<int, std::vector<TrackInfo> > tracks;
@@ -433,6 +681,24 @@ int main(int argc, char** argv)
   TH2D* hPtCharm_all = new TH2D("hPtCharm_all", "all weak open-charm hadrons;p_{T}^{charm hadron} [GeV];species", 200, 0.0, 20.0, 5, 0.5, 5.5);
   TH2D* hPtCharm_BRweight = new TH2D("hPtCharm_BRweight", "weak open-charm hadrons weighted by BR_{e};p_{T}^{charm hadron} [GeV];species", 200, 0.0, 20.0, 5, 0.5, 5.5);
   TH2D* hPtCharmVsProcess = new TH2D("hPtCharmVsProcess", "weak open-charm hadron p_{T} vs process;p_{T}^{charm hadron} [GeV];process", 200, 0.0, 20.0, 8, 0.5, 8.5);
+
+  TH1D* hSTARCharmCounts_y1 = new TH1D(
+    "hSTARCharmCounts_y1",
+    "STAR-style ground-state charm hadron counts, |y|<1;p_{T} [GeV/c];counts",
+    60, 0.0, 6.0
+  );
+
+  TH1D* hSTARD0Counts_y1 = new TH1D(
+    "hSTARD0Counts_y1",
+    "D^{0}+#bar{D}^{0} counts, |y|<1;p_{T} [GeV/c];counts",
+    60, 0.0, 6.0
+  );
+
+  TH1D* hSTARDstarCounts_y1 = new TH1D(
+    "hSTARDstarCounts_y1",
+    "D^{*+}+D^{*-} counts, |y|<1;p_{T} [GeV/c];counts",
+    60, 0.0, 6.0
+  );
 
   labelProcessAxis(hMeeVsProcess_all);
   labelProcessAxis(hMeeVsProcess_PHENIX);
@@ -488,7 +754,54 @@ int main(int argc, char** argv)
     hPtCharm_all->Fill(h.pt, b, 1.0);
     hPtCharm_BRweight->Fill(h.pt, b, h.br_e);
     hPtCharmVsProcess->Fill(h.pt, h.srcbin, 1.0);
+
+    if (std::abs(h.y) < 1.0) {
+      if (isSTARGroundStateCharm(h.pdg)) {
+        hSTARCharmCounts_y1->Fill(h.pt);
+      }
+      if (isD0ForSTAR(h.pdg)) {
+        hSTARD0Counts_y1->Fill(h.pt);
+      }
+      if (isDstarChargedForSTAR(h.pdg)) {
+        hSTARDstarCounts_y1->Fill(h.pt);
+      }
+    }
   }
+
+  TH1D* hSTAR_ccbar_d2sigma_y1 = makeSTARStyleCcbarCrossSection(
+    hSTARCharmCounts_y1,
+    "hSTAR_ccbar_d2sigma_y1",
+    "STAR-style PYTHIA charm spectrum, |y|<1;p_{T} [GeV/c];(d^{2}#sigma)/(2#pi p_{T} dp_{T} dy) [mb/(GeV/c)^{2}]",
+    runInfo,
+    1.0
+  );
+
+  TH1D* hSTAR_ccbar_d2sigma_y1_half = makeSTARStyleCcbarCrossSection(
+    hSTARCharmCounts_y1,
+    "hSTAR_ccbar_d2sigma_y1_half",
+    "Same as hSTAR_ccbar_d2sigma_y1 but divided by 2;p_{T} [GeV/c];(d^{2}#sigma)/(2#pi p_{T} dp_{T} dy) [mb/(GeV/c)^{2}]",
+    runInfo,
+    0.5
+  );
+
+  // STAR-data-style conversions.
+  // D0 points in the STAR paper were divided by c -> D0 = 0.565.
+  // D* points were divided by c -> D*+ = 0.224.
+  TH1D* hSTAR_ccbar_from_D0_y1 = makeSTARStyleCcbarCrossSection(
+    hSTARD0Counts_y1,
+    "hSTAR_ccbar_from_D0_y1",
+    "STAR-style c#bar{c} from D^{0}/0.565, |y|<1;p_{T} [GeV/c];(d^{2}#sigma)/(2#pi p_{T} dp_{T} dy) [mb/(GeV/c)^{2}]",
+    runInfo,
+    1.0/0.565/2
+  );
+
+  TH1D* hSTAR_ccbar_from_Dstar_y1 = makeSTARStyleCcbarCrossSection(
+    hSTARDstarCounts_y1,
+    "hSTAR_ccbar_from_Dstar_y1",
+    "STAR-style c#bar{c} from D^{*#pm}/0.224, |y|<1;p_{T} [GeV/c];(d^{2}#sigma)/(2#pi p_{T} dp_{T} dy) [mb/(GeV/c)^{2}]",
+    runInfo,
+    1.0/0.224/2
+  );
 
   // ------------------------------------------------------------------
   // Fill final tree with smart-rounded relative BR replication.
@@ -557,12 +870,20 @@ int main(int argc, char** argv)
   hPtCharm_all->Write();
   hPtCharm_BRweight->Write();
   hPtCharmVsProcess->Write();
+  hSTARCharmCounts_y1->Write();
+  hSTARD0Counts_y1->Write();
+  hSTARDstarCounts_y1->Write();
+  hSTAR_ccbar_d2sigma_y1->Write();
+  hSTAR_ccbar_d2sigma_y1_half->Write();
+  hSTAR_ccbar_from_D0_y1->Write();
+  hSTAR_ccbar_from_Dstar_y1->Write();
 
-  TParameter<double>("n_production_pairs_read", (double)nPairsRead).Write();
-  TParameter<double>("n_tree_entries", (double)nTreeEntries).Write();
-  TParameter<double>("sum_production_weight_rel", sumWeightRel).Write();
-  TParameter<double>("n_qa_pairs_read", (double)qaPairs.size()).Write();
-  TParameter<double>("n_qa_charm_hadrons_read", (double)qaCharm.size()).Write();
+  writeMergeableRunSummary(runInfo,
+                           nPairsRead,
+                           nTreeEntries,
+                           (long long)qaPairs.size(),
+                           (long long)qaCharm.size(),
+                           sumWeightRel);
 
   saveSummaryText(summaryFile);
   saveSummaryNumbers(summaryFile);

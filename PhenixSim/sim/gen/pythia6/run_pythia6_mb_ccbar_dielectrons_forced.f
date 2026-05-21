@@ -134,7 +134,7 @@ C=======================================================================
 
       CALL PYGIVE('MSEL=1')
 
-C----- Tune A parameters
+C----- Tune A parameters PARP(67) is 4 and PARP(91)=1.5  for phenix
       CALL PYGIVE('MSTP(51)=7')
       CALL PYGIVE('PARP(67)=4.0')
       CALL PYGIVE('PARP(82)=2.0')
