@@ -1,131 +1,174 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <sstream>
-#include <stdio.h>
-#include <TRandom3.h>
+#include <cmath>
+#include <vector>
+
 #include <TFile.h>
-#include <TH1.h>
-#include <TF1.h>
-#include <TLorentzVector.h>
+#include <TTree.h>
 #include <TString.h>
-#include <TVector.h>
-#include "TTree.h"
-#include "TBranch.h"
+#include <TRandom3.h>
 
 using namespace std;
+const int MaxTracks = 20;
 
-struct MyEvent {
-    int ntracks;
-    std::vector<int> *pid;
-    std::vector<double> *mass;
-    std::vector<double> *energy;
-    std::vector<double> *px;
-    std::vector<double> *py;
-    std::vector<double> *pz;
-    std::vector<double> *vx;
-    std::vector<double> *vy;
-    std::vector<double> *vz;
+static int stochastic_round(double x, TRandom3& rng)
+{
+  // If you want D0-only events to stay 1, enforce minimum 1.
+  if (x <= 1.0) return 1;
 
-    void set_to_null() {
-        ntracks = 0;
-        pid = 0;
-        mass = 0;
-        energy = 0;
-        px = 0;
-        py = 0;
-        pz = 0;
-        vx = 0;
-        vy = 0;
-        vz = 0;
+  int n0 = (int)std::floor(x);
+  double frac = x - (double)n0;
+  int n = n0 + (rng.Uniform() < frac ? 1 : 0);
+  if (n < 1) n = 1;
+  return n;
+}
+
+void WriteROOT2OscarPythia(
+    const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
+    const TString infile   = "single_pi0_HELIOS_1B.root",
+    const TString output   = "oscar.txt"
+) {
+    TFile* input = TFile::Open(infile, "READ");
+    if (!input || input->IsZombie()) {
+        cerr << "Error: can't open " << infile << endl;
         return;
-    };
-};
+    }
 
-void WriteROOT2OscarPythia(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plhf/plhf1/mitran/Simul/Dileptons/real/work/output/vertexes.txt",
-						   const TString infile = "single_pi0_HELIOS_1B.root", 
-						   const TString output = "oscar.txt"){
+    // Vertex file reading
+    const double scale = 1e13;
+    const double scale_ptyhia = 1e13;
+    ifstream vfile(filepath.Data());
+    if (!vfile.is_open()) {
+        cerr << "Error: can't open vertex file " << filepath << endl;
+        input->Close();
+        return;
+    }
 
-	TFile* input = new TFile(infile,"READ");
-	if(!(input))
-	{
-	  cout << "no input file" << endl;
-	  exit(1);
-	}
+    vector<double> vertexes;
+    string line;
+    while (getline(vfile, line)) {
+        stringstream ss(line);
+        double val;
+        while (ss >> val) vertexes.push_back(val * scale);
+    }
+    vfile.close();
 
-	//vertex staff
-	const double scale = 1e13; //cm to fm conversion
- 	std::ifstream myfile (filepath);
- 	vector<double> vertexes;
- 	string line;
- 	if (myfile.is_open())
- 	{
- 	  while ( getline (myfile,line) )
- 	  {
- 	    string s;
- 	    std::stringstream ss(line);
- 	    while(getline(ss, s, ' '))
- 	    {
- 	      vertexes.push_back(atof(s.c_str())*scale);
- 	    }
- 	  }
- 	  myfile.close();
- 	}
-	if(false)
-	{
-		for (int i = 0; i < (int) vertexes.size()/4; i++)
-  		{
-  		  std::cout<<vertexes[4*i] << "     " <<vertexes[4*i+1] << "     " <<vertexes[4*i+2] << " "<<vertexes[4*i+3] << " " <<std::endl;
-  		}
-	}
-	// ------------end for vertexes---------------
+    ofstream file(output.Data());
+    if (!file.is_open()) {
+        cerr << "Error: can't open " << output << endl;
+        input->Close();
+        return;
+    }
 
+    TTree* T = dynamic_cast<TTree*>(input->Get("T"));
+    if (!T) {
+        cerr << "Error: TTree 'T' not found in file " << infile << endl;
+        file.close();
+        input->Close();
+        return;
+    }
 
-	ofstream file(output);
+    int ntracks = 0;
+    double zvtx = 0;
 
-	//Read in the TTrees 
+    int pid[MaxTracks] = {0}, isCharm[MaxTracks] = {0}, isBottom[MaxTracks] = {0};
+    double px[MaxTracks] = {0}, py[MaxTracks] = {0}, pz[MaxTracks] = {0};
+    double energy[MaxTracks] = {0}, vx[MaxTracks] = {0}, vy[MaxTracks] = {0}, vz[MaxTracks] = {0};
 
-	TTree* T = (TTree*)input->Get("T");
-  	const int max_trks = 200;
-  	int ntracks = -999;
-	MyEvent myevent;
-	myevent.set_to_null();
+    // IMPORTANT: weight as per-track BR factor
+    double wgt[MaxTracks] = {1.0};
 
-	TBranch *branch[8];
-	T->SetBranchAddress("ntracks",&ntracks);
-	T->SetBranchAddress("pid",&myevent.pid, &branch[0]);
-	T->SetBranchAddress("px",&myevent.px, &branch[1]);
-	T->SetBranchAddress("py",&myevent.py, &branch[2]);
-	T->SetBranchAddress("pz",&myevent.pz, &branch[3]);
-	T->SetBranchAddress("energy",&myevent.energy, &branch[4]);
-	T->SetBranchAddress("mass",&myevent.mass, &branch[5]);
-	T->SetBranchAddress("vx",&myevent.vx, &branch[6]);
-	T->SetBranchAddress("vy",&myevent.vy, &branch[7]);
-	T->SetBranchAddress("vz",&myevent.vz, &branch[8]);
+    T->SetBranchAddress("ntracks", &ntracks);
+    T->SetBranchAddress("zvtx", &zvtx);
+    T->SetBranchAddress("pid", pid);
+    T->SetBranchAddress("isCharm", isCharm);
+    T->SetBranchAddress("isBottom", isBottom);
+    T->SetBranchAddress("px", px);
+    T->SetBranchAddress("py", py);
+    T->SetBranchAddress("pz", pz);
+    T->SetBranchAddress("energy", energy);
+    T->SetBranchAddress("vx", vx);
+    T->SetBranchAddress("vy", vy);   // FIX: was &vy
+    T->SetBranchAddress("vz", vz);   // FIX: was &vz
+    T->SetBranchAddress("weight", wgt); // CHANGED: array, not scalar
 
-	file << "# OSC1999A" << endl;
-	file << "# final_id_p_x" << endl;
-	file << "# SimName 1.0" << endl;
-	file << "#" << endl;
-	file << "# Some comments..." << endl;
-	file << endl;
+    // OSCAR header
+    file << "# OSC1999A" << endl
+         << "# final_id_p_x" << endl
+         << "# SimName 1.0" << endl
+         << "# " << endl
+         << "# Some comments..." << endl << endl;
 
-	for(int ievt = 0; ievt < (int)T->GetEntries(); ievt++){
-		myevent.set_to_null();
-	  T->GetEntry(ievt);
-       
-	  file << 0 << "\t" << ntracks << endl;
+    TRandom3 rng(12345);
 
-	  for(int i = 0; i < ntracks; i++){
-		  
-	    if(i == -1) file << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << "\t" << 0 << endl;
-	    else file << i+1 << "\t" << myevent.pid->at(i) << "\t" << 0 << "\t" << myevent.px->at(i) << "\t" << myevent.py->at(i) << "\t" <<
-		 							myevent.pz->at(i) << "\t" << myevent.energy->at(i) << "\t" << myevent.mass->at(i) << "\t" << 
-									myevent.vx->at(i)*pow(10,12)+vertexes[4*ievt] << "\t" << myevent.vy->at(i)*pow(10,12)+vertexes[4*ievt+1]  << "\t" << 
-									myevent.vz->at(i)*pow(10,12) +vertexes[4*ievt+2] << "\t" << 0 << endl;
-		}
+    Long64_t nEntries = T->GetEntries();
+    int nev_written = 0;
+    for (Long64_t ievt = 0; ievt < nEntries; ++ievt)
+    {
+        T->GetEntry(ievt);
 
-		file << 0 << "\t" << 0 << endl;
-	}
+        // Product of per-electron weights (BR factors)
+        double wprod = 1.0;
+        for (int i = 0; i < ntracks; ++i) {
+            wprod *= (wgt[i] > 0.0 ? wgt[i] / 0.068 : 1.0);
+        }
 
+        // Number of times to write this event (rounded in expectation)
+        int nRep = stochastic_round(wprod, rng);
+
+        for (int irep = 0; irep < nRep; ++irep)
+        {
+            file << 0 << "\t" << ntracks << endl;
+
+            size_t iv = (size_t)nev_written * 4;
+            for (int i = 0; i < ntracks; ++i)
+            {
+                double vx_global = vx[i] * scale_ptyhia + ((iv + 0) < vertexes.size() ? vertexes[iv + 0] : 0.0);
+                double vy_global = vy[i] * scale_ptyhia + ((iv + 1) < vertexes.size() ? vertexes[iv + 1] : 0.0);
+                double vz_global = (vz[i] - zvtx) * scale_ptyhia + ((iv + 2) < vertexes.size() ? vertexes[iv + 2] : 0.0);
+
+                // keep your bottom hack
+                double px_out = px[i];
+                double py_out = py[i];
+                if (isBottom[i] == 1) {
+                    px_out = 0.1;
+                    py_out = 0.1;
+                }
+
+                file << i + 1 << "\t"
+                     << pid[i] << "\t"
+                     << 0 << "\t"
+                     << px_out << "\t"
+                     << py_out << "\t"
+                     << pz[i] << "\t"
+                     << energy[i] << "\t"
+                     << 0.000511 << "\t"
+                     << vx_global << "\t"
+                     << vy_global << "\t"
+                     << vz_global << "\t"
+                     << 0 << endl;
+            }
+
+            file << 0 << "\t" << 0 << endl;
+            nev_written++;
+            //stopping as soon as 10000 events are written
+            if(nev_written >= 10000) 
+            {
+                std::cout<<"\033[1;31m"<<"Reached 10000 events, stopping writing more at "<<ievt<<"\033[0m"<<std::endl;
+                break;
+            }
+        }
+        //stopping as soon as 10000 events are written
+        if(nev_written >= 10000)
+        {
+            std::cout<<"\033[1;31m"<<"Reached 10000 events, stopping writing more at "<<ievt<<"\033[0m"<<std::endl;
+            break;
+        }
+    }
+
+    file.close();
+    input->Close();
+    cout << "Written OSCAR file '" << output << "' with BR-replicated events from "
+         << nEntries << " entries." << endl;
 }
