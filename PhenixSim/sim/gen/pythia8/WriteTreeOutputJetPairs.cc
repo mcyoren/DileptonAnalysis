@@ -65,25 +65,31 @@ int main(int argc, char* argv[]){
   pythia.readString("Beams:idB = 2212");
   pythia.readString("Beams:eCM = 200");
 
-  pythia.readString("HardQCD:all = on");
+  pythia.readString("SoftQCD:all = on");
 
-  pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
+  //pythia.readString("111:oneChannel = 1 1.0 11 22 11 -11"); // Turning ON the Dalitz decay of pion only
 
   pythia.readString("Random:setSeed = on");
   pythia.readString("Random:seed = " + str_seed);
   pythia.readString("Next:numberCount = 100000");
-  pythia.readString("PhaseSpace:pTHatMin = 1.0");
+  //pythia.readString("PhaseSpace:pTHatMin = 1.0");
  
   //Pythia8 tune for STAR (2110.09447)
   pythia.readString("PDF:pSet = 17");
   pythia.readString("MultipartonInteractions:ecmRef = 200");
-  pythia.readString("MultipartonInteractions:bprofile = 2");
+  //pythia.readString("MultipartonInteractions:bprofile = 2");
+  //pythia.readString("MultipartonInteractions:pT0Ref = 1.40"); //Gaussian kT term
+  //pythia.readString("MultipartonInteractions:ecmPow = 0.135");
+  //pythia.readString("MultipartonInteractions:coreRadius = 0.56");
+  //pythia.readString("MultipartonInteractions:coreFraction = 0.78");
+  //pythia.readString("ColourReconnection:range = 5.4");
+  //pythia.readString("StringFlav:probStoUD = 0.3");   // default ~0.217
+  //pythia.readString("StringFlav:probQQtoQ = 0.12"); // default ~0.081
+  //pythia.readString("StringFlav:probSQtoQQ = 0.4"); // de
+pythia.readString("StringFlav:probStoUD = 0.35");
+pythia.readString("StringFlav:probSQtoQQ = 0.25");
+pythia.readString("StringFlav:probQQtoQ = 0.12");
 
-  pythia.readString("MultipartonInteractions:pT0Ref = 1.40"); //Gaussian kT term
-  pythia.readString("MultipartonInteractions:ecmPow = 0.135");
-  pythia.readString("MultipartonInteractions:coreRadius = 0.56");
-  pythia.readString("MultipartonInteractions:coreFraction = 0.78");
-  pythia.readString("ColourReconnection:range = 5.4");
 
   pythia.init();  
   std::cout<<"pythia params were set"<<std::endl;
@@ -189,6 +195,7 @@ int main(int argc, char* argv[]){
       double Vz = pythia.event[j].zProd();
       double Mass = -999;
 
+      std::cout<<sqrt(Vx*Vx + Vy*Vy)/10<<" "<<Pt<< " " <<pythia.event[pythia.event[j].mother1()].id() << " " <<pythia.event[pythia.event[j].mother2()].id() <<std::endl;
       if(fabs(pdg) == 211) Mass = 0.135;
 
       mass[count] = Mass; px[count] = Px; py[count] = Py; pz[count] = Pz;

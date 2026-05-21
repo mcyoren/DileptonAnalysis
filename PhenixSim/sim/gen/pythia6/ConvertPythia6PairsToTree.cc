@@ -214,6 +214,94 @@ static TH1D* makeSTARStyleCcbarCrossSection(const TH1D* hCounts,
   return h;
 }
 
+
+static inline double deltaPhi0Pi(double phi1, double phi2)
+{
+  const double pi = std::acos(-1.0);
+  double dphi = std::fabs(phi1 - phi2);
+  while (dphi > 2.0*pi) dphi -= 2.0*pi;
+  if (dphi > pi) dphi = 2.0*pi - dphi;
+  return dphi;
+}
+
+static inline double totalMomentumFromPtEta(double pt, double eta)
+{
+  return pt * std::cosh(eta);
+}
+
+static double muOverElectronBR(int parentPdg)
+{
+  // The PYTHIA6 generator was run with charm hadrons forced to electron channels,
+  // so PairInfo::weight_br is BR(Hc->e)*BR(Hcbar->e).
+  // For the PHENIX dimuon-like QA proxy we convert this to a muon BR weight.
+  // By default, use lepton universality: BR_mu / BR_e = 1.
+  // If you want species-dependent PDG ratios, change them here.
+  const int a = std::abs(parentPdg);
+  if (a == 421)  return 1.0; // D0
+  if (a == 411)  return 1.0; // D+
+  if (a == 431)  return 1.0; // Ds
+  if (a == 4122) return 1.0; // Lambda_c
+  if (a == 4132) return 1.0; // Xi_c0
+  if (a == 4232) return 1.0; // Xi_c+
+  if (a == 4332) return 1.0; // Omega_c0
+  return 1.0;
+}
+
+static TH1D* makeDSigmaDPhi1D(const TH1D* hCounts,
+                              const char* name,
+                              const char* title,
+                              const RunInfo& runInfo)
+{
+  TH1D* h = (TH1D*)hCounts->Clone(name);
+  h->SetTitle(title);
+  h->Reset();
+
+  const double sigmaMB = runInfo.pythia_xsec_mb;
+  const double nGen = (double)runInfo.generated_events;
+
+  for (int b = 1; b <= hCounts->GetNbinsX(); ++b) {
+    const double n = hCounts->GetBinContent(b);
+    const double e = hCounts->GetBinError(b);
+    const double dphi = hCounts->GetBinWidth(b);
+    if (nGen <= 0.0 || dphi <= 0.0) continue;
+
+    // d sigma / d DeltaPhi [mb/rad]
+    h->SetBinContent(b, sigmaMB * n / nGen / dphi);
+    h->SetBinError(b, sigmaMB * e / nGen / dphi);
+  }
+
+  return h;
+}
+
+static TH2D* makeDSigmaDPhiProcess2D(const TH2D* hCounts,
+                                     const char* name,
+                                     const char* title,
+                                     const RunInfo& runInfo)
+{
+  TH2D* h = (TH2D*)hCounts->Clone(name);
+  h->SetTitle(title);
+  h->Reset();
+
+  const double sigmaMB = runInfo.pythia_xsec_mb;
+  const double nGen = (double)runInfo.generated_events;
+
+  for (int bx = 1; bx <= hCounts->GetNbinsX(); ++bx) {
+    const double dphi = hCounts->GetXaxis()->GetBinWidth(bx);
+    if (nGen <= 0.0 || dphi <= 0.0) continue;
+
+    for (int by = 1; by <= hCounts->GetNbinsY(); ++by) {
+      const double n = hCounts->GetBinContent(bx, by);
+      const double e = hCounts->GetBinError(bx, by);
+
+      // d sigma / d DeltaPhi [mb/rad] in each PYTHIA6 process bin.
+      h->SetBinContent(bx, by, sigmaMB * n / nGen / dphi);
+      h->SetBinError(bx, by, sigmaMB * e / nGen / dphi);
+    }
+  }
+
+  return h;
+}
+
 static const char* parentLabel(int b)
 {
   if (b == 1) return "D0";
@@ -682,6 +770,64 @@ int main(int argc, char** argv)
   TH2D* hPtCharm_BRweight = new TH2D("hPtCharm_BRweight", "weak open-charm hadrons weighted by BR_{e};p_{T}^{charm hadron} [GeV];species", 200, 0.0, 20.0, 5, 0.5, 5.5);
   TH2D* hPtCharmVsProcess = new TH2D("hPtCharmVsProcess", "weak open-charm hadron p_{T} vs process;p_{T}^{charm hadron} [GeV];process", 200, 0.0, 20.0, 8, 0.5, 8.5);
 
+
+  // ------------------------------------------------------------------
+  // PHENIX dimuon-like correlation proxy using forced dielectrons.
+  // Cuts follow the charm panel of the PHENIX forward dimuon plot,
+  // but applied to e+e- from open charm:
+  //   1.5 < m_ee < 2.5 GeV
+  //   p_e > 3 GeV/c  where p = pT*cosh(eta)
+  //   1.2 < |eta_e| < 2.2
+  // The electron-BR histogram uses the generator BR weights directly.
+  // The muon-BR histogram rescales by BR_mu/BR_e, currently set to 1
+  // in muOverElectronBR(parentPdg).
+  // ------------------------------------------------------------------
+  TH1D* hDielectronDphi_forwardIM_eBR_counts = new TH1D(
+    "hDielectronDphi_forwardIM_eBR_counts",
+    "Open-charm e^{+}e^{-}, PHENIX dimuon-like cuts, e-BR weight;#Delta#phi_{ee} [rad];BR_{e} weighted pairs",
+    32, 0.0, std::acos(-1.0)
+  );
+
+  TH1D* hDielectronDphi_forwardIM_muBR_counts = new TH1D(
+    "hDielectronDphi_forwardIM_muBR_counts",
+    "Open-charm e^{+}e^{-}, PHENIX dimuon-like cuts, #mu-BR weight;#Delta#phi_{ee} [rad];BR_{#mu} weighted pairs",
+    32, 0.0, std::acos(-1.0)
+  );
+
+  TH2D* hDielectronDphiVsProcess_forwardIM_eBR_counts = new TH2D(
+    "hDielectronDphiVsProcess_forwardIM_eBR_counts",
+    "Open-charm e^{+}e^{-} #Delta#phi vs PYTHIA6 process, e-BR weight;#Delta#phi_{ee} [rad];process",
+    32, 0.0, std::acos(-1.0),
+    8, 0.5, 8.5
+  );
+
+  TH2D* hDielectronDphiVsProcess_forwardIM_muBR_counts = new TH2D(
+    "hDielectronDphiVsProcess_forwardIM_muBR_counts",
+    "Open-charm e^{+}e^{-} #Delta#phi vs PYTHIA6 process, #mu-BR weight;#Delta#phi_{ee} [rad];process",
+    32, 0.0, std::acos(-1.0),
+    8, 0.5, 8.5
+  );
+
+  TH1D* hDielectronForwardIMInfo = new TH1D(
+    "hDielectronForwardIMInfo",
+    "Forward intermediate-mass dielectron QA;;value",
+    6, 0.5, 6.5
+  );
+
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(1, "QA pairs");
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(2, "pass fwd IM");
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(3, "sum eBR all QA");
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(4, "sum eBR fwd IM");
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(5, "sum muBR fwd IM");
+  hDielectronForwardIMInfo->GetXaxis()->SetBinLabel(6, "sigma fwd IM mb");
+  hDielectronForwardIMInfo->LabelsOption("v", "X");
+  hDielectronForwardIMInfo->SetStats(0);
+
+  hDielectronDphi_forwardIM_eBR_counts->Sumw2();
+  hDielectronDphi_forwardIM_muBR_counts->Sumw2();
+  hDielectronDphiVsProcess_forwardIM_eBR_counts->Sumw2();
+  hDielectronDphiVsProcess_forwardIM_muBR_counts->Sumw2();
+
   TH1D* hSTARCharmCounts_y1 = new TH1D(
     "hSTARCharmCounts_y1",
     "STAR-style ground-state charm hadron counts, |y|<1;p_{T} [GeV/c];counts",
@@ -704,6 +850,8 @@ int main(int argc, char** argv)
   labelProcessAxis(hMeeVsProcess_PHENIX);
   labelProcessAxis(hMeeVsProcess_STAR);
   labelProcessAxis(hPtCharmVsProcess);
+  labelProcessAxis(hDielectronDphiVsProcess_forwardIM_eBR_counts);
+  labelProcessAxis(hDielectronDphiVsProcess_forwardIM_muBR_counts);
 
   labelParentAxis(hPtMother_all);
   labelParentAxis(hPtMother_PHENIX);
@@ -715,6 +863,11 @@ int main(int argc, char** argv)
   labelParentAxis(hPtCharm_BRweight);
 
   // Fill pair QA.
+  long long nForwardIMPairs = 0;
+  double sumQAWeightAll = 0.0;
+  double sumForwardIMElectronBRWeight = 0.0;
+  double sumForwardIMMuonBRWeight = 0.0;
+
   for (size_t i = 0; i < qaPairs.size(); ++i) {
     const PairInfo& p = qaPairs[i].p;
     const int b1 = parentBin(p.parent1);
@@ -727,6 +880,32 @@ int main(int argc, char** argv)
     hPtMother_all->Fill(p.ptmom2, b2, 1.0);
     hPtMother_BRweight_all->Fill(p.ptmom1, b1, p.weight_br);
     hPtMother_BRweight_all->Fill(p.ptmom2, b2, p.weight_br);
+
+    sumQAWeightAll += p.weight_br;
+
+    const double pAbs1 = totalMomentumFromPtEta(p.pt1, p.eta1);
+    const double pAbs2 = totalMomentumFromPtEta(p.pt2, p.eta2);
+
+    const bool passForwardIM =
+      (p.pair_mass > 1.5 && p.pair_mass < 2.5 &&
+       pAbs1 > 3.0 && pAbs2 > 3.0 &&
+       std::fabs(p.eta1) > 1.2 && std::fabs(p.eta1) < 2.2 &&
+       std::fabs(p.eta2) > 1.2 && std::fabs(p.eta2) < 2.2);
+
+    if (passForwardIM) {
+      const double dphi = deltaPhi0Pi(p.phi1, p.phi2);
+      const double muWeight = p.weight_br *
+        muOverElectronBR(p.parent1) * muOverElectronBR(p.parent2);
+
+      hDielectronDphi_forwardIM_eBR_counts->Fill(dphi, p.weight_br);
+      hDielectronDphi_forwardIM_muBR_counts->Fill(dphi, muWeight);
+      hDielectronDphiVsProcess_forwardIM_eBR_counts->Fill(dphi, p.srcbin, p.weight_br);
+      hDielectronDphiVsProcess_forwardIM_muBR_counts->Fill(dphi, p.srcbin, muWeight);
+
+      nForwardIMPairs++;
+      sumForwardIMElectronBRWeight += p.weight_br;
+      sumForwardIMMuonBRWeight += muWeight;
+    }
 
     if (qaPairs[i].pass_phenix) {
       hMee_PHENIX->Fill(p.pair_mass, p.weight_br);
@@ -746,6 +925,48 @@ int main(int argc, char** argv)
       hPtMother_BRweight_STAR->Fill(p.ptmom2, b2, p.weight_br);
     }
   }
+
+
+  TH1D* hDielectronDphi_forwardIM_eBR_dSigma_dPhi = makeDSigmaDPhi1D(
+    hDielectronDphi_forwardIM_eBR_counts,
+    "hDielectronDphi_forwardIM_eBR_dSigma_dPhi",
+    "Open-charm e^{+}e^{-}, PHENIX dimuon-like cuts;#Delta#phi_{ee} [rad];d#sigma/d#Delta#phi [mb/rad]",
+    runInfo
+  );
+
+  TH1D* hDielectronDphi_forwardIM_muBR_dSigma_dPhi = makeDSigmaDPhi1D(
+    hDielectronDphi_forwardIM_muBR_counts,
+    "hDielectronDphi_forwardIM_muBR_dSigma_dPhi",
+    "Open-charm e^{+}e^{-} proxy for #mu^{+}#mu^{-}, PHENIX dimuon-like cuts;#Delta#phi_{ee} [rad];d#sigma/d#Delta#phi [mb/rad]",
+    runInfo
+  );
+
+  TH2D* hDielectronDphiVsProcess_forwardIM_eBR_dSigma_dPhi = makeDSigmaDPhiProcess2D(
+    hDielectronDphiVsProcess_forwardIM_eBR_counts,
+    "hDielectronDphiVsProcess_forwardIM_eBR_dSigma_dPhi",
+    "Open-charm e^{+}e^{-}, d#sigma/d#Delta#phi vs process;#Delta#phi_{ee} [rad];process",
+    runInfo
+  );
+  labelProcessAxis(hDielectronDphiVsProcess_forwardIM_eBR_dSigma_dPhi);
+
+  TH2D* hDielectronDphiVsProcess_forwardIM_muBR_dSigma_dPhi = makeDSigmaDPhiProcess2D(
+    hDielectronDphiVsProcess_forwardIM_muBR_counts,
+    "hDielectronDphiVsProcess_forwardIM_muBR_dSigma_dPhi",
+    "Open-charm e^{+}e^{-} proxy for #mu^{+}#mu^{-}, d#sigma/d#Delta#phi vs process;#Delta#phi_{ee} [rad];process",
+    runInfo
+  );
+  labelProcessAxis(hDielectronDphiVsProcess_forwardIM_muBR_dSigma_dPhi);
+
+  const double sigmaForwardIMMuonBR =
+    (runInfo.generated_events > 0) ?
+    runInfo.pythia_xsec_mb * sumForwardIMMuonBRWeight / (double)runInfo.generated_events : 0.0;
+
+  hDielectronForwardIMInfo->SetBinContent(1, (double)qaPairs.size());
+  hDielectronForwardIMInfo->SetBinContent(2, (double)nForwardIMPairs);
+  hDielectronForwardIMInfo->SetBinContent(3, sumQAWeightAll);
+  hDielectronForwardIMInfo->SetBinContent(4, sumForwardIMElectronBRWeight);
+  hDielectronForwardIMInfo->SetBinContent(5, sumForwardIMMuonBRWeight);
+  hDielectronForwardIMInfo->SetBinContent(6, sigmaForwardIMMuonBR);
 
   // Fill charm-hadron QA independent of dielectron acceptance.
   for (size_t i = 0; i < qaCharm.size(); ++i) {
@@ -870,6 +1091,19 @@ int main(int argc, char** argv)
   hPtCharm_all->Write();
   hPtCharm_BRweight->Write();
   hPtCharmVsProcess->Write();
+  hDielectronDphi_forwardIM_eBR_counts->Write();
+  hDielectronDphi_forwardIM_muBR_counts->Write();
+  hDielectronDphi_forwardIM_eBR_dSigma_dPhi->Write();
+  hDielectronDphi_forwardIM_muBR_dSigma_dPhi->Write();
+  hDielectronDphiVsProcess_forwardIM_eBR_counts->Write();
+  hDielectronDphiVsProcess_forwardIM_muBR_counts->Write();
+  hDielectronDphiVsProcess_forwardIM_eBR_dSigma_dPhi->Write();
+  hDielectronDphiVsProcess_forwardIM_muBR_dSigma_dPhi->Write();
+  hDielectronForwardIMInfo->Write();
+  TParameter<Long64_t>("n_qa_forwardIM_pairs", (Long64_t)nForwardIMPairs).Write();
+  TParameter<double>("sum_qa_forwardIM_eBR_weight", sumForwardIMElectronBRWeight).Write();
+  TParameter<double>("sum_qa_forwardIM_muBR_weight", sumForwardIMMuonBRWeight).Write();
+  TParameter<double>("sigma_qa_forwardIM_muBR_mb", sigmaForwardIMMuonBR).Write();
   hSTARCharmCounts_y1->Write();
   hSTARD0Counts_y1->Write();
   hSTARDstarCounts_y1->Write();

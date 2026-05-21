@@ -1,13 +1,13 @@
 #!/bin/csh
 
-source /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/etc/eic_cshrc.csh -n
-setenv PYTHIA8DATA /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/env/EIC2022a/share/Pythia8/xmldoc
+setenv EIC_LEVEL EIC2022a
+source /cvmfs/eic.opensciencegrid.org/gcc-8.3/MCEG/releases/etc/eic_cshrc.csh
 
 set shift = $4
 set INPUT = `expr $shift + $2`
 echo $INPUT
 
-set tmpdir = "/home/tmp/${USER}_job_pythia_$INPUT"
+set tmpdir = "/phenix/plhf/mitran/tmp/${USER}_job_pythia_$INPUT"
 set sourcedir = /phenix/plhf/mitran/Simul/Dileptons/sim/gen/pythia8
 set outputdir = /phenix/plhf/mitran/Simul/Dileptons/output_single/pythia8
 set DIR = `printf "%05d" $INPUT`
@@ -24,6 +24,27 @@ if( $1 == 2) then
  set executable = WriteTreeOutputJetPairs
  set outname = jetpairs
 endif
+
+if( $1 == 4) then
+ set executable = WriteTreeoutputccbarSoft
+ set outname = ccbarSoft1
+endif
+
+if( $1 == 5) then
+ set executable = WriteLambda
+ set outname = Lambda
+endif
+
+if( $1 == 6) then
+ set executable = WriteTreeoutputccbarSoft
+ set outname = ccbarLambda
+endif
+
+if( $1 == 7) then
+ set executable = WriteTreeoutputccbarSoft
+ set outname = ccbarLambdaDetroit
+endif
+
  
 echo "all params are set to"
 
@@ -67,10 +88,23 @@ if( $#argv != 0) then
   make main113_pA_nPDF
   python3 main113_pA_nPDF.py
  endif
+ if( $1 == 4) then
+  ./$executable $INPUT $3
+ endif
+ if( $1 == 5) then
+  ./$executable $INPUT $3
+ endif
+ if( $1 == 6) then
+  ./$executable $INPUT $3
+ endif
+ if( $1 == 7) then
+  ./$executable $INPUT $3
+ endif
+
 endif
 
-echo "cp *.root $outputdir/""$outname""tree$DIR.root"
-mv *.root $outputdir/"$outname"tree$DIR.root
+echo "cp *.root $outputdir/""$outname""newtree$DIR.root"
+mv *.root $outputdir/"$outname"newtree$DIR.root
 #cp *.dat  $outputdir/$DIR.oscar.parcticles.dat
 #remove tmp dir
 cd $HOME

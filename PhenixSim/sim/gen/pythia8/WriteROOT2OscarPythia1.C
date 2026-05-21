@@ -110,9 +110,9 @@ void WriteROOT2OscarPythia(const TString filepath = "/gpfs/mnt/gpfs02/phenix/plh
 	file << "# Some comments..." << endl;
 	file << endl;
 
-	for(int ievt = 0; ievt < (int)T->GetEntries(); ievt++){
+	for(int ievt = 0; ievt < 10000; ievt++){
 		myevent.set_to_null();
-	  T->GetEntry(ievt);
+	  T->GetEntry((int)ievt%T->GetEntries());
        
 	  file << 0 << "\t" << ntracks << endl;
 

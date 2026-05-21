@@ -808,12 +808,18 @@ int main(int argc, char* argv[])
 
   //2d hist of pt for lepton mother vs mother pid for D0, D+, Ds, Lambda_c, and others (all together, just to be consistent with the others)
   TH2D* hPtMother_src = new TH2D("ptMother_src", "e p_{T} vs mother PID; p_{T}; mother PID (bin)", 100,0,10, 5,0.5,5.5);
+  TH2D* hPtMother_true = new TH2D("hPtMother_true", "p_{T} of mother; p_{T}; mother PID (bin)", 100,0,10, 5,0.5,5.5);
   TH2D* hPtMother_BRweight_src = new TH2D("ptMother_BRweight_src", "e p_{T} vs mother PID weighted by BR/BR(D0); p_{T}; mother PID (bin)", 100,0,10, 5,0.5,5.5);
-
-  for (int b=1;b<5;++b) {hPtMother_src->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());
+  for (int b=1;b<5;++b) {hPtMother_src->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());hPtMother_true->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());
                             hPtMother_BRweight_src->GetYaxis()->SetBinLabel(b, charmParentNames[b-1].c_str());}
-  hPtMother_src->GetYaxis()->SetBinLabel(5, "other");
+  hPtMother_src->GetYaxis()->SetBinLabel(5, "other");hPtMother_true->GetYaxis()->SetBinLabel(5, "other");
   hPtMother_BRweight_src->GetYaxis()->SetBinLabel(5, "other");
+
+
+  const std::string pythia8varNames[] = {"pTried","pOverall","pSumNrep","pSumWpair","pSigmaGen"};
+  TH1D* hist_pythia8_info = new TH1D("pythia8_info", "Pythia8 info;value", 5, 0.5, 5.5);
+  for (int b=1;b<=5;++b) hist_pythia8_info->GetXaxis()->SetBinLabel(b, pythia8varNames[b-1].c_str());
+  hist_pythia8_info->LabelsOption("v","X");
 
   // pTHat (2D too, just to be consistent)
   TH2D* hPTHat_src = make2D("pTHat_src", "pTHat distribution;#hat{p}_{T};source", 100,0,10);
@@ -896,6 +902,9 @@ int main(int argc, char* argv[])
       // Fill pt vs parent PID for all accepted electrons (no extra pT cut here, to be consistent with the others)
       const int parentBin = getCharmParentBin(parent);
       hPtMother_src->Fill(pt, parentBin, wEvt*br1);
+      const double mother_pt = pythia.event[parent].pT();
+      if (std::abs(pythia.event[parent].eta()) < 1.0)
+        hPtMother_true->Fill(mother_pt, parentBin, wEvt*br1);
       const unsigned int wSingleRounded = smartRound(wSingle, rng);
       for (unsigned int irep=0; irep<wSingleRounded; ++irep) {
         hPtMother_BRweight_src->Fill(pt, parentBin);
@@ -1022,7 +1031,7 @@ int main(int argc, char* argv[])
     }
 
     // MAIN gate for tree + dedicated gate histos
-    if (srcEvt != SRC_FLAVOR_EXCITATION) continue; ///podgon
+    ///if (srcEvt != SRC_FLAVOR_EXCITATION) continue; ///podgon
     if ((int)gated.size() < 2) continue;
     hCounts->Fill(1);
 
@@ -1100,6 +1109,11 @@ int main(int argc, char* argv[])
   TParameter<long long>* pSumNrep = new TParameter<long long>("sum_nrepSmart", sumNrepSmart);
   TParameter<double>* pSumWpair   = new TParameter<double>("sum_wpair", sumWpair);
   TParameter<double>* pSigmaGen   = new TParameter<double>("sigmaGen_mb", pythia.info.sigmaGen());
+  hist_pythia8_info->SetBinContent(1, tried);
+  hist_pythia8_info->SetBinContent(2, hook->nCalls);
+  hist_pythia8_info->SetBinContent(3, sumNrepSmart);
+  hist_pythia8_info->SetBinContent(4, sumWpair);
+  hist_pythia8_info->SetBinContent(5, pythia.info.sigmaGen());
 
   // Write
   fout->cd();
@@ -1129,6 +1143,8 @@ int main(int argc, char* argv[])
 
   hPtMother_src->Write();
   hPtMother_BRweight_src->Write();
+
+  hist_pythia8_info->Write();
 
   pBRD0->Write();
   pBRD0sq->Write();
