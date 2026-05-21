@@ -290,6 +290,9 @@ endif
 if( $selected_paticle == 5) then
  set inputpythia = $DATADIR/output_single/pythia8/ccbarLambdanewtree$DIR.root
 endif
+if( $selected_paticle == 6) then
+ set inputpythia = $DATADIR/output_single/pythia6/ccbarnewtree$DIR.root
+endif
 set scriptdir   = $DATADIR/sim/gen/pythia8
 set scriptname  = Convert_pythia8.csh
 set macrname_forscript = WriteROOT2OscarPythia.C
