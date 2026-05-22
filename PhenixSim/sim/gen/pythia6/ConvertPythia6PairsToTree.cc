@@ -229,6 +229,66 @@ static inline double totalMomentumFromPtEta(double pt, double eta)
   return pt * std::cosh(eta);
 }
 
+static inline bool inPhenixArm(double phi)
+{
+  const double pi = std::acos(-1.0);
+
+  const double phi_west_low = -3.0 * pi / 16.0;
+  const double phi_west_up  =  5.0 * pi / 16.0;
+  const double phi_east_low = 11.0 * pi / 16.0;
+  const double phi_east_up  = 19.0 * pi / 16.0;
+
+  if (phi < -pi / 2.0) phi += 2.0 * pi;
+
+  const bool west = (phi > phi_west_low && phi < phi_west_up);
+  const bool east = (phi > phi_east_low && phi < phi_east_up);
+
+  return west || east;
+}
+
+static inline bool passPhenixPhiAcc(double px, double py, int q, double pt)
+{
+  if (pt <= 0.0) return false;
+
+  const double pi = std::acos(-1.0);
+
+  const double k_DC   = 0.206; // rad GeV/c
+  const double k_RICH = 0.309; // rad GeV/c
+
+  double phi = std::atan2(py, px);
+
+  double phi_rich = phi + q * k_RICH / pt;
+  double phi_dc   = phi + q * k_DC   / pt;
+
+  if (phi_rich < -pi / 2.0) phi_rich += 2.0 * pi;
+  if (phi_dc   < -pi / 2.0) phi_dc   += 2.0 * pi;
+
+  return inPhenixArm(phi_rich) && inPhenixArm(phi_dc);
+}
+
+static inline int chargeFromElectronPdg(int pid)
+{
+  // PYTHIA/PDG convention:
+  // e- has pid =  11 and charge = -1
+  // e+ has pid = -11 and charge = +1
+  if (pid == 11) return -1;
+  if (pid == -11) return +1;
+  return 0;
+}
+
+static inline double trackPt(double px, double py)
+{
+  return std::sqrt(px * px + py * py);
+}
+
+static inline double trackRapidity(double px, double py, double pz, double e)
+{
+  (void)px;
+  (void)py;
+  if (e <= std::fabs(pz)) return 999.0;
+  return 0.5 * std::log((e + pz) / (e - pz));
+}
+
 static double muOverElectronBR(int parentPdg)
 {
   // The PYTHIA6 generator was run with charm hadrons forced to electron channels,
@@ -772,6 +832,61 @@ int main(int argc, char** argv)
 
 
   // ------------------------------------------------------------------
+  // Production-pair PHENIX-real acceptance QA.
+  //
+  // The final production pair file is already PHENIX-perfect:
+  //   pT_e > 0.2 GeV and |y_e| < 0.5 for both electrons.
+  //
+  // These histograms do NOT change the tree. They only count the subset
+  // that also passes a more realistic PHENIX-arm acceptance:
+  //   pT_e > 0.2 GeV, |y_e| < 0.35, and both DC/RICH projected phi
+  //   points fall inside one of the PHENIX central arms.
+  // ------------------------------------------------------------------
+  TH1D* hMee_PHENIXPerfect_prod = new TH1D(
+    "hMee_PHENIXPerfect_prod",
+    "production pairs, PHENIX perfect;m_{ee} [GeV];BR-weighted pairs",
+    300, 0.0, 6.0
+  );
+
+  TH1D* hMee_PHENIXReal_prod = new TH1D(
+    "hMee_PHENIXReal_prod",
+    "production pairs, PHENIX real-arm acceptance;m_{ee} [GeV];BR-weighted pairs",
+    300, 0.0, 6.0
+  );
+
+  TH2D* hMeeVsProcess_PHENIXPerfect_prod = new TH2D(
+    "hMeeVsProcess_PHENIXPerfect_prod",
+    "production pairs, PHENIX perfect;m_{ee} [GeV];process",
+    300, 0.0, 6.0,
+    8, 0.5, 8.5
+  );
+
+  TH2D* hMeeVsProcess_PHENIXReal_prod = new TH2D(
+    "hMeeVsProcess_PHENIXReal_prod",
+    "production pairs, PHENIX real-arm acceptance;m_{ee} [GeV];process",
+    300, 0.0, 6.0,
+    8, 0.5, 8.5
+  );
+
+  TH1D* hPHENIXRealProdInfo = new TH1D(
+    "hPHENIXRealProdInfo",
+    "PHENIX real-arm acceptance info from production pairs;;value",
+    8, 0.5, 8.5
+  );
+
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(1, "prod_pairs");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(2, "pass_real");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(3, "sum_BR_prod");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(4, "sum_BR_real");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(5, "sum_rel_prod");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(6, "sum_rel_real");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(7, "real/prod_pairs");
+  hPHENIXRealProdInfo->GetXaxis()->SetBinLabel(8, "real/prod_BR");
+  hPHENIXRealProdInfo->LabelsOption("v", "X");
+  hPHENIXRealProdInfo->SetStats(0);
+
+
+  // ------------------------------------------------------------------
   // PHENIX dimuon-like correlation proxy using forced dielectrons.
   // Cuts follow the charm panel of the PHENIX forward dimuon plot,
   // but applied to e+e- from open charm:
@@ -850,6 +965,8 @@ int main(int argc, char** argv)
   labelProcessAxis(hMeeVsProcess_PHENIX);
   labelProcessAxis(hMeeVsProcess_STAR);
   labelProcessAxis(hPtCharmVsProcess);
+  labelProcessAxis(hMeeVsProcess_PHENIXPerfect_prod);
+  labelProcessAxis(hMeeVsProcess_PHENIXReal_prod);
   labelProcessAxis(hDielectronDphiVsProcess_forwardIM_eBR_counts);
   labelProcessAxis(hDielectronDphiVsProcess_forwardIM_muBR_counts);
 
@@ -1033,6 +1150,11 @@ int main(int argc, char** argv)
   long long nTreeEntries = 0;
   double sumWeightRel = 0.0;
 
+  long long nProductionPairsPHENIXReal = 0;
+  double sumProductionBRWeight = 0.0;
+  double sumProductionBRWeightPHENIXReal = 0.0;
+  double sumProductionWeightRelPHENIXReal = 0.0;
+
   for (std::map<int, PairInfo>::const_iterator it = prodPairs.begin();
        it != prodPairs.end(); ++it) {
 
@@ -1043,10 +1165,46 @@ int main(int argc, char** argv)
       tracks.find(pair_id);
 
     if (jt == tracks.end()) continue;
-    if (jt->second.size() < 2) continue;
+
+    const std::vector<TrackInfo>& tv = jt->second;
+    if (tv.size() < 2) continue;
 
     nPairsRead++;
     sumWeightRel += p.weight_rel;
+
+    // Production pairs are already PHENIX-perfect by construction.
+    // Fill this directly from the unreplicated production pair list.
+    hMee_PHENIXPerfect_prod->Fill(p.pair_mass, p.weight_br);
+    hMeeVsProcess_PHENIXPerfect_prod->Fill(p.pair_mass, p.srcbin, p.weight_br);
+
+    sumProductionBRWeight += p.weight_br;
+
+    const TrackInfo& t1 = tv[0];
+    const TrackInfo& t2 = tv[1];
+
+    const double pt1_tree = trackPt(t1.px, t1.py);
+    const double pt2_tree = trackPt(t2.px, t2.py);
+
+    const double y1_tree = trackRapidity(t1.px, t1.py, t1.pz, t1.energy);
+    const double y2_tree = trackRapidity(t2.px, t2.py, t2.pz, t2.energy);
+
+    const int q1 = chargeFromElectronPdg(t1.pid);
+    const int q2 = chargeFromElectronPdg(t2.pid);
+
+    const bool passPHENIXReal =
+      pt1_tree > 0.2 && pt2_tree > 0.2 &&
+      std::fabs(y1_tree) < 0.35 && std::fabs(y2_tree) < 0.35 &&
+      passPhenixPhiAcc(t1.px, t1.py, q1, pt1_tree) &&
+      passPhenixPhiAcc(t2.px, t2.py, q2, pt2_tree);
+
+    if (passPHENIXReal) {
+      hMee_PHENIXReal_prod->Fill(p.pair_mass, p.weight_br);
+      hMeeVsProcess_PHENIXReal_prod->Fill(p.pair_mass, p.srcbin, p.weight_br);
+
+      nProductionPairsPHENIXReal++;
+      sumProductionBRWeightPHENIXReal += p.weight_br;
+      sumProductionWeightRelPHENIXReal += p.weight_rel;
+    }
 
     const int nrep = smartRound(p.weight_rel, rng);
     if (nrep <= 0) continue;
@@ -1054,7 +1212,6 @@ int main(int argc, char** argv)
     for (int ir = 0; ir < nrep; ++ir) {
       ev.clear();
 
-      const std::vector<TrackInfo>& tv = jt->second;
       for (size_t k = 0; k < tv.size(); ++k) {
         ev.pid.push_back(tv[k].pid);
         ev.mass.push_back(tv[k].mass);
@@ -1071,6 +1228,20 @@ int main(int argc, char** argv)
       tree->Fill();
       nTreeEntries++;
     }
+  }
+
+  hPHENIXRealProdInfo->SetBinContent(1, (double)nPairsRead);
+  hPHENIXRealProdInfo->SetBinContent(2, (double)nProductionPairsPHENIXReal);
+  hPHENIXRealProdInfo->SetBinContent(3, sumProductionBRWeight);
+  hPHENIXRealProdInfo->SetBinContent(4, sumProductionBRWeightPHENIXReal);
+  hPHENIXRealProdInfo->SetBinContent(5, sumWeightRel);
+  hPHENIXRealProdInfo->SetBinContent(6, sumProductionWeightRelPHENIXReal);
+
+  if (nPairsRead > 0) {
+    hPHENIXRealProdInfo->SetBinContent(7, (double)nProductionPairsPHENIXReal / (double)nPairsRead);
+  }
+  if (sumProductionBRWeight > 0.0) {
+    hPHENIXRealProdInfo->SetBinContent(8, sumProductionBRWeightPHENIXReal / sumProductionBRWeight);
   }
 
   fout->cd();
@@ -1091,6 +1262,17 @@ int main(int argc, char** argv)
   hPtCharm_all->Write();
   hPtCharm_BRweight->Write();
   hPtCharmVsProcess->Write();
+  hMee_PHENIXPerfect_prod->Write();
+  hMee_PHENIXReal_prod->Write();
+  hMeeVsProcess_PHENIXPerfect_prod->Write();
+  hMeeVsProcess_PHENIXReal_prod->Write();
+  hPHENIXRealProdInfo->Write();
+
+  TParameter<Long64_t>("n_production_pairs_phenix_real", (Long64_t)nProductionPairsPHENIXReal).Write();
+  TParameter<double>("sum_production_BR_weight", sumProductionBRWeight).Write();
+  TParameter<double>("sum_production_BR_weight_phenix_real", sumProductionBRWeightPHENIXReal).Write();
+  TParameter<double>("sum_production_weight_rel_phenix_real", sumProductionWeightRelPHENIXReal).Write();
+
   hDielectronDphi_forwardIM_eBR_counts->Write();
   hDielectronDphi_forwardIM_muBR_counts->Write();
   hDielectronDphi_forwardIM_eBR_dSigma_dPhi->Write();
