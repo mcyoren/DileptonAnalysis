@@ -191,6 +191,7 @@ C=======================================================================
       OPEN(12, FILE='pythia6_summary.dat', STATUS='UNKNOWN')
       OPEN(13, FILE='pythia6_qa_pairs.dat', STATUS='UNKNOWN')
       OPEN(14, FILE='pythia6_qa_charmhadrons.dat', STATUS='UNKNOWN')
+      OPEN(15, FILE='pythia6_qa_electrons.dat', STATUS='UNKNOWN')
 
       WRITE(10,*) '# pair_id gen_event isub srcbin weight_br',
      &            ' weight_rel parent1 parent2 ptmom1 ptmom2',
@@ -209,6 +210,8 @@ C=======================================================================
      &            ' pass_phenix pass_star'
 
       WRITE(14,*) '# gen_event isub srcbin pdg species br_e',
+     &            ' pt y eta phi px py pz e'
+      WRITE(15,*) '# gen_event isub srcbin pid parent species br_e',
      &            ' pt y eta phi px py pz e'
 
 C=======================================================================
@@ -263,6 +266,14 @@ C     No PHENIX/STAR cuts here: those are QA categories.
 
         PARENT1 = K(MOMIDX1,2)
         IF (.NOT.ISWEAKOPENCHARM(PARENT1)) GOTO 110
+
+        BRI = ELECTRONBR(PARENT1)
+        SPECIES = GETPARENTBIN(PARENT1)
+
+        WRITE(15,9500) IGEN, ISUB, SRCBIN,
+     &      K(I,2), PARENT1, SPECIES, BRI,
+     &      GETPT(I), GETY(I), GETETA(I), GETPHI(I),
+     &      P(I,1), P(I,2), P(I,3), P(I,4)
 
         NELE = NELE + 1
         ELE(NELE) = I
@@ -435,7 +446,8 @@ C=======================================================================
 
  9400 FORMAT(I12,1X,I6,1X,I6,1X,I8,1X,I3,1X,
      &       9(E16.8,1X))
-
+ 9500 FORMAT(I12,1X,I6,1X,I6,1X,I8,1X,I8,1X,I3,1X,
+     &       9(E16.8,1X))
       CALL PYSTAT(1)
 
 C----- Summary / normalization info
@@ -464,6 +476,7 @@ C----- Summary / normalization info
       CLOSE(12)
       CLOSE(13)
       CLOSE(14)
+      CLOSE(15)
 
       WRITE(*,*) 'Done.'
       WRITE(*,*) 'Generated events: ', IGEN

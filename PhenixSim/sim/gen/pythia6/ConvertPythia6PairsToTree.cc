@@ -108,6 +108,24 @@ struct CharmHadronInfo {
   double e;
 };
 
+struct ElectronInfo {
+  int gen_event;
+  int isub;
+  int srcbin;
+  int pid;
+  int parent;
+  int species;
+  double br_e;
+  double pt;
+  double y;
+  double eta;
+  double phi;
+  double px;
+  double py;
+  double pz;
+  double e;
+};
+
 struct RunInfo {
   int job_id;
   long long target_pairs;
@@ -333,6 +351,32 @@ static TH1D* makeDSigmaDPhi1D(const TH1D* hCounts,
   return h;
 }
 
+static TH1D* makeDSigmaDPT1D(const TH1D* hCounts,
+                            const char* name,
+                            const char* title,
+                            const RunInfo& runInfo)
+{
+  TH1D* h = (TH1D*)hCounts->Clone(name);
+  h->SetTitle(title);
+  h->Reset();
+
+  const double sigmaMB = runInfo.pythia_xsec_mb;
+  const double nGen = (double)runInfo.generated_events;
+
+  for (int b = 1; b <= hCounts->GetNbinsX(); ++b) {
+    const double n = hCounts->GetBinContent(b);
+    const double e = hCounts->GetBinError(b);
+    const double dpt = hCounts->GetBinWidth(b);
+    if (nGen <= 0.0 || dpt <= 0.0) continue;
+
+    // d sigma / d pT [mb/(GeV/c)]
+    h->SetBinContent(b, sigmaMB * n / nGen / dpt);
+    h->SetBinError(b, sigmaMB * e / nGen / dpt);
+  }
+
+  return h;
+}
+
 static TH2D* makeDSigmaDPhiProcess2D(const TH2D* hCounts,
                                      const char* name,
                                      const char* title,
@@ -530,6 +574,45 @@ static bool readQACharmHadrons(const char* filename,
        >> h.e;
 
     if (!ss.fail()) hadrons.push_back(h);
+  }
+
+  return true;
+}
+
+static bool readQAElectrons(const char* filename,
+                            std::vector<ElectronInfo>& electrons)
+{
+  std::ifstream in(filename);
+  if (!in) {
+    std::cerr << "Cannot open " << filename << std::endl;
+    return false;
+  }
+
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) continue;
+    if (line[0] == '#') continue;
+
+    std::istringstream ss(line);
+    ElectronInfo e;
+
+    ss >> e.gen_event
+       >> e.isub
+       >> e.srcbin
+       >> e.pid
+       >> e.parent
+       >> e.species
+       >> e.br_e
+       >> e.pt
+       >> e.y
+       >> e.eta
+       >> e.phi
+       >> e.px
+       >> e.py
+       >> e.pz
+       >> e.e;
+
+    if (!ss.fail()) electrons.push_back(e);
   }
 
   return true;
@@ -773,6 +856,7 @@ int main(int argc, char** argv)
   const char* trackFile    = "pythia6_tracks.dat";
   const char* qaPairFile   = "pythia6_qa_pairs.dat";
   const char* qaCharmFile  = "pythia6_qa_charmhadrons.dat";
+  const char* qaElectronFile = "pythia6_qa_electrons.dat";
   const char* summaryFile  = "pythia6_summary.dat";
 
   RunInfo runInfo;
@@ -782,11 +866,13 @@ int main(int argc, char** argv)
   std::map<int, std::vector<TrackInfo> > tracks;
   std::vector<QAPairInfo> qaPairs;
   std::vector<CharmHadronInfo> qaCharm;
+  std::vector<ElectronInfo> qaElectrons;
 
   if (!readProductionPairs(prodPairFile, prodPairs)) return 1;
   if (!readTracks(trackFile, tracks)) return 1;
   if (!readQAPairs(qaPairFile, qaPairs)) return 1;
   if (!readQACharmHadrons(qaCharmFile, qaCharm)) return 1;
+  if (!readQAElectrons(qaElectronFile, qaElectrons)) return 1;
 
   TFile* fout = new TFile(outFile, "RECREATE");
 
@@ -829,6 +915,54 @@ int main(int argc, char** argv)
   TH2D* hPtCharm_all = new TH2D("hPtCharm_all", "all weak open-charm hadrons;p_{T}^{charm hadron} [GeV];species", 200, 0.0, 20.0, 5, 0.5, 5.5);
   TH2D* hPtCharm_BRweight = new TH2D("hPtCharm_BRweight", "weak open-charm hadrons weighted by BR_{e};p_{T}^{charm hadron} [GeV];species", 200, 0.0, 20.0, 5, 0.5, 5.5);
   TH2D* hPtCharmVsProcess = new TH2D("hPtCharmVsProcess", "weak open-charm hadron p_{T} vs process;p_{T}^{charm hadron} [GeV];process", 200, 0.0, 20.0, 8, 0.5, 8.5);
+
+  // ------------------------------------------------------------------
+  // Unbiased single-electron QA from pythia6_qa_electrons.dat.
+  // One line per final-state electron from weak open charm, independent
+  // of whether there is an accepted dielectron pair. Weight = BR(Hc->e).
+  // ------------------------------------------------------------------
+  TH1D* hSingleElectronPt_midY_counts = new TH1D(
+    "hSingleElectronPt_midY_counts",
+    "open-HF single e^{#pm}, |y_{e}|<0.5;p_{T}^{e} [GeV/c];BR_{e}-weighted electrons",
+    200, 0.0, 20.0
+  );
+
+  TH2D* hSingleElectronPtVsProcess_midY = new TH2D(
+    "hSingleElectronPtVsProcess_midY",
+    "open-HF single e^{#pm} p_{T} vs PYTHIA6 process, |y_{e}|<0.5;p_{T}^{e} [GeV/c];process",
+    200, 0.0, 20.0,
+    8, 0.5, 8.5
+  );
+
+  TH2D* hSingleElectronPtVsMother_midY = new TH2D(
+    "hSingleElectronPtVsMother_midY",
+    "open-HF single e^{#pm} p_{T} vs mother, |y_{e}|<0.5;p_{T}^{e} [GeV/c];mother species",
+    200, 0.0, 20.0,
+    5, 0.5, 5.5
+  );
+
+  TH2D* hSingleElectronPtVsMother_midY_BRweight = new TH2D(
+    "hSingleElectronPtVsMother_midY_BRweight",
+    "open-HF single e^{#pm} p_{T} vs mother, |y_{e}|<0.5, BR weighted;p_{T}^{e} [GeV/c];mother species",
+    200, 0.0, 20.0,
+    5, 0.5, 5.5
+  );
+
+  TH1D* hSingleElectronInfo_midY = new TH1D(
+    "hSingleElectronInfo_midY",
+    "single-electron QA, |y_{e}|<0.5;;value",
+    4, 0.5, 4.5
+  );
+  hSingleElectronInfo_midY->GetXaxis()->SetBinLabel(1, "qa_electrons");
+  hSingleElectronInfo_midY->GetXaxis()->SetBinLabel(2, "pass |y|<0.5");
+  hSingleElectronInfo_midY->GetXaxis()->SetBinLabel(3, "sum BR all");
+  hSingleElectronInfo_midY->GetXaxis()->SetBinLabel(4, "sum BR midY");
+  hSingleElectronInfo_midY->LabelsOption("v", "X");
+  hSingleElectronInfo_midY->SetStats(0);
+
+  hSingleElectronPt_midY_counts->Sumw2();
+  hSingleElectronPtVsProcess_midY->Sumw2();
+  hSingleElectronPtVsMother_midY_BRweight->Sumw2();
 
 
   // ------------------------------------------------------------------
@@ -965,6 +1099,7 @@ int main(int argc, char** argv)
   labelProcessAxis(hMeeVsProcess_PHENIX);
   labelProcessAxis(hMeeVsProcess_STAR);
   labelProcessAxis(hPtCharmVsProcess);
+  labelProcessAxis(hSingleElectronPtVsProcess_midY);
   labelProcessAxis(hMeeVsProcess_PHENIXPerfect_prod);
   labelProcessAxis(hMeeVsProcess_PHENIXReal_prod);
   labelProcessAxis(hDielectronDphiVsProcess_forwardIM_eBR_counts);
@@ -978,6 +1113,40 @@ int main(int argc, char** argv)
   labelParentAxis(hPtMother_BRweight_STAR);
   labelParentAxis(hPtCharm_all);
   labelParentAxis(hPtCharm_BRweight);
+  labelParentAxis(hSingleElectronPtVsMother_midY);
+  labelParentAxis(hSingleElectronPtVsMother_midY_BRweight);
+
+  // Fill unbiased single-electron QA.
+  long long nSingleElectronMidY = 0;
+  double sumSingleElectronBRAll = 0.0;
+  double sumSingleElectronBRMidY = 0.0;
+
+  for (size_t i = 0; i < qaElectrons.size(); ++i) {
+    const ElectronInfo& e = qaElectrons[i];
+    sumSingleElectronBRAll += e.br_e;
+
+    if (std::fabs(e.y) < 0.5) {
+      const int mbin = parentBin(e.parent);
+      hSingleElectronPt_midY_counts->Fill(e.pt, e.br_e);
+      hSingleElectronPtVsProcess_midY->Fill(e.pt, e.srcbin, e.br_e);
+      hSingleElectronPtVsMother_midY->Fill(e.pt, mbin, 1.0);
+      hSingleElectronPtVsMother_midY_BRweight->Fill(e.pt, mbin, e.br_e);
+      nSingleElectronMidY++;
+      sumSingleElectronBRMidY += e.br_e;
+    }
+  }
+
+  TH1D* hSingleElectronPt_midY_dSigma_dpT = makeDSigmaDPT1D(
+    hSingleElectronPt_midY_counts,
+    "hSingleElectronPt_midY_dSigma_dpT",
+    "open-HF single e^{#pm}, |y_{e}|<0.5;p_{T}^{e} [GeV/c];d#sigma/dp_{T} [mb/(GeV/c)]",
+    runInfo
+  );
+
+  hSingleElectronInfo_midY->SetBinContent(1, (double)qaElectrons.size());
+  hSingleElectronInfo_midY->SetBinContent(2, (double)nSingleElectronMidY);
+  hSingleElectronInfo_midY->SetBinContent(3, sumSingleElectronBRAll);
+  hSingleElectronInfo_midY->SetBinContent(4, sumSingleElectronBRMidY);
 
   // Fill pair QA.
   long long nForwardIMPairs = 0;
@@ -1262,6 +1431,16 @@ int main(int argc, char** argv)
   hPtCharm_all->Write();
   hPtCharm_BRweight->Write();
   hPtCharmVsProcess->Write();
+  hSingleElectronPt_midY_counts->Write();
+  hSingleElectronPt_midY_dSigma_dpT->Write();
+  hSingleElectronPtVsProcess_midY->Write();
+  hSingleElectronPtVsMother_midY->Write();
+  hSingleElectronPtVsMother_midY_BRweight->Write();
+  hSingleElectronInfo_midY->Write();
+  TParameter<Long64_t>("n_qa_electrons_read", (Long64_t)qaElectrons.size()).Write();
+  TParameter<Long64_t>("n_qa_single_electrons_midY", (Long64_t)nSingleElectronMidY).Write();
+  TParameter<double>("sum_qa_single_electron_BR_weight_all", sumSingleElectronBRAll).Write();
+  TParameter<double>("sum_qa_single_electron_BR_weight_midY", sumSingleElectronBRMidY).Write();
   hMee_PHENIXPerfect_prod->Write();
   hMee_PHENIXReal_prod->Write();
   hMeeVsProcess_PHENIXPerfect_prod->Write();
@@ -1310,6 +1489,7 @@ int main(int argc, char** argv)
   std::cout << "Tree entries:          " << nTreeEntries << std::endl;
   std::cout << "QA pairs read:         " << qaPairs.size() << std::endl;
   std::cout << "QA charm hadrons read: " << qaCharm.size() << std::endl;
+  std::cout << "QA electrons read:     " << qaElectrons.size() << std::endl;
   std::cout << "Wrote:                 " << outFile << std::endl;
 
   return 0;
