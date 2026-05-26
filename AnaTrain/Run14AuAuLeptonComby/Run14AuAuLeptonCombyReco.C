@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "Run14AuAuLeptonCombyReco.h"
 
-
 Run14AuAuLeptonCombyReco::Run14AuAuLeptonCombyReco(const char *outfile, const char *lookup_file) : 
     SubsysReco("Run14AuAuLeptonCombyReco"), reco(lookup_file)
 {
@@ -156,8 +155,9 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         findNode::getClass<SvxClusterList>(TopNode, "SvxClusterList");
     const VtxOut *vtxout =
         findNode::getClass<VtxOut>(TopNode, "VtxOut");
-    const emcClusterContainer* emccont =
+    const emcClusterContainer *emccont =
         findNode::getClass<emcClusterContainer>(TopNode, "emcClusterContainer");
+    const VariableArray *hitarray = findNode::getClass<VariableArray>(TopNode, "SvxHit_VarArray");
 
     if (!globalCNT)
         std::cout << "NO GLOBAL!!!!!!!!!!!!!!!\n";
@@ -173,6 +173,8 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
         std::cout << "NO vtxout!!!!!!!!!!!!!!!\n";
     if (!emccont)
         std::cout << "NO emcClusterContainer!!!!!!!!!!!!!!!\n";
+    if (!hitarray)
+        std::cout << "NO SvxHit_VarArray!!!!!!!!!!!!!!!\n";
 
     if(fill_TTree||fill_true_DCA) event_container->FillEventHist(1);
 
@@ -521,6 +523,7 @@ int Run14AuAuLeptonCombyReco::process_event(PHCompositeNode *TopNode)
     if(True)
     {
         fill_SVXHits_to_myevent(svxhitlist, event);
+        //fill_SVXArrayHits_to_myevent(hitarray, event);
         if(True)
         {
             event_container->FillEventHist(19);
@@ -1248,4 +1251,100 @@ int Run14AuAuLeptonCombyReco::Solution(MyDileptonAnalysis::MyTrack *mytrk1, MyDi
     if (TMath::Abs(dphi_r) >= DPHI2) return 7;
 
     return 8;
+}
+
+void Run14AuAuLeptonCombyReco::fill_SVXArrayHits_to_myevent(const VariableArray *hitarray, MyDileptonAnalysis::MyEvent *event)
+{
+    if (hitarray)
+    {
+        unsigned int size = hitarray->get_array_size();
+        // unsigned int size0 = hitarray->get_array_size();
+
+        const short int *array = hitarray->get_array();
+        int hitarrayID = hitarray->Id();
+        if (array == nullptr)
+        {
+            // cerr << PHWHERE << "ERROR: Cannot locate SvxHit array." <<endl;
+            std::cout << PHWHERE << "ERROR: Cannot locate SvxHit array." << std::endl;
+        }
+        else
+        {
+
+            float mkm = 1.;
+            float xfval = -9999.;
+            float yfval = -9999.;
+            float zfval = -9999.;
+
+            short xival = -9999;
+            short yival = -9999;
+            short zival = -9999;
+
+            short adc = -9999;
+            short nhot = -9999;
+            short ncold = -9999;
+
+            MyDileptonAnalysis::MyVTXHit svxentry;
+            while (size > 0)
+            {
+                svxentry.SetClustId(*array++);
+                size--;
+                adc = *array++; // svxentry.set_adcandsize();
+                size--;
+                if (hitarrayID == 10001)
+                {
+                    nhot = *array++; // svxentry.set_nhot();
+                    size--;
+                    ncold = *array++; // svxentry.set_ncold(*array++);
+                    size--;
+                }
+
+                //---
+                xival = *array++;
+                xfval = xival / mkm;
+                svxentry.SetXHit(xfval / 1000.);
+                size--;
+
+                yival = *array++;
+                yfval = yival / mkm;
+                svxentry.SetYHit(yfval / 1000.);
+                size--;
+
+                zival = *array++;
+                zfval = zival / mkm;
+                svxentry.SetZHit(zfval / 1000.);
+                size--;
+
+                const double rhit = sqrt(svxentry.GetXHit() * svxentry.GetXHit() + svxentry.GetYHit() * svxentry.GetYHit());
+                int layer = -999;
+                if (rhit < 3.3)
+                    layer = 0;
+                else if (rhit < 8.0)
+                    layer = 1;
+                else if (rhit < 14.0)
+                    layer = 2;
+                else if (rhit < 20.0)
+                    layer = 3;
+                else
+                    layer = -1;
+
+                svxentry.SetLayer(layer);
+                svxentry.SetLadder(52);
+                svxentry.SetSensor(2);
+                svxentry.SetiLayerFromR();
+
+                if (nhot < 1 && ncold < 1)
+                    event->AddVTXHit(&svxentry);
+                //---
+                // 	    svxentry.set_x(*array++);
+                // 	    size--;
+                // 	    svxentry.set_y(*array++);
+                // 	    size--;
+                // 	    svxentry.set_z(*array++);
+                // 	    size--;
+
+                if (false)
+                    std::cout << "Hit: clustid " << svxentry.GetClustId() << " x: " << svxentry.GetXHit() << " y: " << svxentry.GetYHit() << " z: " << svxentry.GetZHit() << " " << adc << " " << nhot << " " << ncold << std::endl;
+            } // while (size >0 )
+        }
+    }
 }

@@ -67,6 +67,9 @@
 #include <cstdlib>
 
 
+#include <vararray/VariableArray.h>
+//#include <VariableArrayInt.h>
+
 
 class Run14AuAuLeptonCombyReco : public SubsysReco
 {
@@ -108,6 +111,7 @@ private:
     void get_vtx_mean_values(int run_number, float &mean_x, float &mean_y);
     void read_in_emcmap();
     int isEMCDead(emcClusterContent *emc);
+    void fill_SVXArrayHits_to_myevent(const VariableArray *hitarray, MyDileptonAnalysis::MyEvent *event);
 
 
 protected:
